@@ -134,7 +134,7 @@
               <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
                 <thead>
                   <tr>
-                    <th colspan="10">VENTAS
+                    <th colspan="7">VENTAS
                       <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right;">Remisiones</a>
                     </th>
                   </tr>
@@ -142,41 +142,28 @@
                     <th>FECHA</th>
                     <th>FOLIO</th>
                     <th colspan="3">CLIENTE</th>
-                    <th>CONCEPTO</th>
+                    <!-- <th>CONCEPTO</th>
                     <th>CANTIDAD</th>
-                    <th>PRECIO</th>
+                    <th>PRECIO</th> -->
                     <th>IMPORTE</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php
-                    if (isset($_POST['remision_concepto'])) {
-                      foreach ($_POST['remision_concepto'] as $key => $concepto) {
+                    if (isset($_POST['remision_cliente'])) {
+                      foreach ($_POST['remision_cliente'] as $key => $cliente) {
                         // $totalIngresosRemisiones += floatval($_POST['otros_monto'][$key]);
                       ?>
                         <tr>
-                          <td style="">
-                            <input type="text" name="remision_empresa[]" value="<?php echo $_POST['remision_empresa'][$key] ?>" class="span12 gasto-cargo" style="" required <?php echo $readonly ?>>
-                            <input type="hidden" name="remision_empresa_id[]" value="<?php echo $_POST['remision_empresa_id'][$key] ?>" class="vpositive gasto-cargo-id">
+                          <td style=""><input type="date" name="remision_fecha[]" value="<?php echo $_POST['remision_fecha'][$key] ?>" class="remision_fecha" placeholder="fecha" readonly></td>
+                          <td style=""><input type="text" name="remision_numero[]" value="<?php echo $_POST['remision_numero'][$key] ?>" class="remision-numero vpositive " placeholder="" readonly readonly></td>
+                          <td colspan="3">
+                            <input type="text" name="remision_cliente[]" value="<?php echo $cliente ?>" class="remision-cliente span12" maxlength="500" placeholder="cliente" required readonly>
+                            <input type="hidden" name="remision_id[]" value="<?php echo $_POST['remision_id'][$key] ?>" class="remision-id span12" required>
                             <input type="hidden" name="remision_row[]" value="" class="vpositive remision_row">
                           </td>
-                          <td style=""><input type="text" name="remision_numero[]" value="<?php echo $_POST['remision_numero'][$key] ?>" class="remision-numero vpositive " placeholder="" readonly style="" <?php echo $readonly ?>></td>
-                          <td style=""><input type="date" name="remision_fecha[]" value="<?php echo $_POST['remision_fecha'][$key] ?>" class="remision_fecha" placeholder="fecha" style="" <?php echo $readonly ?>></td>
-                          <td style="width: 40px;">
-                            <select name="remision_nomenclatura[]" class="remision_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
-                              <?php foreach ($nomenclaturas as $n) { ?>
-                                <?php if ($n->tipo === 't'): ?>
-                                <option value="<?php echo $n->id ?>" <?php echo $_POST['remision_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
-                                <?php endif ?>
-                              <?php } ?>
-                            </select>
-                          </td>
-                          <td colspan="3">
-                            <input type="text" name="remision_concepto[]" value="<?php echo $concepto ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
-                            <input type="hidden" name="remision_id[]" value="<?php echo $_POST['remision_id'][$key] ?>" class="remision-id span12" required>
-                          </td>
-                          <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $_POST['remision_importe'][$key] ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly ?>></td>
+                          <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $_POST['remision_importe'][$key] ?>" class="remision-importe vpositive " placeholder="Importe" required readonly></td>
                           <td style="width: 30px;">
                             <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                             <input type="hidden" name="remision_del[]" value="" id="remision_del">
@@ -187,29 +174,14 @@
                           // $totalIngresosRemisiones += floatval($otro->monto);
                         ?>
                           <tr>
-                            <td style="">
-                              <input type="text" name="remision_empresa[]" value="<?php echo $remision->empresa ?>" class="span12 gasto-cargo" style="" required <?php echo $readonly ?>>
-                              <input type="hidden" name="remision_empresa_id[]" value="<?php echo $remision->id_categoria ?>" class="vpositive gasto-cargo-id">
-                              <input type="hidden" name="remision_row[]" value="<?php echo $remision->row ?>" class="vpositive remision_row">
-                              <a href="<?php echo base_url('panel/caja_chica/print_vale_rm/?fecha='.$remision->fecha.'&id_remision='.$remision->id_remision.'&row='.$remision->row.'&noCaja='.$remision->no_caja)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
-                                <i class="ico icon-print" style="cursor:pointer"></i></a>
-                            </td>
-                            <td style=""><input type="text" name="remision_numero[]" value="<?php echo $remision->folio ?>" class="remision-numero vpositive " placeholder="" readonly style="" <?php echo $readonly ?>></td>
-                            <td style=""><input type="date" name="remision_fecha[]" value="<?php echo $remision->fecha_rem ?>" class="remision_fecha" placeholder="fecha" style="" <?php echo $readonly ?>></td>
-                            <td style="width: 40px;">
-                              <select name="remision_nomenclatura[]" class="remision_nomenclatura" style="width: 70px;" <?php echo $readonly.$mod_ing_readonly ?>>
-                                <?php foreach ($nomenclaturas as $n) { ?>
-                                  <?php if ($n->tipo === 't'): ?>
-                                  <option value="<?php echo $n->id ?>" <?php echo $remision->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
-                                  <?php endif ?>
-                                <?php } ?>
-                              </select>
-                            </td>
+                            <td style=""><input type="date" name="remision_fecha[]" value="<?php echo $remision->fecha_rem ?>" class="remision_fecha" placeholder="fecha" readonly></td>
+                            <td style=""><input type="text" name="remision_numero[]" value="<?php echo $remision->folio ?>" class="remision-numero vpositive " placeholder="" readonly style="" readonly></td>
                             <td colspan="3">
-                              <input type="text" name="remision_concepto[]" value="<?php echo $remision->observacion ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
+                              <input type="text" name="remision_cliente[]" value="<?php echo $remision->cliente ?>" class="remision-cliente span12" maxlength="500" placeholder="cliente" required readonly>
                               <input type="hidden" name="remision_id[]" value="<?php echo $remision->id_remision ?>" class="remision-id span12" required>
+                              <input type="hidden" name="remision_row[]" value="<?php echo $remision->row ?>" class="vpositive remision_row">
                             </td>
-                            <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly.$readonlyCC ?>></td>
+                            <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $remision->subtotal ?>" class="remision-importe vpositive " placeholder="Importe" required readonly></td>
                             <td style="width: 30px;">
                               <?php if (!$cajas_cerradas && $modificar_campos): ?>
                                 <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
@@ -230,10 +202,11 @@
                   <?php }} ?>
 
                   <tr class='row-total'>
-                    <td colspan="9"></td>
+                    <td colspan="5"></td>
                     <td style="">
                       <input type="text" name="total_ingresosRemisiones" value="<?php echo MyString::float(MyString::formatoNumero($totalIngresosRemisiones, 2, '')) ?>" class="span12" id="total-ingresosRemisiones" readonly style="text-align: right;">
                     </td>
+                    <td></td>
                   </tr>
 
                 </tbody>
@@ -251,14 +224,12 @@
                     <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
-                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-traspasos">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-sueldos">
                           <thead>
                             <tr>
-                              <th colspan="2">SUELDOS
-                                <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
+                              <th colspan="5">SUELDOS
+                                <button type="button" class="btn btn-success" id="btn-add-sueldos" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
                               </th>
-                              <th colspan="2"></th>
-                              <th colspan="2">IMPORTE</th>
                             </tr>
                             <tr>
                               <th style="width: 15%;">FECHA</th>
@@ -270,85 +241,50 @@
                           </thead>
                           <tbody>
                             <?php
-                              if (isset($_POST['traspaso_concepto'])) {
-                                foreach ($_POST['traspaso_concepto'] as $key => $concepto) {
-                                  $totalSueldos += ($_POST['traspaso_tipo'][$key] == 't'? 1: -1) * floatval($_POST['traspaso_importe'][$key]); ?>
+                              if (isset($_POST['sueldos_concepto'])) {
+                                foreach ($_POST['sueldos_concepto'] as $key => $concepto) {
+                                  $totalSueldos += floatval($_POST['sueldos_importe'][$key]); ?>
                                 <tr>
+                                  <td><input type="date" name="sueldos_fecha" value="<?php echo $_POST['sueldos_fecha'][$key] ?>" required></td>
                                   <td>
-                                    <!-- <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
-                                      <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
-                                      <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
-                                    </select> -->
-                                    <select name="traspaso_tipo[]" class="span12 traspaso_tipo">
-                                      <option value="otros" <?php echo $_POST['traspaso_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
-                                      <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
-                                      <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
-                                      <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
-                                      <option value="caja_plasticos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_plasticos'? 'selected': ''; ?>>Caja Plasticos Gdl</option>
-                                      <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
-                                      <option value="caja_prestamo" <?php echo $_POST['traspaso_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Caja Préstamo</option>
-                                    </select>
-                                    <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
-                                    <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
-                                  </td>
-                                  <td></td>
-                                  <td>
-                                    <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">
-                                      <option value="f" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 'f' ? 'selected' : '' ?>>No</option>
-                                      <option value="t" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 't' ? 'selected' : '' ?>>Si</option>
-                                    </select>
+                                    <input type="hidden" name="sueldos_id_sueldo[]" value="<?php echo $_POST['sueldos_id_sueldo'][$key] ?>" id="sueldos_id_sueldo">
+                                    <input type="text" name="sueldos_proveedor[]" value="<?php echo $_POST['sueldos_proveedor'][$key] ?>" class="span12 autproveedor" required>
+                                    <input type="hidden" name="sueldos_proveedor_id[]" value="<?php echo $_POST['sueldos_proveedor_id'][$key] ?>" class="span12 vpositive autproveedor-id">
                                   </td>
                                   <td style="">
-                                    <input type="text" name="traspaso_concepto[]" value="<?php echo $_POST['traspaso_concepto'][$key] ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                    <input type="text" name="sueldos_concepto[]" value="<?php echo $_POST['sueldos_concepto'][$key] ?>" class="span12 sueldos-concepto" required>
                                   </td>
-                                  <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $_POST['traspaso_importe'][$key] ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
-                                  <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                  <td style="width: 60px;"><input type="text" name="sueldos_importe[]" value="<?php echo $_POST['sueldos_importe'][$key] ?>" class="span12 vpositive sueldos-importe" required></td>
+                                  <td style="width: 30px;">
+                                    <button type="button" class="btn btn-danger btn-del-sueldos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                    <input type="hidden" name="sueldos_del[]" value="<?php echo $_POST['sueldos_del'][$key] ?>" id="sueldos_del">
+                                  </td>
                                 </tr>
                             <?php }} else {
-                              if (isset($caja['traspasos']))
-                              foreach ($caja['traspasos'] as $traspaso) {
-                                $totalSueldos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+                              if (isset($caja['sueldos']))
+                              foreach ($caja['sueldos'] as $sueldo) {
+                                $totalSueldos += floatval($sueldo->importe);
                               ?>
                               <tr>
+                                <td><input type="date" name="sueldos_fecha" value="<?php echo $sueldo->fecha ?>" required></td>
                                 <td>
-                                  <?php echo ucfirst(str_replace('_', ' ', $traspaso->tipo_caja)); ?>
-                                  <input type="hidden" name="traspaso_tipo[]" value="<?php echo $traspaso->tipo_caja ?>">
-                                  <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
-                                  <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
-                                  <a href="<?php echo base_url('panel/caja_chica/print_vale_tras/?id_traspaso='.$traspaso->id_traspaso.'&noCaja='.$traspaso->no_caja)?>" target="_blank" title="Imprimir Gasto comprobar">
-                                    <i class="ico icon-print" style="cursor:pointer"></i></a>
-                                </td>
-                                <td><?php echo $traspaso->tipo == 't' ? 'Ingreso' : 'Egreso' ?></td>
-                                <td>
-                                  <?php echo $traspaso->afectar_fondo == 't' ? 'Si' : 'No'; ?>
-                                  <input type="hidden" name="traspaso_afectar_fondo[]" value="<?php echo $traspaso->afectar_fondo ?>">
+                                  <input type="hidden" name="sueldos_id_sueldo[]" value="<?php echo $sueldo->id ?>" id="sueldos_id_sueldo">
+                                  <input type="text" name="sueldos_proveedor[]" value="<?php echo $sueldo->proveedor ?>" class="span12 autproveedor" required>
+                                  <input type="hidden" name="sueldos_proveedor_id[]" value="<?php echo $sueldo->id_proveedor ?>" class="span12 vpositive autproveedor-id">
                                 </td>
                                 <td style="">
-                                  <?php if ($traspaso->guardado == 't'): ?>
-                                  <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
-                                  <?php else: ?>
-                                    <input type="hidden" name="traspaso_concepto[]" value="-@-" class="span12 traspaso-concepto" <?php echo $readonly ?>>
-                                    <?php echo $traspaso->concepto." (Traspasado de caja No {$traspaso->no_caja})" ?>
-                                  <?php endif ?>
+                                  <input type="text" name="sueldos_concepto[]" value="<?php echo $sueldo->descripcion ?>" class="span12 sueldos-concepto" required>
                                 </td>
-                                <td style="width: 60px;">
-                                  <?php if ($traspaso->guardado == 't'): ?>
-                                  <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
-                                  <?php else: ?>
-                                    <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
-                                    <?php echo $traspaso->monto ?>
-                                  <?php endif ?>
-                                </td>
+                                <td style="width: 60px;"><input type="text" name="sueldos_importe[]" value="<?php echo $sueldo->importe ?>" class="span12 vpositive sueldos-importe" required></td>
                                 <td style="width: 30px;">
-                                  <?php if (!$cajas_cerradas && $modificar_campos && $traspaso->guardado == 't'): ?>
-                                  <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
-                                  <?php endif ?>
+                                  <button type="button" class="btn btn-danger btn-del-sueldos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                  <input type="hidden" name="sueldos_del[]" value="" id="sueldos_del">
                                 </td>
                               </tr>
                             <?php }} ?>
                             <tr class="row-total">
                               <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                              <td><input type="text" value="<?php echo $totalSueldos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                              <td><input type="text" value="<?php echo $totalSueldos ?>" class="input-small vpositive" id="ttotal-sueldos" style="text-align: right;" readonly></td>
                               <td colspan="3"></td>
                             </tr>
                           </tbody>
@@ -489,11 +425,9 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                           <thead>
                             <tr>
-                              <th colspan="2">GASTOS
+                              <th colspan="5">SUELDOS
                                 <button type="button" class="btn btn-success" id="btn-add-gastos" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
                               </th>
-                              <th colspan="2"></th>
-                              <th colspan="2">IMPORTE</th>
                             </tr>
                             <tr>
                               <th style="width: 15%;">FECHA</th>
@@ -507,83 +441,48 @@
                             <?php
                               if (isset($_POST['gastos_concepto'])) {
                                 foreach ($_POST['gastos_concepto'] as $key => $concepto) {
-                                  $totalGastos += floatval($_POST['traspaso_importe'][$key]); ?>
+                                  $totalGastos += floatval($_POST['gastos_importe'][$key]); ?>
                                 <tr>
+                                  <td><input type="date" name="gastos_fecha" value="<?php echo $_POST['gastos_fecha'][$key] ?>" required></td>
                                   <td>
-                                    <!-- <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
-                                      <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
-                                      <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
-                                    </select> -->
-                                    <select name="traspaso_tipo[]" class="span12 traspaso_tipo">
-                                      <option value="otros" <?php echo $_POST['traspaso_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
-                                      <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
-                                      <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
-                                      <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
-                                      <option value="caja_plasticos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_plasticos'? 'selected': ''; ?>>Caja Plasticos Gdl</option>
-                                      <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
-                                      <option value="caja_prestamo" <?php echo $_POST['traspaso_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Caja Préstamo</option>
-                                    </select>
-                                    <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
-                                    <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
-                                  </td>
-                                  <td></td>
-                                  <td>
-                                    <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">
-                                      <option value="f" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 'f' ? 'selected' : '' ?>>No</option>
-                                      <option value="t" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 't' ? 'selected' : '' ?>>Si</option>
-                                    </select>
+                                    <input type="hidden" name="gastos_id_sueldo[]" value="<?php echo $_POST['gastos_id_sueldo'][$key] ?>" id="sueldos_id_sueldo">
+                                    <input type="text" name="gastos_proveedor[]" value="<?php echo $_POST['gastos_proveedor'][$key] ?>" class="span12 autproveedor" required>
+                                    <input type="hidden" name="gastos_proveedor_id[]" value="<?php echo $_POST['gastos_proveedor_id'][$key] ?>" class="span12 vpositive autproveedor-id">
                                   </td>
                                   <td style="">
-                                    <input type="text" name="traspaso_concepto[]" value="<?php echo $_POST['traspaso_concepto'][$key] ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                    <input type="text" name="gastos_concepto[]" value="<?php echo $_POST['gastos_concepto'][$key] ?>" class="span12 gastos-concepto" required>
                                   </td>
-                                  <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $_POST['traspaso_importe'][$key] ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
-                                  <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                  <td style="width: 60px;"><input type="text" name="gastos_importe[]" value="<?php echo $_POST['gastos_importe'][$key] ?>" class="span12 vpositive gastos-importe" required></td>
+                                  <td style="width: 30px;">
+                                    <button type="button" class="btn btn-danger btn-del-gastos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                    <input type="hidden" name="gastos_del[]" value="<?php echo $_POST['gastos_del'][$key] ?>" id="gastos_del">
+                                  </td>
                                 </tr>
                             <?php }} else {
-                              if (isset($caja['traspasos']))
-                              foreach ($caja['traspasos'] as $traspaso) {
-                                $totalGastos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+                              if (isset($caja['gastos']))
+                              foreach ($caja['gastos'] as $sueldo) {
+                                $totalGastos += floatval($sueldo->importe);
                               ?>
                               <tr>
+                                <td><input type="date" name="gastos_fecha" value="<?php echo $sueldo->fecha ?>" required></td>
                                 <td>
-                                  <?php echo ucfirst(str_replace('_', ' ', $traspaso->tipo_caja)); ?>
-                                  <input type="hidden" name="traspaso_tipo[]" value="<?php echo $traspaso->tipo_caja ?>">
-                                  <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
-                                  <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
-                                  <a href="<?php echo base_url('panel/caja_chica/print_vale_tras/?id_traspaso='.$traspaso->id_traspaso.'&noCaja='.$traspaso->no_caja)?>" target="_blank" title="Imprimir Gasto comprobar">
-                                    <i class="ico icon-print" style="cursor:pointer"></i></a>
-                                </td>
-                                <td><?php echo $traspaso->tipo == 't' ? 'Ingreso' : 'Egreso' ?></td>
-                                <td>
-                                  <?php echo $traspaso->afectar_fondo == 't' ? 'Si' : 'No'; ?>
-                                  <input type="hidden" name="traspaso_afectar_fondo[]" value="<?php echo $traspaso->afectar_fondo ?>">
+                                  <input type="hidden" name="gastos_id_sueldo[]" value="<?php echo $sueldo->id ?>" id="gastos_id_sueldo">
+                                  <input type="text" name="gastos_proveedor[]" value="<?php echo $sueldo->proveedor ?>" class="span12 autproveedor" required>
+                                  <input type="hidden" name="gastos_proveedor_id[]" value="<?php echo $sueldo->id_proveedor ?>" class="span12 vpositive autproveedor-id">
                                 </td>
                                 <td style="">
-                                  <?php if ($traspaso->guardado == 't'): ?>
-                                  <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
-                                  <?php else: ?>
-                                    <input type="hidden" name="traspaso_concepto[]" value="-@-" class="span12 traspaso-concepto" <?php echo $readonly ?>>
-                                    <?php echo $traspaso->concepto." (Traspasado de caja No {$traspaso->no_caja})" ?>
-                                  <?php endif ?>
+                                  <input type="text" name="gastos_concepto[]" value="<?php echo $sueldo->descripcion ?>" class="span12 gastos-concepto" required>
                                 </td>
-                                <td style="width: 60px;">
-                                  <?php if ($traspaso->guardado == 't'): ?>
-                                  <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
-                                  <?php else: ?>
-                                    <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
-                                    <?php echo $traspaso->monto ?>
-                                  <?php endif ?>
-                                </td>
+                                <td style="width: 60px;"><input type="text" name="gastos_importe[]" value="<?php echo $sueldo->importe ?>" class="span12 vpositive gastos-importe" required></td>
                                 <td style="width: 30px;">
-                                  <?php if (!$cajas_cerradas && $modificar_campos && $traspaso->guardado == 't'): ?>
-                                  <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
-                                  <?php endif ?>
+                                  <button type="button" class="btn btn-danger btn-del-gastos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                  <input type="hidden" name="gastos_del[]" value="" id="gastos_del">
                                 </td>
                               </tr>
                             <?php }} ?>
                             <tr class="row-total">
                               <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                              <td><input type="text" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                              <td><input type="text" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                               <td colspan="3"></td>
                             </tr>
                           </tbody>
@@ -603,6 +502,34 @@
       </div><!--/span-->
     </div><!--/row-->
   </div><!--/row-->
+
+  <!-- Modal -->
+  <div id="modal-remisiones" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 700px;left: 45%;">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Remisiones</h3>
+    </div>
+    <div class="modal-body" style="max-height: 370px;">
+      <table id="lista_remisiones_modal" class="table table-striped table-bordered table-hover table-condensed">
+        <caption></caption>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Fecha</th>
+            <th>Folio</th>
+            <th>Cliente</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="carga-remisiones">Cargar</button>
+    </div>
+  </div>
 
 </div>
 

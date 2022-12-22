@@ -6,6 +6,11 @@ class estado_resultado_trans extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'estado_resultado_trans/ajax_get_remisiones/',
+
+
+
+
     'ventas/get_folio/',
     'ventas/rventasr_pdf/',
     'ventas/rventasr_xls/',
@@ -86,9 +91,10 @@ class estado_resultado_trans extends MY_Controller {
       array('libs/jquery.filtertable.min.js'),
       array('general/keyjump.js'),
       array('general/util.js'),
-      array('panel/facturacion/gastos_productos.js'),
-      array('panel/ventas_remision/frm_addmod.js'),
-      array('panel/facturacion/frm_otros.js'),
+      ['panel/estado_resultado_trans/addmod.js'],
+      // array('panel/facturacion/gastos_productos.js'),
+      // array('panel/ventas_remision/frm_addmod.js'),
+      // array('panel/facturacion/frm_otros.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
@@ -218,6 +224,16 @@ class estado_resultado_trans extends MY_Controller {
       redirect(base_url('panel/ventas/?'.MyString::getVarsLink(array('msg','id')).'&msg=5'));
     }
   }
+
+  public function ajax_get_remisiones($id_empresa = 24)
+  {
+    $this->load->model('estado_resultado_trans_model');
+    echo json_encode($this->estado_resultado_trans_model->getRemisiones($id_empresa));
+  }
+
+
+
+
 
 
 

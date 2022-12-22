@@ -76,6 +76,38 @@ class estado_resultado_trans_model extends privilegios_model{
     return $response;
 	}
 
+  public function getRemisiones($id_empresa)
+  {
+    $remisiones = $this->db->query(
+      "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, f.subtotal, f.total, c.nombre_fiscal as cliente
+            -- ,fp.descripcion, fp.cantidad, fp.precio_unitario, fp.importe
+       FROM facturacion f
+         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+         -- INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
+       WHERE f.is_factura = 'f' AND f.status = 'p' AND f.id_empresa = {$id_empresa}
+       ORDER BY (f.fecha, f.serie, f.folio) DESC
+       LIMIT 1500"
+    );
+
+    $response = $remisiones->result();
+
+    return $response;
+  }
+
+  public function getProdRemisiones($id_rem)
+  {
+    $remisiones = $this->db->query(
+      "SELECT fp.descripcion, fp.cantidad, fp.precio_unitario, fp.importe
+       FROM facturacion_productos fp
+       WHERE fp.id_factura = {$id_rem}
+       ORDER BY num_row ASC"
+    );
+
+    $response = $remisiones->result();
+
+    return $response;
+  }
+
 	/**
 	 * Obtiene la informacion de una factura
 	 */
