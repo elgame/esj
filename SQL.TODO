@@ -5,6 +5,7 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',572,true,'estado_resultado_trans/agregar/','plus',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',572,false,'estado_resultado_trans/cancelar/','remove',false);
     -- lap
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',572,false,'estado_resultado_trans/modificar/','remove',false);
     CREATE TABLE otros.estado_resultado_trans
       (
           id bigserial NOT NULL,
@@ -20,6 +21,7 @@
           rend_lts double precision,
           rend_precio double precision,
           id_gasto bigint,
+          gasto_monto double precision DEFAULT 0,
           id_creo bigint,
           id_empresa bigint NOT NULL,
           status boolean DEFAULT true,
@@ -62,6 +64,7 @@
           id_estado bigint NOT NULL,
           id_proveedor bigint NOT NULL,
           id_cod bigint,
+          fecha date,
           cantidad double precision,
           precio double precision,
           importe double precision,

@@ -108,32 +108,379 @@ class estado_resultado_trans_model extends privilegios_model{
     return $response;
   }
 
+  public function getRepMant($id_empresa)
+  {
+    $gastos = $this->db->query(
+      "SELECT c.id_compra, Date(c.fecha) AS fecha, p.id_proveedor, p.nombre_fiscal AS proveedor,
+        (c.serie || c.folio) AS folio, c.concepto, c.subtotal, c.total
+       FROM compras c
+         INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+       WHERE c.id_empresa = {$id_empresa} AND c.status <> 'ca'
+        AND c.isgasto = 't'
+       ORDER BY (c.fecha, c.serie, c.folio) DESC
+       LIMIT 1500"
+    );
+
+    $response = $gastos->result();
+
+    return $response;
+  }
+
+  public function ajaxProveedores($id_empresa)
+  {
+    $sql = '';
+    $res = $this->db->query("
+        SELECT *
+        FROM proveedores
+        WHERE status = 'ac' AND id_empresa = {$id_empresa} AND
+          lower(nombre_fiscal) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%'
+        ORDER BY nombre_fiscal ASC
+        LIMIT 20");
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+          'id' => $itm->id_proveedor,
+          'label' => $itm->nombre_fiscal,
+          'value' => $itm->nombre_fiscal,
+          'item' => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
+  public function ajaxCodsGastos()
+  {
+    $sql = '';
+    $res = $this->db->query("
+        SELECT *
+        FROM otros.estado_resultado_trans_cods
+        WHERE status = 't' AND lower(nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%'
+        ORDER BY nombre ASC
+        LIMIT 25");
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+          'id' => $itm->id,
+          'label' => $itm->nombre,
+          'value' => $itm->nombre,
+          'item' => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
+  public function getGastosCaja($id_empresa)
+  {
+    $gastos = $this->db->query(
+      "SELECT c.id_gasto, Date(c.fecha) AS fecha, cc.abreviatura,
+        c.folio_sig AS folio, c.monto, c.concepto, c.nombre
+      FROM cajachica_gastos c
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = c.id_categoria
+      WHERE c.no_caja = 2 AND c.tipo = 'gc' AND c.status = 't'
+      ORDER BY (c.fecha, c.folio) DESC
+      LIMIT 2000"
+    );
+
+    $response = $gastos->result();
+
+    return $response;
+  }
+
+
+  /**
+   * Agrega una nota remison a la bd
+   */
+  public function addEstadoResult()
+  {
+    $this->load->model('clientes_model');
+    $this->load->model('clasificaciones_model');
+
+    $datosFactura = array(
+      'id_chofer'   => $this->input->post('did_chofer'),
+      'id_activo'   => $this->input->post('did_activo'),
+      'id_empresa'  => $this->input->post('did_empresa'),
+      'id_creo'     => $this->session->userdata('id_usuario'),
+      'fecha'       => $this->input->post('dfecha'),
+      'folio'       => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
+      'km_rec'      => floatval($this->input->post('dkm_rec')),
+      'vel_max'     => floatval($this->input->post('dvel_max')),
+      'rep_lt_hist' => floatval($this->input->post('drep_lt_hist')),
+      'rend_km_gps' => floatval($this->input->post('rend_km_gps')),
+      'rend_actual' => floatval($this->input->post('rend_actual')),
+      'rend_lts'    => floatval($this->input->post('rend_lts')),
+      'rend_precio' => floatval($this->input->post('rend_precio')),
+      'id_gasto'    => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
+      'gasto_monto' => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
+    );
+
+    $this->db->insert('otros.estado_resultado_trans', $datosFactura);
+    $id_venta = $this->db->insert_id('otros.estado_resultado_trans_id_seq');
+
+    $ventas = array();
+    if (!empty($_POST['remision_cliente'])) {
+      foreach ($_POST['remision_cliente'] as $key => $descripcion)
+      {
+        $ventas[] = array(
+          'id_estado' => $id_venta,
+          'id_remision' => $_POST['remision_id'][$key] !== '' ? $_POST['remision_id'][$key] : null,
+          'comprobacion' => $_POST['remision_comprobacion'][$key] == 'true' ? 't' : 'f',
+        );
+      }
+      if(count($ventas) > 0)
+        $this->db->insert_batch('otros.estado_resultado_trans_ventas', $ventas);
+    }
+
+    $sueldos = array();
+    if (!empty($_POST['sueldos_concepto'])) {
+      foreach ($_POST['sueldos_concepto'] as $key => $descripcion)
+      {
+        $sueldos[] = array(
+          'id_estado'    => $id_venta,
+          'id_proveedor' => $_POST['sueldos_proveedor_id'][$key] !== '' ? $_POST['sueldos_proveedor_id'][$key] : null,
+          'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
+          'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
+          'importe'      => $_POST['sueldos_importe'][$key] !== '' ? $_POST['sueldos_importe'][$key] : 0,
+          // 'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
+        );
+      }
+      if(count($sueldos) > 0)
+        $this->db->insert_batch('otros.estado_resultado_trans_sueldos', $sueldos);
+    }
+
+    $repmant = array();
+    if (!empty($_POST['repmant_proveedor'])) {
+      foreach ($_POST['repmant_proveedor'] as $key => $descripcion)
+      {
+        $repmant[] = array(
+          'id_estado'    => $id_venta,
+          'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
+          'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
+        );
+      }
+      if(count($repmant) > 0)
+        $this->db->insert_batch('otros.estado_resultado_trans_rep_mtto', $repmant);
+    }
+
+    $gastos = array();
+    if (!empty($_POST['gastos_proveedor'])) {
+      foreach ($_POST['gastos_proveedor'] as $key => $descripcion)
+      {
+        $id_cod = intval($_POST['gastos_codg_id'][$key]);
+        if ($id_cod == 0) {
+          $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
+        }
+
+        $gastos[] = array(
+          'id_estado'    => $id_venta,
+          'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
+          'id_cod'       => $id_cod,
+          'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+          'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
+          'cantidad'     => 0,
+          'precio'       => 0,
+          'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
+        );
+      }
+
+      if(count($gastos) > 0)
+        $this->db->insert_batch('otros.estado_resultado_trans_gastos', $gastos);
+    }
+
+    return array('passes' => true, 'id_venta' => $id_venta);
+  }
+
+  public function updateEstadoResult($id_estado)
+  {
+    $datosFactura = array(
+      'id_chofer'   => $this->input->post('did_chofer'),
+      'id_activo'   => $this->input->post('did_activo'),
+      'id_empresa'  => $this->input->post('did_empresa'),
+      'id_creo'     => $this->session->userdata('id_usuario'),
+      'fecha'       => $this->input->post('dfecha'),
+      'folio'       => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
+      'km_rec'      => floatval($this->input->post('dkm_rec')),
+      'vel_max'     => floatval($this->input->post('dvel_max')),
+      'rep_lt_hist' => floatval($this->input->post('drep_lt_hist')),
+      'rend_km_gps' => floatval($this->input->post('rend_km_gps')),
+      'rend_actual' => floatval($this->input->post('rend_actual')),
+      'rend_lts'    => floatval($this->input->post('rend_lts')),
+      'rend_precio' => floatval($this->input->post('rend_precio')),
+      'id_gasto'    => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
+      'gasto_monto' => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
+
+    );
+
+    $this->db->update('otros.estado_resultado_trans', $datosFactura, "id = {$id_estado}");
+
+    $ventas = array();
+    $this->db->delete('otros.estado_resultado_trans_ventas', "id_estado = {$id_estado}");
+    if (!empty($_POST['remision_cliente'])) {
+      foreach ($_POST['remision_cliente'] as $key => $descripcion)
+      {
+        $ventas[] = array(
+          'id_estado' => $id_estado,
+          'id_remision' => $_POST['remision_id'][$key] !== '' ? $_POST['remision_id'][$key] : null,
+          'comprobacion' => $_POST['remision_comprobacion'][$key] == 'true' ? 't' : 'f',
+        );
+      }
+      if(count($ventas) > 0)
+        $this->db->insert_batch('otros.estado_resultado_trans_ventas', $ventas);
+    }
+
+    $sueldos = array();
+    if (!empty($_POST['sueldos_concepto'])) {
+      foreach ($_POST['sueldos_concepto'] as $key => $descripcion)
+      {
+        if ($_POST['sueldos_del'][$key] == 'true' && $_POST['sueldos_id_sueldo'][$key] > 0) {
+          $this->db->delete('otros.estado_resultado_trans_sueldos', "id = {$_POST['sueldos_id_sueldo'][$key]}");
+        } elseif ($_POST['sueldos_id_sueldo'][$key] > 0) {
+          $this->db->update('otros.estado_resultado_trans_sueldos', array(
+            'id_estado'    => $id_estado,
+            'id_proveedor' => $_POST['sueldos_proveedor_id'][$key] !== '' ? $_POST['sueldos_proveedor_id'][$key] : null,
+            'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
+            'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
+            'importe'      => $_POST['sueldos_importe'][$key] !== '' ? $_POST['sueldos_importe'][$key] : 0,
+            // 'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
+          ), "id = {$_POST['sueldos_id_sueldo'][$key]}");
+        } else {
+          $sueldos[] = array(
+            'id_estado'    => $id_estado,
+            'id_proveedor' => $_POST['sueldos_proveedor_id'][$key] !== '' ? $_POST['sueldos_proveedor_id'][$key] : null,
+            'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
+            'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
+            'importe'      => $_POST['sueldos_importe'][$key] !== '' ? $_POST['sueldos_importe'][$key] : 0,
+            // 'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
+          );
+        }
+      }
+      if(count($sueldos) > 0)
+        $this->db->insert_batch('otros.estado_resultado_trans_sueldos', $sueldos);
+    }
+
+    $repmant = array();
+    $this->db->delete('otros.estado_resultado_trans_rep_mtto', "id_estado = {$id_estado}");
+    if (!empty($_POST['repmant_proveedor'])) {
+      foreach ($_POST['repmant_proveedor'] as $key => $descripcion)
+      {
+        $repmant[] = array(
+          'id_estado'    => $id_estado,
+          'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
+          'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
+        );
+      }
+
+      if(count($repmant) > 0){
+        $this->db->insert_batch('otros.estado_resultado_trans_rep_mtto', $repmant);
+      }
+    }
+
+    $gastos = array();
+    if (!empty($_POST['gastos_proveedor'])) {
+      foreach ($_POST['gastos_proveedor'] as $key => $descripcion)
+      {
+        $id_cod = intval($_POST['gastos_codg_id'][$key]);
+        if ($id_cod == 0) {
+          $id_cod = $this->addCods($this->input->post('gastos_codg'));
+        }
+
+        if ($_POST['gastos_del'][$key] == 'true' && $_POST['gastos_id_gasto'][$key] > 0) {
+          $this->db->delete('otros.estado_resultado_trans_gastos', "id = {$_POST['gastos_id_gasto'][$key]}");
+        } elseif ($_POST['gastos_id_gasto'][$key] > 0) {
+          $this->db->update('otros.estado_resultado_trans_gastos', array(
+            'id_estado'    => $id_venta,
+            'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
+            'id_cod'       => $id_cod,
+            'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+            'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
+            'cantidad'     => 0,
+            'precio'       => 0,
+            'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
+          ), "id = {$_POST['gastos_id_gasto'][$key]}");
+        } else {
+          $gastos[] = array(
+            'id_estado'    => $id_venta,
+            'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
+            'id_cod'       => $id_cod,
+            'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+            'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
+            'cantidad'     => 0,
+            'precio'       => 0,
+            'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
+          );
+        }
+      }
+      if(count($gastos) > 0)
+        $this->db->insert_batch('otros.estado_resultado_trans_gastos', $gastos);
+    }
+
+    return array('passes' => true, 'id_venta' => $id_venta);
+  }
+
+  /**
+   * Obtiene el folio de acuerdo a la serie seleccionada
+   */
+  public function getFolio($empresa, $activo)
+  {
+    $res = $this->db->select('folio')->
+                      from('otros.estado_resultado_trans')->
+                      where("id_empresa = {$empresa}")->
+                      where("id_activo = '{$activo}'")->
+                      order_by('folio', 'DESC')->
+                      limit(1)->get()->row();
+
+    $folio = (isset($res->folio)? $res->folio: 0)+1;
+
+    return $folio;
+  }
+
+  public function addCods($name)
+  {
+    $query = $this->db->query("SELECT id, count(id) FROM otros.estado_resultado_trans_cods
+      WHERE regexp_replace(translate(Lower(nombre), 'áâãäåāăąèééêëēĕėęěìíîïìĩīĭóôõöōŏőùúûüũūŭů',
+        'aaaaaaaaeeeeeeeeeeiiiiiiiiooooooouuuuuuuu'), '[^\w]+', '', 'g') =
+        regexp_replace(translate(Lower('{$name}'),
+        'áâãäåāăąèééêëēĕėęěìíîïìĩīĭóôõöōŏőùúûüũūŭů',
+        'aaaaaaaaeeeeeeeeeeiiiiiiiiooooooouuuuuuuu'), '[^\w]+', '', 'g')
+      GROUP BY id")->row();
+    // echo "<pre>";
+    // var_dump(count($query));
+    // echo "</pre>";exit;
+    if (count($query) == 0 || $query->count == 0) {
+      $cod = [
+        'nombre' => mb_strtoupper($name, 'UTF-8')
+      ];
+      $this->db->insert('otros.estado_resultado_trans_cods', $cod);
+      $id_cod = $this->db->insert_id('otros.estado_resultado_trans_cods_id_seq');
+    } else {
+      $id_cod = $query->id;
+    }
+
+     return $id_cod;
+  }
+
 	/**
 	 * Obtiene la informacion de una factura
 	 */
-	public function getInfoVenta($id, $info_basic=false, $moneda=false)
+	public function getInfoVenta($id, $info_basic=false)
   {
 		$res = $this->db
-      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida, fo.no_salida_fruta")
-      ->from('facturacion as f')
-      ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
-      ->where("f.id_factura = {$id}")
+      ->select("f.*")
+      ->from('otros.estado_resultado_trans as f')
+      ->join('cajachica_gastos g', "g.id_gasto = f.id_gasto", 'left')
+      ->where("f.id = {$id}")
       ->get();
 
     if($res->num_rows() > 0)
     {
 			$response['info'] = $res->row();
-      $response['info']->fechaT = str_replace(' ', 'T', substr($response['info']->fecha, 0, 16));
-      $response['info']->fecha = substr($response['info']->fecha, 0, 10);
-
-      //si hay que hacer conversion de moneda
-      if ($moneda) {
-        $response['info']->subtotal      = ($response['info']->subtotal/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
-        $response['info']->importe_iva   = ($response['info']->importe_iva/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
-        $response['info']->retencion_iva = ($response['info']->retencion_iva/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
-        $response['info']->total         = ($response['info']->total/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
-      }
-
 			$res->free_result();
 
       if($info_basic)
@@ -144,508 +491,72 @@ class estado_resultado_trans_model extends privilegios_model{
       $empresa = $this->empresas_model->getInfoEmpresa($response['info']->id_empresa);
       $response['info']->empresa = $empresa['info'];
 
-      // Carga la info del cliente.
-			$this->load->model('clientes_model');
-			$prov = $this->clientes_model->getClienteInfo($response['info']->id_cliente);
-			$response['info']->cliente = $prov['info'];
+			$this->load->model('choferes_model');
+			$prov = $this->choferes_model->getChoferInfo($response['info']->id_chofer);
+			$response['info']->chofer = $prov['info'];
+
+      $this->load->model('productos_model');
+      $prov = $this->productos_model->getProductosInfo($response['info']->id_activo);
+      $response['info']->activo = $prov['info'];
 
       $res = $this->db
-        ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
-                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
-                u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
-                ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext,
-                fp.ieps, fp.porcentaje_ieps, cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real,
-                fp.isr, fp.porcentaje_isr, fp.ieps_subtotal')
-        ->from('facturacion_productos as fp')
-        ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
-        ->join('unidades_unq as u', 'u.nombre = fp.unidad', 'left')
-        ->join('otros.areas_calidades as ac', 'ac.id_calidad = fp.id_calidad', 'left')
-        ->join('otros.areas_tamanios as at', 'at.id_tamanio = fp.id_tamanio', 'left')
-        ->join('calibres as cal', 'cal.id_calibre = fp.id_calibres', 'left')
-        ->where('id_factura = ' . $id)->order_by('fp.num_row', 'asc')
+        ->select('v.id_remision, Date(f.fecha) AS fecha, (f.serie || f.folio) AS folio,
+          c.id_cliente, c.nombre_fiscal AS cliente, f.subtotal, f.total, v.comprobacion')
+        ->from('otros.estado_resultado_trans_ventas v')
+        ->join('facturacion f', 'v.id_remision = f.id_factura', 'inner')
+        ->join('clientes c', 'c.id_cliente = f.id_cliente', 'inner')
+        ->where('v.id_estado = ' . $id)->order_by('v.id_remision', 'asc')
         ->get();
+      $response['remisiones'] = $res->result();
 
-      $response['productos'] = $res->result();
-      //si hay que hacer conversion de moneda
-      if ($moneda) {
-        foreach ($response['productos'] as $key => $value) {
-          $value->precio_unitario = ($value->precio_unitario/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
-          $value->importe = ($value->importe/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
-          $value->iva = ($value->iva/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
-          $value->retencion_iva = ($value->retencion_iva/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
-        }
-      }
+      $res = $this->db
+        ->select('s.id, p.id_proveedor, Date(s.fecha) AS fecha,
+          s.descripcion, s.importe, p.nombre_fiscal AS proveedor')
+        ->from('otros.estado_resultado_trans_sueldos s')
+        ->join('proveedores p', 'p.id_proveedor = s.id_proveedor', 'inner')
+        ->where('s.id_estado = ' . $id)->order_by('s.id', 'asc')
+        ->get();
+      $response['sueldos'] = $res->result();
 
-      // Obtiene los pallets que tiene la factura.
-      $response['pallets'] = array();
-      $res = $this->db->query(
-        "SELECT fp.id_pallet, rp.folio, rp.no_cajas, rp.kilos_pallet, string_agg(clasi.nombre::text, ', '::text) AS clasificaciones, cali.calibres,
-          (
-            SELECT string_agg(etiq.nombre::text, ', '::text) AS etiquetas
-            FROM rastria_pallets rp2
-            JOIN (
-            SELECT rpr.id_pallet, et.nombre
-            FROM rastria_pallets_rendimiento rpr
-            JOIN etiquetas et ON rpr.id_etiqueta = et.id_etiqueta
-            GROUP BY rpr.id_pallet, rpr.id_etiqueta, et.nombre
-            ORDER BY rpr.id_pallet
-            ) etiq ON etiq.id_pallet = rp2.id_pallet
-            WHERE etiq.id_pallet = fp.id_pallet
-          ) AS etiquetas
+      $res = $this->db
+        ->select('v.id_compra, Date(f.fecha) AS fecha, (f.serie || f.folio) AS folio,
+          p.id_proveedor, p.id_proveedor, p.nombre_fiscal AS proveedor, f.subtotal,
+          f.total, f.concepto, v.comprobacion')
+        ->from('otros.estado_resultado_trans_rep_mtto v')
+        ->join('compras f', 'v.id_compra = f.id_compra', 'inner')
+        ->join('proveedores p', 'p.id_proveedor = f.id_proveedor', 'inner')
+        ->where('v.id_estado = ' . $id)->order_by('v.id_compra', 'asc')
+        ->get();
+      $response['repmant'] = $res->result();
 
-        FROM facturacion_pallets fp
-        INNER JOIN rastria_pallets rp ON rp.id_pallet = fp.id_pallet
-
-        INNER JOIN (
-          SELECT rpr.id_pallet, cl.nombre
-          FROM rastria_pallets_rendimiento rpr
-          JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
-          GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
-          ORDER BY rpr.id_pallet
-        ) clasi ON clasi.id_pallet = fp.id_pallet
-
-        LEFT JOIN (
-          SELECT rpc.id_pallet, string_agg(cal.nombre::text, ', '::text) AS calibres
-          FROM rastria_pallets_calibres rpc
-          JOIN calibres cal ON rpc.id_calibre = cal.id_calibre
-          GROUP BY rpc.id_pallet
-          ORDER BY rpc.id_pallet
-        ) cali ON cali.id_pallet = fp.id_pallet
-
-        WHERE id_factura = {$id}
-        GROUP BY fp.id_pallet, rp.folio, rp.no_cajas, rp.kilos_pallet, cali.calibres
-        ORDER BY fp.id_pallet ASC;");
-
-      $response['pallets'] = $res->result();
-
-      $res = $this->db->query("SELECT fsc.*, p.nombre_fiscal as proveedor
-         FROM facturacion_seg_cert fsc
-         INNER JOIN proveedores p ON p.id_proveedor = fsc.id_proveedor
-         WHERE id_factura = {$id}");
-
-      foreach ($res->result() as $tipo)
-      {
-        if ($tipo->id_clasificacion == 49)
-        {
-          $response['seguro'][] = $tipo;
-        } elseif ($tipo->id_clasificacion == 53)
-        {
-          $response['supcarga'][] = $tipo;
-        }else
-        { // Certificados 51 o 52
-          $response['certificado'.$tipo->id_clasificacion][] = $tipo;
-        }
-      }
+      $res = $this->db
+        ->select('s.id, p.id_proveedor, Date(s.fecha) AS fecha,
+          c.nombre AS codg, c.id AS id_codg, s.importe, p.nombre_fiscal AS proveedor,
+          s.comprobacion')
+        ->from('otros.estado_resultado_trans_gastos s')
+        ->join('proveedores p', 'p.id_proveedor = s.id_proveedor', 'inner')
+        ->join('otros.estado_resultado_trans_cods c', 'c.id = s.id_cod', 'inner')
+        ->where('s.id_estado = ' . $id)->order_by('s.id', 'asc')
+        ->get();
+      // echo $this->db->last_query();
+      $response['gastos'] = $res->result();
 
 			return $response;
 		}else
 			return false;
 	}
 
-	/**
-	 * Obtiene el folio de acuerdo a la serie seleccionada
-	 */
-	public function getFolio($empresa, $serie)
-  {
-		$res = $this->db->select('folio')->
-                      from('facturacion')->
-                      where("id_empresa = {$empresa}")->
-                      where("serie = '{$serie}'")->
-                      where("is_factura = 'f'")->
-                      order_by('folio', 'DESC')->
-                      limit(1)->get()->row();
-
-    $folio      = (isset($res->folio)? $res->folio: 0)+1;
-    // $res = new stdClass();
-    // $res->folio = $folio;
-    // $msg        = 'ok';
-
-    $res = $this->db->select('*')
-      ->from('facturacion_series_folios')
-      ->where("serie = '".$serie."' AND id_empresa = ".$empresa)
-      ->limit(1)->get()->row();
-
-    if(is_object($res)){
-      if($folio < $res->folio_inicio)
-        $folio = $res->folio_inicio;
-
-      $res->folio = $folio;
-      $msg = 'ok';
-
-      if($folio > $res->folio_fin || $folio < $res->folio_inicio)
-        $msg = "El folio ".$folio." está fuera del rango de folios para la serie ".$serie.". <br>
-          Verifique las configuraciones para asignar un nuevo rango de folios";
-    }else
-      $msg = 'La serie no existe.';
 
 
-		return array($res, $msg);
-	}
 
-	/**
-	 * Agrega una nota remison a la bd
-	 */
-	public function addNotaVenta()
-  {
-    $this->load->model('clientes_model');
-    $this->load->model('clasificaciones_model');
 
-    $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
 
-    // Obtiene la forma de pago, si es en parcialidades entonces la forma de
-    // pago son las parcialidades "Parcialidad 1 de X".
-    // $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
 
-    $cfdi_ext = [
-      'tipoDeComprobante' => ($this->input->post('dtipo_comprobante')=='ingreso'? 'I': 'E'),
-      'usoCfdi'           => $this->input->post('duso_cfdi'),
-    ];
 
-    if ($this->input->post('cerrarVenta') == 'true') {
-      $cfdi_ext['cerrarVenta'] = true;
-    }
 
-    $datosFactura = array(
-      'id_cliente'          => $this->input->post('did_cliente'),
-      'id_empresa'          => $this->input->post('did_empresa'),
-      'version'             => $this->input->post('dversion'),
-      'serie'               => $this->input->post('dserie'),
-      'folio'               => $this->input->post('dfolio'),
-      'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
-      'subtotal'            => $this->input->post('total_subtotal'),
-      'importe_iva'         => $this->input->post('total_iva'),
-      'retencion_iva'       => $this->input->post('total_retiva'),
-      'ieps'                => floatval($this->input->post('total_ieps')),
-      'isr'                 => floatval($this->input->post('total_isr')),
-      'total'               => $this->input->post('total_totfac'),
-      'total_letra'         => $this->input->post('dttotal_letra'),
-      'no_aprobacion'       => $this->input->post('dno_aprobacion'),
-      'ano_aprobacion'      => $anoAprobacion[0],
-      'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
-      'forma_pago'          => $this->input->post('dforma_pago'),
-      'metodo_pago'         => $this->input->post('dmetodo_pago'),
-      'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
-      'no_certificado'      => $this->input->post('dno_certificado'),
-      'cadena_original'      => '',
-      'sello'                => '',
-      'certificado'          => '',
-      'condicion_pago'      => $this->input->post('dcondicion_pago'),
-      'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
-      'observaciones'       => $this->input->post('dobservaciones'),
-      'status'              => 'p', //$_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
-      'status_timbrado'     => 'p',
-      'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
-      'is_factura'          => 'f',
-      'sin_costo_nover'     => isset($_POST['dsincosto_nover']) ? 't' : 'f',
-      'moneda'              => $_POST['moneda'],
-      'cfdi_ext'            => json_encode($cfdi_ext),
-    );
-    //Si existe el parametro es una nota de credito de la factura
-    $bitacora_accion = 'la nota de remision';
-    if(isset($_POST['id_nrc']{0}))
-    {
-      $datosFactura['id_nc'] = $_POST['id_nrc'];
-      $datosFactura['status'] = 'pa';
-      $bitacora_accion = 'la nota de credito';
-    }
 
-    // Tipo de cambio y moneda
-    if ($datosFactura['moneda'] !== 'MXN')
-      $datosFactura['tipo_cambio'] = $_POST['tipoCambio'];
-    else
-      $datosFactura['tipo_cambio'] = '1';
 
-    $this->db->insert('facturacion', $datosFactura);
-    $id_venta = $this->db->insert_id('facturacion_id_factura_seq');
 
-    // Si tiene el # de trazabilidad
-    if ($this->input->post('dno_trazabilidad') !== false || $this->input->post('dno_salida_fruta') !== false) {
-      $this->db->insert('facturacion_otrosdatos', [
-        'id_factura'       => $id_venta,
-        'no_trazabilidad'  => $this->input->post('dno_trazabilidad'),
-        'id_paleta_salida' => ($this->input->post('id_paleta_salida')? $this->input->post('id_paleta_salida'): NULL),
-        'no_salida_fruta'  => $this->input->post('dno_salida_fruta'),
-      ]);
-    }
-
-    // Si tiene el # de Salida de fruta
-    if ($this->input->post('dno_salida_fruta') !== false && $this->input->post('dno_salida_fruta') != '') {
-      $this->db->insert('facturacion_otrosdatos', [
-        'id_factura'       => $id_venta,
-
-        'id_paleta_salida' => $this->input->post('id_paleta_salida')
-      ]);
-    }
-
-    // si probiene de una venta se asigna
-    if (isset($_GET['id_vd'])) {
-      $this->load->model('ventas_dia_model');
-      $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $id_venta, 'id_venta' => $_GET['id_vd']));
-    }
-
-    // Bitacora
-    $this->bitacora_model->_insert('facturacion', $id_venta,
-                                    array(':accion'    => $bitacora_accion, ':seccion' => 'nota de remision',
-                                          ':folio'     => $datosFactura['serie'].$datosFactura['folio'],
-                                          ':id_empresa' => $datosFactura['id_empresa'],
-                                          ':empresa'   => 'en '.$this->input->post('dempresa')));
-
-    // Obtiene los datos del cliente.
-    $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);
-    $dataCliente = array(
-      'id_factura'    => $id_venta,
-      'nombre'      => $cliente['info']->nombre_fiscal,
-      'rfc'         => $cliente['info']->rfc,
-      'calle'       => $cliente['info']->calle,
-      'no_exterior' => $cliente['info']->no_exterior,
-      'no_interior' => $cliente['info']->no_interior,
-      'colonia'     => $cliente['info']->colonia,
-      'localidad'   => $cliente['info']->localidad,
-      'municipio'   => $cliente['info']->municipio,
-      'estado'      => $cliente['info']->estado,
-      'cp'          => $cliente['info']->cp,
-      'pais'        => 'MEXICO',
-    );
-    $this->db->insert('facturacion_cliente', $dataCliente);
-
-    $dataSeguroCerti = array();
-    $nrow_seg_cer = 0;
-    $seg_cer_entro = array();
-    $serieFolio = $datosFactura['serie'].$datosFactura['folio'];
-
-    // Productos
-    $productosFactura   = array();
-    $produccionFactura  = array();
-    foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
-    {
-      if ($_POST['prod_dcantidad'][$key] > 0)
-      {
-        $did_unidad = (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL);
-        $dunidad_c = NULL;
-        if ($did_unidad > 0) { // obtenemos la cantidad de la unidad
-          $data_unidad = $this->db->query("SELECT cantidad FROM unidades WHERE id_unidad = {$did_unidad}")->row();
-          $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
-        }
-
-        // Para descontar del inventario de productos de produccion
-        if (isset($_POST['prod_did_prod'][$key]{0})) {
-          $clasificacion = $this->clasificaciones_model->getClasificacionInfo($_POST['prod_did_prod'][$key], true);
-          if ($clasificacion['info']->inventario == 't' && $_POST['prod_did_prod'][$key] !== '') {
-            $produccionFactura[] = array(
-              'id_factura'       => $id_venta,
-              'id_empresa'       => $datosFactura['id_empresa'],
-              'id_empleado'      => $this->session->userdata('id_usuario'),
-              'id_clasificacion' => $_POST['prod_did_prod'][$key],
-              'cantidad'         => $_POST['prod_dcantidad'][$key],
-              'fecha_produccion' => $datosFactura['fecha'],
-              'precio_venta'     => $_POST['prod_dpreciou'][$key],
-              'tipo'             => 'f',
-            );
-          }
-        }
-
-        $cfdi_ext = [
-          'clave_unidad' => [
-            'key'   => $_POST['pclave_unidad_cod'][$key],
-            'value' => $_POST['pclave_unidad'][$key],
-          ]
-        ];
-
-        $productosFactura[] = array(
-          'id_factura'            => $id_venta,
-          'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
-          'num_row'               => intval($key),
-          'cantidad'              => $_POST['prod_dcantidad'][$key],
-          'descripcion'           => $descripcion,
-          'precio_unitario'       => $_POST['prod_dpreciou'][$key],
-          'importe'               => $_POST['prod_importe'][$key],
-          'iva'                   => $_POST['prod_diva_total'][$key],
-          'unidad'                => $_POST['prod_dmedida'][$key],
-          'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
-          'porcentaje_iva'        => ($_POST['prod_diva_porcent'][$key]=='exento'? 0: $_POST['prod_diva_porcent'][$key]),
-          'porcentaje_iva_real'   => $_POST['prod_diva_porcent'][$key],
-          'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
-          'ieps'                  => $_POST['dieps_total'][$key],
-          'porcentaje_ieps'       => $_POST['dieps'][$key],
-          'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
-          'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
-          'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-          'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
-          'cajas'                 => $_POST['prod_dcajas'][$key],
-          'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
-          'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
-          'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
-          'id_unidad'             => $did_unidad,
-          'unidad_c'              => $dunidad_c,
-          'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
-          'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
-          'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
-          'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
-          'cfdi_ext'              => json_encode($cfdi_ext),
-          'ieps_subtotal'         => $_POST['prod_ieps_subtotal'][$key] === 't' ? 't' : 'f',
-        );
-
-        if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
-        {
-          foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
-            if ($_POST['seg_id_proveedor'][$keysecer] > 0) {
-              $dataSeguroCerti[] = array(
-                'id_factura'       => $id_venta,
-                'id_clasificacion' => $_POST['prod_did_prod'][$key],
-                'nrow'             => $nrow_seg_cer,
-                'id_proveedor'     => $_POST['seg_id_proveedor'][$keysecer],
-                'pol_seg'          => $_POST['seg_poliza'][$keysecer],
-                'folio'            => $serieFolio,
-                'bultos'           => 0,
-                'certificado'      => null,
-                'num_operacion'    => null,
-                'id_orden'         => null,
-                'no_certificado'   => null,
-              );
-              ++$nrow_seg_cer;
-            }
-          }
-          $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
-        }
-
-        if (($_POST['prod_did_prod'][$key] === '51' && !isset($seg_cer_entro['51'])) || ($_POST['prod_did_prod'][$key] === '52' && !isset($seg_cer_entro['52'])))
-        {
-          foreach ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]] as $keysecer => $data_secer) {
-            if ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer] > 0) {
-              $dataSeguroCerti[] = array(
-                'id_factura'       => $id_venta,
-                'id_clasificacion' => $_POST['prod_did_prod'][$key],
-                'nrow'             => $nrow_seg_cer,
-                'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'folio'            => $serieFolio,
-                'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'pol_seg'          => null,
-                'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'id_orden'         => (!empty($_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
-                'no_certificado'   => (!empty($_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
-              );
-              ++$nrow_seg_cer;
-            }
-          }
-          $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
-        }
-
-        if ($_POST['prod_did_prod'][$key] === '53' && !isset($seg_cer_entro['53']))
-        {
-          foreach ($_POST['supcarga_id_proveedor'] as $keysecer => $data_secer) {
-            if ($_POST['supcarga_id_proveedor'][$keysecer] > 0) {
-              $dataSeguroCerti[] = array(
-                'id_factura'       => $id_venta,
-                'id_clasificacion' => $_POST['prod_did_prod'][$key],
-                'nrow'             => $nrow_seg_cer,
-                'id_proveedor'     => $_POST['supcarga_id_proveedor'][$keysecer],
-                'certificado'      => $_POST['supcarga_numero'][$keysecer],
-                'folio'            => $serieFolio,
-                'bultos'           => $_POST['supcarga_bultos'][$keysecer],
-                'pol_seg'          => null,
-                'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
-                'id_orden'         => null,
-                'no_certificado'   => null,
-              );
-              ++$nrow_seg_cer;
-            }
-          }
-          $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
-        }
-
-      }
-    }
-    if(count($productosFactura) > 0)
-      $this->db->insert_batch('facturacion_productos', $productosFactura);
-
-    if(count($produccionFactura) > 0)
-      $this->db->insert_batch('otros.produccion_historial', $produccionFactura);
-
-    if (count($dataSeguroCerti) > 0)
-    {
-      $this->db->delete('facturacion_seg_cert', array('id_factura' => $id_venta));
-      $this->db->insert_batch('facturacion_seg_cert', $dataSeguroCerti);
-    }
-
-    if (isset($_POST['palletsIds']))
-    {
-      $pallets = array(); // Ids de los pallets cargados en la factura.
-      // Crea el array de los pallets a insertar.
-      foreach ($_POST['palletsIds'] as $palletId)
-      {
-        $pallets[] = array(
-          'id_factura' => $id_venta,
-          'id_pallet'  => $palletId
-        );
-      }
-
-      if (count($pallets) > 0)
-      {
-        $this->db->insert_batch('facturacion_pallets', $pallets);
-      }
-    }
-
-    $this->load->model('documentos_model');
-    $this->load->model('facturacion_model');
-
-    // Obtiene los documentos que el cliente tiene asignados.
-    $docsCliente = $this->facturacion_model->getClienteDocs($datosFactura['id_cliente'], $id_venta);
-    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio'], substr($datosFactura['fecha'], 0, 10));
-
-    // Inserta los documentos del cliente con un status false.
-    if ($docsCliente)
-      $this->db->insert_batch('facturacion_documentos', $docsCliente);
-    else
-      $datosFactura['docs_finalizados'] = 't';
-
-    //Si es otra moneda actualiza al tipo de cambio
-    if($datosFactura['moneda'] !== 'MXN')
-    {
-      $datosFactura1 = array();
-      $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
-      $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
-      $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-      $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-      $this->db->update('facturacion', $datosFactura1, array('id_factura' => $id_venta));
-
-      foreach ($productosFactura as $key => $value)
-      {
-        $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
-        $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
-        $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-        $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-        $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
-      }
-    }
-
-    // Si es al contado y es la bodega de guadalajara Paga la factura automaticamente
-    if ($this->input->post('dcondicion_pago') == 'co' && preg_match("/bodega/i", $this->input->post('dempresa')) === 1 ) {
-      $this->load->model('cuentas_cobrar_model');
-      $this->load->model('banco_cuentas_model');
-
-      $cuentas = $this->db->query("SELECT * FROM banco_cuentas
-                                 WHERE status = 'ac' AND id_empresa = ".$this->input->post('did_empresa'))->row();
-
-      $_GET['tipo'] = 'v';
-      $data = array('fecha'  => substr($_POST['dfecha'], 0, 10),
-            'concepto'       => 'Pago de contado '.$this->input->post('dserie').$this->input->post('dfolio'),
-            'total'          => $this->input->post('total_totfac'), //$total,
-            'id_cuenta'      => $cuentas->id_cuenta,
-            'ref_movimiento' => $this->input->post('dserie').$this->input->post('dfolio'),
-            'saldar'         => 'no' );
-      $resa = $this->cuentas_cobrar_model->addAbono($data, $id_venta);
-    }
-
-    $this->db->query("SELECT refreshallmaterializedviews();");
-
-    $this->generaNotaRemisionPdf($id_venta, $pathDocs);
-
-    // // Registra la salida de productos si tiene pallets
-    // $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
-
-		return array('passes' => true, 'id_venta' => $id_venta);
-	}
 
   public function addNotaVentaData($data)
   {

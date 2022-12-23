@@ -71,6 +71,7 @@
             <?php foreach($datos_s['res_trans'] as $fact) {?>
                 <tr>
                   <td style="width:70px;"><?php echo $fact->fecha; ?></td>
+                  <td style="width:70px;"><?php echo $fact->folio; ?></td>
                   <td>
                     <span class="label"><?php echo $fact->chofer; ?></span>
                   </td>

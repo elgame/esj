@@ -7,25 +7,12 @@ class estado_resultado_trans extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'estado_resultado_trans/ajax_get_remisiones/',
+    'estado_resultado_trans/ajax_get_repmant/',
+    'estado_resultado_trans/ajax_get_proveedores/',
+    'estado_resultado_trans/ajax_get_cods/',
+    'estado_resultado_trans/ajax_get_gastos_caja/',
 
-
-
-
-    'ventas/get_folio/',
-    'ventas/rventasr_pdf/',
-    'ventas/rventasr_xls/',
-    'ventas/rpsaldo_vencido_pdf/',
-    'ventas/rpsaldo_vencido_xls/',
-    'ventas/rventas_nc_pdf/',
-    'ventas/rventas_nc_xls/',
-    'ventas/imprimir_tk/',
-
-    'facturacion/rvc_pdf/',
-    'facturacion/rvp_pdf/',
-
-
-    'facturacion/ajax_get_clasificaciones/',
-    'facturacion/ajax_get_empresas_fac/'
+    'estado_resultado_trans/imprimir/',
   );
 
 
@@ -107,103 +94,46 @@ class estado_resultado_trans extends MY_Controller {
     $this->load->model('estado_resultado_trans_model');
     $this->load->model('empresas_model');
 
-    $this->configAddModFactura();
+    $this->configAddModEstadoRest();
     if($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
     }
     else
     {
-
       if (isset($_GET['id_nr']))
-        $respons = $this->estado_resultado_trans_model->updateNotaVenta($_GET['id_nr']);
+        $respons = $this->estado_resultado_trans_model->updateEstadoResult($_GET['id_nr']);
       else
-        $respons = $this->estado_resultado_trans_model->addNotaVenta();
-
+        $respons = $this->estado_resultado_trans_model->addEstadoResult();
 
       if($respons['passes'])
       {
-        if(isset($_POST['id_nrc']{0}))
-          redirect(base_url('panel/ventas/?msg=10'));
-        elseif(isset($_POST['guardar_imp']))
-          redirect(base_url('panel/ventas/agregar/?msg=11&imprimir_tk='.$respons['id_venta']));
+        if (isset($_GET['id_nr']))
+          redirect(base_url('panel/estado_resultado_trans/agregar/?msg=3&id_nr='.$_GET['id_nr']));
         else
-          redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_venta']));
+          redirect(base_url('panel/estado_resultado_trans/?msg=3'));
       }
       else
         $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
     }
 
     // Parametros por default.
-    $params['series'] = $this->facturacion_model->getSeriesFolios(100);
+    // $params['series'] = $this->estado_resultado_trans_model->getSeriesFolios(100);
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
-
-    $params['getId'] = '';
 
     // Parametros por default.
     // Obtiene los datos de la empresa predeterminada.
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    // $this->db
-    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-    //   ->from("empresas AS e")
-    //   ->where("e.predeterminado", "t")
-    //   ->get()
-    //   ->row();
 
-    // Obtiene el numero de certificado de la empresa predeterminada.
-    // $params['no_certificado'] = $this->cfdi->obtenNoCertificado($params['empresa_default']->cer_org);
-
-    $params['unidades'] = $this->db->select('*')
-      ->from('unidades')
-      ->where('status', 't')
-      ->order_by('nombre')
-      ->get()->result();
-
-    $params['cerrarVenta'] = false;
-    $params['desbloquear'] = false;
 
     $params['getId'] = '';
     if (isset($_GET['id_nr']) || isset($_GET['id_nrc']))
     {
       $params['borrador'] = $this->estado_resultado_trans_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']), false, true );
-      $params['borrador']['info']->cfdi_ext = $params['borrador']['info']->cfdi_ext? json_decode($params['borrador']['info']->cfdi_ext): false;
-
-      $params['cerrarVenta'] = false;
-      if (isset($params['borrador']['info']->cfdi_ext->cerrarVenta)) {
-        $params['cerrarVenta'] = true;
-      }
-
-      $params['desbloquear'] = false;
-      if ($this->usuarios_model->tienePrivilegioDe('', 'ventas/desbloquear/')) {
-        $params['desbloquear'] = true;
-      }
-
-      if(isset($_GET['id_nr']))
-        $params['fecha']    = isset($params['borrador']) ? $params['borrador']['info']->fechaT : $params['fecha'];
-      if(isset($_GET['id_nrc']))
-      {
-        $params['borrador']['info']->serie         = '';
-        $params['borrador']['info']->folio         = '';
-        $params['borrador']['info']->subtotal      = '';
-        $params['borrador']['info']->subtotal      = '';
-        $params['borrador']['info']->importe_iva   = '';
-        $params['borrador']['info']->retencion_iva = '';
-        $params['borrador']['info']->total         = '';
-        $params['seo']['titulo'] = 'Agregar Nota de credito';
-      }
+      // echo "<pre>";
+      // var_dump($params['borrador']);
+      // echo "</pre>";exit;
     }
-
-    $metodosPago       = new MetodosPago();
-    $formaPago         = new FormaPago();
-    $usoCfdi           = new UsoCfdi();
-    $tipoDeComprobante = new TipoDeComprobante();
-    // $monedas           = new Monedas();
-
-    $params['metodosPago']       = $metodosPago->get()->all();
-    $params['formaPago']         = $formaPago->get()->all();
-    $params['usoCfdi']           = $usoCfdi->get()->all();
-    $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
-    // $params['monedas']           = $monedas->get()->all();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -227,524 +157,106 @@ class estado_resultado_trans extends MY_Controller {
 
   public function ajax_get_remisiones($id_empresa = 24)
   {
+    $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
     $this->load->model('estado_resultado_trans_model');
     echo json_encode($this->estado_resultado_trans_model->getRemisiones($id_empresa));
   }
 
-
-
-
-
-
-
-
-
-
-
-  public function rventasr()
+  public function ajax_get_repmant($id_empresa = 24)
   {
-    $this->carabiner->js(array(
-      array('general/msgbox.js'),
-      array('panel/facturacion/rpt_ventas.js'),
-    ));
-
-    $this->load->library('pagination');
-    $this->load->model('empresas_model');
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Ventas remisiones');
-
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
-
-    if(isset($_GET['msg']{0}))
-      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/ventas_remision/rventasc',$params);
-    $this->load->view('panel/footer',$params);
-  }
-  public function rventasr_pdf(){
-    $this->load->model('ventas_model');
-    $this->ventas_model->getRVentasrPdf();
+    $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
+    $this->load->model('estado_resultado_trans_model');
+    echo json_encode($this->estado_resultado_trans_model->getRepMant($id_empresa));
   }
 
-  public function rventasr_xls()
+  public function ajax_get_proveedores($id_empresa = 24)
   {
-    $this->load->model('ventas_model');
-    $this->ventas_model->getRVentasrXLS();
+    $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
+    $this->load->model('estado_resultado_trans_model');
+    echo json_encode($this->estado_resultado_trans_model->ajaxProveedores($id_empresa));
   }
 
-  /**
-   * Reporte de facturas y notas de credito
-   * @return [type] [description]
-   */
-  public function rventas_nc()
+  public function ajax_get_cods()
   {
-    $this->carabiner->js(array(
-      array('general/msgbox.js'),
-      array('panel/facturacion/rpt_ventas.js'),
-    ));
-
-    $this->load->library('pagination');
-    $this->load->model('empresas_model');
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Facturas y NC');
-
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
-
-    if(isset($_GET['msg']{0}))
-      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/ventas_remision/rptfacturas_nc',$params);
-    $this->load->view('panel/footer',$params);
-  }
-  public function rventas_nc_pdf(){
-    $this->load->model('ventas_model');
-    $this->ventas_model->getRFacturasNCPdf();
-  }
-  public function rventas_nc_xls(){
-    $this->load->model('ventas_model');
-    $this->ventas_model->getRFacturasNCXls();
+    $this->load->model('estado_resultado_trans_model');
+    echo json_encode($this->estado_resultado_trans_model->ajaxCodsGastos());
   }
 
-  /**
-   * Reporte de ventas con saldo vencido
-   * @return [type] [description]
-   */
-  public function rpsaldo_vencido()
+  public function ajax_get_gastos_caja($id_empresa = 24)
   {
-    $this->carabiner->js(array(
-      array('general/msgbox.js'),
-      array('panel/facturacion/rpt_ventas.js'),
-    ));
-
-    $this->load->library('pagination');
-    $this->load->model('empresas_model');
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Ventas Vencidas');
-
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
-
-    if(isset($_GET['msg']{0}))
-      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/ventas_remision/rpsaldo_vencido',$params);
-    $this->load->view('panel/footer',$params);
+    $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
+    $this->load->model('estado_resultado_trans_model');
+    echo json_encode($this->estado_resultado_trans_model->getGastosCaja($id_empresa));
   }
-  public function rpsaldo_vencido_pdf(){
-    $this->load->model('ventas_model');
-    $this->ventas_model->getRVencidasPdf();
-  }
-  public function rpsaldo_vencido_xls(){
-    $this->load->model('ventas_model');
-    $this->ventas_model->getRVencidasXls();
-  }
+
 
   /**
    * Configura los metodos de agregar y modificar
    *
    * @return void
    */
-  private function configAddModFactura($borrador = false)
+  private function configAddModEstadoRest($borrador = false)
   {
-    $required = 'required';
-
-    // $callback_seriefolio_check = 'callback_seriefolio_check';
-    $callback_isValidDate      = 'callback_isValidDate';
-    $callback_val_total        = 'callback_val_total';
-    $callback_chk_cer_caduca   = 'callback_chk_cer_caduca';
-    // if ($borrador)
-    // {
-    //   // $callback_seriefolio_check = '';
-    //   $callback_isValidDate      = '';
-    //   $callback_val_total        = '';
-    //   $callback_chk_cer_caduca   = '';
-    // }
-
     $this->load->library('form_validation');
     $rules = array(
+        ['field' => 'dempresa'                , 'label' => 'dempresa'              , 'rules' => '']                 ,
+        ['field' => 'did_empresa'             , 'label' => 'did_empresa'           , 'rules' => 'required|numeric'] ,
+        ['field' => 'dactivo'                 , 'label' => 'dactivo'               , 'rules' => '']                 ,
+        ['field' => 'did_activo'              , 'label' => 'did_activo'            , 'rules' => 'required|numeric'] ,
+        ['field' => 'did_gasto'               , 'label' => 'did_gasto'             , 'rules' => 'numeric']          ,
+        ['field' => 'dchofer'                 , 'label' => 'dchofer'               , 'rules' => '']                 ,
+        ['field' => 'did_chofer'              , 'label' => 'did_chofer'            , 'rules' => 'required|numeric'] ,
+        ['field' => 'dkm_rec'                 , 'label' => 'dkm_rec'               , 'rules' => 'numeric']          ,
+        ['field' => 'dvel_max'                , 'label' => 'dvel_max'              , 'rules' => 'numeric']          ,
+        ['field' => 'drep_lt_hist'            , 'label' => 'drep_lt_hist'          , 'rules' => 'numeric']          ,
+        ['field' => 'dfecha'                  , 'label' => 'dfecha'                , 'rules' => '']                 ,
+        ['field' => 'rend_km_gps'             , 'label' => 'rend_km_gps'           , 'rules' => 'numeric']          ,
+        ['field' => 'rend_actual'             , 'label' => 'rend_actual'           , 'rules' => 'numeric']          ,
+        ['field' => 'rend_lts'                , 'label' => 'rend_lts'              , 'rules' => 'numeric']          ,
+        ['field' => 'rend_precio'             , 'label' => 'rend_precio'           , 'rules' => 'numeric']          ,
 
-        array('field'   => 'did_empresa',
-              'label'   => 'Empresa',
-              'rules'   => 'required|max_length[25]'),
-        array('field'   => 'did_cliente',
-              'label'   => 'Cliente',
-              'rules'   => 'required|max_length[25]'),
-        array('field'   => 'dserie',
-              'label'   => 'Serie',
-              'rules'   => 'max_length[25]'),
-        array('field'   => 'dfolio',
-              'label'   => 'Folio',
-              'rules'   => 'required|numeric|callback_seriefolio_check'),
-        array('field'   => 'dno_aprobacion',
-              'label'   => 'Numero de aprobacion',
-              'rules'   => 'required|numeric'),
-        array('field'   => 'dano_aprobacion',
-              'label'   => 'Fecha de aprobacion',
-              'rules'   => 'required|max_length[10]|'.$callback_isValidDate),
+        ['field' => 'remision_fecha[]'        , 'label' => 'remision_fecha'        , 'rules' => '']                 ,
+        ['field' => 'remision_numero[]'       , 'label' => 'remision_numero'       , 'rules' => '']                 ,
+        ['field' => 'remision_cliente[]'      , 'label' => 'remision_cliente'      , 'rules' => '']                 ,
+        ['field' => 'remision_id[]'           , 'label' => 'remision_id'           , 'rules' => 'numeric']          ,
+        ['field' => 'remision_row[]'          , 'label' => 'remision_row'          , 'rules' => '']                 ,
+        ['field' => 'remision_importe[]'      , 'label' => 'remision_importe'      , 'rules' => 'numeric']          ,
+        ['field' => 'remision_comprobacion[]' , 'label' => 'remision_comprobacion' , 'rules' => '']                 ,
+        ['field' => 'remision_del[]'          , 'label' => 'remision_del'          , 'rules' => '']                 ,
 
-        array('field'   => 'dfecha',
-              'label'   => 'Fecha',
-              'rules'   => 'required|max_length[25]'), //|callback_isValidDate
+        ['field' => 'sueldos_fecha[]'         , 'label' => 'sueldos_fecha'         , 'rules' => '']                 ,
+        ['field' => 'sueldos_id_sueldo[]'     , 'label' => 'sueldos_id_sueldo'     , 'rules' => '']          ,
+        ['field' => 'sueldos_proveedor[]'     , 'label' => 'sueldos_proveedor'     , 'rules' => '']                 ,
+        ['field' => 'sueldos_proveedor_id[]'  , 'label' => 'sueldos_proveedor_id'  , 'rules' => 'numeric']          ,
+        ['field' => 'sueldos_concepto[]'      , 'label' => 'sueldos_concepto'      , 'rules' => '']                 ,
+        ['field' => 'sueldos_importe[]'       , 'label' => 'sueldos_importe'       , 'rules' => 'numeric']          ,
+        ['field' => 'sueldos_comprobacion[]'  , 'label' => 'sueldos_comprobacion'  , 'rules' => '']                 ,
+        ['field' => 'sueldos_del[]'           , 'label' => 'sueldos_del'           , 'rules' => '']                 ,
 
-        array('field'   => 'total_importe',
-              'label'   => 'SubTotal1',
-              'rules'   => 'numeric'),
-        array('field'   => 'total_subtotal',
-              'label'   => 'SubTotal',
-              'rules'   => 'numeric'),
+        ['field' => 'repmant_fecha[]'         , 'label' => 'repmant_fecha'         , 'rules' => '']                 ,
+        ['field' => 'repmant_numero[]'        , 'label' => 'repmant_numero'        , 'rules' => '']                 ,
+        ['field' => 'repmant_proveedor[]'     , 'label' => 'repmant_proveedor'     , 'rules' => '']                 ,
+        ['field' => 'repmant_id[]'            , 'label' => 'repmant_id'            , 'rules' => 'numeric']                 ,
+        ['field' => 'repmant_row[]'           , 'label' => 'repmant_row'           , 'rules' => '']                 ,
+        ['field' => 'repmant_concepto[]'      , 'label' => 'repmant_concepto'      , 'rules' => '']                 ,
+        ['field' => 'repmant_importe[]'       , 'label' => 'repmant_importe'       , 'rules' => '']                 ,
+        ['field' => 'repmant_comprobacion[]'  , 'label' => 'repmant_comprobacion'  , 'rules' => '']                 ,
+        ['field' => 'repmant_del[]'           , 'label' => 'repmant_del'           , 'rules' => '']                 ,
 
-        array('field'   => 'total_descuento',
-              'label'   => 'Descuento',
-              'rules'   => $required.'|numeric'),
-        array('field'   => 'total_iva',
-              'label'   => 'IVA',
-              'rules'   => 'numeric'),
-        array('field'   => 'total_retiva',
-              'label'   => 'Retencion IVA',
-              'rules'   => $required.'|numeric'),
-        array('field'   => 'total_ieps',
-              'label'   => 'IEPS',
-              'rules'   => 'numeric'),
-        array('field'   => 'total_isr',
-              'label'   => 'ISR',
-              'rules'   => 'numeric'),
-        array('field'   => 'total_totfac',
-              'label'   => 'Total',
-              'rules'   => 'required|numeric|'.$callback_val_total),
-        array('field'   => 'dforma_pago',
-              'label'   => 'Forma de pago',
-              'rules'   => 'required|max_length[80]'),
-        array('field'   => 'dmetodo_pago',
-              'label'   => 'Metodo de pago',
-              'rules'   => 'required|max_length[40]'),
-        array('field'   => 'dmetodo_pago_digitos',
-              'label'   => 'Ultimos 4 digitos',
-              'rules'   => 'max_length[20]'),
-        array('field'   => 'dcondicion_pago',
-              'label'   => 'Condición de pago',
-              'rules'   => 'required|max_length[2]'),
-
-        array('field'   => 'dplazo_credito',
-            'label'   => 'Plazo de crédito',
-            'rules'   => 'numeric'),
-
-        array('field'   => 'dempresa',
-              'label'   => 'Empresa',
-              'rules'   => ''),
-        array('field'   => 'dcliente',
-              'label'   => 'Cliente',
-              'rules'   => ''),
-        array('field'   => 'dcliente_rfc',
-              'label'   => 'Cliente',
-              'rules'   => ''),
-        array('field'   => 'dcliente_domici',
-              'label'   => 'Cliente',
-              'rules'   => ''),
-        array('field'   => 'dcliente_ciudad',
-              'label'   => 'Cliente',
-              'rules'   => ''),
-        array('field'   => 'dttotal_letra',
-              'label'   => 'letra',
-              'rules'   => ''),
-        array('field'   => 'dreten_iva',
-              'label'   => 'Retecion IVA',
-              'rules'   => ''),
-
-        array('field'   => 'prod_dcantidad[]',
-              'label'   => 'prod_dcantidad',
-              'rules'   => ''),
-        array('field'   => 'prod_dkilos[]',
-              'label'   => 'prod_dkilos',
-              'rules'   => ''),
-        array('field'   => 'prod_dcajas[]',
-              'label'   => 'prod_dcajas',
-              'rules'   => ''),
-        array('field'   => 'prod_ddescripcion[]',
-              'label'   => 'prod_ddescripcion',
-              'rules'   => ''),
-        array('field'   => 'prod_ddescripcion2[]',
-              'label'   => 'prod_ddescripcion2',
-              'rules'   => ''),
-        array('field'   => 'prod_ddescuento[]',
-              'label'   => 'prod_ddescuento',
-              'rules'   => ''),
-        array('field'   => 'prod_ddescuento_porcent[]',
-              'label'   => 'prod_ddescuento_porcent',
-              'rules'   => ''),
-        array('field'   => 'prod_dpreciou[]',
-              'label'   => 'prod_dpreciou',
-              'rules'   => ''),
-        array('field'   => 'prod_importe[]',
-              'label'   => 'Importe de los productos',
-              'rules'   => ''), //greater_than[0]
-        array('field'   => 'prod_diva_total[]',
-              'label'   => 'prod_diva_total',
-              'rules'   => ''),
-        array('field'   => 'prod_dreten_iva_total[]',
-              'label'   => 'prod_dreten_iva_total',
-              'rules'   => ''),
-        array('field'   => 'prod_dreten_iva_porcent[]',
-              'label'   => 'prod_dreten_iva_porcent',
-              'rules'   => ''),
-        array('field'   => 'prod_diva_porcent[]',
-              'label'   => 'prod_diva_porcent',
-              'rules'   => ''),
-        array('field'   => 'dieps[]',
-              'label'   => 'dieps',
-              'rules'   => ''),
-        array('field'   => 'dieps_total[]',
-              'label'   => 'dieps_total',
-              'rules'   => ''),
-        array('field'   => 'disr[]',
-              'label'   => 'disr',
-              'rules'   => ''),
-        array('field'   => 'disr_total[]',
-              'label'   => 'disr_total',
-              'rules'   => ''),
-        array('field'   => 'prod_dmedida[]',
-              'label'   => 'prod_dmedida',
-              'rules'   => ''),
-        array('field'   => 'isCert[]',
-              'label'   => 'Certificado',
-              'rules'   => ''),
-        array('field'   => 'pclave_unidad[]',
-              'label'   => 'Clave de unidad',
-              'rules'   => ''),
-        array('field'   => 'pclave_unidad_cod[]',
-              'label'   => 'Clave de unidad',
-              'rules'   => ''),
-
-        array('field'   => 'dversion',
-              'label'   => '',
-              'rules'   => ''),
-        array('field'   => 'dcer_caduca',
-              'label'   => 'Empresa',
-              'rules'   => $callback_chk_cer_caduca),
-
-        array('field'   => 'dno_certificado',
-              'label'   => 'No. Certificado',
-              'rules'   => ''),
-        array('field'   => 'dtipo_comprobante',
-              'label'   => 'Tipo comproante',
-              'rules'   => 'required'),
-        array('field'   => 'dobservaciones',
-              'label'   => 'Observaciones',
-              'rules'   => ''),
-        array('field'   => 'dno_trazabilidad',
-              'label'   => 'No Trazabilidad',
-              'rules'   => 'max_length[15]|callback_check_trazabilidad'),
-        array('field'   => 'dno_salida_fruta',
-              'label'   => 'No Salida de fruta',
-              'rules'   => 'max_length[15]'),
-    );
-
-    if (isset($_POST['privAddDescripciones']{0}) || isset($_POST['id_nrc']{0})) {
-      $rules[] = array('field'   => 'prod_did_prod[]',
-                      'label'   => 'prod_did_prod',
-                      'rules'   => '');
-      $rules[] = array('field'   => 'prod_did_calidad[]',
-                      'label'   => 'prod_did_calidad',
-                      'rules'   => '');
-      $rules[] = array('field'   => 'prod_did_tamanio[]',
-                      'label'   => 'prod_did_tamanio',
-                      'rules'   => '');
-    } else {
-      $rules[] = array('field'   => 'prod_did_prod[]',
-                    'label'   => 'prod_did_prod',
-                    'rules'   => 'required');
-      $rules[] = array('field'   => 'prod_did_calidad[]',
-                      'label'   => 'prod_did_calidad',
-                      'rules'   => 'required');
-      $rules[] = array('field'   => 'prod_did_tamanio[]',
-                      'label'   => 'prod_did_tamanio',
-                      'rules'   => 'required');
-    }
-
-    if (isset($_POST['palletsIds']))
-    {
-      $rules[] = array(
-        'field'   => 'palletsIds[]',
-        'label'   => 'Pallets',
-        'rules'   => 'callback_check_existen_pallets'
-      );
-    }
-
-    $rules[] = array(
-      'field'   => 'pproveedor_seguro',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'seg_id_proveedor',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'seg_poliza',
-      'label'   => '',
-      'rules'   => ''
-    );
-
-    $rules[] = array(
-      'field'   => 'pproveedor_certificado51',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'cert_id_proveedor51',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'cert_certificado51',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'cert_bultos51',
-      'label'   => '',
-      'rules'   => ''
-    );
-
-    $rules[] = array(
-      'field'   => 'pproveedor_certificado52',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'cert_id_proveedor52',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'cert_certificado52',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'cert_bultos52',
-      'label'   => '',
-      'rules'   => ''
-    );
-
-    $rules[] = array(
-      'field'   => 'pproveedor_supcarga',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'supcarga_id_proveedor',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'supcarga_numero',
-      'label'   => '',
-      'rules'   => ''
-    );
-    $rules[] = array(
-      'field'   => 'supcarga_bultos',
-      'label'   => '',
-      'rules'   => ''
+        ['field' => 'gastos_fecha[]'          , 'label' => 'gastos_fecha'          , 'rules' => '']                 ,
+        ['field' => 'gastos_id_gasto[]'       , 'label' => 'gastos_id_gasto'       , 'rules' => '']                 ,
+        ['field' => 'gastos_proveedor[]'      , 'label' => 'gastos_proveedor'      , 'rules' => '']                 ,
+        ['field' => 'gastos_proveedor_id[]'   , 'label' => 'gastos_proveedor_id'   , 'rules' => 'numeric']                 ,
+        ['field' => 'gastos_codg[]'           , 'label' => 'gastos_codg'           , 'rules' => '']                 ,
+        ['field' => 'gastos_codg_id[]'        , 'label' => 'gastos_codg_id'        , 'rules' => '']                 ,
+        ['field' => 'gastos_importe[]'        , 'label' => 'gastos_importe'        , 'rules' => '']                 ,
+        ['field' => 'gastos_comprobacion[]'   , 'label' => 'gastos_comprobacion'   , 'rules' => '']                 ,
+        ['field' => 'gastos_del[]'            , 'label' => 'gastos_del'            , 'rules' => '']                 ,
     );
 
     $this->form_validation->set_rules($rules);
   }
 
-  /**
-   * Verifica que la serie y folio enviados del form no esten asignados a una
-   * factura y tambien que esten vigentes.
-   *
-   * @param string $str
-   * @return boolean
-   */
-  public function seriefolio_check($str){
-    if($str != ''){
-      $sql = $ms = '';
-
-      $sql = (isset($_GET['id_nr'])? " AND id_factura <> {$_GET['id_nr']}": '');
-
-      $res = $this->db->select('Count(id_factura) AS num')
-        ->from('facturacion')
-        ->where("folio = ".$str." AND serie = '".$this->input->post('dserie')."' AND id_empresa = ". $this->input->post('did_empresa') ."
-            AND is_factura = 'f' ".$sql)
-        ->get();
-      $data = $res->row();
-      if($data->num > 0){
-        $this->form_validation->set_message('seriefolio_check', 'El folio ya esta utilizado por otra Nota.');
-        return false;
-      }
-    }
-    return true;
-  }
-
-  public function val_total($str){
-    if($str <= -1){
-      $this->form_validation->set_message('val_total', 'El Total no puede ser menor que -1, verifica los datos ingresados.');
-      return false;
-    }
-    return true;
-  }
-
-  public function check_existen_pallets($str)
-  {
-    $error = false;
-    $palletsYaFacturados = array();
-    foreach ($_POST['palletsIds'] as $palletId)
-    {
-      $query = $this->db->query("SELECT f.id_factura, rp.folio
-                                 FROM facturacion_pallets fp
-                                 INNER JOIN facturacion f ON f.id_factura = fp.id_factura
-                                 INNER JOIN rastria_pallets rp ON rp.id_pallet = fp.id_pallet
-                                 WHERE fp.id_pallet = {$palletId} AND f.status_timbrado != 'ca' AND f.status in ('p', 'pa')");
-
-      if ($query->num_rows() > 0)
-      {
-        $error = true;
-        $pallet = $query->result();
-        $palletsYaFacturados[] = $pallet[0]->folio;
-      }
-
-    }
-
-    if ($error)
-    {
-      $this->form_validation->set_message('check_existen_pallets', 'Los pallets con los folios '.implode(', ', $palletsYaFacturados).' ya estan facturados.');
-      return false;
-    }
-
-    return true;
-  }
-
-  public function check_trazabilidad($value)
-  {
-    if (trim($value) != '') {
-      $sql = !empty($_GET['id_nr'])? " AND f.id_factura <> {$_GET['id_nr']}": '';
-      $error = false;
-      $query = $this->db->query("SELECT f.id_factura, fp.no_trazabilidad
-                                   FROM facturacion_otrosdatos fp
-                                   INNER JOIN facturacion f ON f.id_factura = fp.id_factura
-                                   WHERE fp.no_trazabilidad = '{$value}'
-                                    AND f.id_empresa = {$this->input->post('did_empresa')}
-                                    AND f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'b'
-                                    {$sql}");
-
-      if ($query->num_rows() > 0)
-      {
-        $data = $query->row();
-
-        $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
-        return false;
-      }
-    }
-
-    return true;
-  }
 
   /**
    * Imprime la venta remision
@@ -766,143 +278,6 @@ class estado_resultado_trans extends MY_Controller {
       redirect(base_url('panel/ventas/?msg=1'));
   }
 
-  public function imprimir_tk()
-  {
-    if(isset($_GET['id']{0}))
-    {
-      $this->load->model('ventas_model');
-      if($this->input->get('p') == 'true')
-        $this->ventas_model->ticketNotaRemisionPdf($_GET['id']);
-      else {
-        $params['url'] = 'panel/ventas/imprimir_tk/?id='.$_GET['id'].'&p=true';
-        $params['autoclose'] = true;
-        $this->load->view('panel/facturacion/print_view', $params);
-      }
-    }
-    else
-      redirect(base_url('panel/ventas/?msg=1'));
-  }
-
-  /**
-   * Muestra la vista par el envio de los correo.
-   *
-   * @return void
-   */
-  public function enviar_documentos()
-  {
-    $this->carabiner->js(array(
-      array('panel/facturacion/email.js'),
-    ));
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
-    $params['seo'] = array('titulo' => 'Facturas');
-
-    $this->load->model('facturacion_model');
-    $this->load->model('clientes_model');
-
-    $factura = $this->facturacion_model->getInfoFactura($_GET['id']);
-    $cliente = $this->clientes_model->getClienteInfo($factura['info']->id_cliente);
-
-    $params['emails_default'] = array();
-    if ($cliente['info']->email !== '')
-      $params['emails_default'] = explode(',', $cliente['info']->email);
-
-    // echo "<pre>";
-    //   var_dump($params['emails_default']);
-    // echo "</pre>";exit;
-
-    if(isset($_GET['msg']{0}))
-    {
-      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-      if ($_GET['msg'] == 10)
-      {
-        $params['close'] = 1;
-      }
-    }
-
-    $this->load->view('panel/facturacion/email',$params);
-  }
-
-  /**
-   * obtiene el folio siguiente de la serie seleccionada
-   */
-  public function get_folio()
-  {
-    if(isset($_GET['ide']))
-    {
-      $this->load->model('ventas_model');
-      $res = $this->ventas_model->getFolio($_GET['ide'], $_GET['serie']);
-
-      $param =  $this->showMsgs(2, $res[1]);
-      $param['data'] = $res[0];
-      echo json_encode($param);
-    }
-  }
-
-
-  /*
-   |-------------------------------------------------------------------------
-   |  AJAX
-   |-------------------------------------------------------------------------
-   */
-
-
-  /*
-   |-------------------------------------------------------------------------
-   |  REPORTES
-   |-------------------------------------------------------------------------
-   */
-  public function rvc()
-  {
-    $this->carabiner->js(array(
-      array('panel/facturacion/admin.js'),
-    ));
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
-    $params['seo']        = array('titulo' => 'Reporte Ventas Cliente');
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/general/menu',$params);
-    $this->load->view('panel/facturacion/rvc',$params);
-    $this->load->view('panel/footer',$params);
-  }
-
-
-  public function rvc_pdf()
-  {
-    $this->load->model('facturacion_model');
-    $this->facturacion_model->rvc_pdf();
-  }
-
-  public function rvp()
-  {
-    $this->carabiner->js(array(
-      array('panel/facturacion/admin.js'),
-    ));
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
-    $params['seo']        = array('titulo' => 'Reporte Ventas Producto');
-
-    $query = $this->db->query("SELECT id_familia, nombre
-                               FROM productos_familias");
-
-    $params['familias'] = $query->result();
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/general/menu',$params);
-    $this->load->view('panel/facturacion/rvp',$params);
-    $this->load->view('panel/footer',$params);
-  }
-
-  public function rvp_pdf()
-  {
-    $this->load->model('facturacion_model');
-    $this->facturacion_model->rvp_pdf();
-  }
 
   /*
    |-------------------------------------------------------------------------
@@ -927,7 +302,7 @@ class estado_resultado_trans extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La Nota de remisión se modifico correctamente.';
+        $txt = 'El Estado de Resultados se guardo correctamente.';
         $icono = 'success';
         break;
       case 4:
