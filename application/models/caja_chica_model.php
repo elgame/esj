@@ -30,6 +30,8 @@ class caja_chica_model extends CI_Model {
       'deudores_abonos_dia'      => 0,
       'acreedor_prest_dia'       => 0,
       'acreedor_abonos_dia'      => 0,
+      'efectivo_tabulado'        => 0,
+      'efectivo_tabulado_ant'    => 0,
     );
 
     // Obtiene el saldo incial.
@@ -46,7 +48,7 @@ class caja_chica_model extends CI_Model {
 
     // Obtiene el saldo incial.
     $ultimoSaldo = $this->db->query(
-      "SELECT saldo
+      "SELECT saldo, fecha
        FROM cajachica_efectivo
        WHERE fecha < '{$fecha}' AND no_caja = {$noCaja}
        ORDER BY fecha DESC
@@ -55,84 +57,20 @@ class caja_chica_model extends CI_Model {
 
     if ($ultimoSaldo->num_rows() > 0)
     {
-      $info['saldo_inicial'] = $ultimoSaldo->result()[0]->saldo;
+      $ultimoSaldo = $ultimoSaldo->result()[0];
+      $info['saldo_inicial'] = $ultimoSaldo->saldo;
     }
 
     // Denominaciones
-    $denominaciones = $this->db->query(
-      "SELECT *
-       FROM cajachica_efectivo
-       WHERE fecha = '{$fecha}' AND no_caja = {$noCaja}"
-    );
-    if ($denominaciones->num_rows() === 0)
-    {
-      $denominaciones = new StdClass;
-      $denominaciones->den_05 = 0;
-      $denominaciones->den_1 = 0;
-      $denominaciones->den_2 = 0;
-      $denominaciones->den_5 = 0;
-      $denominaciones->den_10 = 0;
-      $denominaciones->den_20 = 0;
-      $denominaciones->den_50 = 0;
-      $denominaciones->den_100 = 0;
-      $denominaciones->den_200 = 0;
-      $denominaciones->den_500 = 0;
-      $denominaciones->den_1000 = 0;
-    }
-    else
-    {
-      $denominaciones = $denominaciones->result()[0];
-      $info['status'] = $denominaciones->status;
-      $info['id'] = $denominaciones->id_efectivo;
-    }
-    foreach ($denominaciones as $den => $cantidad)
-    {
-      if (strrpos($den, 'den_') !== false)
-      {
-        switch ($den)
-        {
-          case 'den_05':
-            $denominacion = '0.50';
-            break;
-          case 'den_1':
-            $denominacion = '1.00';
-            break;
-          case 'den_2':
-            $denominacion = '2.00';
-            break;
-          case 'den_5':
-            $denominacion = '5.00';
-            break;
-          case 'den_10':
-            $denominacion = '10.00';
-            break;
-          case 'den_20':
-            $denominacion = '20.00';
-            break;
-          case 'den_50':
-            $denominacion = '50.00';
-            break;
-          case 'den_100':
-            $denominacion = '100.00';
-            break;
-          case 'den_200':
-            $denominacion = '200.00';
-            break;
-          case 'den_500':
-            $denominacion = '500.00';
-            break;
-          case 'den_1000':
-            $denominacion = '1000.00';
-            break;
-        }
+    $denomina = $this->getDenominaciones($fecha, $noCaja);
+    isset($denomina['status'])? $info['status'] = $denomina['status'] : '';
+    isset($denomina['id'])? $info['id'] = $denomina['id'] : '';
+    $info['denominaciones'] = $denomina['denominaciones'];
+    $info['efectivo_tabulado'] = $denomina['efectivo_tabulado'];
 
-        $info['denominaciones'][] = array(
-          'denominacion' => $denominacion,
-          'cantidad'     => $cantidad,
-          'total'        => floatval($denominacion) * $cantidad,
-          'denom_abrev'  => $den,
-        );
-      }
+    if (isset($ultimoSaldo->fecha)) {
+      $denomina = $this->getDenominaciones($ultimoSaldo->fecha, $noCaja);
+      $info['efectivo_tabulado_ant'] = $denomina['efectivo_tabulado'];
     }
 
     // Ingresos
@@ -508,6 +446,93 @@ class caja_chica_model extends CI_Model {
     }
 
     return $info;
+  }
+
+  public function getDenominaciones($fecha, $noCaja)
+  {
+    $response = [];
+
+    // Denominaciones
+    $denominaciones = $this->db->query(
+      "SELECT *
+       FROM cajachica_efectivo
+       WHERE fecha = '{$fecha}' AND no_caja = {$noCaja}"
+    );
+    if ($denominaciones->num_rows() === 0)
+    {
+      $denominaciones = new StdClass;
+      $denominaciones->den_05 = 0;
+      $denominaciones->den_1 = 0;
+      $denominaciones->den_2 = 0;
+      $denominaciones->den_5 = 0;
+      $denominaciones->den_10 = 0;
+      $denominaciones->den_20 = 0;
+      $denominaciones->den_50 = 0;
+      $denominaciones->den_100 = 0;
+      $denominaciones->den_200 = 0;
+      $denominaciones->den_500 = 0;
+      $denominaciones->den_1000 = 0;
+    }
+    else
+    {
+      $denominaciones = $denominaciones->result()[0];
+      $response['status'] = $denominaciones->status;
+      $response['id'] = $denominaciones->id_efectivo;
+    }
+
+    $response['efectivo_tabulado'] = 0;
+    foreach ($denominaciones as $den => $cantidad)
+    {
+      if (strrpos($den, 'den_') !== false)
+      {
+        switch ($den)
+        {
+          case 'den_05':
+            $denominacion = '0.50';
+            break;
+          case 'den_1':
+            $denominacion = '1.00';
+            break;
+          case 'den_2':
+            $denominacion = '2.00';
+            break;
+          case 'den_5':
+            $denominacion = '5.00';
+            break;
+          case 'den_10':
+            $denominacion = '10.00';
+            break;
+          case 'den_20':
+            $denominacion = '20.00';
+            break;
+          case 'den_50':
+            $denominacion = '50.00';
+            break;
+          case 'den_100':
+            $denominacion = '100.00';
+            break;
+          case 'den_200':
+            $denominacion = '200.00';
+            break;
+          case 'den_500':
+            $denominacion = '500.00';
+            break;
+          case 'den_1000':
+            $denominacion = '1000.00';
+            break;
+        }
+
+        $response['denominaciones'][] = array(
+          'denominacion' => $denominacion,
+          'cantidad'     => $cantidad,
+          'total'        => floatval($denominacion) * $cantidad,
+          'denom_abrev'  => $den,
+        );
+        $response['efectivo_tabulado'] += floatval($denominacion) * $cantidad;
+      }
+    }
+
+    return $response;
   }
 
   public function getCajaIngresos($fecha, $noCaja, $sql = '')
@@ -3624,7 +3649,7 @@ class caja_chica_model extends CI_Model {
     if ( $pdf->GetY()-$y_aux < 0 ) {
       $pdf->page = $page_aux;
     }
-    $pdf->SetY($y_aux);
+    $pdf->SetY($y_aux-10);
 
     if ($noCajas == 1) {
       $pdf->SetFont('Arial', 'B', 6);
@@ -3669,6 +3694,21 @@ class caja_chica_model extends CI_Model {
         $pdf->SetX(153);
         $pdf->Row(array('PAGO LIMON CR', MyString::formatoNumero($totalBoletasPendientes, 2, '$', false)), false, false);
       }
+
+      if (!$this->saltaPag($pdf, 5)) {
+        $pdf->SetY($pdf->GetY()+5);
+      }
+      $pdf->SetX(153);
+      $pdf->Row(array('EFECTIVO ANT', MyString::formatoNumero($caja['efectivo_tabulado_ant'], 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('PAGO LIMON EF', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
+      $comppp = $caja['efectivo_tabulado_ant'] + $totalIngresos - $totalBoletasPagadas;
+      $pdf->SetX(153);
+      $pdf->Row(array('RESULTADO', MyString::formatoNumero($comppp, 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('DIF', MyString::formatoNumero($totalEfectivo - $comppp, 2, '$', false)), false, false);
 
       // $pdf->SetX(153);
       // $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
@@ -3743,6 +3783,23 @@ class caja_chica_model extends CI_Model {
 
 
     $pdf->Output('CAJA_CHICA.pdf', 'I');
+  }
+
+  private function saltaPag($pdf, $max = 0, $x = 6)
+  {
+    $salto = false;
+    if($pdf->GetY() >= $pdf->limiteY + $max){
+      if (count($pdf->pages) > $pdf->page) {
+        $pdf->page++;
+        $pdf->SetY(10);
+      } else {
+        $pdf->AddPage();
+      }
+      $pdf->SetX($x);
+      $salto = true;
+    }
+
+    return $salto;
   }
 
   public function xlsCaja($fecha, $noCajas){

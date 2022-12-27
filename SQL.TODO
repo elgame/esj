@@ -1,4 +1,5 @@
 
+ ✔ Cambio en caja de limón, poner nueva comprobación de efectivo @done (22-12-27 14:32)
  ☐ Apartado de viajes de camiones como el archivo Estim. Result. Eqpo Transp
    -- lap|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Estado Resultado Transporte',0,true,'estado_resultado_trans/','globe',false);
