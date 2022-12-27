@@ -2045,6 +2045,8 @@ class bodega_guadalajara_model extends CI_Model {
     $caja['diferenciaCorte'] = ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo;
 
     $estadoResult = [
+      'fecha'            => $fecha,
+      'noCajas'          => $noCajas,
       'ventas'           => $totalVentas,
       'exis.ant'         => $totalExisAnt,
       'compras'          => $totalIngresos,
@@ -2181,10 +2183,16 @@ class bodega_guadalajara_model extends CI_Model {
 
   public function printEstadoResultado(&$pdf, $totales, $x=80)
   {
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(50, 25));
+    $pdf->SetXY($x, $pdf->GetY()+10);
+    $now = date("Y-m-d");
+    $pdf->Row(array("Fecha: {$totales['fecha']}", "{$now}"), false, false);
+
     $pdf->SetFillColor(240, 240, 240);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(75));
-    $pdf->SetXY($x, $pdf->GetY()+10);
+    $pdf->SetXY($x, $pdf->GetY());
     $pdf->Row(array('ESTADO DE RESULTADO'), true, 'B');
 
     $pdf->SetAligns(array('R', 'R'));
