@@ -7,6 +7,7 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',572,false,'estado_resultado_trans/cancelar/','remove',false);
     -- lap
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',572,false,'estado_resultado_trans/modificar/','remove',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',572,false,'estado_resultado_trans/imprimir/','print',false);
     CREATE TABLE otros.estado_resultado_trans
       (
           id bigserial NOT NULL,

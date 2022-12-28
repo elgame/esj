@@ -101,12 +101,12 @@
   };
   var btnDelRemision = function () {
     $('#table-remisiones').on('click', '.btn-del-remision', function(event) {
-      let $tr = $(this).parents('tr')
-      if($tr.find('.repmant-id').val() !== '') {
-        $tr.find('#remision_del').val('true')
-      } else {
+      let $tr = $(this).parents('tr');
+      // if($tr.find('.remision-id').val() !== '') {
+        // $tr.find('#remision_del').val('true')
+      // } else {
         $tr.remove();
-      }
+      // }
       calculaTotalRemisiones();
     });
   };
@@ -298,11 +298,11 @@
   var btnDelRepMant = function () {
     $('#table-repmant').on('click', '.btn-del-repmant', function(event) {
       let $tr = $(this).parents('tr')
-      if($tr.find('.repmant-id').val() !== '') {
-        $tr.find('#repmant_del').val('true')
-      } else {
+      // if($tr.find('.repmant-id').val() !== '') {
+        // $tr.find('#repmant_del').val('true')
+      // } else {
         $tr.remove();
-      }
+      // }
       calculaTotalRepMant();
     });
   };
@@ -470,8 +470,19 @@
     });
 
     $('#modal-gastoscaja').on('change', '.chk-remision', function(){
-      alert('#modal-gastoscaja .chk-remision:not([data-id]='+$(this).attr('data-id')+')');
-      $('#modal-gastoscaja .chk-remision:not([data-id]='+$(this).attr('data-id')+')').removeAttr('checked');
+      console.log($(this).attr('data-id'));
+      $('#modal-gastoscaja .chk-remision:not([data-id='+$(this).attr('data-id')+'])').prop('checked', false);
+    });
+
+    $('#carga-gastoscaja').click(function(event) {
+      const sel = $('#modal-gastoscaja .chk-remision:checked');
+      if(sel.length > 0) {
+        $('#did_gasto').val(sel.attr('data-id'));
+        $('#gasto_monto').val(sel.attr('data-total'));
+        $('#modal-gastoscaja').modal('hide');
+      } else {
+        noty({"text": 'Seleccione un gasto.', "layout":"topRight", "type": 'error'});
+      }
     });
   };
 

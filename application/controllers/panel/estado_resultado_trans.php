@@ -148,10 +148,10 @@ class estado_resultado_trans extends MY_Controller {
   {
     if (isset($_GET['id']{0}))
     {
-      $this->load->model('ventas_model');
-      $this->ventas_model->cancelaNotaRemison($_GET['id']);
+      $this->load->model('estado_resultado_trans_model');
+      $this->estado_resultado_trans_model->cancelar($_GET['id']);
 
-      redirect(base_url('panel/ventas/?'.MyString::getVarsLink(array('msg','id')).'&msg=5'));
+      redirect(base_url('panel/estado_resultado_trans/?'.MyString::getVarsLink(array('msg','id')).'&msg=5'));
     }
   }
 
@@ -266,16 +266,16 @@ class estado_resultado_trans extends MY_Controller {
   {
     if(isset($_GET['id']{0}))
     {
-      $this->load->model('ventas_model');
-      if($this->input->get('p') == 'true')
-        $this->ventas_model->generaNotaRemisionPdf($_GET['id']);
-      else {
-        $params['url'] = 'panel/ventas/imprimir/?id='.$_GET['id'].'&p=true';
-        $this->load->view('panel/facturacion/print_view', $params);
-      }
+      $this->load->model('estado_resultado_trans_model');
+      $this->estado_resultado_trans_model->print($_GET['id']);
+      // if($this->input->get('p') == 'true')
+      // else {
+      //   $params['url'] = 'panel/estado_resultado_trans/imprimir/?id='.$_GET['id'].'&p=true';
+      //   $this->load->view('panel/facturacion/print_view', $params);
+      // }
     }
     else
-      redirect(base_url('panel/ventas/?msg=1'));
+      redirect(base_url('panel/estado_resultado_trans/?msg=1'));
   }
 
 
