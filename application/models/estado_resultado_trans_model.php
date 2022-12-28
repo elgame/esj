@@ -534,7 +534,7 @@ class estado_resultado_trans_model extends privilegios_model{
       $res = $this->db
         ->select('v.id_compra, Date(f.fecha) AS fecha, (f.serie || f.folio) AS folio,
           p.id_proveedor, p.id_proveedor, p.nombre_fiscal AS proveedor, f.subtotal,
-          f.total, f.concepto, v.comprobacion')
+          f.total, f.importe_iva, f.concepto, v.comprobacion')
         ->from('otros.estado_resultado_trans_rep_mtto v')
         ->join('compras f', 'v.id_compra = f.id_compra', 'inner')
         ->join('proveedores p', 'p.id_proveedor = f.id_proveedor', 'inner')
@@ -683,6 +683,7 @@ class estado_resultado_trans_model extends privilegios_model{
     }
 
     $ttotalGastos = 0;
+    $ttotalSueldos = 0;
     $pdf->SetXY(6, $pdf->GetY()+5);
     if (count($caja['sueldos']) > 0) {
       $pdf->SetFont('Arial','B', 6);
@@ -712,10 +713,12 @@ class estado_resultado_trans_model extends privilegios_model{
         ), false, 'B');
 
         $ttotalGastos += floatval($sueldo->importe);
+        $ttotalSueldos += floatval($sueldo->importe);
       }
     }
 
     $pdf->SetXY(6, $pdf->GetY()+5);
+    $ttotalRepMant = 0;
     if (count($caja['repmant']) > 0) {
       $pdf->SetFont('Arial','B', 6);
       $pdf->SetAligns(array('L', 'C'));
@@ -746,6 +749,7 @@ class estado_resultado_trans_model extends privilegios_model{
         ), false, 'B');
 
         $ttotalGastos += floatval($rem->subtotal);
+        $ttotalRepMant += floatval($rem->total);
       }
     }
 
@@ -797,6 +801,8 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetWidths(array(25, 25));
     $pdf->SetFont('Arial', 'B', 6);
     $pdf->SetXY(163, $pdf->GetY()+5);
+    $yaux = $pdf->GetY();
+    $pagaux = $pdf->page;
     $pdf->Row(array(' Utilidad Estimada', MyString::formatoNumero($ttotalRemisiones - $ttotalGastos, 2, '$', false)), false, 'B');
 
     $pdf->SetAligns(array('C', 'C', 'C'));
@@ -820,6 +826,32 @@ class estado_resultado_trans_model extends privilegios_model{
       $caja['info']->rend_precio,
       ($caja['info']->rend_lts * $caja['info']->rend_precio),
     ), false, true);
+
+    $pdf->page = $pagaux;
+    $pdf->SetY($yaux);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(60));
+    $pdf->SetFont('Arial', 'B', 6);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('COMPROBACION DE GASTOS CAJA 2'), false, true);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(35, 25));
+    $pdf->SetFont('Arial', '', 6);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('Cuenta', 'Importe'), false, true);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('ANTICIPO', MyString::formatoNumero($caja['info']->gasto_monto, 2, '$', false)), false, true);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('INGRESO', MyString::formatoNumero($ttotalRemisiones, 2, '$', false)), false, true);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('EGRESOS (-)', MyString::formatoNumero($ttotalSueldos, 2, '$', false)), false, true);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('REP. GTOS (-)', MyString::formatoNumero($ttotalRepMant, 2, '$', false)), false, true);
+    $pdf->SetFont('Arial', 'B', 6);
+    $pdf->SetXY(6, $pdf->GetY());
+    $ttotalefectivo = $caja['info']->gasto_monto + $ttotalRemisiones - $ttotalSueldos - $ttotalRepMant;
+    $pdf->Row(array('DEV. EFECTIVO', MyString::formatoNumero($ttotalefectivo, 2, '$', false)), false, true);
 
     $pdf->Output('estado_resultado.pdf', 'I');
   }

@@ -10,6 +10,7 @@ class existencias_limon extends MY_Controller {
     'existencias_limon/guardar/',
     'existencias_limon/ajax_get_categorias/',
     'existencias_limon/cerrar_caja/',
+    'existencias_limon/print_caja_rpt/',
     'existencias_limon/print_caja/',
     'existencias_limon/print_caja2/',
     'existencias_limon/rpt_gastos_pdf/',
@@ -173,6 +174,15 @@ class existencias_limon extends MY_Controller {
     redirect(base_url('panel/caja_chica_prest/cargar/?'.MyString::getVarsLink(array('id', 'msg')).'&msg=7'));
   }
 
+  public function print_caja_rpt()
+  {
+    if ($this->input->get('tipo') == 'print_caja') {
+      $this->print_caja();
+    } else {
+      $this->print_caja2();
+    }
+  }
+
   public function print_caja()
   {
     $this->load->model('existencias_limon_model');
@@ -183,6 +193,29 @@ class existencias_limon extends MY_Controller {
   {
     $this->load->model('existencias_limon_model');
     $this->existencias_limon_model->printCaja2($_GET['ffecha'], $_GET['fno_caja'], $_GET['farea']);
+  }
+
+  public function print_cortes()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/caja_chica/rpt_gastos.js'),
+    ));
+
+    // $this->load->library('pagination');
+    $this->load->model('areas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo'] = array('titulo' => 'Imprimir Reportes de Existencia');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/existencia_limon/print_cortes',$params);
+    $this->load->view('panel/footer',$params);
   }
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')
