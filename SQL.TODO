@@ -1,4 +1,14 @@
 
+ ✔ Ordenes de requisicion y ordenesd de compra cambiar el folio hoja a texto y mostrarlo en la orden de compra @done (22-12-28 17:30)
+    -- lap
+    ALTER TABLE public.compras_requisicion ADD COLUMN folio_hoja2 character varying(200);
+    UPDATE public.compras_requisicion SET folio_hoja2 = folio_hoja::text;
+    ALTER TABLE public.compras_requisicion DROP COLUMN folio_hoja;
+    ALTER TABLE public.compras_requisicion RENAME folio_hoja2 TO folio_hoja;
+    ALTER TABLE public.compras_ordenes ADD COLUMN folio_hoja2 character varying(200);
+    UPDATE public.compras_ordenes SET folio_hoja2 = folio_hoja::text;
+    ALTER TABLE public.compras_ordenes DROP COLUMN folio_hoja;
+    ALTER TABLE public.compras_ordenes RENAME folio_hoja2 TO folio_hoja;
  ✔ Cambio en caja de limón, poner nueva comprobación de efectivo @done (22-12-27 14:32)
  ✔ Reporte de existencia de limon poner opcion de impresion @done (22-12-28 10:20)
    -- lap

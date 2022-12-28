@@ -2543,9 +2543,9 @@ class compras_ordenes_model extends CI_Model {
         }
 
         if (!empty($orden['info'][0]->folio_hoja)) {
-          $pdf->SetWidths(array(120));
-          $pdf->SetXY(90, $pdf->GetY());
-          $pdf->Row(array("Folio Orden: {$orden['info'][0]->folio_hoja}"), false, true);
+          $pdf->SetWidths(array(110));
+          $pdf->SetXY(100, $pdf->GetY());
+          $pdf->Row(array("Folios Hojas: {$orden['info'][0]->folio_hoja}"), false, true);
         }
 
 
