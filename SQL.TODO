@@ -1,6 +1,6 @@
 
  ✔ Ordenes de requisicion y ordenesd de compra cambiar el folio hoja a texto y mostrarlo en la orden de compra @done (22-12-28 17:30)
-    -- lap
+    -- lap|pcc
     ALTER TABLE public.compras_requisicion ADD COLUMN folio_hoja2 character varying(200);
     UPDATE public.compras_requisicion SET folio_hoja2 = folio_hoja::text;
     ALTER TABLE public.compras_requisicion DROP COLUMN folio_hoja;
@@ -11,14 +11,13 @@
     ALTER TABLE public.compras_ordenes RENAME folio_hoja2 TO folio_hoja;
  ✔ Cambio en caja de limón, poner nueva comprobación de efectivo @done (22-12-27 14:32)
  ✔ Reporte de existencia de limon poner opcion de impresion @done (22-12-28 10:20)
-   -- lap
+   -- lap|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir Reportes',505,true,'existencias_limon/print_cortes/','print',true);
  ☐ Apartado de viajes de camiones como el archivo Estim. Result. Eqpo Transp
    -- lap|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Estado Resultado Transporte',0,true,'estado_resultado_trans/','globe',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',572,true,'estado_resultado_trans/agregar/','plus',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',572,false,'estado_resultado_trans/cancelar/','remove',false);
-    -- lap
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',572,false,'estado_resultado_trans/modificar/','remove',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',572,false,'estado_resultado_trans/imprimir/','print',false);
     CREATE TABLE otros.estado_resultado_trans

@@ -2545,7 +2545,22 @@ class compras_ordenes_model extends CI_Model {
         if (!empty($orden['info'][0]->folio_hoja)) {
           $pdf->SetWidths(array(110));
           $pdf->SetXY(100, $pdf->GetY());
-          $pdf->Row(array("Folios Hojas: {$orden['info'][0]->folio_hoja}"), false, true);
+
+          $folio_hoja = $orden['info'][0]->folio_hoja;
+          $parsefh = explode(',', $orden['info'][0]->folio_hoja);
+          if (count($parsefh) > 0) {
+            foreach ($parsefh as $keyfh => $fh) {
+              $parsefh[$keyfh] = str_replace(
+                ['RC', 'RS'],
+                ['REQ. COMPRA ', 'REQ. SERVICIO '],
+                mb_strtoupper($parsefh[$keyfh], 'UTF-8')
+              );
+            }
+            $folio_hoja = implode("\n", $parsefh);
+          }
+
+          $pdf->SetFont('Arial', 'B', 11);
+          $pdf->Row(array("{$folio_hoja}"), false, true);
         }
 
 
