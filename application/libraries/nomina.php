@@ -939,6 +939,10 @@ class nomina
     }
     $totalImss = round($cuotaAdicionalImss + $retencionImss, 2);
 
+    if($this->empleado->nomina_guardada != 'f') {
+      $totalImss = $this->empleado->imss;
+    }
+
     return array(
       'TipoDeduccion' => '001',
       'Clave'          => $this->clavesPatron['imss'],
@@ -969,6 +973,10 @@ class nomina
       $baseRcv = $this->empleado->nomina->salario_diario_integrado;
     }
     $rcv = round(0.01125 * (floatval($baseRcv) * floatval($this->empleado->dias_trabajados)), 2);
+
+    if($this->empleado->nomina_guardada != 'f') {
+      $totalImss = $this->empleado->vejez;
+    }
 
     return array(
       'TipoDeduccion' => '003',
