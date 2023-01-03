@@ -1,4 +1,45 @@
 
+ ☐ Actualizacion de tablas
+   -- lap|san
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=0.01, lim_superior=746.04, cuota_fija=0, porcentaje=1.92 WHERE id_art_113=34;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=746.05, lim_superior=6332.05, cuota_fija=14.32, porcentaje=6.4 WHERE id_art_113=35;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=6332.06, lim_superior=11128.01, cuota_fija=371.83, porcentaje=10.88 WHERE id_art_113=36;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=11128.02, lim_superior=12935.82, cuota_fija=893.63, porcentaje=16 WHERE id_art_113=37;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=12935.83, lim_superior=15487.71, cuota_fija=1182.88, porcentaje=17.92 WHERE id_art_113=38;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=15487.72, lim_superior=31236.49, cuota_fija=1640.18, porcentaje=21.36 WHERE id_art_113=39;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=31236.5, lim_superior=49233, cuota_fija=5004.12, porcentaje=23.52 WHERE id_art_113=40;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=49233.01, lim_superior=93993.9, cuota_fija=9236.89, porcentaje=30 WHERE id_art_113=41;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=93993.91, lim_superior=125325.2, cuota_fija=22665.17, porcentaje=32 WHERE id_art_113=42;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=125325.21, lim_superior=375975.61, cuota_fija=32691.18, porcentaje=34 WHERE id_art_113=43;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=375975.62, lim_superior=9999999, cuota_fija=117912.32, porcentaje=35 WHERE id_art_113=44;
+
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=0.01, lim_superior=171.78, cuota_fija=0, porcentaje=1.92 WHERE id_art_113=78;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=171.79, lim_superior=1458.03, cuota_fija=3.29, porcentaje=6.4 WHERE id_art_113=79;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=1458.04, lim_superior=2562.35, cuota_fija=85.61, porcentaje=10.88 WHERE id_art_113=80;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=2562.36, lim_superior=2978.64, cuota_fija=205.8, porcentaje=16 WHERE id_art_113=81;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=2978.65, lim_superior=3566.22, cuota_fija=272.37, porcentaje=17.92 WHERE id_art_113=82;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=3566.23, lim_superior=7192.64, cuota_fija=377.65, porcentaje=21.36 WHERE id_art_113=83;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=7192.65, lim_superior=11336.57, cuota_fija=1152.27, porcentaje=23.52 WHERE id_art_113=84;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=11336.58, lim_superior=21643.3, cuota_fija=2126.95, porcentaje=30 WHERE id_art_113=85;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=21643.31, lim_superior=28857.78, cuota_fija=5218.92, porcentaje=32 WHERE id_art_113=86;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=28857.79, lim_superior=86573.34, cuota_fija=7527.59, porcentaje=34 WHERE id_art_113=87;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=86573.35, lim_superior=9999999, cuota_fija=27150.83, porcentaje=35 WHERE id_art_113=88;
+
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=0.01, lim_superior=24.54, cuota_fija=0, porcentaje=1.92 WHERE id_art_113=78;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=24.54, lim_superior=208.29, cuota_fija=0.47, porcentaje=6.4 WHERE id_art_113=79;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=208.3, lim_superior=366.05, cuota_fija=12.23, porcentaje=10.88 WHERE id_art_113=80;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=366.06, lim_superior=425.52, cuota_fija=29.4, porcentaje=16 WHERE id_art_113=81;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=425.53, lim_superior=509.46, cuota_fija=38.91, porcentaje=17.92 WHERE id_art_113=82;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=509.47, lim_superior=1027.52, cuota_fija=53.95, porcentaje=21.36 WHERE id_art_113=83;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=1027.53, lim_superior=1619.51, cuota_fija=164.61, porcentaje=23.52 WHERE id_art_113=84;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=1619.52, lim_superior=3091.9, cuota_fija=303.85, porcentaje=30 WHERE id_art_113=85;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=3091.91, lim_superior=4122.54, cuota_fija=745.56, porcentaje=32 WHERE id_art_113=86;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=4122.55, lim_superior=12367.62, cuota_fija=1075.37, porcentaje=34 WHERE id_art_113=87;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=12367.63, lim_superior=9999999, cuota_fija=3878.69, porcentaje=35 WHERE id_art_113=88;
+    ALTER TABLE public.nomina_configuracion_vacaciones ADD COLUMN anio integer NOT NULL DEFAULT 2022;
+    ALTER TABLE public.nomina_configuracion_vacaciones DROP CONSTRAINT nomina_configuracion_vacaciones_pkey;
+    ALTER TABLE public.nomina_configuracion_vacaciones ADD CONSTRAINT nomina_configuracion_vacaciones_pkey PRIMARY KEY (anio1, anio2, anio);
+
  ✔ Ordenes de requisicion y ordenesd de compra cambiar el folio hoja a texto y mostrarlo en la orden de compra @done (22-12-28 17:30)
     -- lap|pcc|san
     ALTER TABLE public.compras_requisicion ADD COLUMN folio_hoja2 character varying(200);

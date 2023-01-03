@@ -954,6 +954,11 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       $sql .= " AND u.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
+    $anioVaca = 2022;
+    if(date("Y") >= 2023) {
+      $anioVaca = date("Y");
+    }
+
     $facturas = $this->db->query(
     "SELECT
         id, COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre as nombre,
@@ -962,7 +967,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
         u.nacionalidad, u.estado_civil, u.cuenta_cpi, u.salario_diario, u.infonavit, u.salario_diario_real, u.fecha_imss, u.telefono,
         u.id_departamente, ud.nombre AS departamento, Date(u.fecha_nacimiento) AS fecha_nacimiento,
         (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) AS antiguedad, up.nombre AS puesto,
-        (SELECT dias FROM nomina_configuracion_vacaciones WHERE (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) >= anio1 AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) <= anio2 ) AS dias_vacaciones
+        (SELECT dias FROM nomina_configuracion_vacaciones WHERE anio = {$anioVaca} AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) >= anio1 AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) <= anio2 ) AS dias_vacaciones
       FROM usuarios AS u
         INNER JOIN usuarios_departamento ud ON u.id_departamente = ud.id_departamento
         LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto

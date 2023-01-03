@@ -2031,9 +2031,13 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function getConfigNominaVacaciones()
   {
+    $anio = 2022;
+    if(date("Y") >= 2023) {
+      $anio = date("Y");
+    }
     $config = $this->db->query(
       "SELECT *
-       FROM nomina_configuracion_vacaciones")->result();
+       FROM nomina_configuracion_vacaciones WHERE anio = {$anio}")->result();
     return $config;
   }
 
