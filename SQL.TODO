@@ -1,5 +1,5 @@
 
- ☐ Actualizacion de tablas
+ ✔ Actualizacion de tablas @done (23-01-03 19:04)
    -- lap|san
     UPDATE public.nomina_mensual_art_113 SET lim_inferior=0.01, lim_superior=746.04, cuota_fija=0, porcentaje=1.92 WHERE id_art_113=34;
     UPDATE public.nomina_mensual_art_113 SET lim_inferior=746.05, lim_superior=6332.05, cuota_fija=14.32, porcentaje=6.4 WHERE id_art_113=35;
