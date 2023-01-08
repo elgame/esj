@@ -492,7 +492,7 @@ class estado_resultado_trans_model extends privilegios_model{
       $response['info']->empresa = $empresa['info'];
 
 			$this->load->model('choferes_model');
-			$prov = $this->choferes_model->getChoferInfo($response['info']->id_chofer);
+			$prov = $this->choferes_model->getChoferInfo($response['info']->id_chofer, false, true);
 			$response['info']->chofer = $prov['info'];
 
       $this->load->model('productos_model');
