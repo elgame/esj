@@ -25,15 +25,15 @@ class configuraciones_model extends CI_Model {
 			);
 		$this->db->update('nomina_configuracion', $data, array('id_configuracion' => '1'));
 
-    $anioVaca = 2022;
-    if(date("Y") >= 2023) {
-      $anioVaca = date("Y");
-    }
+    $anioVaca = $this->input->post('dzona_anio');
+    // if(date("Y") >= 2023) {
+    //   $anioVaca = date("Y");
+    // }
 
-    $this->db->delete('nomina_configuracion_vacaciones', ['anio1' => $anio1, 'anio2' => $anio2, 'anio' => $anioVaca]);
+    $this->db->delete('nomina_configuracion_vacaciones', ['anio' => $anioVaca]);
 		foreach ($this->input->post('anio1') as $key => $anio1)
 		{
-			$data = array('dias' => $_POST['dias'][$key], 'anio1' => $anio1, 'anio2' => $anio2, 'anio' => $anioVaca);
+			$data = array('dias' => $_POST['dias'][$key], 'anio1' => $anio1, 'anio2' => $_POST['anio2'][$key], 'anio' => $anioVaca);
 			// $this->db->update('nomina_configuracion_vacaciones', $data, array('anio1' => $anio1, 'anio2' => $anio2));
       $this->db->insert('nomina_configuracion_vacaciones', $data);
 		}
@@ -176,7 +176,7 @@ class configuraciones_model extends CI_Model {
 
 		$sql_res = $this->db->select("anio1, anio2, dias" )
 							->from("nomina_configuracion_vacaciones")
-              ->where('anio', $anioVaca)
+              ->where('anio', $anio)
 							->get();
 		if ($sql_res->num_rows() > 0)
 			$data['conf_vacaciones']	= $sql_res->result();

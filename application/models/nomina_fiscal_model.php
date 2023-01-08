@@ -12392,7 +12392,6 @@ class nomina_fiscal_model extends CI_Model {
         ];
 
         $regPatronal = isset($datos['fregistro_patronal']) ? $datos['fregistro_patronal'] : '';
-
         $empleadoNomina = $this->nomina(
           $configuraciones,
           array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
