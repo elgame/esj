@@ -2491,8 +2491,8 @@ class existencias_limon_model extends CI_Model {
       $pdf->Row(array(
         $existencia->calibre,
         $existencia->unidad,
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
         MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
         MyString::formatoNumero($existencia->costo, 2, '', false),
         MyString::formatoNumero($existencia->importe, 2, '', false),
       ), false, 'B');
@@ -2503,8 +2503,8 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array(
       '',
       '',
-      MyString::formatoNumero($existenciaRePro_cantidad, 2, '', false),
       MyString::formatoNumero($existenciaRePro_kilos, 2, '', false),
+      MyString::formatoNumero($existenciaRePro_cantidad, 2, '', false),
       MyString::formatoNumero(($existenciaRePro_importe/($existenciaRePro_cantidad==0? 1: $existenciaRePro_cantidad)), 2, '', false),
       MyString::formatoNumero($existenciaRePro_importe, 2, '', false),
     ), false, 'B');

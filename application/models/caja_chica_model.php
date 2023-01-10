@@ -3703,8 +3703,12 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(153);
       $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
       $pdf->SetX(153);
+      $pdf->Row(array('TOTAL ING DEUDOR', MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false)), false, false);
+      $pdf->SetX(153);
       $pdf->Row(array('PAGO LIMON EF', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
-      $comppp = $caja['efectivo_tabulado_ant'] + $totalIngresos - $totalBoletasPagadas;
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL EGR ACREED', MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false)), false, false);
+      $comppp = $caja['efectivo_tabulado_ant'] + $totalIngresos + $caja['acreedor_abonos_dia'] - $totalBoletasPagadas - $caja['deudores_abonos_dia'];
       $pdf->SetX(153);
       $pdf->Row(array('RESULTADO', MyString::formatoNumero($comppp, 2, '$', false)), false, false);
       $pdf->SetX(153);

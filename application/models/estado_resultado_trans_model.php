@@ -305,7 +305,7 @@ class estado_resultado_trans_model extends privilegios_model{
       'id_empresa'  => $this->input->post('did_empresa'),
       'id_creo'     => $this->session->userdata('id_usuario'),
       'fecha'       => $this->input->post('dfecha'),
-      'folio'       => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
+      // 'folio'       => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
       'km_rec'      => floatval($this->input->post('dkm_rec')),
       'vel_max'     => floatval($this->input->post('dvel_max')),
       'rep_lt_hist' => floatval($this->input->post('drep_lt_hist')),
@@ -633,6 +633,7 @@ class estado_resultado_trans_model extends privilegios_model{
 
 
     $ttotalRemisiones = 0;
+    $ttotalRemisionesEf = 0;
     $pdf->SetXY(6, $pdf->GetY()+10);
     if (count($caja['remisiones']) > 0) {
       $pdf->SetFont('Arial','B', 6);
@@ -640,22 +641,25 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->SetWidths(array(206));
       $pdf->Row(array('VENTAS'), false, false);
 
+      $comprobacion = ['t' => 'Si', 'f' => 'No'];
+
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(15, 18, 45, 45, 15, 15, 15, 18));
-      $pdf->Row(array('FECHA', 'FOLIO', 'CLIENTE', 'CONCEPTO', 'UNIDAD', 'CANTIDAD', 'PRECIO', 'IMPORTE'), true, true);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(5, 15, 18, 43, 42, 15, 15, 15, 18));
+      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'CLIENTE', 'CONCEPTO', 'UNIDAD', 'CANTIDAD', 'PRECIO', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(15, 18, 45, 45, 15, 15, 15, 18));
+      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(5, 15, 18, 43, 42, 15, 15, 15, 18));
       $auxrem = 0;
       foreach ($caja['remisiones'] as $key => $rem)
       {
         $pdf->SetX(6);
 
         $pdf->Row(array(
+          ($auxrem != $rem->id_remision? $comprobacion[$rem->comprobacion]: ''),
           ($auxrem != $rem->id_remision? $rem->fecha: ''),
           ($auxrem != $rem->id_remision? $rem->folio: ''),
           ($auxrem != $rem->id_remision? $rem->cliente: ''),
@@ -668,6 +672,9 @@ class estado_resultado_trans_model extends privilegios_model{
 
         $auxrem = $rem->id_remision;
         $ttotalRemisiones += floatval($rem->importe);
+        if ($rem->comprobacion == 't') {
+          $ttotalRemisionesEf += floatval($rem->importe);
+        }
       }
     }
     if ($ttotalRemisiones > 0) {
@@ -693,19 +700,20 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(15, 77, 77, 18));
-      $pdf->Row(array('FECHA', 'PROVEEDOR', 'DESCRIPCION', 'IMPORTE'), true, true);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(5, 15, 75, 74, 18));
+      $pdf->Row(array('C', 'FECHA', 'PROVEEDOR', 'DESCRIPCION', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('C', 'L', 'L', 'R'));
-      $pdf->SetWidths(array(15, 77, 77, 18));
+      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(5, 15, 75, 74, 18));
       foreach ($caja['sueldos'] as $key => $sueldo)
       {
         $pdf->SetX(6);
 
         $pdf->Row(array(
+          'Si',
           $sueldo->fecha,
           $sueldo->proveedor,
           $sueldo->descripcion,
@@ -718,7 +726,7 @@ class estado_resultado_trans_model extends privilegios_model{
     }
 
     $pdf->SetXY(6, $pdf->GetY()+5);
-    $ttotalRepMant = 0;
+    $ttotalRepMantEf = $ttotalRepMant = 0;
     if (count($caja['repmant']) > 0) {
       $pdf->SetFont('Arial','B', 6);
       $pdf->SetAligns(array('L', 'C'));
@@ -727,20 +735,21 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(15, 18, 68, 68, 18));
-      $pdf->Row(array('FECHA', 'FOLIO', 'PROVEEDOR', 'CONCEPTO', 'IMPORTE'), true, true);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(5, 15, 18, 66, 65, 18));
+      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'PROVEEDOR', 'CONCEPTO', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('C', 'L', 'L', 'L', 'R'));
-      $pdf->SetWidths(array(15, 18, 68, 68, 18));
+      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(5, 15, 18, 66, 65, 18));
       $auxrem = 0;
       foreach ($caja['repmant'] as $key => $rem)
       {
         $pdf->SetX(6);
 
         $pdf->Row(array(
+          $comprobacion[$rem->comprobacion],
           $rem->fecha,
           $rem->folio,
           $rem->proveedor,
@@ -750,9 +759,13 @@ class estado_resultado_trans_model extends privilegios_model{
 
         $ttotalGastos += floatval($rem->subtotal);
         $ttotalRepMant += floatval($rem->total);
+        if ($rem->comprobacion == 't') {
+          $ttotalRepMantEf += floatval($rem->total);
+        }
       }
     }
 
+    $ttotalGastosEf = 0;
     $pdf->SetXY(6, $pdf->GetY()+5);
     if (count($caja['gastos']) > 0) {
       $pdf->SetFont('Arial','B', 6);
@@ -762,19 +775,20 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(15, 77, 77, 18));
-      $pdf->Row(array('FECHA', 'PROVEEDOR', 'DESCRIPCION', 'IMPORTE'), true, true);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(5, 15, 75, 74, 18));
+      $pdf->Row(array('C', 'FECHA', 'PROVEEDOR', 'DESCRIPCION', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('C', 'L', 'L', 'R'));
-      $pdf->SetWidths(array(15, 77, 77, 18));
+      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(5, 15, 75, 74, 18));
       foreach ($caja['gastos'] as $key => $gasto)
       {
         $pdf->SetX(6);
 
         $pdf->Row(array(
+          $comprobacion[$gasto->comprobacion],
           $gasto->fecha,
           $gasto->proveedor,
           $gasto->codg,
@@ -782,6 +796,9 @@ class estado_resultado_trans_model extends privilegios_model{
         ), false, 'B');
 
         $ttotalGastos += floatval($gasto->importe);
+        if ($gasto->comprobacion == 't') {
+          $ttotalGastosEf += floatval($gasto->importe);
+        }
       }
     }
 
@@ -843,14 +860,14 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('ANTICIPO', MyString::formatoNumero($caja['info']->gasto_monto, 2, '$', false)), false, true);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('INGRESO', MyString::formatoNumero($ttotalRemisiones, 2, '$', false)), false, true);
+    $pdf->Row(array('INGRESO', MyString::formatoNumero($ttotalRemisionesEf, 2, '$', false)), false, true);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('EGRESOS (-)', MyString::formatoNumero($ttotalSueldos, 2, '$', false)), false, true);
+    $pdf->Row(array('EGRESOS (-)', MyString::formatoNumero(($ttotalSueldos + $ttotalGastosEf), 2, '$', false)), false, true);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('REP. GTOS (-)', MyString::formatoNumero($ttotalRepMant, 2, '$', false)), false, true);
+    $pdf->Row(array('REP. GTOS (-)', MyString::formatoNumero($ttotalRepMantEf, 2, '$', false)), false, true);
     $pdf->SetFont('Arial', 'B', 6);
     $pdf->SetXY(6, $pdf->GetY());
-    $ttotalefectivo = $caja['info']->gasto_monto + $ttotalRemisiones - $ttotalSueldos - $ttotalRepMant;
+    $ttotalefectivo = $caja['info']->gasto_monto + $ttotalRemisionesEf - $ttotalSueldos - $ttotalGastosEf - $ttotalRepMantEf;
     $pdf->Row(array('DEV. EFECTIVO', MyString::formatoNumero($ttotalefectivo, 2, '$', false)), false, true);
 
     $pdf->Output('estado_resultado.pdf', 'I');
