@@ -263,6 +263,11 @@ class estado_resultado_trans_model extends privilegios_model{
           'id_estado'    => $id_venta,
           'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
           'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
+          'fecha'        => $_POST['repmant_fecha'][$key] !== '' ? $_POST['repmant_fecha'][$key] : null,
+          'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
+          'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
+          'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
+          'subtotal'     => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
         );
       }
       if(count($repmant) > 0)
@@ -374,6 +379,11 @@ class estado_resultado_trans_model extends privilegios_model{
           'id_estado'    => $id_estado,
           'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
           'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
+          'fecha'        => $_POST['repmant_fecha'][$key] !== '' ? $_POST['repmant_fecha'][$key] : null,
+          'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
+          'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
+          'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
+          'subtotal'     => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
         );
       }
 
@@ -531,15 +541,17 @@ class estado_resultado_trans_model extends privilegios_model{
         ->get();
       $response['sueldos'] = $res->result();
 
-      $res = $this->db
-        ->select('v.id_compra, Date(f.fecha) AS fecha, (f.serie || f.folio) AS folio,
-          p.id_proveedor, p.id_proveedor, p.nombre_fiscal AS proveedor, f.subtotal,
-          f.total, f.importe_iva, f.concepto, v.comprobacion')
-        ->from('otros.estado_resultado_trans_rep_mtto v')
-        ->join('compras f', 'v.id_compra = f.id_compra', 'inner')
-        ->join('proveedores p', 'p.id_proveedor = f.id_proveedor', 'inner')
-        ->where('v.id_estado = ' . $id)->order_by('v.id_compra', 'asc')
-        ->get();
+      $res = $this->db->query("SELECT v.id_compra AS id_compra, Coalesce(Date(f.fecha), v.fecha ) AS fecha,
+          Coalesce((f.serie || f.folio), v.folio ) AS folio, p.id_proveedor,
+          Coalesce(p.nombre_fiscal, v.proveedor ) AS proveedor,
+          Coalesce(f.subtotal, v.subtotal ) AS subtotal, Coalesce(f.total, v.subtotal ) AS total,
+          Coalesce(f.importe_iva, 0::double precision ) AS importe_iva,
+          Coalesce(f.concepto, v.concepto ) AS concepto, v.comprobacion
+        FROM otros.estado_resultado_trans_rep_mtto v
+          LEFT JOIN compras f ON v.id_compra = f.id_compra
+          LEFT JOIN proveedores p ON p.id_proveedor = f.id_proveedor
+        WHERE v.id_estado = {$id}
+        ORDER BY v.id_compra asc");
       $response['repmant'] = $res->result();
 
       $res = $this->db

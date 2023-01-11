@@ -183,7 +183,7 @@
                             <input type="hidden" name="remision_comprobacion[]" value="<?php echo $_POST['remision_comprobacion'][$key] ?>" class="valcomprobacion">
                           </td>
                           <td style="width: 30px;">
-                            <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                            <button type="button" class="btn btn-danger btn-del-remision" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                             <input type="hidden" name="remision_del[]" value="" id="remision_del">
                           </td>
                         </tr>
@@ -205,7 +205,7 @@
                               <input type="hidden" name="remision_comprobacion[]" value="<?php echo (isset($remision->comprobacion) && $remision->comprobacion == 't'? 'true': '') ?>" class="valcomprobacion">
                             </td>
                             <td style="width: 30px;">
-                              <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                              <button type="button" class="btn btn-danger btn-del-remision" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                               <input type="hidden" name="remision_del[]" value="" id="remision_del">
                             </td>
                           </tr>
@@ -336,6 +336,7 @@
                 <thead>
                   <tr>
                     <th colspan="9">REP Y MTTO DE EQUIPO TRASPORTE
+                      <button type="button" class="btn btn-success" id="btn-add-repmant" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
                       <a href="#modal-repmant" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-repmant" style="padding: 2px 7px 2px; float: right;">Gastos</a>
                     </th>
                   </tr>
@@ -354,17 +355,18 @@
                     if (isset($_POST['repmant_concepto'])) {
                       foreach ($_POST['repmant_concepto'] as $key => $concepto) {
                         // $totalRepMant += floatval($_POST['otros_monto'][$key]);
+                        $readonly = $_POST['repmant_id'][$key] > 0? 'readonly': '';
                       ?>
                         <tr>
-                          <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $_POST['repmant_fecha'][$key] ?>" class="repmant_fecha" placeholder="Fecha" readonly></td>
-                          <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $_POST['repmant_numero'][$key] ?>" class="repmant-numero vpositive" placeholder="" readonly style=""></td>
+                          <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $_POST['repmant_fecha'][$key] ?>" class="repmant_fecha" placeholder="Fecha" <?php echo $readonly ?>></td>
+                          <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $_POST['repmant_numero'][$key] ?>" class="repmant-numero vpositive" placeholder="" <?php echo $readonly ?> style=""></td>
                           <td colspan="3">
-                            <input type="text" name="repmant_proveedor[]" value="<?php echo $_POST['repmant_proveedor'][$key] ?>" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required readonly>
+                            <input type="text" name="repmant_proveedor[]" value="<?php echo $_POST['repmant_proveedor'][$key] ?>" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
                             <input type="hidden" name="repmant_id[]" value="<?php echo $_POST['repmant_id'][$key] ?>" class="repmant-id span12" required>
                             <input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">
                           </td>
-                          <td style=""><input type="text" name="repmant_concepto[]" value="<?php echo $_POST['repmant_concepto'][$key] ?>" class="repmant-concepto" placeholder="Concepto" readonly></td>
-                          <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $_POST['repmant_importe'][$key] ?>" class="repmant-importe vpositive" placeholder="Importe" required readonly></td>
+                          <td style=""><input type="text" name="repmant_concepto[]" value="<?php echo $_POST['repmant_concepto'][$key] ?>" class="repmant-concepto" placeholder="Concepto" <?php echo $readonly ?>></td>
+                          <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $_POST['repmant_importe'][$key] ?>" class="repmant-importe vpositive" placeholder="Importe" required <?php echo $readonly ?>></td>
                           <td style="">
                             <input type="checkbox" value="true" class="chkcomprobacion" <?php echo ($_POST['repmant_comprobacion'][$key] == 'true'? 'checked': '') ?>>
                             <input type="hidden" name="repmant_comprobacion[]" value="<?php echo $_POST['repmant_comprobacion'][$key] ?>" class="valcomprobacion">
@@ -377,17 +379,18 @@
                     <?php }} elseif(isset($borrador['repmant'])) {
                         foreach ($borrador['repmant'] as $repmant) {
                           // $totalRepMant += floatval($otro->monto);
+                          $readonly = $repmant->id_compra > 0? 'readonly': '';
                         ?>
                           <tr>
-                            <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $repmant->fecha ?>" class="repmant_fecha" placeholder="Fecha" readonly></td>
-                            <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $repmant->folio ?>" class="repmant-numero vpositive" placeholder="" readonly style=""></td>
+                            <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $repmant->fecha ?>" class="repmant_fecha" placeholder="Fecha" <?php echo $readonly ?>></td>
+                            <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $repmant->folio ?>" class="repmant-numero vpositive" placeholder="" <?php echo $readonly ?> style=""></td>
                             <td colspan="3">
-                              <input type="text" name="repmant_proveedor[]" value="<?php echo $repmant->proveedor ?>" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required readonly>
+                              <input type="text" name="repmant_proveedor[]" value="<?php echo $repmant->proveedor ?>" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
                               <input type="hidden" name="repmant_id[]" value="<?php echo $repmant->id_compra ?>" class="repmant-id span12" required>
                               <input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">
                             </td>
-                            <td style=""><input type="text" name="repmant_concepto[]" value="<?php echo $repmant->concepto ?>" class="repmant-concepto" placeholder="Concepto" readonly></td>
-                            <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $repmant->subtotal ?>" class="repmant-importe vpositive" placeholder="Importe" required readonly></td>
+                            <td style=""><input type="text" name="repmant_concepto[]" value="<?php echo $repmant->concepto ?>" class="repmant-concepto" placeholder="Concepto" <?php echo $readonly ?>></td>
+                            <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $repmant->subtotal ?>" class="repmant-importe vpositive" placeholder="Importe" required <?php echo $readonly ?>></td>
                             <td style="">
                               <input type="checkbox" value="true" class="chkcomprobacion" <?php echo (isset($repmant->comprobacion) && $repmant->comprobacion == 't'? 'checked': '') ?>>
                               <input type="hidden" name="repmant_comprobacion[]" value="<?php echo (isset($repmant->comprobacion) && $repmant->comprobacion == 't'? 'true': '') ?>" class="valcomprobacion">
@@ -403,9 +406,9 @@
                     foreach ($_POST['repmant_concepto'] as $key => $repmant) {
                         $totalRepMant += floatval($_POST['repmant_importe'][$key]);
                       ?>
-                  <?php }} elseif(isset($caja['repmantes'])) {
-                    foreach ($caja['repmantes'] as $repmant) {
-                        $totalRepMant += floatval($repmant->monto);
+                  <?php }} elseif(isset($borrador['repmant'])) {
+                    foreach ($borrador['repmant'] as $repmant) {
+                        $totalRepMant += floatval($repmant->subtotal);
                       ?>
                   <?php }} ?>
 

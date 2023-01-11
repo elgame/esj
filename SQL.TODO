@@ -1,4 +1,18 @@
 
+ ☐ Reporte de boletas pendientes de pago por proveedor
+ ☐ estimacion transpor
+   -- lap|san
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN id uuid DEFAULT UUID_GENERATE_V4();
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN fecha date DEFAULT NULL;
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN folio character varying(30) DEFAULT '';
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN proveedor character varying(200) DEFAULT '';
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN concepto character varying(250) DEFAULT '';
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN subtotal double precision DEFAULT 0;
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto DROP CONSTRAINT estado_resultado_trans_rep_mtto_pkey;
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD CONSTRAINT estado_resultado_trans_rep_mtto_pkey PRIMARY KEY (id);
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ALTER COLUMN id_compra DROP NOT NULL;
+
  ✔ Actualizacion de tablas @done (23-01-03 19:04)
    -- lap|san
     UPDATE public.nomina_mensual_art_113 SET lim_inferior=0.01, lim_superior=746.04, cuota_fija=0, porcentaje=1.92 WHERE id_art_113=34;

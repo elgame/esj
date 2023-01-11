@@ -236,7 +236,7 @@ class estado_resultado_trans extends MY_Controller {
         ['field' => 'repmant_fecha[]'         , 'label' => 'repmant_fecha'         , 'rules' => '']                 ,
         ['field' => 'repmant_numero[]'        , 'label' => 'repmant_numero'        , 'rules' => '']                 ,
         ['field' => 'repmant_proveedor[]'     , 'label' => 'repmant_proveedor'     , 'rules' => '']                 ,
-        ['field' => 'repmant_id[]'            , 'label' => 'repmant_id'            , 'rules' => 'numeric']                 ,
+        ['field' => 'repmant_id[]'            , 'label' => 'repmant_id'            , 'rules' => '']                 ,
         ['field' => 'repmant_row[]'           , 'label' => 'repmant_row'           , 'rules' => '']                 ,
         ['field' => 'repmant_concepto[]'      , 'label' => 'repmant_concepto'      , 'rules' => '']                 ,
         ['field' => 'repmant_importe[]'       , 'label' => 'repmant_importe'       , 'rules' => '']                 ,

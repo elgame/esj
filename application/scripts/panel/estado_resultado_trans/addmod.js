@@ -12,6 +12,7 @@
     onChanceImporteSueldo();
     obtenRepMantAjax();
     cargaRepMant();
+    btnAddRepMant();
     btnDelRepMant();
     onChangeTotalRepMant();
     btnAddGastos();
@@ -306,11 +307,23 @@
       calculaTotalRepMant();
     });
   };
+  var btnAddRepMant = function () {
+    $('#btn-add-repmant').on('click', function(event) {
+      agregarRepMant({
+        id: '',
+        folio: '',
+        total: '',
+        proveedor: '',
+        concepto: '',
+        fecha: ''
+      });
+    });
+  };
   var agregarRepMant = function (compra) {
     var $table = $('#table-repmant').find('tbody .row-total'),
         tr;
 
-    if ($('#table-repmant').find('.repmant-id[value='+compra.id+']').length == 0) {
+    if ($('#table-repmant').find('.repmant-id[value='+compra.id+']').length == 0 || compra.id == '') {
       var folio = '', folio = '', id = '', total = '0', proveedor = '', concepto = '', fecha = '';
       if (compra) {
         id        = compra.id;
@@ -321,16 +334,18 @@
         fecha     = compra.fecha;
       }
 
+      const readonly = id > 0 ? 'readonly' : '';
+
       tr =  '<tr>' +
-              '<td style=""><input type="date" name="repmant_fecha[]" value="'+fecha+'" class="repmant_fecha" placeholder="Fecha" readonly></td>' +
-              '<td style=""><input type="text" name="repmant_numero[]" value="'+folio+'" class="repmant-numero vpositive" placeholder="" readonly style=""></td>' +
+              '<td style=""><input type="date" name="repmant_fecha[]" value="'+fecha+'" class="repmant_fecha" placeholder="Fecha" '+readonly+'></td>' +
+              '<td style=""><input type="text" name="repmant_numero[]" value="'+folio+'" class="repmant-numero vpositive" placeholder="" '+readonly+' style=""></td>' +
               '<td colspan="3">' +
-                '<input type="text" name="repmant_proveedor[]" value="'+proveedor+'" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required readonly>' +
-                '<input type="hidden" name="repmant_id[]" value="'+id+'" class="repmant-id span12" required>' +
+                '<input type="text" name="repmant_proveedor[]" value="'+proveedor+'" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required '+readonly+'>' +
+                '<input type="hidden" name="repmant_id[]" value="'+id+'" class="repmant-id span12">' +
                 '<input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">' +
               '</td>' +
-              '<td style=""><input type="text" name="repmant_concepto[]" value="'+concepto+'" class="repmant-concepto" placeholder="Concepto" readonly></td>' +
-              '<td style=""><input type="number" step="any" name="repmant_importe[]" value="'+total+'" class="repmant-importe vpositive" placeholder="Importe" required readonly></td>' +
+              '<td style=""><input type="text" name="repmant_concepto[]" value="'+concepto+'" class="repmant-concepto" placeholder="Concepto" '+readonly+'></td>' +
+              '<td style=""><input type="number" step="any" name="repmant_importe[]" value="'+total+'" class="repmant-importe vpositive" placeholder="Importe" required '+readonly+'></td>' +
               '<td style="">' +
                 '<input type="checkbox" value="true" class="chkcomprobacion">' +
                 '<input type="hidden" name="repmant_comprobacion[]" value="" class="valcomprobacion">' +

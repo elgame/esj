@@ -5,6 +5,13 @@ use Carbon\Carbon;
 
 class MyString {
 
+  public static function uniqId()
+  {
+    $bytes = random_bytes(16);
+    $id = bin2hex($bytes);
+    return $id;
+  }
+
   public static function getMetodoPago($codigo='', $nombre='')
   {
     $codigo = (string)$codigo;
