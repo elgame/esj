@@ -644,7 +644,6 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->Row(array($caja['info']->activo->nombre), false, false);
 
     $comprobacion = ['t' => 'Si', 'f' => 'No'];
-
     $ttotalRemisiones = 0;
     $ttotalRemisionesEf = 0;
     $pdf->SetXY(6, $pdf->GetY()+10);
