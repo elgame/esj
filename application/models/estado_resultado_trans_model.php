@@ -405,7 +405,7 @@ class estado_resultado_trans_model extends privilegios_model{
           $this->db->delete('otros.estado_resultado_trans_gastos', "id = {$_POST['gastos_id_gasto'][$key]}");
         } elseif ($_POST['gastos_id_gasto'][$key] > 0) {
           $this->db->update('otros.estado_resultado_trans_gastos', array(
-            'id_estado'    => $id_venta,
+            'id_estado'    => $id_estado,
             'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
             'id_cod'       => $id_cod,
             'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
@@ -416,7 +416,7 @@ class estado_resultado_trans_model extends privilegios_model{
           ), "id = {$_POST['gastos_id_gasto'][$key]}");
         } else {
           $gastos[] = array(
-            'id_estado'    => $id_venta,
+            'id_estado'    => $id_estado,
             'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
             'id_cod'       => $id_cod,
             'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
@@ -427,8 +427,9 @@ class estado_resultado_trans_model extends privilegios_model{
           );
         }
       }
-      if(count($gastos) > 0)
+      if(count($gastos) > 0) {
         $this->db->insert_batch('otros.estado_resultado_trans_gastos', $gastos);
+      }
     }
 
     return array('passes' => true, 'id_venta' => $id_venta);
