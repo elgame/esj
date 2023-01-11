@@ -631,6 +631,7 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetWidths(array(80));
     $pdf->Row(array($caja['info']->activo->nombre), false, false);
 
+    $comprobacion = ['t' => 'Si', 'f' => 'No'];
 
     $ttotalRemisiones = 0;
     $ttotalRemisionesEf = 0;
@@ -640,8 +641,6 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->SetAligns(array('L', 'C'));
       $pdf->SetWidths(array(206));
       $pdf->Row(array('VENTAS'), false, false);
-
-      $comprobacion = ['t' => 'Si', 'f' => 'No'];
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
