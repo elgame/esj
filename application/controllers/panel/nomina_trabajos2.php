@@ -76,7 +76,11 @@ class nomina_trabajos2 extends MY_Controller {
     $filtros['dia_inicia_semana'] = $dia;
 
     $semana = MyString::obtenerSemanaDeFecha($params['fecha'], $filtros['dia_inicia_semana']);
-    $params['filtros'] = array_merge($filtros, $semana);
+    if ($semana) {
+      $params['filtros'] = array_merge($filtros, $semana);
+    } else {
+      redirect(base_url('panel/nomina_trabajos2/?msg=10'));
+    }
 
     $params['tareas_dia'] = $this->nomina_trabajos2_model->getActividades($params['fecha'], $filtros['empresaId'], $params['filtros']);
 
@@ -110,9 +114,9 @@ class nomina_trabajos2 extends MY_Controller {
 
   public function nomina_fiscal_ticket()
   {
-    if (isset($_GET['semana']) && isset($_GET['empresaId']) && isset($_GET['anio'])) {
+    if (isset($_GET['semana']) && isset($_GET['empresaId']) && isset($_GET['anio']) && isset($_GET['fregistro_patronal'])) {
       $this->load->model('nomina_trabajos2_model');
-      $this->nomina_trabajos2_model->ticketNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+      $this->nomina_trabajos2_model->ticketNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['fregistro_patronal'], $_GET['anio']);
     }
   }
 
@@ -165,6 +169,10 @@ class nomina_trabajos2 extends MY_Controller {
         break;
       case 9:
         $txt = 'Favor de especificar una empresa para generar su nomina.';
+        $icono = 'error';
+        break;
+      case 10:
+        $txt = 'La fecha se sale del periodo actual.';
         $icono = 'error';
         break;
 

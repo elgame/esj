@@ -12,6 +12,7 @@
     ALTER TABLE otros.estado_resultado_trans_rep_mtto DROP CONSTRAINT estado_resultado_trans_rep_mtto_pkey;
     ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD CONSTRAINT estado_resultado_trans_rep_mtto_pkey PRIMARY KEY (id);
     ALTER TABLE otros.estado_resultado_trans_rep_mtto ALTER COLUMN id_compra DROP NOT NULL;
+    ALTER TABLE otros.estado_resultado_trans_sueldos ADD COLUMN comprobacion boolean DEFAULT false;
 
  ✔ Actualizacion de tablas @done (23-01-03 19:04)
    -- lap|san

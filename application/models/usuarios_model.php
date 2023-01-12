@@ -562,9 +562,9 @@ class Usuarios_model extends privilegios_model {
    * Obtiene el listado de empresas para usar en peticiones Ajax.
    */
   public function getUsuariosAjax(){
-    $sql = "(lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-           lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-           lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')";
+    $sql = "(
+        lower(nombre || ' ' || apellido_paterno || ' ' || apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+      )";
     if (is_numeric($this->input->get('term'))) {
       $sql = "id = {$_GET['term']}";
     }

@@ -353,7 +353,7 @@ class estado_resultado_trans_model extends privilegios_model{
             'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
             'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
             'importe'      => $_POST['sueldos_importe'][$key] !== '' ? $_POST['sueldos_importe'][$key] : 0,
-            // 'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
+            'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
           ), "id = {$_POST['sueldos_id_sueldo'][$key]}");
         } else {
           $sueldos[] = array(
@@ -362,7 +362,7 @@ class estado_resultado_trans_model extends privilegios_model{
             'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
             'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
             'importe'      => $_POST['sueldos_importe'][$key] !== '' ? $_POST['sueldos_importe'][$key] : 0,
-            // 'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
+            'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
           );
         }
       }
@@ -534,7 +534,7 @@ class estado_resultado_trans_model extends privilegios_model{
       $response['remisiones'] = $res->result();
 
       $res = $this->db
-        ->select('s.id, p.id_proveedor, Date(s.fecha) AS fecha,
+        ->select('s.id, p.id_proveedor, Date(s.fecha) AS fecha, s.comprobacion,
           s.descripcion, s.importe, p.nombre_fiscal AS proveedor')
         ->from('otros.estado_resultado_trans_sueldos s')
         ->join('proveedores p', 'p.id_proveedor = s.id_proveedor', 'inner')
@@ -725,7 +725,7 @@ class estado_resultado_trans_model extends privilegios_model{
         $pdf->SetX(6);
 
         $pdf->Row(array(
-          'Si',
+          $comprobacion[$sueldo->comprobacion],
           $sueldo->fecha,
           $sueldo->proveedor,
           $sueldo->descripcion,
@@ -733,7 +733,9 @@ class estado_resultado_trans_model extends privilegios_model{
         ), false, 'B');
 
         $ttotalGastos += floatval($sueldo->importe);
-        $ttotalSueldos += floatval($sueldo->importe);
+        if ($sueldo->comprobacion == 't') {
+          $ttotalSueldos += floatval($sueldo->importe);
+        }
       }
     }
 
