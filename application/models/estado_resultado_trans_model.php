@@ -222,14 +222,14 @@ class estado_resultado_trans_model extends privilegios_model{
     );
 
     $this->db->insert('otros.estado_resultado_trans', $datosFactura);
-    $id_venta = $this->db->insert_id('otros.estado_resultado_trans_id_seq');
+    $id_estado = $this->db->insert_id('otros.estado_resultado_trans_id_seq');
 
     $ventas = array();
     if (!empty($_POST['remision_cliente'])) {
       foreach ($_POST['remision_cliente'] as $key => $descripcion)
       {
         $ventas[] = array(
-          'id_estado' => $id_venta,
+          'id_estado' => $id_estado,
           'id_remision' => $_POST['remision_id'][$key] !== '' ? $_POST['remision_id'][$key] : null,
           'comprobacion' => $_POST['remision_comprobacion'][$key] == 'true' ? 't' : 'f',
         );
@@ -243,7 +243,7 @@ class estado_resultado_trans_model extends privilegios_model{
       foreach ($_POST['sueldos_concepto'] as $key => $descripcion)
       {
         $sueldos[] = array(
-          'id_estado'    => $id_venta,
+          'id_estado'    => $id_estado,
           'id_proveedor' => $_POST['sueldos_proveedor_id'][$key] !== '' ? $_POST['sueldos_proveedor_id'][$key] : null,
           'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
           'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
@@ -260,7 +260,7 @@ class estado_resultado_trans_model extends privilegios_model{
       foreach ($_POST['repmant_proveedor'] as $key => $descripcion)
       {
         $repmant[] = array(
-          'id_estado'    => $id_venta,
+          'id_estado'    => $id_estado,
           'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
           'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
           'fecha'        => $_POST['repmant_fecha'][$key] !== '' ? $_POST['repmant_fecha'][$key] : null,
@@ -284,7 +284,7 @@ class estado_resultado_trans_model extends privilegios_model{
         }
 
         $gastos[] = array(
-          'id_estado'    => $id_venta,
+          'id_estado'    => $id_estado,
           'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
           'id_cod'       => $id_cod,
           'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
@@ -299,7 +299,7 @@ class estado_resultado_trans_model extends privilegios_model{
         $this->db->insert_batch('otros.estado_resultado_trans_gastos', $gastos);
     }
 
-    return array('passes' => true, 'id_venta' => $id_venta);
+    return array('passes' => true, 'id_estado' => $id_estado);
   }
 
   public function updateEstadoResult($id_estado)
@@ -398,7 +398,7 @@ class estado_resultado_trans_model extends privilegios_model{
       {
         $id_cod = intval($_POST['gastos_codg_id'][$key]);
         if ($id_cod == 0) {
-          $id_cod = $this->addCods($this->input->post('gastos_codg'));
+          $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
         }
 
         if ($_POST['gastos_del'][$key] == 'true' && $_POST['gastos_id_gasto'][$key] > 0) {
@@ -432,7 +432,7 @@ class estado_resultado_trans_model extends privilegios_model{
       }
     }
 
-    return array('passes' => true, 'id_venta' => $id_venta);
+    return array('passes' => true, 'id_estado' => $id_estado);
   }
 
   /**
