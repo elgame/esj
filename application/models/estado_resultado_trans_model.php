@@ -677,9 +677,9 @@ class estado_resultado_trans_model extends privilegios_model{
           ($auxrem != $rem->id_remision? $rem->cliente: ''),
           $rem->descripcion,
           $rem->unidad,
-          MyString::formatoNumero($rem->cantidad, 2, ''),
-          MyString::formatoNumero($rem->precio_unitario, 2, ''),
-          MyString::formatoNumero($rem->importe, 2, '')
+          MyString::formatoNumero($rem->cantidad, 2, '', false),
+          MyString::formatoNumero($rem->precio_unitario, 2, '', false),
+          MyString::formatoNumero($rem->importe, 2, '', false)
         ), false, 'B');
 
         $auxrem = $rem->id_remision;
@@ -729,7 +729,7 @@ class estado_resultado_trans_model extends privilegios_model{
           $sueldo->fecha,
           $sueldo->proveedor,
           $sueldo->descripcion,
-          MyString::formatoNumero($sueldo->importe, 2, '')
+          MyString::formatoNumero($sueldo->importe, 2, '', false)
         ), false, 'B');
 
         $ttotalGastos += floatval($sueldo->importe);
@@ -768,7 +768,7 @@ class estado_resultado_trans_model extends privilegios_model{
           $rem->folio,
           $rem->proveedor,
           $rem->concepto,
-          MyString::formatoNumero($rem->subtotal, 2, '')
+          MyString::formatoNumero($rem->subtotal, 2, '', false)
         ), false, 'B');
 
         $ttotalGastos += floatval($rem->subtotal);
@@ -806,7 +806,7 @@ class estado_resultado_trans_model extends privilegios_model{
           $gasto->fecha,
           $gasto->proveedor,
           $gasto->codg,
-          MyString::formatoNumero($gasto->importe, 2, '')
+          MyString::formatoNumero($gasto->importe, 2, '', false)
         ), false, 'B');
 
         $ttotalGastos += floatval($gasto->importe);

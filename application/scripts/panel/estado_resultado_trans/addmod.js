@@ -421,11 +421,11 @@
       var $tr = $(this).parents('tr'),
           // id = $tr.find('.gasto-cargo-id').val(),
           // $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
-          $gastos_id_sueldo = $tr.find('#gastos_id_sueldo'),
+          $gastos_id_gasto = $tr.find('#gastos_id_gasto'),
           $gastos_del = $tr.find('#gastos_del'),
           total = 0;
 
-      if ($gastos_id_sueldo.val() != '') {
+      if ($gastos_id_gasto.val() != '') {
         $gastos_del.val('true');
         $tr.css('display', 'none');
       } else {
