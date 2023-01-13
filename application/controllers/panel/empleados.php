@@ -260,12 +260,14 @@ class empleados extends MY_Controller {
       $this->load->model('nomina_fiscal_model');
       $data = $this->usuarios_model->getUsuariosAjax();
       $_GET['cid_empresa'] = $_GET['did_empresa'];
+      $empresa = $this->empresas_model->getInfoEmpresa($_GET['did_empresa'], true);
+
       $filtros = array(
-        'semana'            => '',
+        'semana'            => 1,
         'anio'              => date("Y"),
         'empresaId'         => $_GET['did_empresa'],
         'puestoId'          => '',
-        'dia_inicia_semana' => '4',
+        'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
         'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
         'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
       );
