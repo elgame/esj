@@ -2,6 +2,12 @@
  ☐ Reporte de boletas pendientes de pago por proveedor
  ☐ estimacion transpor
    -- lap|san
+    ALTER TABLE otros.estado_resultado_trans ADD COLUMN id_gasto1 character varying(100);
+    UPDATE otros.estado_resultado_trans SET id_gasto1 = id_gasto;
+    ALTER TABLE otros.estado_resultado_trans DROP COLUMN id_gasto;
+    ALTER TABLE otros.estado_resultado_trans RENAME COLUMN id_gasto1 TO id_gasto;
+    COMMENT ON COLUMN otros.estado_resultado_trans.id_gasto IS 'gasto por comprobar de la caja chica 2 ';
+   -- lap|san
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN id uuid DEFAULT UUID_GENERATE_V4();
     ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN fecha date DEFAULT NULL;

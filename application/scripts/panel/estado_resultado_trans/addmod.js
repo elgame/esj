@@ -492,12 +492,27 @@
     $('#carga-gastoscaja').click(function(event) {
       const sel = $('#modal-gastoscaja .chk-remision:checked');
       if(sel.length > 0) {
-        $('#did_gasto').val(sel.attr('data-id'));
-        $('#gasto_monto').val(sel.attr('data-total'));
-        $('#modal-gastoscaja').modal('hide');
+        const idsg = $('#did_gasto').val().split(',');
+        if($('#did_gasto').val() == '') {
+          idsg.pop();
+        }
+        const idsel = sel.attr('data-id');
+        if(!idsg.find(itm => itm == idsel)) {
+          idsg.push(idsel);
+          $('#did_gasto').val(idsg.join(','));
+          $('#gasto_monto').val( (parseFloat($('#gasto_monto').val()) || 0) + (parseFloat(sel.attr('data-total')) || 0) );
+          $('#modal-gastoscaja').modal('hide');
+        } else {
+          noty({"text": 'Ya se agrego ese gasto.', "layout":"topRight", "type": 'error'});
+        }
       } else {
         noty({"text": 'Seleccione un gasto.', "layout":"topRight", "type": 'error'});
       }
+    });
+
+    $('#btn-gastocaja-clear').click(function(event) {
+      $('#did_gasto').val('');
+      $('#gasto_monto').val('');
     });
   };
 

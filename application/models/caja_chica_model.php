@@ -293,7 +293,8 @@ class caja_chica_model extends CI_Model {
             SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
             WHERE no_caja = {$noCaja} AND fecha <= '{$fecha}' GROUP BY id_deudor
           ) ab ON cd.id_deudor = ab.id_deudor
-        WHERE cd.no_caja = {$noCaja} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+        WHERE cd.no_caja = {$noCaja} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0
+        ORDER BY fecha ASC"
       );
 
       if ($deudores && $deudores->num_rows() > 0)

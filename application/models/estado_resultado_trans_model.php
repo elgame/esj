@@ -485,7 +485,7 @@ class estado_resultado_trans_model extends privilegios_model{
 		$res = $this->db
       ->select("f.*")
       ->from('otros.estado_resultado_trans as f')
-      ->join('cajachica_gastos g', "g.id_gasto = f.id_gasto", 'left')
+      // ->join('cajachica_gastos g', "g.id_gasto = f.id_gasto", 'left')
       ->where("f.id = {$id}")
       ->get();
 

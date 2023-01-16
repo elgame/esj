@@ -128,6 +128,9 @@
                   <a href="#modal-gastoscaja" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-gastocaja" style="padding: 2px 7px 2px;">Gasto Caja</a>
                   <input type="text" name="gasto_monto" id="gasto_monto" value="<?php echo set_value('gasto_monto', isset($borrador) ? $borrador['info']->gasto_monto : ''); ?>" readonly>
                   <input type="hidden" name="did_gasto" id="did_gasto" value="<?php echo set_value('did_gasto', isset($borrador) ? $borrador['info']->id_gasto : ''); ?>">
+                  <button type="button" class="btn" id="btn-gastocaja-clear" title="Borrar anticipos">
+                    <i class="icon-minus-sign"></i>
+                  </button>
                 </div>
               </div>
 
