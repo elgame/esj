@@ -876,7 +876,7 @@ class catalogos_sft_model extends CI_Model{
     if ($this->input->get('q_conceptos') != '') {
       switch ($this->input->get('q_conceptos')) {
         case 'qgdc':
-          $sql_co .= " AND (cp.descripcion <> 'DIESEL' OR cp.descripcion <> 'GASOLINA' OR cp.descripcion <> 'CALCOMANIA FISCAL VEHICULAR')";
+          $sql_co .= " AND (cp.descripcion <> 'DIESEL' AND cp.descripcion <> 'GASOLINA' AND cp.descripcion <> 'CALCOMANIA FISCAL VEHICULAR')";
           break;
       }
     }
