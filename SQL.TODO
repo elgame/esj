@@ -1,6 +1,10 @@
 
  ☐ Reporte de boletas pendientes de pago por proveedor
- ☐ estimacion transpor
+ ✔ Reporte de codigos de gastos poner filtro para quitar concepto de diesel, gasolina y calcomania @done (23-01-18 12:42)
+ ☐ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio
+   poder agregar el rendimiento del termo, HORAS TRABAJADAS, LTS DIESEL TERMO, REND HR POR LITRO
+   crear reporte acumulado por rango de fechas y camion
+ ✔ estimacion transpor @done (23-01-18 10:40)
    -- lap|san
     ALTER TABLE otros.estado_resultado_trans ADD COLUMN id_gasto1 character varying(100);
     UPDATE otros.estado_resultado_trans SET id_gasto1 = id_gasto;

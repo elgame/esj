@@ -872,6 +872,15 @@ class catalogos_sft_model extends CI_Model{
       // $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('sucursalId')."";
     }
 
+    $sql_co = '';
+    if ($this->input->get('q_conceptos') != '') {
+      switch ($this->input->get('q_conceptos')) {
+        case 'qgdc':
+          $sql_co .= " AND (cp.descripcion <> 'DIESEL' OR cp.descripcion <> 'GASOLINA' OR cp.descripcion <> 'CALCOMANIA FISCAL VEHICULAR')";
+          break;
+      }
+    }
+
     $sql2 = $sql;
 
     // vehiculos
@@ -889,6 +898,7 @@ class catalogos_sft_model extends CI_Model{
               SELECT Sum(cp.total) importe
               FROM compras_productos cp INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
               WHERE cp.id_cat_codigos In({$ids_hijos}) {$sql_compras} AND cp.status = 'a' AND co.status <> 'ca'
+                {$sql_co}
               UNION
               SELECT Sum(cg.monto) importe
               FROM cajachica_gastos cg INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
@@ -933,7 +943,7 @@ class catalogos_sft_model extends CI_Model{
                     GROUP BY cor.id_orden
                   ) oranc ON oranc.id_orden = co.id_orden
                 WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_compras}
-                  AND cp.status = 'a' AND co.status <> 'ca'
+                  AND cp.status = 'a' AND co.status <> 'ca' {$sql_co}
                 UNION
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(cg.fecha) fecha_orden, cg.folio::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
