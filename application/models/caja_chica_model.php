@@ -2733,7 +2733,7 @@ class caja_chica_model extends CI_Model {
 
     // Acreedores
     $totalAcreedores = $totalAcreedoresHoy = 0;
-    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['acreedores']) > 0) {
+    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6)) {
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
@@ -3268,6 +3268,7 @@ class caja_chica_model extends CI_Model {
 
         $totalDeudores += floatval($deudor->saldo);
 
+        $pdf->SetFont('Arial','', 6);
         $pdf->SetAligns(array('C', 'L', 'C', 'L', 'L', 'R', 'R', 'R'));
         $pdf->SetX(6);
         $pdf->Row(array(

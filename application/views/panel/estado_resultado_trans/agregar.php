@@ -85,6 +85,14 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="destino">Destino</label>
+                <div class="controls">
+                  <input type="text" name="destino" class="span9" id="destino"
+                    value="<?php echo set_value('destino', isset($borrador) ? $borrador['info']->destino : ''); ?>" placeholder="">
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">
@@ -120,6 +128,27 @@
                 <label class="control-label" for="rend_precio">Diesel Precio</label>
                 <div class="controls">
                   <input type="text" name="rend_precio" class="span9" id="rend_precio" value="<?php echo set_value('rend_precio', isset($borrador) ? $borrador['info']->rend_precio : ''); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="rend_thrs_trab">Termo Hrs Trabajadas</label>
+                <div class="controls">
+                  <input type="text" name="rend_thrs_trab" class="span9" id="rend_thrs_trab" value="<?php echo set_value('rend_thrs_trab', isset($borrador) ? $borrador['info']->rend_thrs_trab : ''); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="rend_thrs_lts">Termo Lts</label>
+                <div class="controls">
+                  <input type="text" name="rend_thrs_lts" class="span9" id="rend_thrs_lts" value="<?php echo set_value('rend_thrs_lts', isset($borrador) ? $borrador['info']->rend_thrs_lts : ''); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="rend_thrs_hxl">Termo Hrs/Lts</label>
+                <div class="controls">
+                  <input type="text" name="rend_thrs_hxl" class="span9" id="rend_thrs_hxl" value="<?php echo set_value('rend_thrs_hxl', isset($borrador) ? $borrador['info']->rend_thrs_hxl : ''); ?>" size="25">
                 </div>
               </div>
 

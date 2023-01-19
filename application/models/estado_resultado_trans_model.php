@@ -50,7 +50,8 @@ class estado_resultado_trans_model extends privilegios_model{
     if($this->input->get('fbuscar') != '')
       $sql .= " AND (
         lower(c.nombre) LIKE '%".mb_strtolower($this->input->get('fbuscar'), 'UTF-8')."%' OR
-        lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('fbuscar'), 'UTF-8')."%')";
+        lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('fbuscar'), 'UTF-8')."%' OR
+        er.folio = ".intval($this->input->get('fbuscar')).")";
 
     $query = BDUtil::pagination("
         SELECT er.id, er.fecha, er.folio, c.nombre AS chofer,
@@ -204,21 +205,25 @@ class estado_resultado_trans_model extends privilegios_model{
     $this->load->model('clasificaciones_model');
 
     $datosFactura = array(
-      'id_chofer'   => $this->input->post('did_chofer'),
-      'id_activo'   => $this->input->post('did_activo'),
-      'id_empresa'  => $this->input->post('did_empresa'),
-      'id_creo'     => $this->session->userdata('id_usuario'),
-      'fecha'       => $this->input->post('dfecha'),
-      'folio'       => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
-      'km_rec'      => floatval($this->input->post('dkm_rec')),
-      'vel_max'     => floatval($this->input->post('dvel_max')),
-      'rep_lt_hist' => floatval($this->input->post('drep_lt_hist')),
-      'rend_km_gps' => floatval($this->input->post('rend_km_gps')),
-      'rend_actual' => floatval($this->input->post('rend_actual')),
-      'rend_lts'    => floatval($this->input->post('rend_lts')),
-      'rend_precio' => floatval($this->input->post('rend_precio')),
-      'id_gasto'    => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
-      'gasto_monto' => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
+      'id_chofer'      => $this->input->post('did_chofer'),
+      'id_activo'      => $this->input->post('did_activo'),
+      'id_empresa'     => $this->input->post('did_empresa'),
+      'id_creo'        => $this->session->userdata('id_usuario'),
+      'fecha'          => $this->input->post('dfecha'),
+      'folio'          => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
+      'km_rec'         => floatval($this->input->post('dkm_rec')),
+      'vel_max'        => floatval($this->input->post('dvel_max')),
+      'rep_lt_hist'    => floatval($this->input->post('drep_lt_hist')),
+      'rend_km_gps'    => floatval($this->input->post('rend_km_gps')),
+      'rend_actual'    => floatval($this->input->post('rend_actual')),
+      'rend_lts'       => floatval($this->input->post('rend_lts')),
+      'rend_precio'    => floatval($this->input->post('rend_precio')),
+      'rend_thrs_trab' => floatval($this->input->post('rend_thrs_trab')),
+      'rend_thrs_lts'  => floatval($this->input->post('rend_thrs_lts')),
+      'rend_thrs_hxl'  => floatval($this->input->post('rend_thrs_hxl')),
+      'destino'        => $this->input->post('destino'),
+      'id_gasto'       => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
+      'gasto_monto'    => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
     );
 
     $this->db->insert('otros.estado_resultado_trans', $datosFactura);
@@ -305,21 +310,25 @@ class estado_resultado_trans_model extends privilegios_model{
   public function updateEstadoResult($id_estado)
   {
     $datosFactura = array(
-      'id_chofer'   => $this->input->post('did_chofer'),
-      'id_activo'   => $this->input->post('did_activo'),
-      'id_empresa'  => $this->input->post('did_empresa'),
-      'id_creo'     => $this->session->userdata('id_usuario'),
-      'fecha'       => $this->input->post('dfecha'),
+      'id_chofer'      => $this->input->post('did_chofer'),
+      'id_activo'      => $this->input->post('did_activo'),
+      'id_empresa'     => $this->input->post('did_empresa'),
+      'id_creo'        => $this->session->userdata('id_usuario'),
+      'fecha'          => $this->input->post('dfecha'),
       // 'folio'       => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
-      'km_rec'      => floatval($this->input->post('dkm_rec')),
-      'vel_max'     => floatval($this->input->post('dvel_max')),
-      'rep_lt_hist' => floatval($this->input->post('drep_lt_hist')),
-      'rend_km_gps' => floatval($this->input->post('rend_km_gps')),
-      'rend_actual' => floatval($this->input->post('rend_actual')),
-      'rend_lts'    => floatval($this->input->post('rend_lts')),
-      'rend_precio' => floatval($this->input->post('rend_precio')),
-      'id_gasto'    => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
-      'gasto_monto' => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
+      'km_rec'         => floatval($this->input->post('dkm_rec')),
+      'vel_max'        => floatval($this->input->post('dvel_max')),
+      'rep_lt_hist'    => floatval($this->input->post('drep_lt_hist')),
+      'rend_km_gps'    => floatval($this->input->post('rend_km_gps')),
+      'rend_actual'    => floatval($this->input->post('rend_actual')),
+      'rend_lts'       => floatval($this->input->post('rend_lts')),
+      'rend_precio'    => floatval($this->input->post('rend_precio')),
+      'rend_thrs_trab' => floatval($this->input->post('rend_thrs_trab')),
+      'rend_thrs_lts'  => floatval($this->input->post('rend_thrs_lts')),
+      'rend_thrs_hxl'  => floatval($this->input->post('rend_thrs_hxl')),
+      'destino'        => $this->input->post('destino'),
+      'id_gasto'       => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
+      'gasto_monto'    => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
 
     );
 
@@ -644,11 +653,16 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetWidths(array(80));
     $pdf->Row(array($caja['info']->activo->nombre), false, false);
 
+    $pdf->SetXY(6, $pdf->GetY()+7 );
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array('DESTINO: '.$caja['info']->destino), false, false);
+
     $comprobacion = ['t' => 'Si', 'f' => 'No'];
 
     $ttotalRemisiones = 0;
     $ttotalRemisionesEf = 0;
-    $pdf->SetXY(6, $pdf->GetY()+10);
+    $pdf->SetXY(6, $pdf->GetY()+5);
     if (count($caja['remisiones']) > 0) {
       $pdf->SetFont('Arial','B', 6);
       $pdf->SetAligns(array('L', 'C'));
@@ -839,7 +853,15 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetAligns(array('C', 'C', 'C'));
     $pdf->SetWidths(array(20, 20, 20));
     $pdf->SetFont('Arial', 'B', 6);
-    $pdf->SetXY(150, $pdf->GetY()+5);
+    $pdf->SetXY(85, $pdf->GetY()+5);
+    $pdf->Row(array('Term Hrs Trabajadas', 'Term Lts', 'Term Hrs/Lts'), false, true);
+    $pdf->SetXY(85, $pdf->GetY());
+    $pdf->Row(array($caja['info']->rend_thrs_trab, $caja['info']->rend_thrs_lts, $caja['info']->rend_thrs_hxl), false, true);
+
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(20, 20, 20));
+    $pdf->SetFont('Arial', 'B', 6);
+    $pdf->SetXY(150, $pdf->GetY()-12);
     $pdf->Row(array('Km Recorrido', 'Velocidad Max', 'Reposición Lt/Hist'), false, true);
     $pdf->SetXY(150, $pdf->GetY());
     $pdf->Row(array($caja['info']->km_rec, $caja['info']->vel_max, $caja['info']->rep_lt_hist), false, true);

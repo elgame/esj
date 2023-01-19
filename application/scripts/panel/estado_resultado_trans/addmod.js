@@ -27,6 +27,7 @@
     autocompleteCodGastosLive();
 
     chkcomprobacion();
+    termohrs();
   });
 
   var submitForm = function () {
@@ -37,6 +38,15 @@
       if ($('#btnGuardar').length == 0) {
         event.preventDefault();
       }
+    });
+  }
+
+  var termohrs = function() {
+    $('.form-horizontal').on('keyup', '#rend_thrs_trab, #rend_thrs_lts', function(){
+      const rend_thrs_trab = (parseFloat($('#rend_thrs_trab').val())||0);
+      const rend_thrs_lts = (parseFloat($('#rend_thrs_lts').val())||1);
+      console.log(rend_thrs_trab, rend_thrs_lts);
+      $('#rend_thrs_hxl').val((rend_thrs_trab/rend_thrs_lts).toFixed(2))
     });
   }
 
