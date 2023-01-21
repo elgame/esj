@@ -6,7 +6,7 @@
  ☐ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio
    poder agregar el rendimiento del termo, HORAS TRABAJADAS, LTS DIESEL TERMO, REND HR POR LITRO
    crear reporte acumulado por rango de fechas y camion
-   -- lap
+   -- lap|san
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN destino character varying(150) COLLATE pg_catalog."default";
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_trab double precision;
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_lts double precision;
