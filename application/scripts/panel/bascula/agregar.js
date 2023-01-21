@@ -752,8 +752,8 @@ $(function(){
         });
 
         let userId = parseInt($('#userId').val())||0;
-        if((totalKg+5) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
-          noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+5) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+        if((totalKg+10) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
+          noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+10) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
         } else {
           $form.submit();
         }
@@ -787,8 +787,8 @@ $(function(){
           });
 
           let userId = parseInt($('#userId').val())||0;
-          if((totalKg+5) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
-            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+5) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          if((totalKg+10) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
+            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+10) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
           } else {
             $('#form').submit();
           }
@@ -873,8 +873,8 @@ $(function(){
           });
 
           let userId = parseInt($('#userId').val())||0;
-          if((totalKg+5) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
-            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+5) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          if((totalKg+10) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
+            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+10) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
           } else {
             $('#autorizar').val(resp.user_id);
             $('#form').submit();
