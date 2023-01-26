@@ -12,7 +12,7 @@
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_lts double precision;
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_hxl double precision;
    -- lap
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Relación de Fletes',572,true,'privilegios/rpt_rel_fletes/','print',true);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Relación de Fletes',572,true,'estado_resultado_trans/rpt_rel_fletes/','print',true);
  ✔ estimacion transpor @done (23-01-18 10:40)
    -- lap|san
     ALTER TABLE otros.estado_resultado_trans ADD COLUMN id_gasto1 character varying(100);

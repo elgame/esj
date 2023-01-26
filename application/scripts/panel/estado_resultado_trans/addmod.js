@@ -62,7 +62,8 @@
 
   var obtenRemisionesAjax = function () {
     $('#modal-remisiones').on('show', function () {
-      $.getJSON(base_url+'panel/estado_resultado_trans/ajax_get_remisiones', function(json, textStatus) {
+      const params = `?did_empresa=${$('#did_empresa').val()}`;
+      $.getJSON(base_url+'panel/estado_resultado_trans/ajax_get_remisiones' + params, function(json, textStatus) {
         var html = '';
         for (var key in json) {
           html += '<tr>'+

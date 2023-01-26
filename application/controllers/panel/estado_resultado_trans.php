@@ -11,6 +11,8 @@ class estado_resultado_trans extends MY_Controller {
     'estado_resultado_trans/ajax_get_proveedores/',
     'estado_resultado_trans/ajax_get_cods/',
     'estado_resultado_trans/ajax_get_gastos_caja/',
+    'estado_resultado_trans/rpt_rel_fletes_pdf/',
+    'estado_resultado_trans/rpt_rel_fletes_xls/',
 
     'estado_resultado_trans/imprimir/',
   );
@@ -129,7 +131,7 @@ class estado_resultado_trans extends MY_Controller {
     $params['getId'] = '';
     if (isset($_GET['id_nr']) || isset($_GET['id_nrc']))
     {
-      $params['borrador'] = $this->estado_resultado_trans_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']), false, true );
+      $params['borrador'] = $this->estado_resultado_trans_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']) );
       // echo "<pre>";
       // var_dump($params['borrador']);
       // echo "</pre>";exit;
@@ -187,6 +189,45 @@ class estado_resultado_trans extends MY_Controller {
     $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
     $this->load->model('estado_resultado_trans_model');
     echo json_encode($this->estado_resultado_trans_model->getGastosCaja($id_empresa));
+  }
+
+  public function rpt_rel_fletes()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_salidas_codigos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Relación de Fletes');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/estado_resultado_trans/rpt_rel_fletes',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_rel_fletes_pdf(){
+    if ($this->input->get('did_empresa') > 0 && $this->input->get('activoId') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $this->load->model('estado_resultado_trans_model');
+      $this->estado_resultado_trans_model->getRelFletesXls();
+    }
+  }
+  public function rpt_rel_fletes_xls(){
+    if ($this->input->get('did_empresa') > 0 && $this->input->get('activoId') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $this->load->model('estado_resultado_trans_model');
+      $this->estado_resultado_trans_model->getRelFletesXls('xls');
+    }
   }
 
 

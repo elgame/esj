@@ -523,7 +523,7 @@ class estado_resultado_trans_model extends privilegios_model{
         $res = $this->db
           ->select('v.id_remision, Date(f.fecha) AS fecha, (f.serie || f.folio) AS folio,
             c.id_cliente, c.nombre_fiscal AS cliente, f.subtotal, f.total, v.comprobacion,
-            fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva, fp.unidad')
+            fp.id_clasificacion, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva, fp.unidad')
           ->from('otros.estado_resultado_trans_ventas v')
             ->join('facturacion f', 'v.id_remision = f.id_factura', 'inner')
             ->join('clientes c', 'c.id_cliente = f.id_cliente', 'inner')
@@ -907,6 +907,323 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->Row(array('DEV. EFECTIVO', MyString::formatoNumero($ttotalefectivo, 2, '$', false)), false, true);
 
     $pdf->Output('estado_resultado.pdf', 'I');
+  }
+
+  public function getRelFletesData($id_producto=null, $id_almacen=null, $con_req=false, $extras = [])
+  {
+    $sql_com = $sql_sal = $sql_req = $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+
+    $fletes = $this->db->query("SELECT id
+      FROM otros.estado_resultado_trans
+      WHERE id_empresa = {$_GET['did_empresa']} AND fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        AND status = 't' AND id_activo = {$_GET['activoId']}")->result();
+
+    $response = [
+      'destino' => [''],
+      'fecha' => [''],
+      'chofer' => [''],
+      'ingresos' => ['data' => [], 'rows' => []]
+    ];
+    foreach ($fletes as $keyf => $flete) {
+      $infoFlete = $this->getInfoVenta($flete->id, false, true);
+
+      $response['destino'][] = $infoFlete['info']->destino;
+      $response['fecha'][] = $infoFlete['info']->fecha;
+      $response['chofer'][] = $infoFlete['info']->chofer->nombre;
+
+      // ingresos
+      $remisiones = []; // agrupamos por clasif
+      foreach ($infoFlete['remisiones'] as $key => $rem) {
+        if (isset($remisiones[$rem->id_clasificacion])) {
+          $remisiones[$rem->id_clasificacion]->cantidad += $rem->cantidad;
+          $remisiones[$rem->id_clasificacion]->importe += $rem->importe;
+          $remisiones[$rem->id_clasificacion]->iva += $rem->iva;
+        } else {
+          $remisiones[$rem->id_clasificacion] = $rem;
+        }
+      }
+      foreach ($remisiones as $key => $rem) { // agrega los nuevos conceptos de ingreso
+        if (isset($response['ingresos']['rows'][$rem->id_clasificacion])) {
+          $response['ingresos']['rows'][$rem->id_clasificacion][] = $rem->importe;
+        } else {
+          $response['ingresos']['rows'][$rem->id_clasificacion][] = $rem->descripcion;
+          for ($i=0; $i < $keyf; $i++) {
+            $response['ingresos']['rows'][$rem->id_clasificacion][] = 0;
+          }
+          $response['ingresos']['rows'][$rem->id_clasificacion][] = $rem->importe;
+        }
+      }
+      foreach ($response['ingresos']['rows'] as $key => $row) { // ajusta todos los conceptos al # de rows
+        if ($keyf+2 > count($row)) {
+          $response['ingresos']['rows'][$key][] = 0;
+        }
+      }
+    }
+    echo "<pre>";
+    var_dump($response);
+    echo "</pre>";exit;
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    if(is_array($this->input->get('ffamilias'))){
+      $sql .= " AND pf.id_familia IN (".implode(',', $this->input->get('ffamilias')).")";
+    }
+
+    if($this->input->get('fid_producto') != '' || $id_producto > 0){
+      $id_producto = $id_producto>0? $id_producto: $this->input->get('fid_producto');
+      $sql .= " AND p.id_producto = ".$id_producto;
+      $res_prod = $this->db->query("SELECT id_empresa FROM productos WHERE id_producto = {$id_producto}")->row();
+      $_GET['did_empresa'] = $res_prod->id_empresa;
+    }
+
+    if (!isset($extras['empresa'])) {
+      $this->load->model('empresas_model');
+      $client_default = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+      $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+      if($this->input->get('did_empresa') != ''){
+        $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+      }
+    } elseif (isset($extras['empresa'])) {
+      $sql .= " AND p.id_empresa = '{$extras['empresa']}'";
+    }
+
+    if ($this->input->get('did_empresa') == 3) { // gomez gudiño
+      $sql_com .= " AND Date(cp.fecha_aceptacion) > '2015-04-30'";
+      $sql_sal .= " AND Date(sa.fecha_registro) > '2015-04-30'";
+    }
+
+    $id_almacen = $id_almacen>0? $id_almacen: $this->input->get('did_almacen');
+    if ($id_almacen > 0) {
+      $sql_com .= " AND co.id_almacen = ".$id_almacen;
+      $sql_sal .= " AND sa.id_almacen = ".$id_almacen;
+      $sql_req .= " AND cr.id_almacen = ".$id_almacen;
+    }
+
+    $sql_con_req = '';
+    $sql_con_req_f = '';
+    if ($con_req) { // toma en cuenta la existencia de las requisición pendientes
+      $sql_con_req_f = ', COALESCE(con_req.cantidad, 0) AS con_req';
+      $sql_con_req = "LEFT JOIN
+      (
+        SELECT crq.id_producto, Sum(crq.cantidad) AS cantidad
+        FROM compras_requisicion cr
+          INNER JOIN compras_requisicion_productos crq ON cr.id_requisicion = crq.id_requisicion
+        WHERE cr.status = 'p' AND cr.tipo_orden = 'p' AND cr.autorizado = 'f' AND cr.id_autorizo IS NULL
+          AND cr.es_receta = 't' AND crq.importe > 0
+          {$sql_req}
+        GROUP BY crq.id_producto
+      ) AS con_req ON con_req.id_producto = p.id_producto";
+    }
+
+    $res = $this->db->query(
+      "SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura,
+        COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
+        (COALESCE(sal_co.cantidad, 0) - COALESCE(sal_sa.cantidad, 0)) AS saldo_anterior, p.stock_min
+        {$sql_con_req_f}
+      FROM productos AS p
+      INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
+      INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
+      LEFT JOIN
+      (
+        SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
+        FROM compras_ordenes AS co
+          INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+        WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
+          AND Date(cp.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql_com} AND co.id_orden_aplico IS NULL
+        GROUP BY cp.id_producto
+      ) AS co ON co.id_producto = p.id_producto
+      LEFT JOIN
+      (
+        SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
+        FROM compras_salidas AS sa
+        INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+        WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
+          AND Date(sa.fecha_registro) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql_sal}
+        GROUP BY sp.id_producto
+      ) AS sa ON sa.id_producto = p.id_producto
+      LEFT JOIN
+      (
+        SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
+        FROM compras_ordenes AS co
+          INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+        WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
+          AND Date(cp.fecha_aceptacion) < '{$fecha}'
+          {$sql_com} AND co.id_orden_aplico IS NULL
+        GROUP BY cp.id_producto
+      ) AS sal_co ON sal_co.id_producto = p.id_producto
+      LEFT JOIN
+      (
+        SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
+        FROM compras_salidas AS sa
+        INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+        WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
+          AND Date(sa.fecha_registro) < '{$fecha}'
+          {$sql_sal}
+        GROUP BY sp.id_producto
+      ) AS sal_sa ON sal_sa.id_producto = p.id_producto
+      {$sql_con_req}
+      WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
+      ORDER BY nombre, nombre_producto ASC
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+  public function getRelFletesXls($tipo = 'html'){
+    if ($tipo == 'xls') {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=rel_fletes.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
+
+    $res = $this->getRelFletesData();
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Existencia por unidades';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    // $titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Saldo</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Entradas</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Salidas</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Existencia</td>
+        </tr>';
+
+    $familia = '';
+    $totales = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($key==0){
+
+        if ($key == 0)
+        {
+          $familia = $item->nombre;
+          $html .= '<tr>
+              <td colspan="6" style="font-size:16px;border:1px solid #000;">'.$familia.'</td>
+            </tr>';
+        }
+      }
+
+      if ($familia <> $item->nombre)
+      {
+        if($key > 0){
+          $html .= '
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">TOTALES</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][0].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][1].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][2].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][3].'</td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>';
+        }
+        $totales['familia'] = array(0,0,0,0);
+
+        $familia = $item->nombre;
+        $html .= '<tr>
+              <td colspan="6" style="font-size:16px;border:1px solid #000;">'.$familia.'</td>
+            </tr>';
+      }
+
+      $imprimir = true;
+      $existencia = $item->saldo_anterior+$item->entradas-$item->salidas;
+      if($this->input->get('con_existencia') == 'si')
+        if($existencia <= 0)
+          $imprimir = false;
+      if($this->input->get('con_movimiento') == 'si')
+        if($item->entradas <= 0 && $item->salidas <= 0)
+          $imprimir = false;
+
+
+      if($imprimir)
+      {
+        $totales['familia'][0] += $item->saldo_anterior;
+        $totales['familia'][1] += $item->entradas;
+        $totales['familia'][2] += $item->salidas;
+        $totales['familia'][3] += $existencia;
+
+        $totales['general'][0] += $item->saldo_anterior;
+        $totales['general'][1] += $item->entradas;
+        $totales['general'][2] += $item->salidas;
+        $totales['general'][3] += $existencia;
+
+        $html .= '<tr>
+              <td style="width:30px;border:1px solid #000;"></td>
+              <td style="width:300px;border:1px solid #000;">'.$item->nombre_producto.' ('.$item->abreviatura.')'.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->saldo_anterior.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->entradas.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->salidas.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$existencia.'</td>
+            </tr>';
+      }
+    }
+
+    $html .= '
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">TOTALES</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][0].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][1].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][2].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][3].'</td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">GENERAL</td>
+              <td style="border:1px solid #000;">'.$totales['general'][0].'</td>
+              <td style="border:1px solid #000;">'.$totales['general'][1].'</td>
+              <td style="border:1px solid #000;">'.$totales['general'][2].'</td>
+              <td style="border:1px solid #000;">'.$totales['general'][3].'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
   }
 
 }
