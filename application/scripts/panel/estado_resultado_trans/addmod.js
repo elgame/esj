@@ -266,6 +266,7 @@
               '<td><input type="checkbox" class="chk-repmant" data-id="'+json[key].id_compra+'" '+
                 'data-folio="'+json[key].folio+'" data-total="'+json[key].subtotal+'" '+
                 'data-proveedor="'+json[key].proveedor+'" '+
+                'data-proveedorid="'+json[key].id_proveedor+'" '+
                 'data-concepto="'+json[key].concepto+'" '+
                 'data-fecha="'+json[key].fecha+'"></td>'+
               '<td style="width: 66px;">'+json[key].fecha+'</td>'+
@@ -289,14 +290,26 @@
         $('.chk-repmant:checked').each(function(index, el) {
           $this = $(this);
 
-          agregarRepMant({
-            id: $this.attr('data-id'),
-            folio: $this.attr('data-folio'),
-            total: $this.attr('data-total'),
-            proveedor: $this.attr('data-proveedor'),
-            concepto: $this.attr('data-concepto'),
-            fecha: $this.attr('data-fecha')
-          });
+          if($('#tipo-repmant').val() == 'repMant') {
+            agregarRepMant({
+              id: $this.attr('data-id'),
+              folio: $this.attr('data-folio'),
+              total: $this.attr('data-total'),
+              proveedor: $this.attr('data-proveedor'),
+              concepto: $this.attr('data-concepto'),
+              fecha: $this.attr('data-fecha')
+            });
+          } else { //gastos
+            agregarGastos({
+              id: $this.attr('data-id'),
+              folio: $this.attr('data-folio'),
+              total: $this.attr('data-total'),
+              proveedor: $this.attr('data-proveedor'),
+              proveedorId: $this.attr('data-proveedorid'),
+              concepto: $this.attr('data-concepto'),
+              fecha: $this.attr('data-fecha')
+            });
+          }
         });
 
         calculaTotalRepMant();
@@ -319,6 +332,11 @@
     });
   };
   var btnAddRepMant = function () {
+    $('#btn-show-repmant').on('click', function(event) {
+      $('#tipo-repmant').val('repMant');
+      $('#modal-repmant').modal('show');
+    });
+
     $('#btn-add-repmant').on('click', function(event) {
       agregarRepMant({
         id: '',
@@ -396,33 +414,48 @@
 
 
   var btnAddGastos = function () {
+    $('#btn-show-gastos').on('click', function(event) {
+      $('#tipo-repmant').val('gastos');
+      $('#modal-repmant').modal('show');
+    });
+
     $('#btn-add-gastos').on('click', function(event) {
-      agregarGastos();
+      agregarGastos({
+        id: '',
+        folio: '',
+        total: '',
+        proveedor: '',
+        proveedorId: '',
+        concepto: '',
+        fecha: ''
+      });
     });
   };
-  var agregarGastos = function () {
+  var agregarGastos = function (compra) {
     var $table = $('#table-gastos').find('tbody .row-total'),
-        tr = '<tr>'+
-                '<td><input type="date" name="gastos_fecha[]" value="" required></td>'+
-                '<td>'+
-                  '<input type="hidden" name="gastos_id_gasto[]" value="" id="gastos_id_gasto">'+
-                  '<input type="text" name="gastos_proveedor[]" value="" class="span12 autproveedor" required>'+
-                  '<input type="hidden" name="gastos_proveedor_id[]" value="" class="span12 vpositive autproveedor-id">'+
-                '</td>'+
-                '<td style="">'+
-                  '<input type="text" name="gastos_codg[]" value="" class="span12 codsgastos" required>'+
-                  '<input type="hidden" name="gastos_codg_id[]" value="" class="span12 vpositive codsgastos-id">'+
-                '</td>'+
-                '<td style="width: 60px;"><input type="text" name="gastos_importe[]" value="" class="span12 vpositive gastos-importe" required></td>'+
-                '<td style="">' +
-                  '<input type="checkbox" value="true" class="chkcomprobacion">' +
-                  '<input type="hidden" name="gastos_comprobacion[]" value="" class="valcomprobacion">' +
-                '</td>' +
-                '<td style="width: 30px;">'+
-                  '<button type="button" class="btn btn-danger btn-del-gastos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
-                  '<input type="hidden" name="gastos_del[]" value="" id="gastos_del">'+
-                '</td>' +
-              '</tr>';
+      tr = '<tr>'+
+              '<td><input type="date" name="gastos_fecha[]" value="' + compra.fecha + '" required></td>'+
+              '<td><input type="text" name="gastos_folio[]" value="' + compra.folio + '"></td>'+
+              '<td>'+
+                '<input type="hidden" name="gastos_id_compra[]" value="' + compra.id + '" id="gastos_id_compra">'+
+                '<input type="hidden" name="gastos_id_gasto[]" value="" id="gastos_id_gasto">'+
+                '<input type="text" name="gastos_proveedor[]" value="' + compra.proveedor + '" class="span12 autproveedor" required>'+
+                '<input type="hidden" name="gastos_proveedor_id[]" value="' + compra.proveedorId + '" class="span12 vpositive autproveedor-id">'+
+              '</td>'+
+              '<td style="">'+
+                '<input type="text" name="gastos_codg[]" value="' + compra.concepto + '" class="span12 codsgastos" required>'+
+                '<input type="hidden" name="gastos_codg_id[]" value="" class="span12 vpositive codsgastos-id">'+
+              '</td>'+
+              '<td style=""><input type="text" name="gastos_importe[]" value="' + compra.total + '" class="span12 vpositive gastos-importe" required></td>'+
+              '<td style="">' +
+                '<input type="checkbox" value="true" class="chkcomprobacion">' +
+                '<input type="hidden" name="gastos_comprobacion[]" value="" class="valcomprobacion">' +
+              '</td>' +
+              '<td style="">'+
+                '<button type="button" class="btn btn-danger btn-del-gastos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+                '<input type="hidden" name="gastos_del[]" value="" id="gastos_del">'+
+              '</td>' +
+            '</tr>';
 
     $(tr).insertBefore($table);
     $(".vpositive").numeric({ negative: false }); //Numero positivo
