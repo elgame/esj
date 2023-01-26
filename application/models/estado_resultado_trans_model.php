@@ -297,6 +297,8 @@ class estado_resultado_trans_model extends privilegios_model{
           'cantidad'     => 0,
           'precio'       => 0,
           'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
+          'id_compra'    => $_POST['gastos_id_compra'][$key] !== '' ? $_POST['gastos_id_compra'][$key] : null,
+          'folio'        => $_POST['gastos_folio'][$key] !== '' ? $_POST['gastos_folio'][$key] : '',
         );
       }
 
@@ -433,6 +435,8 @@ class estado_resultado_trans_model extends privilegios_model{
             'cantidad'     => 0,
             'precio'       => 0,
             'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
+            'id_compra'    => $_POST['gastos_id_compra'][$key] !== '' ? $_POST['gastos_id_compra'][$key] : null,
+            'folio'        => $_POST['gastos_folio'][$key] !== '' ? $_POST['gastos_folio'][$key] : '',
           );
         }
       }
@@ -561,18 +565,21 @@ class estado_resultado_trans_model extends privilegios_model{
           LEFT JOIN compras f ON v.id_compra = f.id_compra
           LEFT JOIN proveedores p ON p.id_proveedor = f.id_proveedor
         WHERE v.id_estado = {$id}
-        ORDER BY v.id_compra asc");
+        ORDER BY fecha asc");
       $response['repmant'] = $res->result();
 
-      $res = $this->db
-        ->select('s.id, p.id_proveedor, Date(s.fecha) AS fecha,
-          c.nombre AS codg, c.id AS id_codg, s.importe, p.nombre_fiscal AS proveedor,
-          s.comprobacion')
-        ->from('otros.estado_resultado_trans_gastos s')
-        ->join('proveedores p', 'p.id_proveedor = s.id_proveedor', 'inner')
-        ->join('otros.estado_resultado_trans_cods c', 'c.id = s.id_cod', 'inner')
-        ->where('s.id_estado = ' . $id)->order_by('s.id', 'asc')
-        ->get();
+      $res = $this->db->query("SELECT v.id, v.id_compra AS id_compra,
+          Coalesce((f.serie || f.folio), v.folio ) AS folio, p.id_proveedor,
+          p.nombre_fiscal AS proveedor, Coalesce(Date(f.fecha), v.fecha ) AS fecha,
+          Coalesce(f.subtotal, v.importe ) AS subtotal, Coalesce(f.total, v.importe ) AS total,
+          Coalesce(f.importe_iva, 0::double precision ) AS importe_iva,
+          c.nombre AS codg, c.id AS id_codg, v.comprobacion
+        FROM otros.estado_resultado_trans_gastos v
+          INNER JOIN proveedores p ON p.id_proveedor = v.id_proveedor
+          INNER JOIN otros.estado_resultado_trans_cods c ON c.id = v.id_cod
+          LEFT JOIN compras f ON v.id_compra = f.id_compra
+        WHERE v.id_estado = {$id}
+        ORDER BY fecha asc");
       // echo $this->db->last_query();
       $response['gastos'] = $res->result();
 
@@ -803,14 +810,14 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(5, 15, 75, 74, 18));
-      $pdf->Row(array('C', 'FECHA', 'PROVEEDOR', 'DESCRIPCION', 'IMPORTE'), true, true);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(5, 15, 15, 65, 69, 18));
+      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'PROVEEDOR', 'DESCRIPCION', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'R'));
-      $pdf->SetWidths(array(5, 15, 75, 74, 18));
+      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(5, 15, 15, 65, 69, 18));
       foreach ($caja['gastos'] as $key => $gasto)
       {
         $pdf->SetX(6);
@@ -818,14 +825,15 @@ class estado_resultado_trans_model extends privilegios_model{
         $pdf->Row(array(
           $comprobacion[$gasto->comprobacion],
           $gasto->fecha,
+          $gasto->folio,
           $gasto->proveedor,
           $gasto->codg,
-          MyString::formatoNumero($gasto->importe, 2, '', false)
+          MyString::formatoNumero($gasto->subtotal, 2, '', false)
         ), false, 'B');
 
-        $ttotalGastos += floatval($gasto->importe);
+        $ttotalGastos += floatval($gasto->subtotal);
         if ($gasto->comprobacion == 't') {
-          $ttotalGastosEf += floatval($gasto->importe);
+          $ttotalGastosEf += floatval($gasto->subtotal);
         }
       }
     }

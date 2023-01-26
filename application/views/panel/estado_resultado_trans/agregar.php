@@ -369,7 +369,7 @@
                   <tr>
                     <th colspan="9">REP Y MTTO DE EQUIPO TRASPORTE
                       <button type="button" class="btn btn-success" id="btn-add-repmant" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
-                      <a href="#modal-repmant" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-repmant" style="padding: 2px 7px 2px; float: right;">Gastos</a>
+                      <a href="#" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-repmant" style="padding: 2px 7px 2px; float: right;">Gastos</a>
                     </th>
                   </tr>
                   <tr>
@@ -471,16 +471,18 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                           <thead>
                             <tr>
-                              <th colspan="6">GASTOS
+                              <th colspan="7">GASTOS
                                 <button type="button" class="btn btn-success" id="btn-add-gastos" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
+                                <a href="#" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-gastos" style="padding: 2px 7px 2px; float: right;">Gastos</a>
                               </th>
                             </tr>
                             <tr>
-                              <th style="width: 15%;">FECHA</th>
-                              <th style="width: 30%;">PROVEEDOR</th>
-                              <th style="width: 37%;">CONCEPTO</th>
-                              <th style="width: 15%;">IMPORTE</th>
-                              <th style="width: 15%;">COMPRO</th>
+                              <th style="width: 12%;">FECHA</th>
+                              <th style="width: 12%;">FOLIO</th>
+                              <th style="width: 25%;">PROVEEDOR</th>
+                              <th style="width: 25%;">CONCEPTO</th>
+                              <th style="width: 12%;">IMPORTE</th>
+                              <th style="width: 3%;">COMPRO</th>
                               <th style="width: 3%;"></th>
                             </tr>
                           </thead>
@@ -491,7 +493,9 @@
                                   $totalGastos += floatval($_POST['gastos_importe'][$key]); ?>
                                 <tr>
                                   <td><input type="date" name="gastos_fecha[]" value="<?php echo $_POST['gastos_fecha'][$key] ?>" required></td>
+                                  <td><input type="text" name="gastos_folio[]" value="<?php echo $_POST['gastos_folio'][$key] ?>"></td>
                                   <td>
+                                    <input type="hidden" name="gastos_id_compra[]" value="<?php echo $_POST['gastos_id_compra'][$key] ?>" id="gastos_id_compra">
                                     <input type="hidden" name="gastos_id_gasto[]" value="<?php echo $_POST['gastos_id_gasto'][$key] ?>" id="sueldos_id_sueldo">
                                     <input type="text" name="gastos_proveedor[]" value="<?php echo $_POST['gastos_proveedor'][$key] ?>" class="span12 autproveedor" required>
                                     <input type="hidden" name="gastos_proveedor_id[]" value="<?php echo $_POST['gastos_proveedor_id'][$key] ?>" class="span12 vpositive autproveedor-id">
@@ -500,12 +504,12 @@
                                     <input type="text" name="gastos_codg[]" value="<?php echo $_POST['gastos_codg'][$key] ?>" class="span12 codsgastos" required>
                                     <input type="hidden" name="gastos_codg_id[]" value="<?php echo $_POST['gastos_codg_id'][$key] ?>" class="span12 vpositive codsgastos-id">
                                   </td>
-                                  <td style="width: 60px;"><input type="text" name="gastos_importe[]" value="<?php echo $_POST['gastos_importe'][$key] ?>" class="span12 vpositive gastos-importe" required></td>
+                                  <td style=""><input type="text" name="gastos_importe[]" value="<?php echo $_POST['gastos_importe'][$key] ?>" class="span12 vpositive gastos-importe" required></td>
                                   <td style="">
                                     <input type="checkbox" value="true" class="chkcomprobacion" <?php echo ($_POST['gastos_comprobacion'][$key] == 'true'? 'checked': '') ?>>
                                     <input type="hidden" name="gastos_comprobacion[]" value="<?php echo $_POST['gastos_comprobacion'][$key] ?>" class="valcomprobacion">
                                   </td>
-                                  <td style="width: 30px;">
+                                  <td style="">
                                     <button type="button" class="btn btn-danger btn-del-gastos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                     <input type="hidden" name="gastos_del[]" value="<?php echo $_POST['gastos_del'][$key] ?>" id="gastos_del">
                                   </td>
@@ -513,11 +517,13 @@
                             <?php }} else {
                               if (isset($borrador['gastos']))
                               foreach ($borrador['gastos'] as $gasto) {
-                                $totalGastos += floatval($gasto->importe);
+                                $totalGastos += floatval($gasto->subtotal);
                               ?>
                               <tr>
                                 <td><input type="date" name="gastos_fecha[]" value="<?php echo $gasto->fecha ?>" required></td>
+                                <td><input type="text" name="gastos_folio[]" value="<?php echo $gasto->folio ?>"></td>
                                 <td>
+                                  <input type="hidden" name="gastos_id_compra[]" value="<?php echo $gasto->id_compra ?>" id="gastos_id_compra">
                                   <input type="hidden" name="gastos_id_gasto[]" value="<?php echo $gasto->id ?>" id="gastos_id_gasto">
                                   <input type="text" name="gastos_proveedor[]" value="<?php echo $gasto->proveedor ?>" class="span12 autproveedor" required>
                                   <input type="hidden" name="gastos_proveedor_id[]" value="<?php echo $gasto->id_proveedor ?>" class="span12 vpositive autproveedor-id">
@@ -526,19 +532,19 @@
                                   <input type="text" name="gastos_codg[]" value="<?php echo $gasto->codg ?>" class="span12 codsgastos" required>
                                   <input type="hidden" name="gastos_codg_id[]" value="<?php echo $gasto->id_codg ?>" class="span12 vpositive codsgastos-id">
                                 </td>
-                                <td style="width: 60px;"><input type="text" name="gastos_importe[]" value="<?php echo $gasto->importe ?>" class="span12 vpositive gastos-importe" required></td>
+                                <td style=""><input type="text" name="gastos_importe[]" value="<?php echo $gasto->subtotal ?>" class="span12 vpositive gastos-importe" required></td>
                                 <td style="">
                                   <input type="checkbox" value="true" class="chkcomprobacion" <?php echo (isset($gasto->comprobacion) && $gasto->comprobacion == 't'? 'checked': '') ?>>
                                   <input type="hidden" name="gastos_comprobacion[]" value="<?php echo (isset($gasto->comprobacion) && $gasto->comprobacion == 't'? 'true': '') ?>" class="valcomprobacion">
                                 </td>
-                                <td style="width: 30px;">
+                                <td style="">
                                   <button type="button" class="btn btn-danger btn-del-gastos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                   <input type="hidden" name="gastos_del[]" value="" id="gastos_del">
                                 </td>
                               </tr>
                             <?php }} ?>
                             <tr class="row-total">
-                              <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                              <td colspan="4" style="text-align: right; font-weight: bolder;">TOTAL</td>
                               <td><input type="text" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                               <td colspan="3"></td>
                             </tr>
@@ -612,6 +618,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <input type="hidden" id="tipo-repmant" value="repMant">
       <button class="btn btn-primary" id="carga-repmant">Cargar</button>
     </div>
   </div>
