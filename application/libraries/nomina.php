@@ -1405,6 +1405,10 @@ class nomina
         }
       }
     }
+    // else {
+    //   $diasVacaciones = $this->vacacionesConfig[0]->dias;
+    // }
+
     return $diasVacaciones;
   }
 
