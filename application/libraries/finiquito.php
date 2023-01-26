@@ -1141,7 +1141,7 @@ class finiquito
     }
     else
     {
-      $diasVacaciones = 6;
+      $diasVacaciones = $this->vacacionesConfig[0]->dias;
     }
 
     // Saca el proporcional de dias de vacaciones.
