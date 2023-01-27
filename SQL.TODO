@@ -3,7 +3,7 @@
  ☐ Reporte de asistencias cambiar como la foto
  ☐ Reporte de boletas pendientes de pago por proveedor
  ✔ Reporte de codigos de gastos poner filtro para quitar concepto de diesel, gasolina y calcomania @done (23-01-18 12:42)
- ☐ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio
+ ✔ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio @done (23-01-26 16:13)
    poder agregar el rendimiento del termo, HORAS TRABAJADAS, LTS DIESEL TERMO, REND HR POR LITRO
    crear reporte acumulado por rango de fechas y camion
    -- lap|san|pcc
@@ -11,7 +11,7 @@
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_trab double precision;
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_lts double precision;
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_hxl double precision;
-   -- pcc
+   -- lap|pcc
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN id_compra bigint;
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD CONSTRAINT estado_resultado_trans_rep_mtto_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN folio character varying(30) COLLATE pg_catalog."default" DEFAULT ''::character varying;
