@@ -353,9 +353,9 @@ class MYpdf extends FPDF {
             $this->Ln($h);
     }
 
-    public function chkSaltaPag($xy = [63, 10])
+    public function chkSaltaPag($xy = [63, 10], $y = 10)
     {
-      if($this->GetY()+10 >= $this->limiteY){
+      if($this->GetY()+$y >= $this->limiteY){
         if (count($this->pages) > $this->page) {
           $this->page++;
           $this->SetXY($xy[0], $xy[1]);
