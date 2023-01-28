@@ -909,12 +909,24 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->Row(array('Cuenta', 'Importe'), false, true);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('ANTICIPO', MyString::formatoNumero($caja['info']->gasto_monto, 2, '$', false)), false, true);
+    if ($pdf->limiteY <= $pdf->GetY()+8) {
+      $pdf->AddPage();
+    }
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('INGRESO', MyString::formatoNumero($ttotalRemisionesEf, 2, '$', false)), false, true);
+    if ($pdf->limiteY <= $pdf->GetY()+8) {
+      $pdf->AddPage();
+    }
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('EGRESOS (-)', MyString::formatoNumero(($ttotalSueldos + $ttotalGastosEf), 2, '$', false)), false, true);
+    if ($pdf->limiteY <= $pdf->GetY()+8) {
+      $pdf->AddPage();
+    }
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('REP. GTOS (-)', MyString::formatoNumero($ttotalRepMantEf, 2, '$', false)), false, true);
+    if ($pdf->limiteY <= $pdf->GetY()+8) {
+      $pdf->AddPage();
+    }
     $pdf->SetFont('Arial', 'B', 6);
     $pdf->SetXY(6, $pdf->GetY());
     $ttotalefectivo = $caja['info']->gasto_monto + $ttotalRemisionesEf - $ttotalSueldos - $ttotalGastosEf - $ttotalRepMantEf;
