@@ -11,11 +11,10 @@
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_trab double precision;
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_lts double precision;
    ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_hxl double precision;
-   -- lap|pcc
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN id_compra bigint;
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD CONSTRAINT estado_resultado_trans_rep_mtto_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN folio character varying(30) COLLATE pg_catalog."default" DEFAULT ''::character varying;
-   -- lap
+   -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Relación de Fletes',572,true,'estado_resultado_trans/rpt_rel_fletes/','print',true);
  ✔ estimacion transpor @done (23-01-18 10:40)
    -- lap|san|pcc
