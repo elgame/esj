@@ -1859,7 +1859,7 @@ class compras_ordenes_model extends CI_Model {
   {
     $tipo = isset($datos['tipoo']{0})? $datos['tipoo']: 'en';
     $filtro = isset($datos['filtro']{0})? " AND b.folio = '{$datos['filtro']}'": '';
-    $accion = isset($datos['accion'][0])? "'".implode("','", $datos['accion'])."'": "'en', 'p', 'b'";
+    $accion = isset($datos['accion'][0])? "'".implode("','", $datos['accion'])."'": "'en', 'sa', 'p', 'b'";
     $area = isset($datos['area']{0})? " AND a.id_area = '{$datos['area']}'": '';
 
     $campos = "p.nombre_fiscal AS proveedor,";
