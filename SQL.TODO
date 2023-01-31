@@ -2,6 +2,9 @@
  ☐ Revisar el checador con adrian y cargar las asistencias directamente
  ☐ Reporte de asistencias cambiar como la foto
  ☐ Reporte de boletas pendientes de pago por proveedor
+ ☐ Reportes de nomina
+   -- lap
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Costo x Labor',364,true,'nomina_trabajos2/rpt_costo_labores/','print',true);
  ✔ Reporte de codigos de gastos poner filtro para quitar concepto de diesel, gasolina y calcomania @done (23-01-18 12:42)
  ✔ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio @done (23-01-26 16:13)
    poder agregar el rendimiento del termo, HORAS TRABAJADAS, LTS DIESEL TERMO, REND HR POR LITRO

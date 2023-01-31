@@ -359,102 +359,94 @@ class nomina_trabajos2_model extends CI_Model {
    *******************************
    * @return void
    */
-  public function getDataCombutible()
+  /**
+   * Reporte salidas de productos
+   */
+  public function rptCostoLaboresData()
   {
-    $sql = $sql2 = '';
+    $sql = '';
 
-    //Filtro de fecha.
-    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-      $sql .= " AND Date(csc.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-    elseif($this->input->get('ffecha1') != '')
-      $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha1')."'";
-    elseif($this->input->get('ffecha2') != '')
-      $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha2')."'";
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $sql .= " AND Date(t2.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
-    $sql2 = $sql;
-
-    // vehiculos
-    if (isset($_GET['dareas']) && count($_GET['dareas']) > 0)
-    {
-      $sql .= " AND i.id_area In(".implode(',', $_GET['dareas']).")";
+    if($this->input->get('dlaborId') != ''){
+      $dlaborId = $this->input->get('dlaborId');
+      $sql .= " AND t2.id_labor = ".$dlaborId;
     }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND t2.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('areaId') > 0) {
+      $sql .= " AND t2.id_area = ".$this->input->get('areaId');
+    }
+
+    if ($this->input->get('dempleadoId') > 0) {
+      $sql .= " AND t2.id_usuario = ".$this->input->get('dempleadoId');
+    }
+
+    if(is_array($this->input->get('ranchoId'))){
+      $sql .= " AND cc.id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
+    }
+
+    if(is_array($this->input->get('centroCostoId'))){
+      $sql .= " AND cc.id_centro_costo IN (".implode(',', $this->input->get('centroCostoId')).")";
+    }
+
+    $res = $this->db->query(
+      "SELECT cc.id_centro_costo, cc.tabla, Sum(cc.hectareas) AS hectareas,
+        Sum(t2.avance/cc.num) AS avance, Sum(t2.importe/cc.num) AS importe
+      FROM nomina_trabajos_dia2 t2
+        INNER JOIN nomina_trabajos_dia2_centros cc ON (t2.id_empresa = cc.id_empresa AND
+            t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows = cc.rows)
+      WHERE 1 = 1 {$sql}
+      GROUP BY cc.id_centro_costo, cc.tabla
+      ");
 
     $response = array();
-
-    // Totales de vehiculos
-    $response = $this->db->query(
-        "SELECT Sum(csc.horas_totales) AS horas_totales, Sum(csc.lts_combustible) AS lts_combustible,
-          i.nombre AS implemento, i.codigo_fin AS codigo_implemento, i.id_area
-        FROM compras_salidas_combustible AS csc
-          INNER JOIN compras_areas AS i ON i.id_area = csc.id_implemento
-        WHERE 1 = 1 {$sql}
-        GROUP BY i.id_area
-        ORDER BY implemento ASC")->result();
-
-    // Si es desglosado carga independientes
-    if (isset($_GET['ddesglosado']{0}) && $_GET['ddesglosado'] == '1') {
-      foreach ($response as $key => $value) {
-        $value->detalle = $this->db->query(
-            "SELECT csc.id_combustible, csc.fecha, csc.hora_inicial, csc.hora_final, csc.horas_totales, csc.lts_combustible,
-              l.id_labor, l.nombre AS labor, l.codigo, csc.id_centro_costo, cc.nombre AS centro_costo, cc.codigo_fin AS codigo_centro_costo,
-              csc.id_implemento, i.nombre AS implemento, i.codigo_fin AS codigo_implemento
-            FROM compras_salidas_combustible AS csc
-              INNER JOIN compras_areas AS cc ON cc.id_area = csc.id_centro_costo
-              INNER JOIN compras_areas AS i ON i.id_area = csc.id_implemento
-              INNER JOIN compras_salidas_labores AS l ON l.id_labor = csc.id_labor
-            WHERE i.id_area = {$value->id_area} {$sql2}
-            ORDER BY (csc.fecha, csc.id_combustible) ASC")->result();
-      }
-    }
+    if($res->num_rows() > 0)
+      $response = $res->result();
 
     return $response;
   }
-  public function rptcombustible_pdf()
-  {
-    $combustible = $this->getDataCombutible();
+  public function rptCostoLaboresPdf(){
+    $res = $this->rptCostoLaboresData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
-    $pdf->show_head = true;
 
-    if ($empresa['info']->logo !== '')
-      $pdf->logo = $empresa['info']->logo;
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-    $pdf->titulo2 = "Reporte de Combustible";
-
-    $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
-    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
-    elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
-    elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
-
+    $pdf->titulo2 = 'Reporte Costos por Labor';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
     $pdf->AliasNbPages();
-    // $links = array('', '', '', '');
-    $pdf->SetY(30);
-    $aligns = array('L', 'R', 'R', 'R');
-    $widths = array(115, 30, 30, 30);
-    $header = array('Vehiculo', 'Lts Combustible', 'Total Hrs', 'Lts/Hrs');
-    $aligns2 = array('L', 'L', 'L', 'R', 'R', 'R');
-    $widths2 = array(19, 48, 48, 30, 30, 30);
-    $header2 = array('Fecha', 'Centro Costo', 'Labor', 'Lts Combustible', 'Total Hrs', 'Lts/Hrs');
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
 
-    $lts_combustible = 0;
-    $horas_totales = 0;
+    $aligns = array('L', 'R', 'R', 'R', 'L');
+    $widths = array(110, 30, 30, 30, 30, 30);
+    $header = array('Tabla', 'Superficie', 'Avance', 'Importe');
 
-    $entro = false;
-    foreach($combustible as $key => $vehiculo)
-    {
-      $cantidad = 0;
-      $importe = 0;
-      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
-      {
+    $total_avance = $total_importe = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
         $pdf->AddPage();
 
         $pdf->SetFont('Arial','B',8);
@@ -465,95 +457,57 @@ class nomina_trabajos2_model extends CI_Model {
         $pdf->SetWidths($widths);
         $pdf->Row($header, true);
       }
-      $pdf->SetFont('Arial','B',8);
+
+      $pdf->SetFont('Arial','',8);
       $pdf->SetTextColor(0,0,0);
+
+      $datos = array(
+        $item->tabla,
+        $item->hectareas,
+        MyString::formatoNumero($item->avance, 2, '', false),
+        MyString::formatoNumero($item->importe, 2, '', false),
+      );
+      $total_avance += $item->avance;
+      $total_importe += $item->importe;
+
+      $_GET['id_centro_costo'] = $item->id_centro_costo;
+      $pdf->SetMyLinks([base_url('panel/nomina_trabajos2/rpt_costo_labores_desg_pdf?'.MyString::getVarsLink([]))]);
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
-      $pdf->Row(array(
-        $vehiculo->implemento,
-        MyString::formatoNumero($vehiculo->lts_combustible, 2, '', false),
-        MyString::formatoNumero($vehiculo->horas_totales, 2, '', false),
-        MyString::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false),
-      ), false, false);
-
-      $lts_combustible += floatval($vehiculo->lts_combustible);
-      $horas_totales   += floatval($vehiculo->horas_totales);
-
-      if (isset($vehiculo->detalle)) {
-        foreach ($vehiculo->detalle as $key2 => $item)
-        {
-          $band_head = false;
-          if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
-          {
-            $pdf->AddPage();
-
-            $pdf->SetFont('Arial','B',8);
-            $pdf->SetTextColor(255,255,255);
-            $pdf->SetFillColor(160,160,160);
-            $pdf->SetX(6);
-            $pdf->SetAligns($aligns2);
-            $pdf->SetWidths($widths2);
-            $pdf->Row($header2, true);
-          }
-
-          $pdf->SetFont('Arial','',8);
-          $pdf->SetTextColor(0,0,0);
-
-          $datos = array(
-            $item->fecha,
-            $item->centro_costo,
-            $item->labor,
-            MyString::formatoNumero($item->lts_combustible, 2, '', false),
-            MyString::formatoNumero($item->horas_totales, 2, '', false),
-            MyString::formatoNumero(($item->lts_combustible/($item->horas_totales>0?$item->horas_totales:1)), 2, '', false),
-          );
-
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns2);
-          $pdf->SetWidths($widths2);
-          $pdf->Row($datos, false, false);
-        }
-      }
-
+      $pdf->Row($datos, false);
     }
 
-    $pdf->SetX(6);
-    $pdf->SetAligns($aligns);
-    $pdf->SetWidths($widths);
+    $pdf->SetMyLinks([]);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(['R', 'R', 'R']);
+    $pdf->SetWidths([140, 30, 30]);
+    $pdf->Row(array('TOTAL',
+      MyString::formatoNumero($total_avance, 2, '', false),
+      MyString::formatoNumero($total_importe, 2, '', false),
+      ), false, true);
 
-    $pdf->SetFont('Arial','B',9);
-    $pdf->SetTextColor(0,0,0);
-    $pdf->Row(array('TOTALES',
-        MyString::formatoNumero($lts_combustible, 2, '', false),
-        MyString::formatoNumero($horas_totales, 2, '', false),
-        MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false) ),
-    true, false);
-
-    $pdf->Output('reporte_combustible.pdf', 'I');
+    $pdf->Output('costos_labor.pdf', 'I');
   }
-
-  public function rptcombustible_xls()
-  {
+  public function rptCostoLaboresXls(){
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=reporte_combustible.xls");
+    header("Content-Disposition: attachment; filename=costos_labor.xls");
     header("Pragma: no-cache");
     header("Expires: 0");
 
-    $combustible = $this->getDataCombutible();
+    $res = $this->rptCostoLaboresData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
-    $titulo2 = "Reporte de Combustible";
-    $titulo3 = "";
-    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
-    elseif (!empty($_GET['ffecha1']))
-        $titulo3 .= "Del ".$_GET['ffecha1'];
-    elseif (!empty($_GET['ffecha2']))
-        $titulo3 .= "Del ".$_GET['ffecha2'];
+    $titulo2 = 'Reporte Costos por Labor';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
 
     $html = '<table>
       <tbody>
@@ -570,53 +524,234 @@ class nomina_trabajos2_model extends CI_Model {
           <td colspan="6"></td>
         </tr>
         <tr style="font-weight:bold">
-          <td style="width:500px;border:1px solid #000;background-color: #cccccc;">Vehiculo</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Lts Combustible</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total Hrs</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Lts/Hrs</td>
+          <td colspan="3" style="width:200px;border:1px solid #000;background-color: #cccccc;">Tabla</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Superficie</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Avance</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
         </tr>';
-    $lts_combustible = $horas_totales = 0;
-    foreach ($combustible as $key => $vehiculo)
-    {
-      $lts_combustible += floatval($vehiculo->lts_combustible);
-      $horas_totales   += floatval($vehiculo->horas_totales);
 
-      $html .= '<tr style="font-weight:bold">
-          <td style="width:500px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->implemento.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->lts_combustible.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->horas_totales.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false).'</td>
+    $total_avance = $total_importe = 0;
+    foreach($res as $key => $item){
+      $html .= '<tr>
+          <td colspan="3" style="width:200px;border:1px solid #000;">'.$item->tabla.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->hectareas.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->avance.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
         </tr>';
-      if (isset($vehiculo->detalle)) {
-        foreach ($vehiculo->detalle as $key2 => $item)
-        {
-          $html .= '<tr>
-              <td colspan="3" style="width:500px;border:1px solid #000;">
-                <table>
-                  <tr>
-                    <td style="width:80px;border:1px solid #000;">'.$item->fecha.'</td>
-                    <td style="width:210px;border:1px solid #000;">'.$item->centro_costo.'</td>
-                    <td style="width:210px;border:1px solid #000;">'.$item->labor.'</td>
-                  </tr>
-                </table>
-              </td>
-              <td style="width:150px;border:1px solid #000;">'.$item->lts_combustible.'</td>
-              <td style="width:150px;border:1px solid #000;">'.$item->horas_totales.'</td>
-              <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
-            </tr>';
-        }
-      }
-
+      $total_avance += $item->avance;
+      $total_importe += $item->importe;
     }
 
     $html .= '
-        <tr style="font-weight:bold">
-          <td>TOTALES</td>
-          <td style="border:1px solid #000;">'.$lts_combustible.'</td>
-          <td style="border:1px solid #000;">'.$horas_totales.'</td>
-          <td style="border:1px solid #000;">'.MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
+            <tr style="font-weight:bold">
+              <td colspan="4"></td>
+              <td style="border:1px solid #000;">'.$total_avance.'</td>
+              <td style="border:1px solid #000;">'.$total_importe.'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  public function rptCostoLaboresDesglosadoData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $sql .= " AND Date(t2.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+
+    if($this->input->get('dlaborId') != ''){
+      $dlaborId = $this->input->get('dlaborId');
+      $sql .= " AND t2.id_labor = ".$dlaborId;
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND t2.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('areaId') > 0) {
+      $sql .= " AND t2.id_area = ".$this->input->get('areaId');
+    }
+
+    if ($this->input->get('dempleadoId') > 0) {
+      $sql .= " AND t2.id_usuario = ".$this->input->get('dempleadoId');
+    }
+
+    if(is_array($this->input->get('ranchoId'))){
+      $sql .= " AND cc.id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
+    }
+
+    if($this->input->get('id_centro_costo') > 0){
+      $sql .= " AND cc.id_centro_costo = ".$this->input->get('id_centro_costo')."";
+    }
+
+    $res = $this->db->query(
+      "SELECT cc.id_centro_costo, cc.tabla, (cc.hectareas) AS hectareas,
+        (t2.avance/cc.num) AS avance, (t2.importe/cc.num) AS importe,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
+        sl.nombre AS labor
+      FROM nomina_trabajos_dia2 t2
+        INNER JOIN usuarios u ON u.id = t2.id_usuario
+        INNER JOIN compras_salidas_labores sl ON sl.id_labor = t2.id_labor
+        INNER JOIN nomina_trabajos_dia2_centros cc ON (t2.id_empresa = cc.id_empresa AND
+            t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows = cc.rows)
+      WHERE 1 = 1 {$sql}
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+  public function rptCostoLaboresDesglosadoPdf(){
+    $res = $this->rptCostoLaboresDesglosadoData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte Costos por Labor Detallado';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $pdf->titulo3 .= (isset($res[0]->tabla)? "Centro: ".$res[0]->tabla : '');
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $pdf->SetX(6);
+    $pdf->SetAligns(['L']);
+    $pdf->SetWidths([110]);
+    $pdf->SetMyLinks([base_url('panel/nomina_trabajos2/rpt_costo_labores_desg_xls?'.MyString::getVarsLink([]))]);
+    $pdf->Row(['Excel'], false, false);
+    $pdf->SetMyLinks([]);
+
+    $aligns = array('L', 'L', 'R', 'R', 'L');
+    $widths = array(70, 70, 30, 30, 30, 30);
+    $header = array('Trabajador', 'Labor', 'Avance', 'Importe');
+
+    $total_avance = $total_importe = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        if ($pdf->GetY() >= $pdf->limiteY) {
+          $pdf->AddPage();
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $datos = array(
+        $item->trabajador,
+        $item->labor,
+        MyString::formatoNumero($item->avance, 2, '', false),
+        MyString::formatoNumero($item->importe, 2, '', false),
+      );
+      $total_avance += $item->avance;
+      $total_importe += $item->importe;
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->SetMyLinks([]);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(['R', 'R', 'R']);
+    $pdf->SetWidths([140, 30, 30]);
+    $pdf->Row(array('TOTAL',
+      MyString::formatoNumero($total_avance, 2, '', false),
+      MyString::formatoNumero($total_importe, 2, '', false),
+      ), false, true);
+
+    $pdf->Output('costos_labor_detallado.pdf', 'I');
+  }
+  public function rptCostoLaboresDesglosadoXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=costos_labor_detallado.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->rptCostoLaboresDesglosadoData();
+
+    $this->load->model('empresas_model');
+
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte Costos por Labor Detallado';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $titulo3 .= (isset($res[0]->tabla)? "Centro: ".$res[0]->tabla : '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
-      </tbody>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="4" style="width:200px;border:1px solid #000;background-color: #cccccc;">Trabajador</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Avance</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+
+    $total_avance = $total_importe = 0;
+    foreach($res as $key => $item){
+      $html .= '<tr>
+          <td colspan="2" style="width:200px;border:1px solid #000;">'.$item->trabajador.'</td>
+          <td colspan="2" style="width:200px;border:1px solid #000;">'.$item->labor.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->avance.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
+        </tr>';
+      $total_avance += $item->avance;
+      $total_importe += $item->importe;
+    }
+
+    $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="4"></td>
+              <td style="border:1px solid #000;">'.$total_avance.'</td>
+              <td style="border:1px solid #000;">'.$total_importe.'</td>
+            </tr>';
+
+    $html .= '</tbody>
     </table>';
 
     echo $html;

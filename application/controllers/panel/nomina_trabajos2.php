@@ -9,6 +9,11 @@ class nomina_trabajos2 extends MY_Controller {
     'nomina_trabajos2/ajax_save/',
     'nomina_trabajos2/ajax_del/',
     'nomina_trabajos2/nomina_fiscal_ticket/',
+
+    'nomina_trabajos2/rpt_costo_labores_pdf/',
+    'nomina_trabajos2/rpt_costo_labores_xls/',
+    'nomina_trabajos2/rpt_costo_labores_desg_pdf/',
+    'nomina_trabajos2/rpt_costo_labores_desg_xls/'
   );
 
   public function _remap($method)
@@ -118,6 +123,52 @@ class nomina_trabajos2 extends MY_Controller {
       $this->load->model('nomina_trabajos2_model');
       $this->nomina_trabajos2_model->ticketNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['fregistro_patronal'], $_GET['anio']);
     }
+  }
+
+  public function rpt_costo_labores()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_costo_labores.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Costos por Labor');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_costo_labores',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_costo_labores_pdf(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoLaboresPdf();
+  }
+  public function rpt_costo_labores_xls(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoLaboresXls();
+  }
+  public function rpt_costo_labores_desg_pdf(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoLaboresDesglosadoPdf();
+  }
+  public function rpt_costo_labores_desg_xls(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoLaboresDesglosadoXls();
   }
 
 

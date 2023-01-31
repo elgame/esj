@@ -113,7 +113,7 @@
 
     function addRanchoTag(item) {
       if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
-        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+        $('#tagsRanchoIds').html('<li><span class="tag">'+item.value+'</span>'+
           '<input type="hidden" name="ranchoId[]" class="ranchoId valAddTr" value="'+item.id+'">'+
           '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
           '</li>');
