@@ -6,7 +6,7 @@
         <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
       </li>
       <li>
-        <a href="<?php echo base_url('panel/labores_codigo/'); ?>">Categorias</a> <span class="divider">/</span>
+        <a href="<?php echo base_url('panel/labores_codigo/'); ?>">Labores</a> <span class="divider">/</span>
       </li>
       <li>Moficiar</li>
     </ul>
@@ -53,6 +53,14 @@
                   </div>
                 </div>
               </div><!--/control-group -->
+
+              <div class="control-group">
+                <label class="control-label" for="departamento">Area</label>
+                <div class="controls">
+                  <input type="text" name="departamento" data-add="false"
+                    value="<?php echo set_value_get('departamento', $categoria['info'][0]->departamento) ?>" id="departamento" class="span11" placeholder="ARIERO, EMPAQUE">
+                </div>
+              </div>
 
             </div>
 

@@ -54,6 +54,14 @@
                 </div>
               </div><!--/control-group -->
 
+              <div class="control-group">
+                <label class="control-label" for="departamento">Area</label>
+                <div class="controls">
+                  <input type="text" name="departamento" data-add="false"
+                    value="<?php echo set_value_get('departamento', $this->input->get('departamento')) ?>" id="departamento" class="span11" placeholder="ARIERO, EMPAQUE">
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">

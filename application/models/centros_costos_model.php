@@ -81,6 +81,7 @@ class centros_costos_model extends CI_Model {
         'id_cuenta'     => NULL,
         'cuenta_cpi'    => $this->input->post('cuenta_cpi'),
         'codigo'        => $this->input->post('codigo'),
+        'id_rancho'     => $this->input->post('ranchoId') > 0? $this->input->post('ranchoId'): NULL,
       );
 
       if ($data['tipo'] === 'banco' && $this->input->post('id_cuenta') !== false) {
@@ -114,6 +115,7 @@ class centros_costos_model extends CI_Model {
         'id_cuenta'     => NULL,
         'cuenta_cpi'    => $this->input->post('cuenta_cpi'),
         'codigo'        => $this->input->post('codigo'),
+        'id_rancho'     => $this->input->post('ranchoId') > 0? $this->input->post('ranchoId'): NULL,
       );
 
       if ($data['tipo'] === 'banco' && $this->input->post('id_cuenta') !== false) {
@@ -138,7 +140,7 @@ class centros_costos_model extends CI_Model {
     $id_centro_costo = $id_centro_costo? $id_centro_costo: (isset($_GET['id'])? $_GET['id']: 0);
 
     $sql_res = $this->db->select("id_centro_costo, id_area, nombre, status, tipo, hectareas, no_plantas, anios_credito,
-                                  id_cuenta, cuenta_cpi, codigo" )
+                                  id_cuenta, cuenta_cpi, codigo, id_rancho" )
                         ->from("otros.centro_costo")
                         ->where("id_centro_costo", $id_centro_costo)
                         ->get();
@@ -156,6 +158,12 @@ class centros_costos_model extends CI_Model {
         $this->load->model('areas_model');
         $empresa = $this->areas_model->getAreaInfo($data['info']->id_area, true);
         $data['info']->area = $empresa['info'];
+      }
+
+      if (isset($data['info']->id_rancho)) {
+        $this->load->model('ranchos_model');
+        $rancho = $this->ranchos_model->getRanchoInfo($data['info']->id_rancho, true);
+        $data['info']->rancho = $rancho['info'];
       }
 
       if (isset($data['info']->id_cuenta)) {

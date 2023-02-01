@@ -490,7 +490,10 @@ class Usuarios_model extends privilegios_model {
 
   public function changeEmpresaSel($empresa)
   {
+    $this->load->model('empresas_model');
+    $data = $this->empresas_model->getInfoEmpresa($empresa, true);
     $this->session->set_userdata('selempresa', $empresa);
+    $this->session->set_userdata('selempresaname', $data['info']->nombre_fiscal);
     return true;
   }
 
@@ -513,6 +516,8 @@ class Usuarios_model extends privilegios_model {
           'nombre'     => $fun_res[0]->nombre,
           'email'      => $fun_res[0]->email,
           'tipo'       => $fun_res[0]->tipo,
+          'selempresa'  => 2,
+          'selempresaname'  => 'EMPAQUE SAN JORGE',
 					'idunico' => uniqid('l', true));
 				$this->crea_session($user_data);
 		}

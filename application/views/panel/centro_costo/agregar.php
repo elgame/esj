@@ -84,10 +84,26 @@
                     </div>
 
                     <div class="control-group">
+                      <label class="control-label" for="empresaId">Empresa </label>
+                      <div class="controls">
+                      <?php echo $this->session->userdata('selempresaname'); ?>
+                      <input type="hidden" name="empresaId" value="<?php echo $this->session->userdata('selempresa'); ?>" id="empresaId">
+                      </div>
+                    </div>
+
+                    <div class="control-group">
                       <label class="control-label" for="farea">Cultivo </label>
                       <div class="controls">
                       <input type="text" name="farea" id="farea" class="span10" value="<?php echo set_value('farea'); ?>" placeholder="Limon, Piña">
                       <input type="hidden" name="did_area" value="<?php echo set_value('did_area'); ?>" id="did_area">
+                      </div>
+                    </div>
+
+                    <div class="control-group">
+                      <label class="control-label" for="rancho">Rancho </label>
+                      <div class="controls">
+                      <input type="text" name="rancho" id="rancho" class="span10" value="<?php echo set_value('rancho'); ?>" placeholder="Limon, Piña">
+                      <input type="hidden" name="ranchoId" value="<?php echo set_value('ranchoId'); ?>" id="ranchoId">
                       </div>
                     </div>
 

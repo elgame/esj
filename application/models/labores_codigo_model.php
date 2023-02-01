@@ -26,7 +26,7 @@ class labores_codigo_model extends CI_Model {
     }
 
     $query = BDUtil::pagination(
-        "SELECT id_labor, codigo, nombre, costo, status
+        "SELECT id_labor, codigo, nombre, costo, status, departamento
         FROM compras_salidas_labores
         WHERE 1 = 1 {$sql}
         ORDER BY (nombre) ASC
@@ -52,6 +52,7 @@ class labores_codigo_model extends CI_Model {
       'nombre' => $data['nombre'],
       'codigo' => strtoupper($data['codigo']),
       'costo' => floatval($data['costo']),
+      'departamento' => mb_strtoupper($data['departamento'], 'UTF-8'),
     );
 
     $this->db->insert('compras_salidas_labores', $insertData);
@@ -62,7 +63,7 @@ class labores_codigo_model extends CI_Model {
   public function info($id_labor)
   {
     $query = $this->db->query(
-      "SELECT id_labor, codigo, nombre, costo, status
+      "SELECT id_labor, codigo, nombre, costo, status, departamento
         FROM compras_salidas_labores
         WHERE id_labor = {$id_labor}");
 
@@ -81,6 +82,7 @@ class labores_codigo_model extends CI_Model {
       'nombre' => $data['nombre'],
       'codigo' => strtoupper($data['codigo']),
       'costo' => floatval($data['costo']),
+      'departamento' => mb_strtoupper($data['departamento'], 'UTF-8'),
     );
 
     $this->db->update('compras_salidas_labores', $updateData, array('id_labor' => $id_labor));
@@ -113,6 +115,31 @@ class labores_codigo_model extends CI_Model {
           'id' => $itm->id_labor,
           'label' => $itm->nombre,
           'value' => $itm->nombre,
+          'item' => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
+  public function ajaxDepartamentos()
+  {
+    $sql = " AND (departamento LIKE '%".mb_strtoupper($_GET['term'], 'UTF-8')."%')";
+    $res = $this->db->query("
+        SELECT DISTINCT departamento
+        FROM compras_salidas_labores
+        WHERE departamento IS NOT NULL {$sql}
+        ORDER BY departamento ASC
+        LIMIT 20");
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+          'id' => null,
+          'label' => $itm->departamento,
+          'value' => $itm->departamento,
           'item' => $itm,
         );
       }

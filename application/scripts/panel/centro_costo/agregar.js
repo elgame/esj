@@ -85,4 +85,40 @@ $(function(){
     }
   });
 
+  autocompleteRanchos();
 });
+
+
+var autocompleteRanchos = function () {
+  $("#rancho").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#empresaId").val()) > 0)
+        params.did_empresa = $("#empresaId").val();
+      if(parseInt($("#did_area").val()) > 0)
+        params.area = $("#did_area").val();
+      $.ajax({
+          url: base_url + 'panel/ranchos/ajax_get_ranchos/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      var $rancho =  $(this);
+
+      $rancho.val(ui.item.id);
+      $("#ranchoId").val(ui.item.id);
+      $rancho.css("background-color", "#A1F57A");
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $("#rancho").css("background-color", "#FFD071");
+      $("#ranchoId").val('');
+    }
+  });
+};
