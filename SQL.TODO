@@ -3,11 +3,13 @@
  ☐ Reporte de asistencias cambiar como la foto
  ☐ Reporte de boletas pendientes de pago por proveedor
  ☐ Reportes de nomina
-   -- lap
+   -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Costo x Labor',364,true,'nomina_trabajos2/rpt_costo_labores/','print',true);
    ALTER TABLE IF EXISTS public.compras_salidas_labores ADD COLUMN departamento character varying(70) COLLATE pg_catalog."default";
    ALTER TABLE IF EXISTS otros.centro_costo ADD COLUMN id_rancho bigint;
    ALTER TABLE IF EXISTS otros.centro_costo ADD CONSTRAINT centro_costo_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   -- lap
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Pre Nomina',364,true,'nomina_trabajos2/rpt_prenomina/','print',true);
  ✔ Reporte de codigos de gastos poner filtro para quitar concepto de diesel, gasolina y calcomania @done (23-01-18 12:42)
  ✔ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio @done (23-01-26 16:13)
    poder agregar el rendimiento del termo, HORAS TRABAJADAS, LTS DIESEL TERMO, REND HR POR LITRO

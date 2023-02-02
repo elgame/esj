@@ -359,9 +359,6 @@ class nomina_trabajos2_model extends CI_Model {
    *******************************
    * @return void
    */
-  /**
-   * Reporte salidas de productos
-   */
   public function rptCostoLaboresData()
   {
     $sql = '';
@@ -756,6 +753,155 @@ class nomina_trabajos2_model extends CI_Model {
 
     echo $html;
   }
+
+
+  public function rptPreNominaData()
+  {
+    if ($this->input->get('semana') <= 0 || !is_numeric($this->input->get('anio')) || $this->input->get('fregistro_patronal') == '') {
+      return false;
+    }
+
+    $this->load->model('nomina_fiscal_model');
+
+    $sql = '';
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND t2.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    $filtros = array(
+      'calcMes'     => false,
+      'semana'      => $_GET['semana'],
+      'anio'        => $_GET['anio'],
+      'empresaId'   => $_GET['did_empresa'],
+      'puestoId'    => '',
+      'regPatronal' => $_GET['fregistro_patronal'],
+      'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
+    );
+    if ($filtros['empresaId'] !== '') {
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
+    } else {
+      $dia = '4';
+    }
+    $filtros['dia_inicia_semana'] = $dia;
+
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($filtros['semana'], $filtros['anio'], $dia);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
+
+     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
+    $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
+    $nomina_empleados = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
+
+    $diasSemana = [];
+    $fechaini = new DateTime($semana['fecha_inicio']);
+    $fechaend = new DateTime($semana['fecha_final']);
+    while ($fechaini <= $fechaend) {
+      $diasSemana[$fechaini->format("Y-m-d")] = 0;
+      $fechaini->modify('+1 day');
+    }
+    echo "<pre>";
+    var_dump($diasSemana);
+    echo "</pre>";exit;
+
+    foreach ($nomina_empleados as $key => $trabajador) {
+      $trabajador->destajo = [];
+    }
+
+    $destajo = $this->db->query(
+      "SELECT id_usuario, fecha, Sum(importe) AS importe
+      FROM nomina_trabajos_dia2 t2
+      WHERE t2.fecha BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'
+      GROUP BY id_usuario, fecha
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+  public function rptPreNominaPdf(){
+    $res = $this->rptPreNominaData();
+    if ($res === false) {
+      return false;
+    }
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte Costos por Labor';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'R', 'R', 'R', 'L');
+    $widths = array(110, 30, 30, 30, 30, 30);
+    $header = array('Tabla', 'Superficie', 'Avance', 'Importe');
+
+    $total_avance = $total_importe = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $datos = array(
+        $item->tabla,
+        $item->hectareas,
+        MyString::formatoNumero($item->avance, 2, '', false),
+        MyString::formatoNumero($item->importe, 2, '', false),
+      );
+      $total_avance += $item->avance;
+      $total_importe += $item->importe;
+
+      $_GET['id_centro_costo'] = $item->id_centro_costo;
+      $pdf->SetMyLinks([base_url('panel/nomina_trabajos2/rpt_costo_labores_desg_pdf?'.MyString::getVarsLink([]))]);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->SetMyLinks([]);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(['R', 'R', 'R']);
+    $pdf->SetWidths([140, 30, 30]);
+    $pdf->Row(array('TOTAL',
+      MyString::formatoNumero($total_avance, 2, '', false),
+      MyString::formatoNumero($total_importe, 2, '', false),
+      ), false, true);
+
+    $pdf->Output('costos_labor.pdf', 'I');
+  }
+
 
 }
 /* End of file nomina_fiscal_model.php */
