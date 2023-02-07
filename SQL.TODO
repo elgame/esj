@@ -8,7 +8,6 @@
    ALTER TABLE IF EXISTS public.compras_salidas_labores ADD COLUMN departamento character varying(70) COLLATE pg_catalog."default";
    ALTER TABLE IF EXISTS otros.centro_costo ADD COLUMN id_rancho bigint;
    ALTER TABLE IF EXISTS otros.centro_costo ADD CONSTRAINT centro_costo_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-   -- lap|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Pre Nomina',364,true,'nomina_trabajos2/rpt_prenomina/','print',true);
  ✔ Reporte de codigos de gastos poner filtro para quitar concepto de diesel, gasolina y calcomania @done (23-01-18 12:42)
  ✔ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio @done (23-01-26 16:13)
@@ -22,7 +21,6 @@
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN id_compra bigint;
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD CONSTRAINT estado_resultado_trans_rep_mtto_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN folio character varying(30) COLLATE pg_catalog."default" DEFAULT ''::character varying;
-   -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Relación de Fletes',572,true,'estado_resultado_trans/rpt_rel_fletes/','print',true);
  ✔ estimacion transpor @done (23-01-18 10:40)
    -- lap|san|pcc
