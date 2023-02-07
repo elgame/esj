@@ -28,8 +28,8 @@ class cuentas_pagar_model extends privilegios_model{
 		$fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
 		$_GET['ftipo'] = (isset($_GET['ftipo']))?$_GET['ftipo']:'pp';
 
-		$sql = $this->input->get('ftipo')=='pv'? " AND (Date('".$fecha."'::timestamp with time zone)-Date(f.fecha_factura)) > f.plazo_credito": '';
-		$sqlt = $this->input->get('ftipo')=='pv'? " AND (Date('".$fecha."'::timestamp with time zone)-Date(f.fecha_factura)) > f.plazo_credito": '';
+		$sql = $this->input->get('ftipo')=='pv'? " AND (Date('".$fecha."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito": '';
+		$sqlt = $this->input->get('ftipo')=='pv'? " AND (Date('".$fecha."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito": '';
 
 		if($this->input->get('fid_proveedor') != ''){
 			$sql .= " AND f.id_proveedor = '".$this->input->get('fid_proveedor')."'";
@@ -97,7 +97,7 @@ class cuentas_pagar_model extends privilegios_model{
 							GROUP BY ffaa.id_proveedor
 						) AS faa ON c.id_proveedor = faa.id_proveedor
 					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL
-						AND Date(f.fecha_factura) <= '{$fecha}'{$sql}
+						AND Date(f.fecha) <= '{$fecha}'{$sql}
 					GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos
 				)
 			) AS tsaldos
@@ -275,8 +275,8 @@ class cuentas_pagar_model extends privilegios_model{
 
 		$sql = $sqlt = $sql2 = '';
 		if($this->input->get('ftipo')=='pv'){
-			$sql = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha_factura)) > f.plazo_credito";
-			$sqlt = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha_factura)) > f.plazo_credito";
+			$sql = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito";
+			$sqlt = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito";
 			$sql2 = 'WHERE saldo > 0';
 		}
 
@@ -369,7 +369,7 @@ class cuentas_pagar_model extends privilegios_model{
             ) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
           WHERE f.status <> 'ca' AND f.status <> 'b' {$sqlp2}
              AND id_nc IS NULL
-             AND Date(f.fecha_factura) < '{$fecha1}'
+             AND Date(f.fecha) < '{$fecha1}'
              {$sql}
           GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos, tipo
 				) AS sal
@@ -431,11 +431,11 @@ class cuentas_pagar_model extends privilegios_model{
         LEFT JOIN proveedores p ON p.id_proveedor = f.id_proveedor
 			WHERE f.status <> 'ca' AND f.id_nc IS NULL
         {$sqlp1}
-				AND (Date(f.fecha_factura) >= '{$fecha1}' AND Date(f.fecha_factura) <= '{$fecha2}')
+				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				{$sql}
         {$sql_only_sel_where}
 
-			ORDER BY {$sql_only_sel_order} fecha_factura ASC, serie ASC, folio ASC
+			ORDER BY {$sql_only_sel_order} fecha ASC, serie ASC, folio ASC
 			");
 
 
