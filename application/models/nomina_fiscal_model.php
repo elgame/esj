@@ -770,6 +770,16 @@ class nomina_fiscal_model extends CI_Model {
       'desc_cocina'   => isset($data->desc_cocina)? $data->desc_cocina: 0,
     );
   }
+  public function getDescPreNomina($empresaId, $anio, $semana)
+  {
+    $data = $this->db->query("SELECT id_empleado, Sum(horas_extras) horas_extras, Sum(desc_playeras) desc_playeras,
+        Sum(desc_otros) desc_otros, Sum(desc_cocina) desc_cocina
+      FROM nomina_fiscal_presave
+      WHERE id_empresa = {$empresaId} AND anio = {$anio} AND semana = {$semana}
+      GROUP BY id_empleado")->result();
+
+    return $data;
+  }
 
   public function add_nominas($datos, $empresaId, $empleadoId)
   {

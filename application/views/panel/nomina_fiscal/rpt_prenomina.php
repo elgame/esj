@@ -40,7 +40,7 @@
                 <div style="clear: both;"></div>
 
                 <div class="control-group" id="cultivosGrup" style="margin-top: 10px;">
-                  <label class="control-label" for="semana">Registro Patronal </label>
+                  <label class="control-label" for="fregistro_patronal">Registro Patronal </label>
                   <div class="controls">
                     <div class="input-append span12">
                       <select name="fregistro_patronal" id="fregistro_patronal" class="span12">

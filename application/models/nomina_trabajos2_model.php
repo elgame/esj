@@ -1,6 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class nomina_trabajos2_model extends CI_Model {
+  private $pren_destajo = [];
+  private $pren_descuentos = [];
 
   public function save($datos)
   {
@@ -755,6 +757,31 @@ class nomina_trabajos2_model extends CI_Model {
   }
 
 
+  private function getDestajoTrabFecha($trabajador_id, $fecha)
+  {
+    $total = 0;
+    $resultado = array_filter($this->pren_destajo, function($v) use(&$total, $trabajador_id, $fecha){
+      if ($v->id_usuario == $trabajador_id && $v->fecha == $fecha) {
+        $total += $v->importe;
+        return true;
+      }
+      return false;
+    });
+    return $total;
+  }
+  private function getDestajoTrabDescuentos($trabajador_id)
+  {
+    $resultado = array_filter($this->pren_descuentos, function($v) use($trabajador_id){
+      return ($v->id_empleado == $trabajador_id);
+    });
+    $resempty = (object)[
+      'horas_extras' => 0,
+      'desc_playeras' => 0,
+      'desc_otros' => 0,
+      'desc_cocina' => 0,
+    ];
+    return empty($resultado)? $resempty: $resultado[0];
+  }
   public function rptPreNominaData()
   {
     if ($this->input->get('semana') <= 0 || !is_numeric($this->input->get('anio')) || $this->input->get('fregistro_patronal') == '') {
@@ -790,7 +817,7 @@ class nomina_trabajos2_model extends CI_Model {
     $filtros['dia_inicia_semana'] = $dia;
 
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($filtros['semana'], $filtros['anio'], $dia);
-    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
+    // $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
 
      $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
     $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
@@ -803,26 +830,38 @@ class nomina_trabajos2_model extends CI_Model {
       $diasSemana[$fechaini->format("Y-m-d")] = 0;
       $fechaini->modify('+1 day');
     }
-    echo "<pre>";
-    var_dump($diasSemana);
-    echo "</pre>";exit;
 
-    foreach ($nomina_empleados as $key => $trabajador) {
-      $trabajador->destajo = [];
-    }
-
-    $destajo = $this->db->query(
+    $this->pren_destajo = $this->db->query(
       "SELECT id_usuario, fecha, Sum(importe) AS importe
       FROM nomina_trabajos_dia2 t2
-      WHERE t2.fecha BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'
+      WHERE t2.id_empresa = {$filtros['empresaId']} AND
+        t2.fecha BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'
       GROUP BY id_usuario, fecha
-      ");
+      ")->result();
+    $this->pren_descuentos = $this->nomina_fiscal_model->getDescPreNomina($filtros['empresaId'], $filtros['anio'], $filtros['semana']);
 
-    $response = array();
-    if($res->num_rows() > 0)
-      $response = $res->result();
+    foreach ($nomina_empleados as $key => $trabajador) {
+      $nomina_empleados[$key]->destajo = $diasSemana;
+      $nomina_empleados[$key]->pre_descuentos = $this->getDestajoTrabDescuentos($trabajador->id);
 
-    return $response;
+      foreach ($diasSemana as $f => $value) {
+        $nomina_empleados[$key]->destajo[$f] = $this->getDestajoTrabFecha($trabajador->id, $f);
+      }
+
+      $nomina_empleados[$key]->total_descuento_material = 0;
+      $nomina_empleados[$key]->total_descuento_prestamos = 0;
+      if (count($trabajador->prestamos) > 0) {
+        foreach ($trabajador->prestamos as $f => $value) {
+          if ($value['tipo'] == 'mt') {
+            $nomina_empleados[$key]->total_descuento_material += $value['pago_semana'];
+          } else {
+            $nomina_empleados[$key]->total_descuento_prestamos += $value['pago_semana'];
+          }
+        }
+      }
+    }
+
+    return ['data' => $nomina_empleados, 'semana' => $semana];
   }
   public function rptPreNominaPdf(){
     $res = $this->rptPreNominaData();
@@ -835,32 +874,50 @@ class nomina_trabajos2_model extends CI_Model {
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf = new MYpdf('L', 'mm', 'Letter');
 
       if ($empresa['info']->logo !== '')
         $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-    $pdf->titulo2 = 'Reporte Costos por Labor';
-    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
-    $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
-    $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
-    $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $pdf->titulo2 = 'Reporte Pre Nomina';
+    $pdf->titulo3 = "Año: {$res['semana']['anio']} | Semana: {$res['semana']['semana']} \n";
+    $pdf->titulo3 .= "{$res['semana']['fecha_inicio']} Al {$res['semana']['fecha_final']}";
     $pdf->AliasNbPages();
     //$pdf->AddPage();
-    $pdf->SetFont('Arial','',8);
+    $pdf->SetFont('Arial','',7);
 
-    $aligns = array('L', 'R', 'R', 'R', 'L');
-    $widths = array(110, 30, 30, 30, 30, 30);
-    $header = array('Tabla', 'Superficie', 'Avance', 'Importe');
+    $totales_destajo = [];
+    $aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
+    $widths = array(60, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15);
+    $header = array('Trabajador');
+    foreach ($res['data'][0]->destajo as $key => $value) {
+      $header[] = $key;
+      $totales_destajo[$key] = 0;
+    }
+    $header[] = 'T. Perce';
+    $header[] = 'D. Playera';
+    $header[] = 'D. Cocina';
+    $header[] = 'D. Otros';
+    $header[] = 'D. Material';
+    $header[] = 'D. Presta';
+    $header[] = 'Total';
+    $totales_destajo['tperce'] = 0;
+    $totales_destajo['td_playera'] = 0;
+    $totales_destajo['td_cocina'] = 0;
+    $totales_destajo['td_otros'] = 0;
+    $totales_destajo['td_mater'] = 0;
+    $totales_destajo['td_prest'] = 0;
+    $totales_destajo['total_nom'] = 0;
 
-    $total_avance = $total_importe = 0;
-    foreach($res as $key => $item){
+    foreach($res['data'] as $key => $item){
+      $total_destajo = $total_importe = 0;
+
       $band_head = false;
       if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
         $pdf->AddPage();
 
-        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFont('Arial','B',7);
         $pdf->SetTextColor(255,255,255);
         $pdf->SetFillColor(160,160,160);
         $pdf->SetX(6);
@@ -869,37 +926,54 @@ class nomina_trabajos2_model extends CI_Model {
         $pdf->Row($header, true);
       }
 
-      $pdf->SetFont('Arial','',8);
+      $pdf->SetFont('Arial','',7);
       $pdf->SetTextColor(0,0,0);
 
       $datos = array(
-        $item->tabla,
-        $item->hectareas,
-        MyString::formatoNumero($item->avance, 2, '', false),
-        MyString::formatoNumero($item->importe, 2, '', false),
+        $item->nombre
       );
-      $total_avance += $item->avance;
-      $total_importe += $item->importe;
+      foreach ($item->destajo as $keyf => $valdestajo) {
+        $datos[] = MyString::formatoNumero($valdestajo, 2, '', false);
+        $total_destajo += $valdestajo;
+        $totales_destajo[$keyf] += $valdestajo;
+      }
+      $datos[] = MyString::formatoNumero($total_destajo, 2, '', false);
+      $totales_destajo['tperce'] += $total_destajo;
 
-      $_GET['id_centro_costo'] = $item->id_centro_costo;
-      $pdf->SetMyLinks([base_url('panel/nomina_trabajos2/rpt_costo_labores_desg_pdf?'.MyString::getVarsLink([]))]);
+      $datos[] = MyString::formatoNumero($item->pre_descuentos->desc_playeras, 2, '', false);
+      $datos[] = MyString::formatoNumero($item->pre_descuentos->desc_cocina, 2, '', false);
+      $datos[] = MyString::formatoNumero($item->pre_descuentos->desc_otros, 2, '', false);
+      $totales_destajo['td_playera'] += $item->pre_descuentos->desc_playeras;
+      $totales_destajo['td_cocina'] += $item->pre_descuentos->desc_cocina;
+      $totales_destajo['td_otros'] += $item->pre_descuentos->desc_otros;
+
+      $datos[] = MyString::formatoNumero($item->total_descuento_material, 2, '', false);
+      $datos[] = MyString::formatoNumero($item->total_descuento_prestamos, 2, '', false);
+      $totales_destajo['td_mater'] += $item->total_descuento_material;
+      $totales_destajo['td_prest'] += $item->total_descuento_prestamos;
+
+      $total_nom_trab = $total_destajo - $item->pre_descuentos->desc_playeras - $item->pre_descuentos->desc_cocina -
+                        $item->pre_descuentos->desc_otros - $item->total_descuento_material - $item->total_descuento_prestamos;
+      $datos[] = MyString::formatoNumero($total_nom_trab, 2, '', false);
+      $totales_destajo['total_nom'] += $total_nom_trab;
+
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
       $pdf->Row($datos, false);
     }
 
-    $pdf->SetMyLinks([]);
-    $pdf->SetFont('Arial','B',8);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(['R', 'R', 'R']);
-    $pdf->SetWidths([140, 30, 30]);
-    $pdf->Row(array('TOTAL',
-      MyString::formatoNumero($total_avance, 2, '', false),
-      MyString::formatoNumero($total_importe, 2, '', false),
-      ), false, true);
+    $aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
+    $widths = array(60, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15);
+    $row_totales = ['TOTALES'];
+    foreach ($totales_destajo as $keyf => $tcol) {
+      $row_totales[] = MyString::formatoNumero($tcol, 2, '', false);
+    }
+    $pdf->Row($row_totales, false, true);
 
-    $pdf->Output('costos_labor.pdf', 'I');
+    $pdf->Output('pre_nomina.pdf', 'I');
   }
 
 
