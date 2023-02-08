@@ -22,6 +22,9 @@
             </div>
           </div>
           <div class="box-content">
+            <a href="<?php echo base_url('panel/facturacion/notas_credito_pdf/?'.MyString::getVarsLink(['msg'])); ?>" class="linksm" target="_blank">
+              <i class="icon-print"></i> Imprimir</a>
+
             <form action="<?php echo base_url('panel/facturacion/notas_credito'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="ffolio">Folio</label>

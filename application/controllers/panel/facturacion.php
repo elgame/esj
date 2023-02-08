@@ -41,7 +41,9 @@ class facturacion extends MY_Controller {
     'facturacion/descarga_masiva/',
     'facturacion/nomina/',
 
-    'facturacion/getRemisiones/'
+    'facturacion/getRemisiones/',
+    'facturacion/notas_credito_pdf/',
+
   );
 
   public function _remap($method)
@@ -116,6 +118,10 @@ class facturacion extends MY_Controller {
     $this->load->view('panel/general/menu',$params);
     $this->load->view('panel/facturacion/admin_nc',$params);
     $this->load->view('panel/footer',$params);
+  }
+  public function notas_credito_pdf(){
+    $this->load->model('facturacion2_model');
+    $this->facturacion2_model->notasCreditosPdf();
   }
 
   public function pago_parcialidad()

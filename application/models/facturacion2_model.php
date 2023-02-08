@@ -675,4 +675,98 @@ class facturacion2_model extends privilegios_model{
     echo $html;
   }
 
+  /**
+   * Descarga el listado de cuentas por pagar en formato pdf
+   */
+  public function notasCreditosPdf($pdf=null, $num=0) {
+    $this->load->library('mypdf');
+
+    $this->load->model('facturacion_model');
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    // Creación del objeto de la clase heredada
+    $showw = false;
+    $first = false;
+    if (is_null($pdf)) {
+      $pdf = new MYpdf('L', 'mm', 'Letter');
+      $showw = true;
+      $first = true;
+    }
+
+    if ($empresa['info']->logo !== '' && file_exists($empresa['info']->logo))
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Notas de credito';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= $this->input->get('dcliente');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'R', 'L');
+    $widths = array(18, 25, 101, 28, 95);
+    $header = array('Fecha', 'Folio', 'Cliente', 'Total', 'Observaciones');
+
+    $res = $this->facturacion_model->getFacturas(9999999999, " AND id_nc IS NOT NULL");
+
+    $total_importe = 0;
+    $total_vencido = 0;
+    if (count($res['fact']) > 0) {
+      foreach($res['fact'] as $key => $item){
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY || $key == 0){ //salta de pagina si exede el max
+          if ($showw && $key == 0) {
+            $pdf->AddPage();
+          } elseif ($key > 0 && $pdf->GetY() >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+        $datos = array($item->fecha,
+          ($item->serie ? $item->serie.' - ' : '').$item->folio,
+          $item->nombre_fiscal,
+          MyString::formatoNumero($item->total, 2, '$', false),
+          $item->observaciones,
+        );
+        $total_importe += $item->total;
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false);
+      }
+    }
+
+    $pdf->SetFillColor(160,160,160);
+    $pdf->SetAligns(['R', 'R', 'L']);
+    $pdf->SetWidths([144, 28, 95]);
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetTextColor(255,255,255);
+    $pdf->Row(array('Total:',
+      MyString::formatoNumero($total_importe, 2, '$', false),
+      '',
+    ), true);
+
+
+    if ($showw) {
+      $pdf->Output('notas_credito.pdf', 'I');
+    } else {
+      return $pdf;
+    }
+  }
+
 }
