@@ -9,8 +9,34 @@
    ALTER TABLE IF EXISTS otros.centro_costo ADD COLUMN id_rancho bigint;
    ALTER TABLE IF EXISTS otros.centro_costo ADD CONSTRAINT centro_costo_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Pre Nomina',364,true,'nomina_trabajos2/rpt_prenomina/','print',true);
-   -- pcc
+   -- pcc|lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Auditoria de Costos',364,true,'nomina_trabajos2/rpt_auditoria_costos/','print',true);
+   -- lap
+   CREATE OR REPLACE VIEW public.nomina_trabajos_dia2_centros
+     AS
+     SELECT cen.id_empresa,
+        cen.id_usuario,
+        cen.fecha,
+        cen.rows,
+        cen.id_centro_costo,
+        cen.num,
+        cen.id_rancho,
+        ce.nombre AS tabla,
+        ce.hectareas,
+        ra.nombre AS rancho
+       FROM ( SELECT cc.id_empresa,
+                cc.id_usuario,
+                cc.fecha,
+                cc.rows,
+                cc.id_centro_costo,
+                cc.num,
+                r.id_rancho
+               FROM nomina_trabajos_dia2 t2
+                 JOIN nomina_trabajos_dia2_centro_costo cc ON t2.id_empresa = cc.id_empresa AND t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows::text = cc.rows::text
+                 JOIN nomina_trabajos_dia2_rancho r ON t2.id_empresa = r.id_empresa AND t2.id_usuario = r.id_usuario AND t2.fecha = r.fecha AND t2.rows::text = r.rows::text) cen
+         JOIN otros.centro_costo ce ON ce.id_centro_costo = cen.id_centro_costo
+         JOIN otros.ranchos ra ON ra.id_rancho = cen.id_rancho;
+    ALTER TABLE public.nomina_trabajos_dia2_centros OWNER TO programa;
  ✔ Reporte de codigos de gastos poner filtro para quitar concepto de diesel, gasolina y calcomania @done (23-01-18 12:42)
  ✔ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio @done (23-01-26 16:13)
    poder agregar el rendimiento del termo, HORAS TRABAJADAS, LTS DIESEL TERMO, REND HR POR LITRO

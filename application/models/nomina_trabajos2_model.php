@@ -408,16 +408,7 @@ class nomina_trabajos2_model extends CI_Model {
       WHERE 1 = 1 {$sql}
       GROUP BY cc.id_centro_costo, cc.tabla
       ");
-echo "<pre>";
-  var_dump("SELECT cc.id_centro_costo, cc.tabla, Sum(cc.hectareas) AS hectareas,
-        Sum(t2.avance/cc.num) AS avance, Sum(t2.importe/cc.num) AS importe
-      FROM nomina_trabajos_dia2 t2
-        INNER JOIN nomina_trabajos_dia2_centros cc ON (t2.id_empresa = cc.id_empresa AND
-            t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows = cc.rows)
-      WHERE 1 = 1 {$sql}
-      GROUP BY cc.id_centro_costo, cc.tabla
-      ");
-echo "</pre>";exit;
+
     $response = array();
     if($res->num_rows() > 0)
       $response = $res->result();
@@ -812,7 +803,8 @@ echo "</pre>";exit;
         INNER JOIN nomina_trabajos_dia2_centros cc ON (t2.id_empresa = cc.id_empresa AND
             t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows = cc.rows)
       WHERE 1 = 1 {$sql}
-      GROUP BY cc.id_centro_costo, cc.tabla
+      GROUP BY cc.id_centro_costo, cc.tabla, sl.nombre
+      ORDER BY tabla ASC, labor ASC
       ");
 
     $response = array();
@@ -880,7 +872,7 @@ echo "</pre>";exit;
               <td colspan="4"></td>
               <td style="border:1px solid #000;">'.$total_avance.'</td>
               <td style="border:1px solid #000;">'.$total_importe.'</td>
-              <td style="border:1px solid #000;">'.($total_importe/$total_avance).'</td>
+              <td style="border:1px solid #000;">'.number_format($total_importe/$total_avance, 2, '.', '').'</td>
             </tr>';
 
     $html .= '</tbody>
