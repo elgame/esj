@@ -408,7 +408,16 @@ class nomina_trabajos2_model extends CI_Model {
       WHERE 1 = 1 {$sql}
       GROUP BY cc.id_centro_costo, cc.tabla
       ");
-
+echo "<pre>";
+  var_dump("SELECT cc.id_centro_costo, cc.tabla, Sum(cc.hectareas) AS hectareas,
+        Sum(t2.avance/cc.num) AS avance, Sum(t2.importe/cc.num) AS importe
+      FROM nomina_trabajos_dia2 t2
+        INNER JOIN nomina_trabajos_dia2_centros cc ON (t2.id_empresa = cc.id_empresa AND
+            t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows = cc.rows)
+      WHERE 1 = 1 {$sql}
+      GROUP BY cc.id_centro_costo, cc.tabla
+      ");
+echo "</pre>";exit;
     $response = array();
     if($res->num_rows() > 0)
       $response = $res->result();
@@ -748,6 +757,130 @@ class nomina_trabajos2_model extends CI_Model {
               <td colspan="4"></td>
               <td style="border:1px solid #000;">'.$total_avance.'</td>
               <td style="border:1px solid #000;">'.$total_importe.'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
+
+  public function rptAuditoriaCostosData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $sql .= " AND Date(t2.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+
+    if($this->input->get('dlaborId') != ''){
+      $dlaborId = $this->input->get('dlaborId');
+      $sql .= " AND t2.id_labor = ".$dlaborId;
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND t2.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('areaId') > 0) {
+      $sql .= " AND t2.id_area = ".$this->input->get('areaId');
+    }
+
+    if ($this->input->get('dempleadoId') > 0) {
+      $sql .= " AND t2.id_usuario = ".$this->input->get('dempleadoId');
+    }
+
+    if(is_array($this->input->get('ranchoId'))){
+      $sql .= " AND cc.id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
+    }
+
+    if(is_array($this->input->get('centroCostoId'))){
+      $sql .= " AND cc.id_centro_costo IN (".implode(',', $this->input->get('centroCostoId')).")";
+    }
+
+    $res = $this->db->query(
+      "SELECT cc.id_centro_costo, cc.tabla, sl.nombre AS labor,
+        Sum(t2.avance/cc.num) AS avance, Sum(t2.importe/cc.num) AS importe
+      FROM nomina_trabajos_dia2 t2
+        INNER JOIN compras_salidas_labores sl ON sl.id_labor = t2.id_labor
+        INNER JOIN nomina_trabajos_dia2_centros cc ON (t2.id_empresa = cc.id_empresa AND
+            t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows = cc.rows)
+      WHERE 1 = 1 {$sql}
+      GROUP BY cc.id_centro_costo, cc.tabla
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+  public function rptAuditoriaCostosXls(){
+    // header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    // header("Content-Disposition: attachment; filename=auditoria_costos.xls");
+    // header("Pragma: no-cache");
+    // header("Expires: 0");
+
+    $res = $this->rptAuditoriaCostosData();
+
+    $this->load->model('empresas_model');
+
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte Auditoria de costos';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="7" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="7" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="7" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="7"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="2" style="width:200px;border:1px solid #000;background-color: #cccccc;">Tabla</td>
+          <td colspan="2" style="width:200px;border:1px solid #000;background-color: #cccccc;">Labor</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Avance</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Imp/Avance</td>
+        </tr>';
+
+    $total_avance = $total_importe = 0;
+    foreach($res as $key => $item){
+      $html .= '<tr>
+          <td colspan="2" style="width:200px;border:1px solid #000;">'.$item->tabla.'</td>
+          <td colspan="2" style="width:200px;border:1px solid #000;">'.$item->labor.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->avance.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
+          <td style="width:200px;border:1px solid #000;">'.($item->importe/$item->avance).'</td>
+        </tr>';
+      $total_avance += $item->avance;
+      $total_importe += $item->importe;
+    }
+
+    $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="4"></td>
+              <td style="border:1px solid #000;">'.$total_avance.'</td>
+              <td style="border:1px solid #000;">'.$total_importe.'</td>
+              <td style="border:1px solid #000;">'.($total_importe/$total_avance).'</td>
             </tr>';
 
     $html .= '</tbody>
