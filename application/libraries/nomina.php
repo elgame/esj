@@ -587,9 +587,10 @@ class nomina
    *
    * @return float
    */
-  public function diasPrimaVacacional()
+  public function diasPrimaVacacional($dias = null)
   {
-    return (intval($this->empresaConfig->prima_vacacional) / 100) * $this->empleado->dias_vacaciones;
+    $dias = $dias? $dias: $this->empleado->dias_vacaciones;
+    return (intval($this->empresaConfig->prima_vacacional) / 100) * $dias;
   }
 
   /**
@@ -599,7 +600,9 @@ class nomina
    */
   public function factorIntegracion()
   {
-    return round((365 + $this->empresaConfig->aguinaldo + $this->empleado->dias_prima_vacacional) / 365, 4);
+    // dias completos de vacaciones para el calculo de sdi
+    $dias_prima_full = $this->diasPrimaVacacional($this->diasDeVacaciones());
+    return round((365 + $this->empresaConfig->aguinaldo + $dias_prima_full) / 365, 4);
   }
 
   /**
