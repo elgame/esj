@@ -1,4 +1,28 @@
 
+ ☐ Reporte estado resultado transp agregar multimple los litros y precios en reporte sacar un promedio
+   en reporte de relacion de fletes ordenar por fecha los vajes
+   Agregar fecha de viaje y tomar esa fecha para el reporte relacion de fecha,
+   quitar de gastos los conceptos COSTO MENSUAL GENERAL EST, COSTO ESTIMADO, COSTO MENSUAL GENERAL
+ ✔ Reporte cuentas por pagar que salgan todos @done (23-02-15 18:34)
+ ☐ En captura de actividades 2 de nomina, filtrar las tablas por rancho
+ ☐ Reporte de prenomina agregar bonos, -fonacot, -infonavit, -pencion
+   -- lap|san
+   CREATE TABLE IF NOT EXISTS public.nomina_trabajos_dia2_labores_areas
+      (
+          id bigserial NOT NULL,
+          nombre character varying(60) COLLATE pg_catalog."default" NOT NULL,
+          status boolean DEFAULT true,
+          CONSTRAINT nomina_trabajos_dia2_labores_areas_pkey PRIMARY KEY (id)
+      ) TABLESPACE pg_default;
+      ALTER TABLE IF EXISTS public.nomina_trabajos_dia2_labores_areas OWNER to programa;
+      INSERT INTO public.nomina_trabajos_dia2_labores_areas(nombre) VALUES ('Administrativo'),('Arieros'),('Control de Maleza'),
+        ('Control de Plagas'),('Labores Varias'),('Mantenimiento'),('Nutrición'),('Riego'),('Operadores');
+   DELETE FROM public.compras_salidas_labores;
+ ✔ Agregar codigo en gastos directos y agregar en el reporte @done (23-02-15 18:34)
+   -- lap|san
+   ALTER TABLE IF EXISTS public.compras ADD COLUMN id_cat_codigos bigint;
+   ALTER TABLE IF EXISTS public.compras ADD CONSTRAINT compras_id_cat_codigos_fkey FOREIGN KEY (id_cat_codigos) REFERENCES otros.cat_codigos (id_cat_codigos) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+ ☐ modificar los tickets de nomina como la foto
  ☐ Revisar el checador con adrian y cargar las asistencias directamente
  ☐ Reporte de asistencias cambiar como la foto
  ☐ Reporte de boletas pendientes de pago por proveedor

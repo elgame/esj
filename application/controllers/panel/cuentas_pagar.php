@@ -13,6 +13,7 @@ class cuentas_pagar extends MY_Controller {
     'cuentas_pagar/cuenta_xls/',
     'cuentas_pagar/cuenta2_pdf/',
     'cuentas_pagar/cuenta2_xls/',
+    'cuentas_pagar/cuenta2_all_pdf/',
 
     'cuentas_pagar/saldos_pdf/',
     'cuentas_pagar/saldos_xls/',
@@ -159,6 +160,10 @@ class cuentas_pagar extends MY_Controller {
   public function cuenta2_xls(){
     $this->load->model('cuentas_pagar_model');
     $this->cuentas_pagar_model->cuenta2ProveedorExcel();
+  }
+  public function cuenta2_all_pdf(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->cuenta2ProveedorAllPdf();
   }
 
 

@@ -86,6 +86,8 @@ class labores_codigo extends MY_Controller {
       }
     }
 
+    $params['areas'] = $this->labores_codigo_model->getAreas();
+
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -129,6 +131,7 @@ class labores_codigo extends MY_Controller {
     }
 
     $params['categoria'] = $this->labores_codigo_model->info($_GET['id'], true);
+    $params['areas'] = $this->labores_codigo_model->getAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

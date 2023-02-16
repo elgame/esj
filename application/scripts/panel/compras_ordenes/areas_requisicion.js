@@ -12,7 +12,7 @@
   });
 
   var autocompleteCodigos = function () {
-    $('#table-productos, .tblproductos0').on('focus', 'input.showCodigoAreaAuto:not(.ui-autocomplete-input)', function(event) {
+    $('#table-productos, .tblproductos0, .simpleCodArea').on('focus', 'input.showCodigoAreaAuto:not(.ui-autocomplete-input)', function(event) {
       var iniCat = 0;
       if (parseInt($(this).attr('data-ini')) > 0)
         iniCat = $(this).attr('data-ini');
@@ -54,7 +54,7 @@
   };
 
   var showCodigoArea = function() {
-    $("#productos, .tblproductos0").on('click', '.showCodigoArea', function(event) {
+    $("#productos, .tblproductos0, .simpleCodArea").on('click', '.showCodigoArea', function(event) {
       var $tr = $(this).parent().parent(),
       iniCat = null;
       if ($(this).is('.notr'))
@@ -86,6 +86,7 @@
 
 
       if (passes) {
+        console.log(objCodigoArea);
         objCodigoArea.val(radioSel.attr('data-codfin'));
         objCodigoArea.parent().find('.showCodigoAreaAutoId').val(radioSel.val());
         objCodigoArea.parent().find('#codigoAreaId').val(radioSel.val());

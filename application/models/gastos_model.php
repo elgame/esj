@@ -36,6 +36,7 @@ class gastos_model extends privilegios_model{
       'retencion_isr'   => $data['ret_isr'],
       'importe_ieps'    => $data['ieps'],
       'id_area'         => ($data['areaId']? $data['areaId']: NULL),
+      'id_cat_codigos'  => (!empty($data['codigoAreaId'])? $data['codigoAreaId']: NULL),
       // 'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
       // 'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
       'id_activo'       => ($data['activoId']? $data['activoId']: NULL),

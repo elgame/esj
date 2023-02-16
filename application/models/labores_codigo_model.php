@@ -52,7 +52,7 @@ class labores_codigo_model extends CI_Model {
       'nombre' => $data['nombre'],
       'codigo' => strtoupper($data['codigo']),
       'costo' => floatval($data['costo']),
-      'departamento' => mb_strtoupper($data['departamento'], 'UTF-8'),
+      'departamento' => $data['departamento'],
     );
 
     $this->db->insert('compras_salidas_labores', $insertData);
@@ -76,13 +76,29 @@ class labores_codigo_model extends CI_Model {
     return $data;
   }
 
+  public function getAreas()
+  {
+    $query = $this->db->query(
+      "SELECT id, nombre
+        FROM nomina_trabajos_dia2_labores_areas
+        WHERE status = 't'");
+
+    $data = array();
+    if ($query->num_rows() > 0)
+    {
+      $data = $query->result();
+    }
+
+    return $data;
+  }
+
   public function modificar($id_labor, $data)
   {
     $updateData = array(
       'nombre' => $data['nombre'],
       'codigo' => strtoupper($data['codigo']),
       'costo' => floatval($data['costo']),
-      'departamento' => mb_strtoupper($data['departamento'], 'UTF-8'),
+      'departamento' => $data['departamento'],
     );
 
     $this->db->update('compras_salidas_labores', $updateData, array('id_labor' => $id_labor));

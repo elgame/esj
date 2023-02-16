@@ -57,8 +57,13 @@
               <div class="control-group">
                 <label class="control-label" for="departamento">Area</label>
                 <div class="controls">
-                  <input type="text" name="departamento" data-add="false"
-                    value="<?php echo set_value_get('departamento', $categoria['info'][0]->departamento) ?>" id="departamento" class="span11" placeholder="ARIERO, EMPAQUE">
+                  <select name="departamento" id="departamento" class="span11">
+                    <option value=""></option>
+                    <?php foreach ($areas as $key => $value): ?>
+                    <option value="<?php echo $value->nombre ?>"
+                      <?php echo set_select('departamento', $categoria['info'][0]->departamento, ($value->nombre == $categoria['info'][0]->departamento)); ?>><?php echo $value->nombre ?></option>
+                    <?php endforeach ?>
+                  </select>
                 </div>
               </div>
 

@@ -27,7 +27,9 @@
             <a href="<?php echo base_url('panel/cuentas_pagar/cuenta2_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Imprimir</a> |
             <a href="<?php echo base_url('panel/cuentas_pagar/cuenta2_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-table"></i> Excel</a>
+              <i class="icon-table"></i> Excel</a> |
+            <a href="<?php echo base_url('panel/cuentas_pagar/cuenta2_all_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+              <i class="icon-print"></i> Imprimir Todos</a>
 
             <form action="<?php echo base_url('panel/cuentas_pagar/cuenta2'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters span12">
