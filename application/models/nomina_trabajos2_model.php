@@ -9,17 +9,18 @@ class nomina_trabajos2_model extends CI_Model {
     $this->load->model('nomina_fiscal_model');
 
     $data = array(
-      'id_empresa' => $datos['id_empresa'],
-      'id_usuario' => $datos['id_empleado'],
-      'fecha'      => $datos['fecha'],
-      'rows'       => isset($datos['rows'])? $datos['rows']: uniqid(),
-      'id_labor'   => $datos['id_labor'],
-      'id_area'    => $datos['id_area'],
-      'anio'       => $datos['anio'],
-      'semana'     => $datos['semana'],
-      'costo'      => floatval($datos['costo']),
-      'avance'     => floatval($datos['avance']),
-      'importe'    => floatval($datos['importe']),
+      'id_empresa'  => $datos['id_empresa'],
+      'id_usuario'  => $datos['id_empleado'],
+      'fecha'       => $datos['fecha'],
+      'rows'        => isset($datos['rows'])? $datos['rows']: uniqid(),
+      'id_labor'    => $datos['id_labor'],
+      'id_area'     => $datos['id_area'],
+      'anio'        => $datos['anio'],
+      'semana'      => $datos['semana'],
+      'costo'       => floatval($datos['costo']),
+      'avance'      => floatval($datos['avance']),
+      'avance_real' => (floatval($datos['avance_real'])>0? floatval($datos['avance_real']): floatval($datos['avance'])),
+      'importe'     => floatval($datos['importe']),
     );
 
     if (isset($datos['rows'])){

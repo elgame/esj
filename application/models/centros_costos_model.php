@@ -183,10 +183,15 @@ class centros_costos_model extends CI_Model {
    */
   public function getCentrosCostosAjax($sqlX = null){
     $sql = '';
-    if ($this->input->get('term') !== false)
-      $sql .= " AND (lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-                lower(cc.codigo) LIKE '".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
-              )";
+    if ($this->input->get('term') !== false) {
+      if (strlen($this->input->get('term')) > 5) {
+        $sql .= " AND (lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                  lower(cc.codigo) = '".mb_strtolower($this->input->get('term'), 'UTF-8')."'
+                )";
+      } else {
+        $sql .= " AND (lower(cc.codigo) = '".mb_strtolower($this->input->get('term'), 'UTF-8')."')";
+      }
+    }
     if ($this->input->get('tipo') !== false) {
       if (is_array($this->input->get('tipo'))) {
         $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
@@ -196,6 +201,8 @@ class centros_costos_model extends CI_Model {
 
     if ($this->input->get('id_area') !== false)
       $sql .= " AND cc.id_area = {$this->input->get('id_area')}";
+    if ($this->input->get('rancho') !== false)
+      $sql .= " AND cc.id_rancho = {$this->input->get('rancho')}";
 
     if (!is_null($sqlX))
       $sql .= $sqlX;
@@ -216,8 +223,8 @@ class centros_costos_model extends CI_Model {
       foreach($res->result() as $itm){
         $response[] = array(
             'id'    => $itm->id_centro_costo,
-            'label' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
-            'value' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
+            'label' => ($itm->codigo!=''? "{$itm->codigo} - ": '').$itm->nombre,
+            'value' => ($itm->codigo!=''? "{$itm->codigo} - ": '').$itm->nombre,
             'item'  => $itm,
         );
       }

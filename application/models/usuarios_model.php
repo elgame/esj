@@ -571,7 +571,7 @@ class Usuarios_model extends privilegios_model {
         lower(nombre || ' ' || apellido_paterno || ' ' || apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
       )";
     if (is_numeric($this->input->get('term'))) {
-      $sql = "id = {$_GET['term']}";
+      $sql = "id = ".trim($_GET['term']);
     }
 
     if($this->input->get('empleados')!='')
@@ -593,8 +593,7 @@ class Usuarios_model extends privilegios_model {
         "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, salario_diario,
                 DATE(fecha_entrada) as fecha_entrada, DATE(fecha_salida) as fecha_salida, esta_asegurado
         FROM usuarios
-        WHERE
-          {$sql}
+        WHERE {$sql}
         ORDER BY nombre ASC
         LIMIT 20");
 

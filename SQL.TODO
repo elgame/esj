@@ -4,7 +4,7 @@
    Agregar fecha de viaje y tomar esa fecha para el reporte relacion de fecha,
    quitar de gastos los conceptos COSTO MENSUAL GENERAL EST, COSTO ESTIMADO, COSTO MENSUAL GENERAL
  ✔ Reporte cuentas por pagar que salgan todos @done (23-02-15 18:34)
- ☐ En captura de actividades 2 de nomina, filtrar las tablas por rancho
+ ✔ En captura de actividades 2 de nomina, filtrar las tablas por rancho @done (23-02-16 16:48)
  ☐ Reporte de prenomina agregar bonos, -fonacot, -infonavit, -pencion
    -- lap|san
    CREATE TABLE IF NOT EXISTS public.nomina_trabajos_dia2_labores_areas
@@ -16,8 +16,10 @@
       ) TABLESPACE pg_default;
       ALTER TABLE IF EXISTS public.nomina_trabajos_dia2_labores_areas OWNER to programa;
       INSERT INTO public.nomina_trabajos_dia2_labores_areas(nombre) VALUES ('Administrativo'),('Arieros'),('Control de Maleza'),
-        ('Control de Plagas'),('Labores Varias'),('Mantenimiento'),('Nutrición'),('Riego'),('Operadores');
-   DELETE FROM public.compras_salidas_labores;
+        ('Control de Plagas'),('Labores Varias'),('Mantenimiento'),('Nutrición'),('Riego'),('Operadores'),('Deshije');
+   -- DELETE FROM public.compras_salidas_labores;
+   -- lap
+   ALTER TABLE IF EXISTS public.nomina_trabajos_dia2 ADD COLUMN avance_real double precision DEFAULT 0;
  ✔ Agregar codigo en gastos directos y agregar en el reporte @done (23-02-15 18:34)
    -- lap|san
    ALTER TABLE IF EXISTS public.compras ADD COLUMN id_cat_codigos bigint;

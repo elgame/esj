@@ -52,27 +52,35 @@
                 <input type="hidden" id="danio" value="<?php echo $filtros['anio']; ?>">
                 <input type="hidden" id="dfecha" value="<?php echo $fecha; ?>">
 
-                <div class="span3">
-                  <label for="dempleado">Empleado</label>
-                  <input type="text" class="span12" id="dempleado" value="">
-                  <input type="hidden" class="valAddTr" id="dempleadoId" value="">
-                </div>
-                <div class="span3">
-                  <label for="dlabor">Labor</label>
-                  <input type="text" class="span12" id="dlabor" value="">
-                  <input type="hidden" class="valAddTr" id="dlaborId" value="">
-                </div>
-                <div class="span1">
-                  <label for="dcosto">Costo</label>
-                  <input type="text" class="span12 valAddTr" id="dcosto" value="" readonly>
-                </div>
-                <div class="span1">
-                  <label for="davance">Avance</label>
-                  <input type="text" class="span12 valAddTr vpositive" id="davance" value="">
-                </div>
-                <div class="span2">
-                  <label for="dimporte">Importe</label>
-                  <input type="text" class="span12 valAddTr not0" id="dimporte" value="" readonly>
+                <div class="row-fluid">
+                  <div class="span3">
+                    <label for="dempleado">Empleado</label>
+                    <input type="text" class="span12" id="dempleado" value="">
+                    <input type="hidden" class="valAddTr" id="dempleadoId" value="">
+                  </div>
+                  <div class="span3">
+                    <label for="dlabor">Labor</label>
+                    <input type="text" class="span12" id="dlabor" value="">
+                    <input type="hidden" class="valAddTr" id="dlaborId" value="">
+                  </div>
+                  <div class="span1">
+                    <label for="dcosto">Costo</label>
+                    <input type="text" class="span12 valAddTr" id="dcosto" value="" readonly>
+                  </div>
+                  <div class="span3">
+                    <div class="span6">
+                      <label for="davance">Avance</label>
+                      <input type="text" class="span12 valAddTr vpositive" id="davance" value="">
+                    </div>
+                    <div class="span6">
+                      <label for="davance_real">Avance Rel</label>
+                      <input type="text" class="span12 valAddTr vpositive" id="davance_real" value="">
+                    </div>
+                  </div>
+                  <div class="span2">
+                    <label for="dimporte">Importe</label>
+                    <input type="text" class="span12 valAddTr not0" id="dimporte" value="" readonly>
+                  </div>
                 </div>
 
                 <div class="span3">
@@ -85,7 +93,7 @@
                   <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                   <div class="controls">
                     <div class="input-append span12">
-                      <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1">
+                      <input type="text" name="rancho" class="span12" id="rancho" value="" placeholder="Milagro A, Linea 1">
                     </div>
                   </div>
                   <ul class="tags" id="tagsRanchoIds">
