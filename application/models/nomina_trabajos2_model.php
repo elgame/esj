@@ -263,11 +263,9 @@ class nomina_trabajos2_model extends CI_Model {
 
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
-    if ($empresaId !== '')
+    if ($empresaId !== '') {
       $diaComienza = $empresa['info']->dia_inicia_semana;
-      // $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
-    else
-      $diaComienza = '4';
+    }
 
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $empleados = $this->db->query("SELECT nf.*, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador
@@ -284,15 +282,32 @@ class nomina_trabajos2_model extends CI_Model {
     $pdf = new MYpdf('P', 'mm', array(63, 270));
     $pdf->show_head = false;
 
+    $descuentoss = [
+      'infonavit' => ['r', 'Infonavit'], 'dePensionAlimenticia' => ['od', 'Pensión Alimenticia'],
+      'fonacot' => ['od', 'Fonacot'], 'fondo_ahorro' => ['r', 'Fondo de Ahorro'],
+      'descuento_playeras' => ['r', 'Playeras'], 'descuento_cocina' => ['r', 'Cocina'],
+      'deduccion_otros' => ['r', 'Otros'], 'totalDescuentoMaterial' => ['od', 'Material'],
+      'totalPrestamosEf' => ['od', 'Prestamos Efectivo'], 'prestamos' => ['r', 'Prestamos']
+    ];
+    $bonoss = ['bonos', 'otros', 'domingo'];
+
     $pdf->SetXY(0, 3);
     foreach ($empleados as $key => $empleado) {
+      $empleado->otros_datos = json_decode($empleado->otros_datos);
       $pdf->AddPage();
       $pdf->AddFont($pdf->fount_num, '');
 
-      $tareas = $this->db->query("SELECT t2.fecha, t2.costo, t2.avance,
-          t2.importe, sl.nombre AS labor, sl.codigo
+      $tareas = $this->db->query("SELECT t2.fecha, t2.costo, t2.avance, t2.avance_real,
+          t2.importe, sl.nombre AS labor, sl.codigo, nr2.ranchos
         FROM nomina_trabajos_dia2 t2
           INNER JOIN compras_salidas_labores sl ON sl.id_labor = t2.id_labor
+          INNER JOIN (
+            SELECT dr2.id_empresa, dr2.id_usuario, dr2.fecha, dr2.rows,
+              String_agg(r.codigo, ',') AS ranchos
+            FROM public.nomina_trabajos_dia2_rancho dr2
+              INNER JOIN otros.ranchos r ON r.id_rancho = dr2.id_rancho
+            GROUP BY dr2.id_empresa, dr2.id_usuario, dr2.fecha, dr2.rows
+          ) nr2 ON nr2.id_empresa = t2.id_empresa AND nr2.id_usuario = t2.id_usuario AND nr2.fecha = t2.fecha AND nr2.rows = t2.rows
         WHERE t2.anio = {$anio} AND t2.semana = {$semana['semana']}
           AND t2.id_empresa = {$empresaId} AND t2.id_usuario = {$empleado->id_empleado}
         ORDER BY fecha ASC")->result();
@@ -318,21 +333,76 @@ class nomina_trabajos2_model extends CI_Model {
       $pdf->Row2(array("{$empleado->trabajador}"), false, false, 5);
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row2(array('--------------------------------------------------------------------------'), false, false, 5);
+      $pdf->SetFounts(array($pdf->fount_txt), array(-2));
       $pdf->SetAligns(array('C'));
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('ACTIVIDADES'), false, false, 5);
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row2(array('ACTIVIDADES'), false, false, 3);
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row2(array('--------------------------------------------------------------------------'), false, false, 5);
 
+      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt, $pdf->fount_txt, $pdf->fount_num, $pdf->fount_num), array(-3, -3, -3, -3, -3));
+      $pdf->SetWidths(array(9, 7, 25, 10, 12));
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R'));
+      $total_ingresos = 0;
       foreach ($tareas as $keyt => $tarea) {
-        $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt, $pdf->fount_num), array(-2, -2, -2));
-        $pdf->SetWidths(array(13, 34, 15));
-        $pdf->SetAligns(array('L', 'L', 'R'));
-
         $pdf->SetXY(0, $pdf->GetY()-2);
-        $pdf->Row2(array($tarea->fecha, $tarea->labor, MyString::formatoNumero($tarea->importe, 2, '$', false)), false, false, 5);
+        $pdf->Row2(array(
+          MyString::fechaATexto($tarea->fecha, 'inm'),
+          $tarea->ranchos, $tarea->labor, $tarea->avance_real,
+          MyString::formatoNumero($tarea->importe, 2, '$', false)), false, false, 5);
+        $total_ingresos += $tarea->importe;
       }
 
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->SetWidths(array($pdf->pag_size[0]));
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->Row2(array('--------------------------------------------------------------------------'), false, false, 5);
+      $pdf->SetFounts(array($pdf->fount_txt), array(-2));
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row2(array('BONOS'), false, false, 3);
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('--------------------------------------------------------------------------'), false, false, 5);
+      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-3, -3));
+      $pdf->SetWidths(array(51, 12));
+      $pdf->SetAligns(array('L', 'R'));
+      $total_bonos = 0;
+      foreach ($bonoss as $key => $fields) {
+        $value = isset($empleado->{$fields})? $empleado->{$fields}: 0;
+        if ($value > 0) {
+          $pdf->SetXY(0, $pdf->GetY()-2);
+          $pdf->Row2(array(ucfirst($fields), MyString::formatoNumero($value, 2, '$', false)), false, false, 4);
+          $total_bonos += $value;
+        }
+      }
+
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->SetWidths(array($pdf->pag_size[0]));
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->Row2(array('--------------------------------------------------------------------------'), false, false, 5);
+      $pdf->SetFounts(array($pdf->fount_txt), array(-2));
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row2(array('DESCUENTOS'), false, false, 3);
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('--------------------------------------------------------------------------'), false, false, 5);
+      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-3, -3));
+      $pdf->SetWidths(array(51, 12));
+      $pdf->SetAligns(array('L', 'R'));
+      $total_descuentos = 0;
+      foreach ($descuentoss as $fields => $tipo) {
+        $value = $tipo[0] === 'od'? (isset($empleado->otros_datos->{$fields})? $empleado->otros_datos->{$fields}: 0): $empleado->{$fields};
+        if ($value > 0) {
+          $pdf->SetXY(0, $pdf->GetY()-2);
+          $pdf->Row2(array($tipo[1], MyString::formatoNumero($value, 2, '$', false)), false, false, 4);
+          $total_descuentos += $value;
+        }
+      }
+
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
       $pdf->SetWidths(array($pdf->pag_size[0]));
       $pdf->SetAligns(array('C'));
       $pdf->SetXY(0, $pdf->GetY()-2);
@@ -342,11 +412,7 @@ class nomina_trabajos2_model extends CI_Model {
       $pdf->SetWidths(array(31, 31));
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Total Percepciones', MyString::formatoNumero($empleado->total_percepcion - $empleado->subsidio, 2, '$', false)), false, false, 5);
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Total Deducciones', MyString::formatoNumero($empleado->total_deduccion - $empleado->subsidio, 2, '$', false)), false, false, 5);
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Total Neto', MyString::formatoNumero($empleado->total_neto, 2, '$', false)), false, false, 5);
+      $pdf->Row2(array('Total', MyString::formatoNumero($total_ingresos + $total_bonos - $total_descuentos, 2, '$', false)), false, false, 5);
 
       $pdf->SetXY(0, $pdf->GetY()+10);
     }
@@ -948,6 +1014,9 @@ class nomina_trabajos2_model extends CI_Model {
      $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
     $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
     $nomina_empleados = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
+    // echo "<pre>";
+    // var_dump($nomina_empleados);
+    // echo "</pre>";exit;
 
     $diasSemana = [];
     $fechaini = new DateTime($semana['fecha_inicio']);
@@ -1015,25 +1084,25 @@ class nomina_trabajos2_model extends CI_Model {
 
     $totales_destajo = [];
     $aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
-    $widths = array(60, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15);
+    $widths = array(60, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17);
     $header = array('Trabajador');
     foreach ($res['data'][0]->destajo as $key => $value) {
       $header[] = $key;
       $totales_destajo[$key] = 0;
     }
     $header[] = 'T. Perce';
-    $header[] = 'D. Playera';
-    $header[] = 'D. Cocina';
-    $header[] = 'D. Otros';
-    $header[] = 'D. Material';
-    $header[] = 'D. Presta';
+    $header[] = 'D. Fiscales';
+    $header[] = 'Bonos';
+    $header[] = 'D. Fuera';
+    // $header[] = 'D. Material';
+    // $header[] = 'D. Presta';
     $header[] = 'Total';
     $totales_destajo['tperce'] = 0;
-    $totales_destajo['td_playera'] = 0;
-    $totales_destajo['td_cocina'] = 0;
+    $totales_destajo['td_fiscales'] = 0;
+    $totales_destajo['tbonos'] = 0;
     $totales_destajo['td_otros'] = 0;
-    $totales_destajo['td_mater'] = 0;
-    $totales_destajo['td_prest'] = 0;
+    // $totales_destajo['td_mater'] = 0;
+    // $totales_destajo['td_prest'] = 0;
     $totales_destajo['total_nom'] = 0;
 
     foreach($res['data'] as $key => $item){
@@ -1066,20 +1135,17 @@ class nomina_trabajos2_model extends CI_Model {
       $datos[] = MyString::formatoNumero($total_destajo, 2, '', false);
       $totales_destajo['tperce'] += $total_destajo;
 
-      $datos[] = MyString::formatoNumero($item->pre_descuentos->desc_playeras, 2, '', false);
-      $datos[] = MyString::formatoNumero($item->pre_descuentos->desc_cocina, 2, '', false);
-      $datos[] = MyString::formatoNumero($item->pre_descuentos->desc_otros, 2, '', false);
-      $totales_destajo['td_playera'] += $item->pre_descuentos->desc_playeras;
-      $totales_destajo['td_cocina'] += $item->pre_descuentos->desc_cocina;
-      $totales_destajo['td_otros'] += $item->pre_descuentos->desc_otros;
+      $datos[] = MyString::formatoNumero(($item->infonavit + $item->p_alimenticia + $item->fonacot + $item->fondo_ahorro), 2, '', false);
+      $totales_destajo['td_fiscales'] += ($item->infonavit + $item->p_alimenticia + $item->fonacot + $item->fondo_ahorro);
 
-      $datos[] = MyString::formatoNumero($item->total_descuento_material, 2, '', false);
-      $datos[] = MyString::formatoNumero($item->total_descuento_prestamos, 2, '', false);
-      $totales_destajo['td_mater'] += $item->total_descuento_material;
-      $totales_destajo['td_prest'] += $item->total_descuento_prestamos;
+      $datos[] = MyString::formatoNumero(($item->bonos + $item->otros + $item->domingo), 2, '', false);
+      $totales_destajo['tbonos'] += ($item->bonos + $item->otros + $item->domingo);
 
-      $total_nom_trab = $total_destajo - $item->pre_descuentos->desc_playeras - $item->pre_descuentos->desc_cocina -
-                        $item->pre_descuentos->desc_otros - $item->total_descuento_material - $item->total_descuento_prestamos;
+      $datos[] = MyString::formatoNumero(($item->pre_descuentos->desc_playeras + $item->pre_descuentos->desc_cocina + $item->pre_descuentos->desc_otros + $item->total_descuento_material + $item->total_descuento_prestamos), 2, '', false);
+      $totales_destajo['td_otros'] += ($item->pre_descuentos->desc_playeras + $item->pre_descuentos->desc_cocina + $item->pre_descuentos->desc_otros + $item->total_descuento_material + $item->total_descuento_prestamos);
+
+      $total_nom_trab = $total_destajo - ($item->infonavit + $item->p_alimenticia + $item->fonacot + $item->fondo_ahorro) +
+        ($item->bonos + $item->otros + $item->domingo) - ($item->pre_descuentos->desc_playeras + $item->pre_descuentos->desc_cocina + $item->pre_descuentos->desc_otros + $item->total_descuento_material + $item->total_descuento_prestamos);
       $datos[] = MyString::formatoNumero($total_nom_trab, 2, '', false);
       $totales_destajo['total_nom'] += $total_nom_trab;
 
@@ -1092,7 +1158,7 @@ class nomina_trabajos2_model extends CI_Model {
     $pdf->SetFont('Arial','B', 8);
     $pdf->SetXY(6, $pdf->GetY());
     $aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
-    $widths = array(60, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15);
+    $widths = array(60, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17);
     $row_totales = ['TOTALES'];
     foreach ($totales_destajo as $keyf => $tcol) {
       $row_totales[] = MyString::formatoNumero($tcol, 2, '', false);

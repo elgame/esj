@@ -74,7 +74,7 @@
                     </div>
                     <div class="span6">
                       <label for="davance_real">Avance Rel</label>
-                      <input type="text" class="span12 valAddTr vpositive" id="davance_real" value="">
+                      <input type="text" class="span12 vpositive" id="davance_real" value="">
                     </div>
                   </div>
                   <div class="span2">
