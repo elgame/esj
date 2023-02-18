@@ -721,6 +721,7 @@
                               <td style="width: 66px;">
                                 <input type="text" name="iepsPorcent[]" value="<?php echo $_POST['iepsPorcent'][$key] ?>" id="iepsPorcent" class="span12">
                                 <input type="hidden" name="iepsTotal[]" value="<?php echo $_POST['iepsTotal'][$key] ?>" id="iepsTotal" class="span12">
+                                <input type="hidden" name="iepsSub[]" value="<?php echo $_POST['iepsSub'][$key] ?>" id="iepsSub" class="span12">
                               </td>
                               <td style="width: 66px;">
                                   <select name="ret_iva[]" id="ret_iva" class="span12">
@@ -746,7 +747,21 @@
                                   <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12">
                                   <input type="hidden" name="observaciones[]" value="<?php echo $_POST['observaciones'][$key] ?>" id="observaciones" class="span12">
                               </td>
-                              <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
+                              <td style="width: 35px;">
+                                <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
+                                  <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                    <div class="arrow"></div><h3 class="popover-title">Activos / Certificados</h3>
+                                    <div class="popover-content">
+
+                                      <div class="control-group" style="width: 375px;">
+                                        <input type="text" name="noCertificado[]" value="<?php echo $_POST['noCertificado'][$key] ?>" id="noCertificado" class="span12" placeholder="No Certificado">
+                                      </div>
+
+                                    </div>
+                                  </div>
+                                </div>
+                                <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
+                              </td>
                             </tr>
                           <?php  }} else {
                                $retencionisr = $subtotal = $iva = $ieps = $total = $retencion = 0;
@@ -866,6 +881,7 @@
                                  <td style="width: 66px;">
                                    <input type="text" name="iepsPorcent[]" value="<?php echo $prod->porcentaje_ieps ?>" id="iepsPorcent" <?php echo $readonly ?> class="span12">
                                    <input type="hidden" name="iepsTotal[]" value="<?php echo $prod->ieps ?>" id="iepsTotal" class="span12">
+                                   <input type="hidden" name="iepsSub[]" value="<?php echo $prod->ieps_sub ?>" id="iepsSub" class="span12">
                                  </td>
                                  <td style="width: 66px;<?php echo $redBg ?>">
                                     <select name="ret_iva[]" id="ret_iva" class="span12">
@@ -891,7 +907,19 @@
                                     <input type="text" name="observacion[]" value="<?php echo $prod->observacion ?>" id="observacion" class="span12" <?php echo $readonly ?>>
                                     <input type="hidden" name="observaciones[]" value="<?php echo $prod->observaciones ?>" id="observaciones" class="span12">
                                 </td>
-                                 <td style="width: 35px;<?php echo $redBg ?>">
+                                <td style="width: 35px;<?php echo $redBg ?>">
+                                  <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
+                                    <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                      <div class="arrow"></div><h3 class="popover-title">Activos / Certificados</h3>
+                                      <div class="popover-content">
+
+                                        <div class="control-group" style="width: 375px;">
+                                          <input type="text" name="noCertificado[]" value="<?php echo $prod->no_certificado ?>" id="noCertificado" class="span12" placeholder="No Certificado" <?php echo $readonly ?>>
+                                        </div>
+
+                                      </div>
+                                    </div>
+                                  </div>
                                   <?php if ($showButton && $prod->status != 'a'){ ?>
                                     <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
                                   <?php } ?>

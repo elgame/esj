@@ -36,13 +36,16 @@ class cuentas_pagar_model extends privilegios_model{
 			$sqlt .= " AND f.id_proveedor = '".$this->input->get('fid_proveedor')."'";
 		}
 
+    if($this->input->get('ftipodoc') != '') {
+      $sql .= " AND f.tipo_documento = '".$this->input->get('ftipodoc')."'";
+    }
+
 		$this->load->model('empresas_model');
 		$client_default = $this->empresas_model->getDefaultEmpresa();
 		$_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
 		$_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
 	    if($this->input->get('did_empresa') != '' && $this->input->get('did_empresa') != 'all'){
 	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 	    }
 
 		$query = BDUtil::pagination(
@@ -127,7 +130,7 @@ class cuentas_pagar_model extends privilegios_model{
 	 * Descarga el listado de cuentas por pagar en formato pdf
 	 */
 	public function cuentasPagarPdf(){
-		$res = $this->getCuentasPagarData(1000);
+		$res = $this->getCuentasPagarData(10000);
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
@@ -277,9 +280,15 @@ class cuentas_pagar_model extends privilegios_model{
 			$sql2 = 'WHERE saldo > 0';
 		}
 
+    $sql_only_sel_table = $sql_only_sel_where = $sql_only_sel_order = $sql_only_sel_fiels = '';
+
     if($this->input->get('did_empresa') != ''){
-      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+      if (isset($otros['all_empresas']) && $otros['all_empresas']) {
+        $sql_only_sel_order .= ' id_empresa ASC,';
+      } else {
+        $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+        $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+      }
     }
 
     if($this->input->get('id_proveedor') != ''){
@@ -288,7 +297,10 @@ class cuentas_pagar_model extends privilegios_model{
       $sqlp3 = " AND id_proveedor = '".$this->input->get('id_proveedor')."'";
     }
 
-    $sql_only_sel_table = $sql_only_sel_where = $sql_only_sel_order = $sql_only_sel_fiels = '';
+    if($this->input->get('ftipodoc') != '') {
+      $sql .= " AND f.tipo_documento = '".$this->input->get('ftipodoc')."'";
+    }
+
     if (isset($otros['only_select'])) { // solo los seleccionados para pago masivo
       $sql_only_sel_table = " INNER JOIN banco_pagos_compras bpc ON f.id_compra = bpc.id_compra
         LEFT JOIN (
@@ -300,75 +312,77 @@ class cuentas_pagar_model extends privilegios_model{
           GROUP BY cf.id_compra
         ) ord ON f.id_compra = ord.id_compra";
       $sql_only_sel_where = " AND bpc.status = 'f'";
-      $sql_only_sel_order = 'proveedor ASC,';
+      $sql_only_sel_order .= ' proveedor ASC,';
       $sql_only_sel_fiels = ', ord.ordenes';
     }
 
-		/*** Saldo anterior ***/
-		$saldo_anterior = $this->db->query(
-			"SELECT
-				id_proveedor,
-				Sum(total) AS total,
-				Sum(iva) AS iva,
-				Sum(abonos) AS abonos,
-				Sum(saldo)::numeric(12, 2) AS saldo,
-				tipo
-			FROM
-				(
-					SELECT
-            c.id_proveedor,
-            c.nombre_fiscal,
-            Sum(f.total) AS total,
-            Sum(f.importe_iva) AS iva,
-            COALESCE(Sum(faa.abonos),0) as abonos,
-            COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-            'f'::text as tipo
-          FROM
-            proveedores AS c
-            INNER JOIN compras AS f ON c.id_proveedor = f.id_proveedor
-            LEFT JOIN (
-              SELECT
-                d.id_proveedor,
-                d.id_compra,
-                Sum(d.abonos) AS abonos
-              FROM
-              (
+    if (!(isset($otros['all_empresas']) && $otros['all_empresas'])) {
+      /*** Saldo anterior ***/
+      $saldo_anterior = $this->db->query(
+        "SELECT
+          id_proveedor,
+          Sum(total) AS total,
+          Sum(iva) AS iva,
+          Sum(abonos) AS abonos,
+          Sum(saldo)::numeric(12, 2) AS saldo,
+          tipo
+        FROM
+          (
+            SELECT
+              c.id_proveedor,
+              c.nombre_fiscal,
+              Sum(f.total) AS total,
+              Sum(f.importe_iva) AS iva,
+              COALESCE(Sum(faa.abonos),0) as abonos,
+              COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+              'f'::text as tipo
+            FROM
+              proveedores AS c
+              INNER JOIN compras AS f ON c.id_proveedor = f.id_proveedor
+              LEFT JOIN (
                 SELECT
-                  f.id_proveedor,
-                  f.id_compra,
-                  Sum(fa.total) AS abonos
+                  d.id_proveedor,
+                  d.id_compra,
+                  Sum(d.abonos) AS abonos
                 FROM
-                  compras AS f
-                    INNER JOIN compras_abonos AS fa ON f.id_compra = fa.id_compra
-                WHERE f.status <> 'ca' AND f.status <> 'b'
-                  {$sqlp1}
-                  AND Date(fa.fecha) <= '{$fecha2}'{$sql}
-                GROUP BY f.id_proveedor, f.id_compra
+                (
+                  SELECT
+                    f.id_proveedor,
+                    f.id_compra,
+                    Sum(fa.total) AS abonos
+                  FROM
+                    compras AS f
+                      INNER JOIN compras_abonos AS fa ON f.id_compra = fa.id_compra
+                  WHERE f.status <> 'ca' AND f.status <> 'b'
+                    {$sqlp1}
+                    AND Date(fa.fecha) <= '{$fecha2}'{$sql}
+                  GROUP BY f.id_proveedor, f.id_compra
 
-                UNION
+                  UNION
 
-                SELECT
-                  f.id_proveedor,
-                  f.id_nc AS id_compra,
-                  Sum(f.total) AS abonos
-                FROM
-                  compras AS f
-                WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
-                  {$sqlp1}
-                  AND Date(f.fecha) <= '{$fecha2}'{$sql}
-                GROUP BY f.id_proveedor, f.id_compra
-              ) AS d
-              GROUP BY d.id_proveedor, d.id_compra
-            ) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
-          WHERE f.status <> 'ca' AND f.status <> 'b' {$sqlp2}
-             AND id_nc IS NULL
-             AND Date(f.fecha) < '{$fecha1}'
-             {$sql}
-          GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos, tipo
-				) AS sal
-			{$sql2}
-			GROUP BY id_proveedor, tipo
-			");
+                  SELECT
+                    f.id_proveedor,
+                    f.id_nc AS id_compra,
+                    Sum(f.total) AS abonos
+                  FROM
+                    compras AS f
+                  WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+                    {$sqlp1}
+                    AND Date(f.fecha) <= '{$fecha2}'{$sql}
+                  GROUP BY f.id_proveedor, f.id_compra
+                ) AS d
+                GROUP BY d.id_proveedor, d.id_compra
+              ) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
+            WHERE f.status <> 'ca' AND f.status <> 'b' {$sqlp2}
+               AND id_nc IS NULL
+               AND Date(f.fecha) < '{$fecha1}'
+               {$sql}
+            GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos, tipo
+          ) AS sal
+        {$sql2}
+        GROUP BY id_proveedor, tipo
+        ");
+    }
 
 		/*** Facturas y ventas en el rango de fechas ***/
 		$res = $this->db->query(
@@ -388,7 +402,8 @@ class cuentas_pagar_model extends privilegios_model{
 				('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
 				'f'::text as tipo, f.status,
         COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago,
-        p.nombre_fiscal AS proveedor {$sql_only_sel_fiels}
+        p.nombre_fiscal AS proveedor,
+        e.id_empresa, e.nombre_fiscal AS empresa {$sql_only_sel_fiels}
 			FROM
 				compras AS f
         {$sql_only_sel_table}
@@ -422,6 +437,7 @@ class cuentas_pagar_model extends privilegios_model{
 					GROUP BY id_compra
 				) AS ac ON f.id_compra = ac.id_compra {$sql}
         LEFT JOIN proveedores p ON p.id_proveedor = f.id_proveedor
+        LEFT JOIN empresas e ON e.id_empresa = f.id_empresa
 			WHERE f.status <> 'ca' AND f.id_nc IS NULL
         {$sqlp1}
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
@@ -462,16 +478,18 @@ class cuentas_pagar_model extends privilegios_model{
 			}
 		}
 
-		if($saldo_anterior->num_rows() > 0){
-			$response['anterior'] = $saldo_anterior->result();
-			foreach ($response['anterior'] as $key => $c) {
-				if ($key > 0){
-					$response['anterior'][0]->total += $c->total;
-					$response['anterior'][0]->abonos += $c->abonos;
-					$response['anterior'][0]->saldo += $c->saldo;
-				}
-			}
-		}
+    if (!(isset($otros['all_empresas']) && $otros['all_empresas'])) {
+  		if($saldo_anterior->num_rows() > 0) {
+  			$response['anterior'] = $saldo_anterior->result();
+  			foreach ($response['anterior'] as $key => $c) {
+  				if ($key > 0){
+  					$response['anterior'][0]->total += $c->total;
+  					$response['anterior'][0]->abonos += $c->abonos;
+  					$response['anterior'][0]->saldo += $c->saldo;
+  				}
+  			}
+  		}
+    }
 
 		return $response;
 	}
@@ -901,6 +919,208 @@ class cuentas_pagar_model extends privilegios_model{
 	}
 
 
+  public function cuenta2ProveedorAllPdf(){
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+
+    $res = $this->getCuentaProveedorData(['only_select' => true, 'all_empresas' => true]);
+
+    // $this->load->model('empresas_model');
+    // $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    // $pdf->logo = $empresa['info']->logo!=''? (file_exists($empresa['info']->logo)? $empresa['info']->logo: '') : '';
+    $pdf->titulo1 = '';
+
+    if (count($res['anterior']) > 0)
+      $res['anterior'] = $res['anterior'][0];
+
+    $pdf->titulo2 = isset($res['proveedor']->nombre_fiscal)? 'Cuenta de '.$res['proveedor']->nombre_fiscal: '';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por pagar');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+
+    // $response = $this->cuentaProveedorCurpPdf($pdf, $res);
+    // echo "<pre>";
+    //   var_dump($res);
+    // echo "</pre>";exit;
+
+
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('C', 'C', 'C', 'L', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
+    $widths = array(17, 17, 26, 45, 47, 24, 24, 24, 16, 17, 13);
+    $header = array('Fecha F', 'Fecha', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D Trans');
+
+    $total_cargo = 0;
+    $total_abono = 0;
+    $total_saldo = 0;
+    $total_cargo_p = $total_abono_p = $total_saldo_p = 0;
+    $total_cargo_e = $total_abono_e = $total_saldo_e = 0;
+    $aux_prov = '';
+    $aux_empresa = '';
+    $totales_x_tipo = array('nacional' => 0, 'internacional' => 0);
+
+    // $bad_saldo_ante = true;
+    // if(isset($res['anterior']->saldo)){ //se suma a los totales del saldo anterior
+    //   // $total_cargo += $res['anterior']->total;
+    //   // $total_abono += $res['anterior']->abonos;
+    //   // $total_saldo += $res['anterior']->saldo;
+    // }else{
+    //   $res['anterior'] = new stdClass();
+    //   $res['anterior']->total = 0;
+    //   $res['anterior']->abonos = 0;
+    //   $res['anterior']->saldo = 0;
+    // }
+    // $res['anterior']->concepto = 'Saldo anterior a '.$res['fecha1'];
+    $comprasids = array();
+    foreach($res['cuentas'] as $key => $item){
+      $comprasids[] = $item->id_compra;
+      $band_head = false;
+      if($pdf->GetY()+25 >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+      }
+
+      // $pdf->SetTextColor(0,0,0);
+      // if($bad_saldo_ante){
+      //   $pdf->SetFont('Arial','',7);
+      //   $pdf->SetX(6);
+      //   $pdf->SetAligns($aligns);
+      //   $pdf->SetWidths($widths);
+      //   $pdf->Row(array('', '', '', $res['anterior']->concepto, '',
+      //     MyString::formatoNumero($res['anterior']->total, 2, '$', false),
+      //     MyString::formatoNumero($res['anterior']->abonos, 2, '$', false),
+      //     MyString::formatoNumero($res['anterior']->saldo, 2, '$', false),
+      //     '', '', ''), false);
+      //   $bad_saldo_ante = false;
+      // }
+
+
+      if ($aux_prov != $res['cuentas'][$key]->proveedor) {
+        if ($key > 0) {
+          $pdf->SetX(6);
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(220,220,220);
+          $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(152, 24, 24, 24));
+          $pdf->Row(array('Total Proveedor:',
+              MyString::formatoNumero($total_cargo_p, 2, '$', false),
+              MyString::formatoNumero($total_abono_p, 2, '$', false),
+              MyString::formatoNumero($total_saldo_p, 2, '$', false)), true);
+        }
+
+        $total_cargo_p = $total_abono_p = $total_saldo_p = 0;
+        $pdf->SetY($pdf->GetY()+3);
+        $aux_prov = $res['cuentas'][$key]->proveedor;
+      }
+
+      if ($aux_empresa != $item->id_empresa) {
+        if ($key > 0) {
+          $pdf->SetX(6);
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(220,220,220);
+          $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(152, 24, 24, 24));
+          $pdf->Row(array('Total Empresa:',
+              MyString::formatoNumero($total_cargo_e, 2, '$', false),
+              MyString::formatoNumero($total_abono_e, 2, '$', false),
+              MyString::formatoNumero($total_saldo_e, 2, '$', false)), true);
+        }
+
+        $total_cargo_e = $total_abono_e = $total_saldo_e = 0;
+
+        $pdf->SetFont('Arial','B', 10);
+        $pdf->SetX(6);
+        $pdf->SetAligns(['L']);
+        $pdf->SetWidths([150]);
+        $pdf->Row([$item->empresa], false, false);
+        $aux_empresa = $item->id_empresa;
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+
+      if (preg_match('/internacional/', $item->concepto2)) {
+        $totales_x_tipo['internacional'] += $item->cargo;
+      } else {
+        $totales_x_tipo['nacional'] += $item->cargo;
+      }
+
+      $datos = array($item->fecha_factura,
+                  $item->fecha,
+                  $item->serie.$item->folio,
+                  $item->ordenes,
+                  $item->proveedor,
+                  MyString::formatoNumero($item->cargo, 2, '$', false),
+                  MyString::formatoNumero($item->abono, 2, '$', false),
+                  MyString::formatoNumero($item->saldo, 2, '$', false),
+                  $item->estado, $item->fecha_vencimiento,
+                  $item->dias_transc);
+
+      $total_cargo_p += $item->cargo;
+      $total_abono_p += $item->abono;
+      $total_saldo_p += $item->saldo;
+
+      $total_cargo_e += $item->cargo;
+      $total_abono_e += $item->abono;
+      $total_saldo_e += $item->saldo;
+
+      $total_cargo += $item->cargo;
+      $total_abono += $item->abono;
+      $total_saldo += $item->saldo;
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFillColor(220,220,220);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(152, 24, 24, 24));
+    $pdf->Row(array('Total Proveedor:',
+        MyString::formatoNumero($total_cargo_p, 2, '$', false),
+        MyString::formatoNumero($total_abono_p, 2, '$', false),
+        MyString::formatoNumero($total_saldo_p, 2, '$', false)), true);
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFillColor(220,220,220);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(152, 24, 24, 24));
+    $pdf->Row(array('Total Empresa:',
+        MyString::formatoNumero($total_cargo_e, 2, '$', false),
+        MyString::formatoNumero($total_abono_e, 2, '$', false),
+        MyString::formatoNumero($total_saldo_e, 2, '$', false)), true);
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFillColor(160,160,160);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(152, 24, 24, 24));
+    $pdf->Row(array('Totales:',
+        MyString::formatoNumero($total_cargo, 2, '$', false),
+        MyString::formatoNumero($total_abono, 2, '$', false),
+        MyString::formatoNumero($total_saldo, 2, '$', false)), true);
+
+
+    $pdf->Output('cuentas_pagar.pdf', 'I');
+  }
   public function cuenta2ProveedorPdf(){
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -1285,6 +1505,58 @@ class cuentas_pagar_model extends privilegios_model{
 
 		return $response;
 	}
+
+  public function historialAbonosPdf(){
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = false;
+
+    $res = $this->getDetalleVentaFacturaData();
+    // echo "<pre>";
+    //   var_dump($res);
+    // echo "</pre>";exit;
+
+    $pdf->AddPage();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetFont('Arial','B', 10);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(205));
+    $pdf->Row(array("Proveedor: {$res['proveedor']->nombre_fiscal}"), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(40, 40, 125));
+    $pdf->Row(array(
+      "Factura: {$res['cobro'][0]->serie}{$res['cobro'][0]->folio}",
+      "Fecha: {$res['cobro'][0]->fecha}",
+      "Total: ".number_format($res['cobro'][0]->total, 2)
+    ), false, false);
+
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(20, 80, 20));
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('Fecha', 'Concepto', 'Abono'), false, true);
+    $pdf->SetFont('Arial','', 9);
+    foreach ($res['abonos'] as $key => $value) {
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array(
+        $value->fecha,
+        $value->concepto,
+        '$'.number_format($value->abono, 2)
+      ), false, true);
+    }
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetFont('Arial','B', 10);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(205));
+    $pdf->Row(array("Saldo: $".number_format($res['saldo'], 2)), false, false);
+
+    $pdf->Output('cuentas_proveedor.pdf', 'I');
+  }
 
 
 	/**

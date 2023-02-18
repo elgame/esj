@@ -1,13 +1,465 @@
 
+ ☐ Reporte estado resultado transp agregar multimple los litros y precios en reporte sacar un promedio
+   en reporte de relacion de fletes ordenar por fecha los vajes
+   Agregar fecha de viaje y tomar esa fecha para el reporte relacion de fecha,
+   quitar de gastos los conceptos COSTO MENSUAL GENERAL EST, COSTO ESTIMADO, COSTO MENSUAL GENERAL
+ ✔ Reporte cuentas por pagar que salgan todos @done (23-02-15 18:34)
+ ✔ En captura de actividades 2 de nomina, filtrar las tablas por rancho @done (23-02-16 16:48)
+ ✔ Reporte de prenomina agregar bonos, -fonacot, -infonavit, -pencion @done (23-02-17 19:04)
+   -- lap|san
+   CREATE TABLE IF NOT EXISTS public.nomina_trabajos_dia2_labores_areas
+      (
+          id bigserial NOT NULL,
+          nombre character varying(60) COLLATE pg_catalog."default" NOT NULL,
+          status boolean DEFAULT true,
+          CONSTRAINT nomina_trabajos_dia2_labores_areas_pkey PRIMARY KEY (id)
+      ) TABLESPACE pg_default;
+      ALTER TABLE IF EXISTS public.nomina_trabajos_dia2_labores_areas OWNER to programa;
+      INSERT INTO public.nomina_trabajos_dia2_labores_areas(nombre) VALUES ('Administrativo'),('Arieros'),('Control de Maleza'),
+        ('Control de Plagas'),('Labores Varias'),('Mantenimiento'),('Nutrición'),('Riego'),('Operadores'),('Deshije');
+   -- DELETE FROM public.compras_salidas_labores;
+   -- lap
+   ALTER TABLE IF EXISTS public.nomina_trabajos_dia2 ADD COLUMN avance_real double precision DEFAULT 0;
+ ✔ Agregar codigo en gastos directos y agregar en el reporte @done (23-02-15 18:34)
+   -- lap|san
+   ALTER TABLE IF EXISTS public.compras ADD COLUMN id_cat_codigos bigint;
+   ALTER TABLE IF EXISTS public.compras ADD CONSTRAINT compras_id_cat_codigos_fkey FOREIGN KEY (id_cat_codigos) REFERENCES otros.cat_codigos (id_cat_codigos) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+ ☐ modificar los tickets de nomina como la foto
+ ☐ Revisar el checador con adrian y cargar las asistencias directamente
+ ☐ Reporte de asistencias cambiar como la foto
+ ☐ Reporte de boletas pendientes de pago por proveedor
+ ☐ Reportes de nomina
+   -- lap|san|pcc
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Costo x Labor',364,true,'nomina_trabajos2/rpt_costo_labores/','print',true);
+   ALTER TABLE IF EXISTS public.compras_salidas_labores ADD COLUMN departamento character varying(70) COLLATE pg_catalog."default";
+   ALTER TABLE IF EXISTS otros.centro_costo ADD COLUMN id_rancho bigint;
+   ALTER TABLE IF EXISTS otros.centro_costo ADD CONSTRAINT centro_costo_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Pre Nomina',364,true,'nomina_trabajos2/rpt_prenomina/','print',true);
+   -- pcc|lap
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Auditoria de Costos',364,true,'nomina_trabajos2/rpt_auditoria_costos/','print',true);
+   -- lap
+   CREATE OR REPLACE VIEW public.nomina_trabajos_dia2_centros
+     AS
+     SELECT cen.id_empresa,
+        cen.id_usuario,
+        cen.fecha,
+        cen.rows,
+        cen.id_centro_costo,
+        cen.num,
+        cen.id_rancho,
+        ce.nombre AS tabla,
+        ce.hectareas,
+        ra.nombre AS rancho
+       FROM ( SELECT cc.id_empresa,
+                cc.id_usuario,
+                cc.fecha,
+                cc.rows,
+                cc.id_centro_costo,
+                cc.num,
+                r.id_rancho
+               FROM nomina_trabajos_dia2 t2
+                 JOIN nomina_trabajos_dia2_centro_costo cc ON t2.id_empresa = cc.id_empresa AND t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows::text = cc.rows::text
+                 JOIN nomina_trabajos_dia2_rancho r ON t2.id_empresa = r.id_empresa AND t2.id_usuario = r.id_usuario AND t2.fecha = r.fecha AND t2.rows::text = r.rows::text) cen
+         JOIN otros.centro_costo ce ON ce.id_centro_costo = cen.id_centro_costo
+         JOIN otros.ranchos ra ON ra.id_rancho = cen.id_rancho;
+    ALTER TABLE public.nomina_trabajos_dia2_centros OWNER TO programa;
+ ✔ Reporte de codigos de gastos poner filtro para quitar concepto de diesel, gasolina y calcomania @done (23-01-18 12:42)
+ ✔ Estimacion de transporte, poner la opcion de cargar gastos de compra desde gastos generales y poner destinatario al inicio @done (23-01-26 16:13)
+   poder agregar el rendimiento del termo, HORAS TRABAJADAS, LTS DIESEL TERMO, REND HR POR LITRO
+   crear reporte acumulado por rango de fechas y camion
+   -- lap|san|pcc
+   ALTER TABLE otros.estado_resultado_trans ADD COLUMN destino character varying(150) COLLATE pg_catalog."default";
+   ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_trab double precision;
+   ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_lts double precision;
+   ALTER TABLE otros.estado_resultado_trans ADD COLUMN rend_thrs_hxl double precision;
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN id_compra bigint;
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD CONSTRAINT estado_resultado_trans_rep_mtto_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN folio character varying(30) COLLATE pg_catalog."default" DEFAULT ''::character varying;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Relación de Fletes',572,true,'estado_resultado_trans/rpt_rel_fletes/','print',true);
+ ✔ estimacion transpor @done (23-01-18 10:40)
+   -- lap|san|pcc
+    ALTER TABLE otros.estado_resultado_trans ADD COLUMN id_gasto1 character varying(100);
+    UPDATE otros.estado_resultado_trans SET id_gasto1 = id_gasto;
+    ALTER TABLE otros.estado_resultado_trans DROP COLUMN id_gasto;
+    ALTER TABLE otros.estado_resultado_trans RENAME COLUMN id_gasto1 TO id_gasto;
+    COMMENT ON COLUMN otros.estado_resultado_trans.id_gasto IS 'gasto por comprobar de la caja chica 2 ';
+   -- lap|san|pcc
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN id uuid DEFAULT UUID_GENERATE_V4();
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN fecha date DEFAULT NULL;
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN folio character varying(30) DEFAULT '';
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN proveedor character varying(200) DEFAULT '';
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN concepto character varying(250) DEFAULT '';
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD COLUMN subtotal double precision DEFAULT 0;
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto DROP CONSTRAINT estado_resultado_trans_rep_mtto_pkey;
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ADD CONSTRAINT estado_resultado_trans_rep_mtto_pkey PRIMARY KEY (id);
+    ALTER TABLE otros.estado_resultado_trans_rep_mtto ALTER COLUMN id_compra DROP NOT NULL;
+    ALTER TABLE otros.estado_resultado_trans_sueldos ADD COLUMN comprobacion boolean DEFAULT false;
+
+ ✔ Actualizacion de tablas @done (23-01-03 19:04)
+   -- lap|san|pcc
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=0.01, lim_superior=746.04, cuota_fija=0, porcentaje=1.92 WHERE id_art_113=34;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=746.05, lim_superior=6332.05, cuota_fija=14.32, porcentaje=6.4 WHERE id_art_113=35;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=6332.06, lim_superior=11128.01, cuota_fija=371.83, porcentaje=10.88 WHERE id_art_113=36;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=11128.02, lim_superior=12935.82, cuota_fija=893.63, porcentaje=16 WHERE id_art_113=37;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=12935.83, lim_superior=15487.71, cuota_fija=1182.88, porcentaje=17.92 WHERE id_art_113=38;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=15487.72, lim_superior=31236.49, cuota_fija=1640.18, porcentaje=21.36 WHERE id_art_113=39;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=31236.5, lim_superior=49233, cuota_fija=5004.12, porcentaje=23.52 WHERE id_art_113=40;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=49233.01, lim_superior=93993.9, cuota_fija=9236.89, porcentaje=30 WHERE id_art_113=41;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=93993.91, lim_superior=125325.2, cuota_fija=22665.17, porcentaje=32 WHERE id_art_113=42;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=125325.21, lim_superior=375975.61, cuota_fija=32691.18, porcentaje=34 WHERE id_art_113=43;
+    UPDATE public.nomina_mensual_art_113 SET lim_inferior=375975.62, lim_superior=9999999, cuota_fija=117912.32, porcentaje=35 WHERE id_art_113=44;
+
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=0.01, lim_superior=171.78, cuota_fija=0, porcentaje=1.92 WHERE id_art_113=78;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=171.79, lim_superior=1458.03, cuota_fija=3.29, porcentaje=6.4 WHERE id_art_113=79;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=1458.04, lim_superior=2562.35, cuota_fija=85.61, porcentaje=10.88 WHERE id_art_113=80;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=2562.36, lim_superior=2978.64, cuota_fija=205.8, porcentaje=16 WHERE id_art_113=81;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=2978.65, lim_superior=3566.22, cuota_fija=272.37, porcentaje=17.92 WHERE id_art_113=82;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=3566.23, lim_superior=7192.64, cuota_fija=377.65, porcentaje=21.36 WHERE id_art_113=83;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=7192.65, lim_superior=11336.57, cuota_fija=1152.27, porcentaje=23.52 WHERE id_art_113=84;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=11336.58, lim_superior=21643.3, cuota_fija=2126.95, porcentaje=30 WHERE id_art_113=85;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=21643.31, lim_superior=28857.78, cuota_fija=5218.92, porcentaje=32 WHERE id_art_113=86;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=28857.79, lim_superior=86573.34, cuota_fija=7527.59, porcentaje=34 WHERE id_art_113=87;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=86573.35, lim_superior=9999999, cuota_fija=27150.83, porcentaje=35 WHERE id_art_113=88;
+
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=0.01, lim_superior=24.54, cuota_fija=0, porcentaje=1.92 WHERE id_art_113=78;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=24.54, lim_superior=208.29, cuota_fija=0.47, porcentaje=6.4 WHERE id_art_113=79;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=208.3, lim_superior=366.05, cuota_fija=12.23, porcentaje=10.88 WHERE id_art_113=80;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=366.06, lim_superior=425.52, cuota_fija=29.4, porcentaje=16 WHERE id_art_113=81;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=425.53, lim_superior=509.46, cuota_fija=38.91, porcentaje=17.92 WHERE id_art_113=82;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=509.47, lim_superior=1027.52, cuota_fija=53.95, porcentaje=21.36 WHERE id_art_113=83;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=1027.53, lim_superior=1619.51, cuota_fija=164.61, porcentaje=23.52 WHERE id_art_113=84;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=1619.52, lim_superior=3091.9, cuota_fija=303.85, porcentaje=30 WHERE id_art_113=85;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=3091.91, lim_superior=4122.54, cuota_fija=745.56, porcentaje=32 WHERE id_art_113=86;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=4122.55, lim_superior=12367.62, cuota_fija=1075.37, porcentaje=34 WHERE id_art_113=87;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=12367.63, lim_superior=9999999, cuota_fija=3878.69, porcentaje=35 WHERE id_art_113=88;
+    ALTER TABLE public.nomina_configuracion_vacaciones ADD COLUMN anio integer NOT NULL DEFAULT 2022;
+    ALTER TABLE public.nomina_configuracion_vacaciones DROP CONSTRAINT nomina_configuracion_vacaciones_pkey;
+    ALTER TABLE public.nomina_configuracion_vacaciones ADD CONSTRAINT nomina_configuracion_vacaciones_pkey PRIMARY KEY (anio1, anio2, anio);
+
+ ✔ Ordenes de requisicion y ordenesd de compra cambiar el folio hoja a texto y mostrarlo en la orden de compra @done (22-12-28 17:30)
+    -- lap|pcc|san
+    ALTER TABLE public.compras_requisicion ADD COLUMN folio_hoja2 character varying(200);
+    UPDATE public.compras_requisicion SET folio_hoja2 = folio_hoja::text;
+    ALTER TABLE public.compras_requisicion DROP COLUMN folio_hoja;
+    ALTER TABLE public.compras_requisicion RENAME folio_hoja2 TO folio_hoja;
+    ALTER TABLE public.compras_ordenes ADD COLUMN folio_hoja2 character varying(200);
+    UPDATE public.compras_ordenes SET folio_hoja2 = folio_hoja::text;
+    ALTER TABLE public.compras_ordenes DROP COLUMN folio_hoja;
+    ALTER TABLE public.compras_ordenes RENAME folio_hoja2 TO folio_hoja;
+ ✔ Cambio en caja de limón, poner nueva comprobación de efectivo @done (22-12-27 14:32)
+ ✔ Reporte de existencia de limon poner opcion de impresion @done (22-12-28 10:20)
+   -- lap|pcc|san
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir Reportes',505,true,'existencias_limon/print_cortes/','print',true);
+ ☐ Apartado de viajes de camiones como el archivo Estim. Result. Eqpo Transp
+   -- lap|pcc|san
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Estado Resultado Transporte',0,true,'estado_resultado_trans/','globe',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',572,true,'estado_resultado_trans/agregar/','plus',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',572,false,'estado_resultado_trans/cancelar/','remove',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',572,false,'estado_resultado_trans/modificar/','remove',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',572,false,'estado_resultado_trans/imprimir/','print',false);
+    CREATE TABLE otros.estado_resultado_trans
+      (
+          id bigserial NOT NULL,
+          id_chofer bigint NOT NULL,
+          id_activo bigint NOT NULL,
+          fecha date NOT NULL,
+          folio bigint NOT NULL,
+          km_rec double precision,
+          vel_max double precision,
+          rep_lt_hist double precision,
+          rend_km_gps double precision,
+          rend_actual double precision,
+          rend_lts double precision,
+          rend_precio double precision,
+          id_gasto bigint,
+          gasto_monto double precision DEFAULT 0,
+          id_creo bigint,
+          id_empresa bigint NOT NULL,
+          status boolean DEFAULT true,
+          CONSTRAINT estado_resultado_trans_pkey PRIMARY KEY (id),
+          CONSTRAINT estado_resultado_trans_id_activo_fkey FOREIGN KEY (id_activo)
+              REFERENCES public.productos (id_producto) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_id_chofer_fkey FOREIGN KEY (id_chofer)
+              REFERENCES public.choferes (id_chofer) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_id_creo_fkey FOREIGN KEY (id_creo)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_id_empresa_fkey FOREIGN KEY (id_empresa)
+              REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_id_gasto_fkey FOREIGN KEY (id_gasto)
+              REFERENCES public.cajachica_gastos (id_gasto) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans OWNER to programa;
+      COMMENT ON COLUMN otros.estado_resultado_trans.folio IS 'viaje, folio por camion';
+      COMMENT ON COLUMN otros.estado_resultado_trans.id_gasto IS 'gasto por comprobar de la caja chica 2 ';
+    CREATE TABLE otros.estado_resultado_trans_cods
+      (
+          id bigserial NOT NULL,
+          nombre character varying(150) COLLATE pg_catalog."default" NOT NULL,
+          status boolean DEFAULT true,
+          CONSTRAINT estado_resultado_trans_cods_pkey PRIMARY KEY (id)
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_cods OWNER to programa;
+    CREATE TABLE otros.estado_resultado_trans_gastos
+      (
+          id bigserial NOT NULL,
+          id_estado bigint NOT NULL,
+          id_proveedor bigint NOT NULL,
+          id_cod bigint,
+          fecha date,
+          cantidad double precision,
+          precio double precision,
+          importe double precision,
+          comprobacion boolean DEFAULT false,
+          CONSTRAINT estado_resultado_trans_gastos_pkey PRIMARY KEY (id),
+          CONSTRAINT estado_resultado_trans_gastos_id_cod_fkey FOREIGN KEY (id_cod)
+              REFERENCES otros.estado_resultado_trans_cods (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_gastos_id_estado_fkey FOREIGN KEY (id_estado)
+              REFERENCES otros.estado_resultado_trans (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_gastos_id_proveedor_fkey FOREIGN KEY (id_proveedor)
+              REFERENCES public.proveedores (id_proveedor) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_gastos OWNER to programa;
+      COMMENT ON COLUMN otros.estado_resultado_trans_gastos.id_cod IS 'Codigos de gastos para estado_resultado_trans';
+    CREATE TABLE otros.estado_resultado_trans_rep_mtto
+      (
+          id_estado bigint NOT NULL,
+          id_compra bigint NOT NULL,
+          comprobacion boolean DEFAULT false,
+          CONSTRAINT estado_resultado_trans_rep_mtto_pkey PRIMARY KEY (id_estado, id_compra),
+          CONSTRAINT estado_resultado_trans_rep_mtto_id_compra_fkey FOREIGN KEY (id_compra)
+              REFERENCES public.compras (id_compra) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_rep_mtto_id_estado_fkey FOREIGN KEY (id_estado)
+              REFERENCES otros.estado_resultado_trans (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_rep_mtto OWNER to programa;
+    CREATE TABLE otros.estado_resultado_trans_sueldos
+      (
+          id bigserial NOT NULL,
+          id_estado bigint NOT NULL,
+          id_proveedor bigint NOT NULL,
+          fecha date NOT NULL,
+          descripcion character varying(250) COLLATE pg_catalog."default",
+          importe double precision NOT NULL,
+          CONSTRAINT estado_resultado_trans_sueldos_pkey PRIMARY KEY (id),
+          CONSTRAINT estado_resultado_trans_sueldos_id_estado_fkey FOREIGN KEY (id_estado)
+              REFERENCES otros.estado_resultado_trans (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_sueldos_id_proveedor_fkey FOREIGN KEY (id_proveedor)
+              REFERENCES public.proveedores (id_proveedor) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_sueldos OWNER to programa;
+    CREATE TABLE otros.estado_resultado_trans_ventas
+      (
+          id_estado bigint NOT NULL,
+          id_remision bigint NOT NULL,
+          comprobacion boolean DEFAULT false,
+          CONSTRAINT estado_resultado_trans_ventas_pkey PRIMARY KEY (id_estado, id_remision),
+          CONSTRAINT estado_resultado_trans_ventas_id_estado_fkey FOREIGN KEY (id_estado)
+              REFERENCES otros.estado_resultado_trans (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_ventas_id_remision_fkey FOREIGN KEY (id_remision)
+              REFERENCES public.facturacion (id_factura) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_ventas OWNER to programa;
+      COMMENT ON COLUMN otros.estado_resultado_trans_ventas.comprobacion IS 'si: true, no: false';
+ ✔ Reporte de asistencias por rango de fecha, empleado, faltas, asistencias, incapacidades @done (22-11-18 11:58)
+   -- lap|san|pcc
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Asistencia',364,true,'nomina_fiscal/rpt_asistencias/','list-ol',true);
+ ✔ Reporte rastreabilidad @done (22-11-02 12:50) lap|san|pcc
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Rastreabilidad y seguimiento 2',363,true,'rastreabilidad/rrs2/','print',true);
+ ☐ Reporte de existencia nuevo reporte como el del correo (Reporte de rendimiento de limon nuevo)
+   -- lap|san|pcc
+   CREATE TABLE otros.existencias_limon_manoobra_insumo
+      (
+          id bigserial NOT NULL,
+          id_unidad integer NOT NULL,
+          id_area integer NOT NULL DEFAULT 2,
+          descripcion character varying(200),
+          fecha date NOT NULL,
+          no_caja integer NOT NULL DEFAULT 1,
+          costo double precision NOT NULL DEFAULT 0,
+          kilos double precision NOT NULL DEFAULT 0,
+          cantidad double precision NOT NULL DEFAULT 0,
+          importe double precision NOT NULL DEFAULT 0,
+          CONSTRAINT existencias_limon_manoobra_insumo_pkey PRIMARY KEY (id),
+          CONSTRAINT existencias_limon_manoobra_insumo_id_area_fkey FOREIGN KEY (id_area)
+              REFERENCES public.areas (id_area) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT existencias_limon_manoobra_insumo_id_unidad_fkey FOREIGN KEY (id_unidad)
+              REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.existencias_limon_manoobra_insumo OWNER to programa;
+      COMMENT ON TABLE otros.existencias_limon_manoobra_insumo IS 'Cuando regresan fruta de una venta';
+   -- lap|san|pcc
+    ALTER TABLE public.calibres ADD COLUMN "order" integer DEFAULT 99999;
+    UPDATE calibres SET "order" = 1 WHERE id_calibre = 105;
+    UPDATE calibres SET "order" = 2 WHERE id_calibre = 106;
+    UPDATE calibres SET "order" = 3 WHERE id_calibre = 107;
+    UPDATE calibres SET "order" = 4 WHERE id_calibre = 108;
+    UPDATE calibres SET "order" = 5 WHERE id_calibre = 109;
+    UPDATE calibres SET "order" = 6 WHERE id_calibre = 110;
+    UPDATE calibres SET "order" = 8 WHERE id_calibre = 123;
+    UPDATE calibres SET "order" = 7 WHERE id_calibre = 122;
+    UPDATE calibres SET "order" = 6 WHERE id_calibre = 132;
+    UPDATE calibres SET "order" = 3 WHERE id_calibre = 128;
+    UPDATE calibres SET "order" = 2 WHERE id_calibre = 127;
+    UPDATE calibres SET "order" = 1 WHERE id_calibre = 125;
+    UPDATE calibres SET "order" = 9 WHERE id_calibre = 112;
+    UPDATE calibres SET "order" = 4 WHERE id_calibre = 113;
+    UPDATE calibres SET "order" = 0 WHERE id_calibre = 118;
+     autenticacion bioetrico
+      vb, c#
+      Reporte de asistencia, cargar las fotos de las checadas
+      asistencias cargadas desde la base de datos
+ ✔ Bascula poner quien cierra la boleta @done (22-09-21 17:11)
+   -- lap|san|pcc
+   COMMENT ON COLUMN public.bascula.id_usuario IS 'usuario que registro la boleta';
+   ALTER TABLE public.bascula ADD COLUMN id_usuario_cerro bigint;
+   COMMENT ON COLUMN public.bascula.id_usuario_cerro IS 'usuario que cerro la boleta';
+ ✔ Remisiones no guarda los certificados y borra productos @done (22-09-07 20:10)
+ ☐ Poner historial de ordenes de compras cuando faltan productos, poner opcion de imprimir historial de ordenes subscuentes
+ ✔ Poner opcion de imprimir historial de abonos en cuentas por pagar de una factura (abonos) @done (22-09-21 14:05)
+ ☐ Buscar bascula, buscar lectores
+ ✔ Validar exportacion y nacional en papeletas de salida @done (22-09-07 20:11)
+   --san|lap|pcc
+   ALTER TABLE public.bascula_pagos ADD COLUMN created_at timestamp without time zone DEFAULT now();
+ ☐ poner limite de credito en clientes y validar al hacer facturas o remisiones
+ ✔ Reporte cuentas por cobrar, pendientes por cobrar, meter columna saldo vencido y dias de credito @done (22-07-13 10:16)
+ ✔ Brenda, Reporte acumulado por empresa, ordenar de esa forma @done (22-07-13 10:19)
+   --lap|san|pcc|gdl
+   ALTER TABLE public.empresas ADD COLUMN num_orden integer;
+   --lap|san|pcc|gdl
+   ALTER TABLE public.empresas ADD COLUMN nombre_corto character varying COLLATE pg_catalog."default";
+ ✔ Reporte codigos cuentas, reporte de gastos, meter el Areas / Ranchos / Lineas @done (22-07-15 09:44)
+ ✔ Reporte de compras de productos y productos regresados en almacen @done (22-08-03 00:14)
+   -- lap|san|pcc|gdl
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Existencia por unidades de salida',369,true,'inventario/epus/','print',true);
+ ✔ Reporte de salidas de almacén por usuario @done (22-07-22 19:31)
+   -- lap|san|pcc|gdl
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas por Usuarios',366,true,'productos_salidas/rpt_salidas_usuarios/','print',true);
+ ✔ Caja de prestamos exportar a excel @done (22-07-14 10:48)
+ ☐ En ordenes de compra poner campo para que capturen el No de Certificado y esos en la factura poder seleccionarlos
+   --lap|san|pcc|gdl
+    ALTER TABLE public.productos_familias ADD COLUMN is_certif boolean DEFAULT false;
+    COMMENT ON COLUMN public.productos_familias.is_certif IS 'indica si los productos de la familia son para capturar certificados de ventas (facturas)';
+    ALTER TABLE public.compras_requisicion_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    ALTER TABLE public.compras_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    ALTER TABLE public.facturacion_seg_cert ADD COLUMN id_orden bigint;
+    COMMENT ON COLUMN public.facturacion_seg_cert.id_orden IS 'Orden del certificado o linea captura';
+    ALTER TABLE public.facturacion_seg_cert ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    COMMENT ON COLUMN public.facturacion_seg_cert.no_certificado IS 'Orden del certificado o linea captura';
+    CREATE OR REPLACE VIEW public.no_certificados_compras
+       AS
+       SELECT co.id_orden, co.folio,
+         e.id_empresa,
+          e.nombre_fiscal AS empresa,
+          cp.no_certificado,
+          COALESCE(fsc.id_factura, 0::bigint) AS reg
+         FROM compras_ordenes co
+           JOIN compras_productos cp ON co.id_orden = cp.id_orden
+           JOIN empresas e ON e.id_empresa = co.id_empresa
+           LEFT JOIN facturacion_seg_cert fsc ON fsc.id_orden = cp.id_orden AND fsc.no_certificado::text = cp.no_certificado::text
+        WHERE cp.no_certificado IS NOT NULL AND cp.no_certificado <> '' AND fsc.id_factura IS NULL;
+
+      ALTER TABLE public.no_certificados_compras
+          OWNER TO programa;
+    -- pcc|san
+    CREATE OR REPLACE VIEW public.no_certificados_rpt
+         AS
+         SELECT oc.id_orden,
+            oc.folio_orden,
+            oc.fecha_orden,
+            oc.empresa_orden,
+            oc.no_certificado,
+            v.id_factura,
+            v.folio_venta,
+            v.fecha_venta,
+            v.empresa_venta,
+            v.certificado
+           FROM ( SELECT co.id_orden,
+                    co.folio AS folio_orden,
+                    date(co.fecha_creacion) AS fecha_orden,
+                    e.id_empresa,
+                    e.nombre_fiscal AS empresa_orden,
+                    cp.no_certificado
+                   FROM compras_ordenes co
+                     JOIN compras_productos cp ON co.id_orden = cp.id_orden
+                     JOIN empresas e ON e.id_empresa = co.id_empresa
+                  WHERE cp.no_certificado IS NOT NULL AND cp.no_certificado::text <> ''::text) oc
+             LEFT JOIN ( SELECT f.id_factura,
+                    f.serie::text || f.folio AS folio_venta,
+                    date(f.fecha) AS fecha_venta,
+                    e.id_empresa,
+                    e.nombre_fiscal AS empresa_venta,
+                    fsc.certificado,
+                    fsc.no_certificado,
+                    fsc.id_orden
+                   FROM facturacion f
+                     JOIN facturacion_seg_cert fsc ON f.id_factura = fsc.id_factura
+                     JOIN empresas e ON e.id_empresa = f.id_empresa
+                     LEFT JOIN ( SELECT remisiones_historial.id_remision,
+                            remisiones_historial.id_factura,
+                            remisiones_historial.status
+                           FROM remisiones_historial
+                          WHERE remisiones_historial.status::text <> 'ca'::text AND remisiones_historial.status::text <> 'b'::text) fh ON f.id_factura = fh.id_remision
+                  WHERE f.status::text <> 'ca'::text AND f.status::text <> 'b'::text AND f.id_abono_factura IS NULL AND f.id_nc IS NULL AND fsc.no_certificado::text <> ''::text AND COALESCE(fh.id_remision, 0::bigint) = 0) v ON v.id_orden = oc.id_orden AND v.no_certificado::text = oc.no_certificado::text;
+
+        ALTER TABLE public.no_certificados_rpt
+            OWNER TO programa;
+ ✔ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma @done (22-07-20 13:29)
+   --lap|pcc|san|gdl
+   ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;
+   ALTER TABLE public.compras_requisicion_productos ADD COLUMN ieps_sub boolean DEFAULT false;
+   COMMENT ON COLUMN public.compras_requisicion_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
+   ALTER TABLE public.compras_productos ADD COLUMN ieps_sub boolean DEFAULT false;
+   COMMENT ON COLUMN public.compras_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
+   ALTER TABLE public.clasificaciones ADD COLUMN ieps_subtotal boolean DEFAULT false;
+   ALTER TABLE public.facturacion_productos ADD COLUMN ieps_subtotal boolean DEFAULT false;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN retencion_isr double precision NOT NULL DEFAULT 0;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_isr real NOT NULL DEFAULT 0;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_ieps real NOT NULL DEFAULT (0)::real;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN ieps real NOT NULL DEFAULT (0)::real;
  ✔ Caja de prestamos imprimir recibo del prestamo @done (22-06-21 18:26)
-   --lap|san
+   --lap|san|pcc|gdl
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar Caja campos',247,false,'caja_chica/modificar_caja_campos/','edit',false);
  ✔ En ordenes poner el campo de piezas opcional, y hacer un reporte con filtro de fechas y código de área @done (22-06-21 19:38)
-   -- lap|san
+   -- lap|san|pcc|gdl
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN piezas double precision DEFAULT 0;
    ALTER TABLE public.compras_productos ADD COLUMN piezas double precision DEFAULT 0;
       INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras X Piezas',367,true,'catalogos_sft/rpt_codigos_compras_piezas/','print',true);
  ✔ Descargas masivas de remisiones @done (22-07-06 13:31)
+   -- lap|san|pcc
+     ALTER TABLE public.facturacion_otrosdatos ADD COLUMN orden_compra character varying(50) COLLATE pg_catalog."default";
  ☐ Nomina corona
    - catalogo de ranchos
    - catalogo de tablas por rancho, numero de he
@@ -18,10 +470,10 @@
    - Reporte concentrado de sueldo por trabajador
    - Imprimir formato de trabajadores por rancho, asignarle al trabajador el rancho
  ✔ Agregar imágenes a las ordenes de compra @done (22-07-06 13:31)
-   --lap|san
+   --lap|san|pcc
    ALTER TABLE public.compras_requisicion ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
    ALTER TABLE public.compras_ordenes ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
- ☐ En compras y ventas poner opcion para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma
+
  ✔ isr factura @done (22-05-31 14:05)
    -- pcc|lap|san
    ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;
@@ -223,7 +675,7 @@
 
  ✔ En reporte de ieps (devoluciones_iva/rpt_ieps) poner el mismo reporte sacando los datos de las facturas, @done (21-10-27 14:30)
    en ese mismo reporte pero de compras cuando son productos con presentacion multiplica de nuevo la cantidad de la precentacion
-   -- lap|san
+   -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de IEPS ventas',501,true,'devoluciones_iva/rpt_ieps_ventas/','print',true);
  ✔ En produccion poner imprimir el listado de lotes capturados @done (21-10-27 12:31)
  ✔ Poner en la poliza de nomina la cuenta de descuento de pension alimenticia Cta 21112000 @done (21-09-23 15:29)

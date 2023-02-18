@@ -588,7 +588,7 @@
                     </div><!--/span1 -->
                     <div class="span1">
                       <label for="fieps" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IEPS (%)</label>
-                      <input type="text" class="span12 vpositive" id="fieps" placeholder="%">
+                      <input type="text" class="span12 vpositive" id="fieps" placeholder="%" data-sub="f">
                     </div><!--/span1 -->
                     <div class="span2">
                       <label for="ftipo_moneda" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">Tipo de cambio</label>
@@ -742,8 +742,12 @@
                             <td style="width: 35px;">
                               <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
                                 <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
-                                  <div class="arrow"></div><h3 class="popover-title">Activos</h3>
+                                  <div class="arrow"></div><h3 class="popover-title">Activos / Certificados</h3>
                                   <div class="popover-content">
+
+                                    <div class="control-group" style="width: 375px;">
+                                      <input type="text" name="noCertificado[]" class="span11" value="<?php echo $_POST['noCertificado'][$key] ?>" placeholder="No Certificado">
+                                    </div>
 
                                     <div class="control-group" style="width: 375px;">
                                       <input type="text" name="observacionesP[]" class="span11" value="<?php echo $_POST['observacionesP'][$key] ?>" placeholder="Observaciones">
@@ -805,6 +809,7 @@
                                         </td>
                                         <td style="width: 66px;">
                                             <input type="text" name="iepsPorcent[]" value="<?php echo $_POST['iepsPorcent'][$key] ?>" id="iepsPorcent" class="span12">
+                                            <input type="hidden" name="iepsSub[]" value="<?php echo $_POST['iepsSub'][$key] ?>" id="iepsSub" class="span12">
                                         </td>
                                         <td>
                                           <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12">

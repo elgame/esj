@@ -398,7 +398,7 @@ class caja_chica_prest_model extends CI_Model {
     }
 
     // Traspasos
-    $traspasos = $this->getTraspasos($fecha, 'caja_prestamo', true, (!$all? " AND bt.status = 't'": ''));
+    $traspasos = $this->getTraspasos($fecha, 'prest1', false, (!$all? " AND bt.status = 't'": ''));
     $info['traspasos'] = $traspasos;
 
     if (true) {
@@ -444,7 +444,7 @@ class caja_chica_prest_model extends CI_Model {
     }
 
     if (true) {
-      $ddNoCaja = '1, 2, 3, 4, 5';
+      $ddNoCaja = '1, 2, 3, 4, 5, 6';
       $ddTipo = 'caja_prestamo';
 
       // acreedores
@@ -572,7 +572,7 @@ class caja_chica_prest_model extends CI_Model {
     return $info;
   }
 
-  public function getTraspasos($fecha, $tno_caja, $total=false, $sql = '')
+  public function getTraspasos1($fecha, $tno_caja, $total=false, $sql = '')
   {
     if ($total) {
       $traspaso = $this->db->query(
@@ -590,6 +590,46 @@ class caja_chica_prest_model extends CI_Model {
         false AS guardado, bt.tipo_caja
        FROM public.cajachica_traspasos bt
        WHERE bt.fecha = '{$fecha}' AND bt.tipo_caja = '{$tno_caja}' {$sql}
+       ORDER BY bt.folio ASC"
+    );
+
+    return $traspaso->result();
+  }
+
+  public function getTraspasos($fecha, $noCaja, $total=false, $sql = '')
+  {
+    $noCaja = $noCaja == 'prest1'? 0: $noCaja;
+    if ($total) {
+      $traspaso = $this->db->query(
+        "SELECT Sum(bt.monto) AS monto
+         FROM public.cajachica_traspasos bt
+         WHERE bt.fecha <= '{$fecha}' AND bt.no_caja = {$noCaja} {$sql}"
+      )->row();
+      return $traspaso->monto;
+    }
+
+    $tno_caja = '';
+    if ($noCaja == 1) {
+      $tno_caja = 'caja_limon';
+    } elseif ($noCaja == 2) {
+      $tno_caja = 'caja_gastos';
+    } elseif ($noCaja == 4) {
+      $tno_caja = 'caja_general';
+    } elseif ($noCaja == 5) {
+      $tno_caja = 'caja_fletes';
+    } elseif ($noCaja == 6) {
+      $tno_caja = 'caja_plasticos';
+    } elseif ($noCaja == 0) {
+      $tno_caja = "caja_prestamo";
+    }
+
+    $traspaso = $this->db->query(
+      "SELECT bt.id_traspaso, bt.concepto, bt.monto, bt.fecha, bt.no_caja, bt.no_impresiones,
+        bt.id_usuario, bt.fecha_creacion, bt.afectar_fondo, bt.folio, bt.status,
+        (CASE bt.no_caja WHEN {$noCaja} THEN bt.tipo ELSE (NOT bt.tipo) END) AS tipo,
+        (CASE bt.no_caja WHEN {$noCaja} THEN true ELSE false END) AS guardado, bt.tipo_caja
+       FROM public.cajachica_traspasos bt
+       WHERE bt.fecha = '{$fecha}' AND (bt.no_caja = {$noCaja} OR bt.tipo_caja = '{$tno_caja}') {$sql}
        ORDER BY bt.folio ASC"
     );
 
@@ -1024,13 +1064,58 @@ class caja_chica_prest_model extends CI_Model {
       $pdf->Row(array(
         $fondoc->categoria,
         $fondoc->empresa,
-        $fondoc->fecha,
+        MyString::fechaAT($fondoc->fecha),
         $fondoc->referencia,
         MyString::formatoNumero(($fondoc->tipo_movimiento=='t'? $fondoc->monto: ''), 2, '', false),
         MyString::formatoNumero(($fondoc->tipo_movimiento=='f'? $fondoc->monto: ''), 2, '', false),
         MyString::formatoNumero($saldofc, 2, '', false),
         $fondoc->id_fondo
       ), false, 'B');
+    }
+
+    // Traspasos
+    $totalTraspasos = 0;
+    if (count($caja['traspasos']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(205, 25));
+      $pdf->Row(array('TRASPASOS'), true, true);
+
+      $pdf->SetFont('Arial','', 6.5);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('C', 'L', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(15, 20, 20, 125, 25));
+      $pdf->Row(array('FOLIO', 'TIPO', 'AF. FONDO', 'CONCEPTO', 'IMPORTE'), true, true);
+      $pdf->SetFont('Arial','', 6);
+
+      $codigoAreas = array();
+      foreach ($caja['traspasos'] as $key => $traspaso)
+      {
+        $colortxt = [[100, 100, 100]];
+        if ($traspaso->status == 't') {
+          $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+          $colortxt = [[0, 0, 0]];
+        }
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $traspaso->folio,
+          ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
+          ($traspaso->afectar_fondo=='t'? 'Si': 'No'),
+          ($traspaso->status == 't'? $traspaso->concepto: 0),
+          MyString::formatoNumero(
+            ($traspaso->status == 't'? $traspaso->monto: 0),
+            2, '', false)), false, true, $colortxt);
+      }
+
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, true);
     }
 
     // PRESTAMOS A LARGO PLAZO
@@ -1044,9 +1129,9 @@ class caja_chica_prest_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
-    $pdf->Row(array('EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
+    $pdf->Row(array('FOLIO', 'EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
@@ -1140,11 +1225,12 @@ class caja_chica_prest_model extends CI_Model {
         $pdf->Row(array($tipo), true, 'B');
       }
 
-      $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
-      $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+      $pdf->SetAligns(array('L','L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+      $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
       $pdf->SetFont('Arial','', 7);
       $pdf->SetX(6);
       $pdf->Row(array(
+        $prestamo->id_prestamo_nom,
         $prestamo->categoria,
         $prestamo->empleado,
         MyString::fechaAT($prestamo->fecha),
@@ -1227,12 +1313,12 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(20, 48));
     $pdf->SetX(6);
-    $pdf->Row(array('Traspasos', MyString::formatoNumero($caja['traspasos'], 2, '$', false)), false, 'B');
+    $pdf->Row(array('Traspasos', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, 'B');
 
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(20, 48));
     $pdf->SetX(6);
-    $pdf->Row(array('Saldo', MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos']), 2, '$', false) ), false, 'B');
+    $pdf->Row(array('Saldo', MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$totalTraspasos), 2, '$', false) ), false, 'B');
 
 
     // PRESTAMOS A CORTO PLAZO
@@ -1309,14 +1395,14 @@ class caja_chica_prest_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
-    $pdf->Row(array('EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
+    $pdf->Row(array('FOLIO', 'EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
-    $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+    $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
 
     $tipoo = '';
     $empresaaux = '';
@@ -1405,11 +1491,12 @@ class caja_chica_prest_model extends CI_Model {
         $pdf->Row(array($tipo), true, 'B');
       }
 
-      $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
-      $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+      $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+      $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
       $pdf->SetFont('Arial','', 7);
       $pdf->SetX(6);
       $pdf->Row(array(
+        $prestamo->id_prestamo_nom,
         $prestamo->categoria,
         $prestamo->empleado,
         MyString::fechaAT($prestamo->fecha),
@@ -1677,6 +1764,633 @@ class caja_chica_prest_model extends CI_Model {
     // $pdf->Row(array('', '', 'TOTAL', MyString::formatoNumero($totalempsaldos, 2, '$', false)), true, true);
 
     // $pdf->Output('CAJA_CHICA.pdf', 'I');
+  }
+
+  public function xlsCaja($fecha, $noCajas)  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=caja_chica_pres.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+
+    $caja = $this->get($fecha, $noCajas);
+    // $nomenclaturas = $this->nomenclaturas();
+
+    // echo "<pre>";
+    //   var_dump($caja);
+    // echo "</pre>";exit;
+
+    $fondo_cajaa = 0;
+    foreach ($caja['fondos_caja'] as $fondoc) {
+      $fondo_cajaa = ($fondoc->tipo_movimiento=='t'? $fondo_cajaa+$fondoc->monto: $fondo_cajaa-$fondoc->monto);
+    }
+
+    $titulo1 = mb_strtoupper('REPORTE CAJA PRESTAMOS', 'UTF-8');
+    $titulo2 = 'FECHA ' . MyString::fechaAT($fecha);
+    $titulo3 = 'FONDO DE CAJA '.MyString::formatoNumero($fondo_cajaa, 2, '$', false)."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="12" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="12" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="12" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="12"></td>
+        </tr>';
+
+    // Deudores diversos
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">DEUDORES DIVERSOS</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">FONDO DE CAJA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">REFERENCIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">INGRESOS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">EGRESOS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TICKET</td>
+      </tr>';
+
+    $totalfondo = $total_prestamos = 0;
+    $saldofc = 0;
+    foreach ($caja['fondos_caja'] as $fondoc) {
+      $totalfondo += floatval($fondoc->monto);
+      $saldofc = ($fondoc->tipo_movimiento=='t'? $saldofc+$fondoc->monto: $saldofc-$fondoc->monto);
+
+      $html .= '<tr style="">
+        <td style="border:1px solid #000;">'.$fondoc->categoria.'</td>
+        <td style="border:1px solid #000;">'.$fondoc->empresa.'</td>
+        <td style="border:1px solid #000;">'.$fondoc->fecha.'</td>
+        <td style="border:1px solid #000;">'.$fondoc->referencia.'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero(($fondoc->tipo_movimiento=='t'? $fondoc->monto: ''), 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero(($fondoc->tipo_movimiento=='f'? $fondoc->monto: ''), 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($saldofc, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.$fondoc->id_fondo.'</td>
+      </tr>';
+    }
+
+    // Traspasos
+    $totalTraspasos = 0;
+    if (count($caja['traspasos']) > 0) {
+      $html .= '<tr><td></td></tr>
+      <tr><td></td></tr>
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">TRASPASOS</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TIPO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">AF. FONDO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+      </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['traspasos'] as $key => $traspaso)
+      {
+        $colortxt = [[100, 100, 100]];
+        if ($traspaso->status == 't') {
+          $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+          $colortxt = [[0, 0, 0]];
+        }
+
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$traspaso->folio.'</td>
+          <td style="border:1px solid #000;">'.($traspaso->tipo=='t'? 'Ingreso': 'Egreso').'</td>
+          <td style="border:1px solid #000;">'.($traspaso->afectar_fondo=='t'? 'Si': 'No').'</td>
+          <td style="border:1px solid #000;">'.($traspaso->status == 't'? $traspaso->concepto: 0).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero(($traspaso->status == 't'? $traspaso->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, true);
+
+      $html .= '<tr style="font-weight:bold">
+        <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">SUMAS: </td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalTraspasos, 2, '$', false).'</td>
+      </tr>';
+    }
+
+    // PRESTAMOS A LARGO PLAZO
+    $html .= '<tr><td></td></tr>
+      <tr><td></td></tr>
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">PRESTAMOS A LARGO PLAZO</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TRABAJADOR</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">REFERENCIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">CARGO PRESTAMOS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS INICIALES</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">ABONO DEL DIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">No.</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TICKET</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS FINALES</td>
+      </tr>';
+
+    $tipoo = '';
+    $empresaaux = '';
+    $first = false;
+    $totalpreslp_salini = $totalpreslp_pago_dia = $totalpreslp_salfin = 0;
+    $totalpreslp_grup_salini = $totalpreslp_grup_pago_dia = $totalpreslp_grup_salfin = 0;
+    $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
+    $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+    $totalpreslp_salini_efd = $totalpreslp_pago_dia_efd = $totalpreslp_salfin_efd = 0;
+    $totalpreslp_ef_rec = [];
+    foreach ($caja['prestamos_lp'] as $key => $prestamo) {
+
+      $totalpreslp_salini += floatval($prestamo->saldo_ini);
+      $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
+      $totalpreslp_salfin      += floatval($prestamo->saldo_fin);
+      if ($prestamo->tipo == 'efd') {
+        $totalpreslp_salini_efd += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_efd += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_efd += floatval($prestamo->saldo_fin);
+
+        if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+          $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+        } else {
+          $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+        }
+      } elseif ($prestamo->tipo == 'ef') {
+        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+        // if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+        //   $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+        // } else {
+        //   $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+        // }
+      } else {
+        $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
+      }
+
+      if ($empresaaux != $prestamo->categoria) {
+        if ($first) {
+          $html .= '<tr style="font-weight:bold">
+            <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">SUMAS: </td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_grup_salini, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_grup_pago_dia, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_grup_salfin, 2, '$', false).'</td>
+          </tr>';
+        }
+        $totalpreslp_grup_salini = $totalpreslp_grup_pago_dia = $totalpreslp_grup_salfin = 0;
+        $empresaaux = $prestamo->categoria;
+      }
+      $first = true;
+      $totalpreslp_grup_salini   += floatval($prestamo->saldo_ini);
+      $totalpreslp_grup_pago_dia += floatval($prestamo->pago_dia);
+      $totalpreslp_grup_salfin   += floatval($prestamo->saldo_fin);
+
+      if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
+        switch ($prestamo->tipo) {
+          case 'efd': $tipo = 'Efectivo Fijo'; break;
+          case 'ef': $tipo = 'Efectivo'; break;
+          default: $tipo = 'Fiscal'; break;
+        }
+        $tipoo = $prestamo->tipo;
+
+        $html .= '<tr style="font-weight:bold">
+          <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">'.$tipo.'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="">
+        <td style="border:1px solid #000;">'.$prestamo->categoria.'</td>
+        <td style="border:1px solid #000;">'.$prestamo->empleado.'</td>
+        <td style="border:1px solid #000;">'.MyString::fechaAT($prestamo->fecha).'</td>
+        <td style="border:1px solid #000;">'.$prestamo->referencia.' '.($prestamo->tipo_nombre).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->monto, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_ini, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->pago_dia, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.$prestamo->no_pagos.'/'.$prestamo->tno_pagos.'</td>
+        <td style="border:1px solid #000;">'.$prestamo->no_ticket.'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_fin, 2, '', false).'</td>
+      </tr>';
+    }
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">SUMAS: </td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salini, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_pago_dia, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salfin, 2, '$', false).'</td>
+      </tr>';
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">Fiscal: </td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salini_fi, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_pago_dia_fi, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salfin_fi, 2, '$', false).'</td>
+      </tr>';
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">Efectivo: </td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salini_ef, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_pago_dia_ef, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salfin_ef, 2, '$', false).'</td>
+      </tr>';
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">Efectivo Fijo: </td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salini_efd, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_pago_dia_efd, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salfin_efd, 2, '$', false).'</td>
+      </tr>';
+
+
+    $html .= '<tr><td></td></tr>
+      <tr><td></td></tr>
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">Recuperar Efectivo Fijo</td>
+      </tr>
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">Saldo Anterior: '.MyString::formatoNumero($caja['saldo_prest_fijo'], 2, '$', false).'</td>
+      </tr>';
+
+    $total_prestamos_recuperar = 0;
+    if (count($totalpreslp_ef_rec) > 0) {
+      $html .= '
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">Cobro Prestamos Fijos</td>
+      </tr>';
+
+      foreach ($totalpreslp_ef_rec as $key => $value) {
+        if ($value > 0) {
+          $html .= '<tr style="">
+            <td colspan="5" style="border:1px solid #000;">'.$key.'</td>
+            <td colspan="5" style="border:1px solid #000;">'.MyString::formatoNumero($value, 2, '$', false).'</td>
+          </tr>';
+
+          $total_prestamos_recuperar += $value;
+        }
+      }
+    }
+
+    $html .= '<tr style="">
+      <td colspan="5" style="border:1px solid #000;">Traspasos</td>
+      <td colspan="5" style="border:1px solid #000;">'.MyString::formatoNumero($caja['traspasos'], 2, '$', false).'</td>
+    </tr>';
+
+    $html .= '<tr style="">
+      <td colspan="5" style="border:1px solid #000;">Saldo</td>
+      <td colspan="5" style="border:1px solid #000;">'.MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$totalTraspasos), 2, '$', false).'</td>
+    </tr>';
+
+
+    // PRESTAMOS A CORTO PLAZO
+    $html .= '<tr><td></td></tr>
+      <tr><td></td></tr>
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">PRESTAMOS A CORTO PLAZO</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TRABAJADOR</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">REFERENCIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">CARGO PRESTAMOS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS INICIALES</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">ABONO DEL DIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">No.</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TICKET</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS FINALES</td>
+      </tr>';
+
+    $totalprestamos = $totalprescp_salini = 0;
+    $totalprescp_pago_dia = $totalprescp_salfin = 0;
+    foreach ($caja['prestamos'] as $prestamo) {
+      $totalprestamos += floatval($prestamo->monto);
+      $totalprescp_salini += floatval($prestamo->saldo_ini);
+      $totalprescp_pago_dia += floatval($prestamo->pago_dia);
+      $totalprescp_salfin += floatval($prestamo->saldo_fin);
+
+      $html .= '<tr style="">
+        <td style="border:1px solid #000;">'.$prestamo->categoria.'</td>
+        <td style="border:1px solid #000;">'.$prestamo->empleado.'</td>
+        <td style="border:1px solid #000;">'.MyString::fechaAT($prestamo->fecha).'</td>
+        <td style="border:1px solid #000;">'.$prestamo->concepto.'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->monto, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_ini, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->pago_dia, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.$prestamo->no_pagos.'</td>
+        <td style="border:1px solid #000;">'.$prestamo->id_pago.'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_fin, 2, '', false).'</td>
+      </tr>';
+    }
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">SUMAS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalprescp_salini, 2, '$', false).'</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalprescp_pago_dia, 2, '$', false).'</td>
+        <td style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalprescp_salfin, 2, '$', false).'</td>
+      </tr>';
+
+    // DESCUENTOS MATERIALES
+    $html .= '<tr><td></td></tr>
+      <tr><td></td></tr>
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">DESCUENTO DE MATERIALES Y/O HERRAMIENTAS</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TRABAJADOR</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">REFERENCIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">CARGO PRESTAMOS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS INICIALES</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">ABONO DEL DIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">No.</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TICKET</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS FINALES</td>
+      </tr>';
+
+    $tipoo = '';
+    $empresaaux = '';
+    $first = false;
+    // $totalpreslp_salini = $totalpreslp_pago_dia = $totalpreslp_salfin = 0;
+    $totalpreslp_grup_salini = $totalpreslp_grup_pago_dia = $totalpreslp_grup_salfin = 0;
+    $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
+    $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+    $totalpreslp_salini_efd = $totalpreslp_pago_dia_efd = $totalpreslp_salfin_efd = 0;
+    $totalpreslp_ef_rec = [];
+    foreach ($caja['materiales'] as $key => $prestamo) {
+      $totalpreslp_salini += floatval($prestamo->saldo_ini);
+      $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
+      $totalpreslp_salfin      += floatval($prestamo->saldo_fin);
+      // if ($prestamo->tipo == 'efd') {
+      //   $totalpreslp_salini_efd += floatval($prestamo->saldo_ini);
+      //   $totalpreslp_pago_dia_efd += floatval($prestamo->pago_dia);
+      //   $totalpreslp_salfin_efd += floatval($prestamo->saldo_fin);
+
+      //   if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+      //     $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+      //   } else {
+      //     $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+      //   }
+      // } elseif ($prestamo->tipo == 'ef') {
+      //   $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+      //   $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+      //   $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+      //   // if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+      //   //   $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+      //   // } else {
+      //   //   $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+      //   // }
+      // } else {
+        $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
+      // }
+
+      if ($empresaaux != $prestamo->categoria) {
+        if ($first) {
+          $html .= '<tr style="font-weight:bold">
+            <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">SUMAS: </td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_grup_salini, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_grup_pago_dia, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_grup_salfin, 2, '$', false).'</td>
+          </tr>
+          <tr><td></td></tr>';
+        }
+        $totalpreslp_grup_salini = $totalpreslp_grup_pago_dia = $totalpreslp_grup_salfin = 0;
+        $empresaaux = $prestamo->categoria;
+      }
+      $first = true;
+      $totalpreslp_grup_salini   += floatval($prestamo->saldo_ini);
+      $totalpreslp_grup_pago_dia += floatval($prestamo->pago_dia);
+      $totalpreslp_grup_salfin   += floatval($prestamo->saldo_fin);
+
+      if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
+        switch ($prestamo->tipo) {
+          case 'efd': $tipo = 'Efectivo Fijo'; break;
+          case 'ef': $tipo = 'Efectivo'; break;
+          default: $tipo = 'Fiscal'; break;
+        }
+        $tipoo = $prestamo->tipo;
+
+        $html .= '<tr style="font-weight:bold">
+                  <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">'.$tipo.'</td>
+                </tr>';
+      }
+      $html .= '<tr style="">
+        <td style="border:1px solid #000;">'.$prestamo->categoria.'</td>
+        <td style="border:1px solid #000;">'.$prestamo->empleado.'</td>
+        <td style="border:1px solid #000;">'.MyString::fechaAT($prestamo->fecha).'</td>
+        <td style="border:1px solid #000;">'.$prestamo->referencia.' '.($prestamo->tipo_nombre).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->monto, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_ini, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->pago_dia, 2, '', false).'</td>
+        <td style="border:1px solid #000;">'.$prestamo->no_pagos.'/'.$prestamo->tno_pagos.'</td>
+        <td style="border:1px solid #000;">'.$prestamo->no_ticket.'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_fin, 2, '', false).'</td>
+      </tr>';
+    }
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">SUMAS: </td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salini_fi, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_pago_dia_fi, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salfin_fi, 2, '$', false).'</td>
+      </tr>';
+
+    // PRESTAMOS DEL DIA
+    $html .= '<tr><td></td></tr>
+      <tr><td></td></tr>
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">PRESTAMOS DEL DIA</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TRABAJADOR</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">REFERENCIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">CARGO PRESTAMOS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS INICIALES</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">ABONO DEL DIA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">No.</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TICKET</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SALDOS FINALES</td>
+      </tr>';
+
+    $totalpreslgcp_monto = $totalpreslgcp_salini = $totalpreslgcp_pago_dia = $totalpreslgcp_salfin_fi = $totalpreslgcp_salfin_ef = 0;
+    foreach ($caja['prestamos_dia'] as $prestamo) {
+      $totalpreslgcp_monto    += floatval($prestamo->monto);
+      $totalpreslgcp_salini   += floatval($prestamo->saldo_ini);
+      $totalpreslgcp_pago_dia += floatval($prestamo->pago_dia);
+      if ($prestamo->tipo == 'fi') {
+        $totalpreslgcp_salfin_fi   += floatval($prestamo->saldo_fin); // fiscal
+      } else {
+        $totalpreslgcp_salfin_ef   += floatval($prestamo->saldo_fin); // efectivo
+      }
+
+      if (isset($prestamo->id_prestamo) && $prestamo->id_prestamo > 0) { // corto plazo
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$prestamo->categoria.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->empleado.'</td>
+          <td style="border:1px solid #000;">'.MyString::fechaAT($prestamo->fecha).'</td>
+          <td style="border:1px solid #000;">'.$prestamo->concepto.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->monto, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_ini, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->pago_dia, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.$prestamo->no_pagos.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->id_pago.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_fin, 2, '', false).'</td>
+        </tr>';
+      } else {
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$prestamo->categoria.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->empleado.'</td>
+          <td style="border:1px solid #000;">'.MyString::fechaAT($prestamo->fecha).'</td>
+          <td style="border:1px solid #000;">'.$prestamo->referencia.' '.($prestamo->tipo_nombre).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->monto, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_ini, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->pago_dia, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.$prestamo->no_pagos.'/'.$prestamo->tno_pagos.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->no_ticket.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($prestamo->saldo_fin, 2, '', false).'</td>
+        </tr>';
+      }
+    }
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">SUMAS: </td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslgcp_salini, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslgcp_pago_dia, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalpreslgcp_salfin_fi+$totalpreslgcp_salfin_ef), 2, '$', false).'</td>
+      </tr>';
+
+    $tt_saldo_inicial       = $totalpreslp_salini+$totalprescp_salini;
+    $tt_saldo_finales       = $totalpreslp_salfin+$totalprescp_salfin+$totalpreslgcp_salfin_fi+$totalpreslgcp_salfin_ef;
+    $tt_efectivo_anterior   = $saldofc-$tt_saldo_inicial;
+    $tt_caja_ingreso        = $totalpreslp_pago_dia+$totalprescp_pago_dia+$totalpreslgcp_pago_dia;
+    $tt_caja_egreso         = $totalpreslgcp_monto;
+    $tt_efectivo_disponible = $tt_efectivo_anterior+$tt_caja_ingreso-$tt_caja_egreso;
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTALES</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($tt_saldo_inicial, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($tt_caja_ingreso, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($tt_saldo_finales, 2, '$', false).'</td>
+      </tr>
+      <tr><td></td></tr>
+      <tr><td></td></tr>';
+
+    // Tabulaciones
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">TABULACION DE EFECTIVO</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">NUMERO</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">DENOMIN</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+      </tr>';
+
+    $totalEfectivo = 0;
+    foreach ($caja['denominaciones'] as $key => $denominacion)
+    {
+      $html .= '<tr style="">
+        <td colspan="1" style="border:1px solid #000;">'.$denominacion['cantidad'].'</td>
+        <td colspan="1" style="border:1px solid #000;">'.$denominacion['denominacion'].'</td>
+        <td colspan="1" style="border:1px solid #000;">'.MyString::formatoNumero($denominacion['total'], 2, '', false).'</td>
+      </tr>';
+
+      $totalEfectivo += floatval($denominacion['total']);
+    }
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL EFECTIVO</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivo, 2, '$', false).'</td>
+      </tr>
+      <tr><td></td></tr>
+      <tr><td></td></tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">SALDO INICIAL</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($tt_saldo_inicial, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">PTMO A LARGO PLAZO</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salfin_ef, 2, '$', false).'</td>
+      </tr>';
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">EFECTIVO ANTERIOR</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($tt_efectivo_anterior, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">PTMO A CORTO PLAZO</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalprescp_salfin, 2, '$', false).'</td>
+      </tr>';
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">CAJA INGRESOS</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($tt_caja_ingreso, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">PTMO DEL DIA FI</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslgcp_salfin_fi, 2, '$', false).'</td>
+      </tr>';
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">CAJA EGRESOS</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslgcp_monto, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">PTMO DEL DIA EF</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslgcp_salfin_ef, 2, '$', false).'</td>
+      </tr>';
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">EFECTIVO DISPONIBLE</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($tt_efectivo_disponible, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TABULACION DE EFECTIVO</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivo, 2, '$', false).'</td>
+      </tr>';
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">DIFERENCIA DEL CORTE</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($tt_efectivo_disponible-$totalEfectivo, 2, '$', false).'</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalpreslp_salfin_ef+$totalprescp_salfin+$totalEfectivo+$totalpreslgcp_salfin_ef, 2, '$', false).'</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">FONDO DE CAJA</td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalEfectivo+($tt_efectivo_disponible-$totalEfectivo)+$tt_saldo_finales), 2, '$', false).'</td>
+      </tr>';
+
+    echo $html;
   }
 
   public function saltaPag(&$pdf)

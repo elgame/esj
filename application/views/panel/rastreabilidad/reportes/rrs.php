@@ -53,6 +53,9 @@
 
       <div class="row-fluid">
         <div class="box span12">
+          <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/rastreabilidad/rrs_xls'); ?>" class="linksm" target="_blank">
+            <i class="icon-table"></i> Excel</a>
+
           <div class="box-content">
             <div class="row-fluid">
               <iframe name="rdeReporte" id="iframe-reporte" class="span12" 

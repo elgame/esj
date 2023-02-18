@@ -127,6 +127,13 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="fieps">IEPS junto al Subtotal </label>
+                  <div class="controls">
+                    <input type="checkbox" name="ieps_subtotal" id="ieps_subtotal" value="si" <?php echo ($data['info']->ieps_subtotal == 't'? 'checked': '') ?>>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="cuenta_contpaq"><strong>Cuenta contpaq</strong> </label>
                   <div class="controls">
                     <input type="text" name="cuenta_contpaq" id="cuenta_contpaq" class="span12" maxlength="12"

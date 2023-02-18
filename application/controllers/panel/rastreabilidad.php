@@ -22,12 +22,17 @@ class rastreabilidad extends MY_Controller {
 
     'rastreabilidad/rpl_pdf/',
     'rastreabilidad/rrs_pdf/',
+    'rastreabilidad/rrs_xls/',
     'rastreabilidad/ajax_get_lotes/',
     'rastreabilidad/rrl_pdf/',
     'rastreabilidad/rrl_xls/',
     'rastreabilidad/rpt_lotes_pdf/',
 
     'rastreabilidad/siguiente_lote/',
+
+    'rastreabilidad/rrs2/',
+    'rastreabilidad/rrs2_pdf/',
+    'rastreabilidad/rrs2_xls/',
   );
 
   public function _remap($method){
@@ -318,7 +323,10 @@ class rastreabilidad extends MY_Controller {
       'titulo' => 'Reporte Rastreabilidad del Producto'
     );
     $this->load->model('areas_model');
+    $this->load->model('empresas_model');
     $this->load->model('calidades_model');
+
+    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $params['areas']     = $this->areas_model->getAreas(false);
     $itm_select = '';
@@ -442,6 +450,14 @@ class rastreabilidad extends MY_Controller {
       $this->rastreabilidad_model->rrs_pdf();
     }
   }
+  public function rrs_xls()
+  {
+    if(isset($_GET['ffecha1']) && isset($_GET['farea']) && isset($_GET['flotes']))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rrsXls();
+    }
+  }
 
   public function ajax_get_lotes()
   {
@@ -449,6 +465,58 @@ class rastreabilidad extends MY_Controller {
     // Obtiene los lotes de la fecha indicada
     $params = $this->rastreabilidad_model->getLotesByFecha($_GET['fecha'], $_GET['area']);
     echo json_encode($params);
+  }
+
+
+  public function rrs2()
+  {
+    $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('panel/rastreabilidad/reportes/rrs.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Rastreabilidad y seguimiento Producto'
+    );
+    $this->load->model('areas_model');
+    $this->load->model('calidades_model');
+    $this->load->model('rastreabilidad_model');
+
+    $params['areas']     = $this->areas_model->getAreas(false);
+    // Obtenemos area predeterminada
+    $params['area_default'] = null;
+    foreach ($params['areas']['areas'] as $key => $value)
+    {
+      if($value->predeterminado == 't')
+      {
+        $params['area_default'] = $value->id_area;
+        break;
+      }
+    }
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/rastreabilidad/reportes/rrs2', $params);
+    $this->load->view('panel/footer');
+  }
+  public function rrs2_pdf()
+  {
+    if(isset($_GET['ffecha1']) && isset($_GET['farea']) && isset($_GET['did_proveedor']))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rrs2_pdf();
+    }
+  }
+  public function rrs2_xls()
+  {
+    if(isset($_GET['ffecha1']) && isset($_GET['farea']) && isset($_GET['did_proveedor']))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rrsXls2();
+    }
   }
 
 

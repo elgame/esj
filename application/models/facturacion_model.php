@@ -95,7 +95,7 @@ class facturacion_model extends privilegios_model{
 	public function getInfoFactura($idFactura, $info_basic=false)
   {
 		$res = $this->db
-      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida")
+      ->select("f.*, fo.no_trazabilidad, fo.orden_compra, fo.id_paleta_salida")
       ->from('facturacion as f')
       ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
       ->where("f.id_factura = {$idFactura}")
@@ -132,7 +132,7 @@ class facturacion_model extends privilegios_model{
                 u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones, fp.clase, fp.peso, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.no_identificacion,
                 cl.clave_prod_serv, fp.cfdi_ext->'clave_unidad'->>'key' AS clave_unidad, fp.cfdi_ext, fp.ieps, fp.porcentaje_ieps,
-                cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real, fp.isr, fp.porcentaje_isr", false)
+                cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real, fp.isr, fp.porcentaje_isr, fp.ieps_subtotal", false)
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades_unq as u', "u.nombre = fp.unidad", 'left')
@@ -741,7 +741,8 @@ class facturacion_model extends privilegios_model{
       if ($this->input->post('dno_trazabilidad') !== false) {
         $this->db->insert('facturacion_otrosdatos', [
           'id_factura'      => $idFactura,
-          'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+          'no_trazabilidad' => $this->input->post('dno_trazabilidad'),
+          'orden_compra'    => $this->input->post('dorden_compra')
         ]);
       }
 
@@ -884,6 +885,7 @@ class facturacion_model extends privilegios_model{
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'no_identificacion'     => $_POST['no_identificacion'][$key],
           'cfdi_ext'              => json_encode($cfdi_extpp),
+          'ieps_subtotal'         => $_POST['prod_ieps_subtotal'][$key] === 't' ? 't' : 'f',
         );
 
         $addProdApi = true;
@@ -920,6 +922,7 @@ class facturacion_model extends privilegios_model{
             'trasladoIshPorcent'      => '0',
             'trasladoIva'             => $_POST['prod_diva_total'][$key],
             'trasladoIvaPorcent'      => ($tipoDeComprobante !== 'T'? $_POST['prod_diva_porcent'][$key]: '16'),
+            'desglosarIeps'           => ($_POST['prod_ieps_subtotal'][$key] === 't' ? false : true),
             'valorUnitario'           => $_POST['prod_dpreciou'][$key],
             'objetoImp'               => "02",
           );
@@ -928,18 +931,22 @@ class facturacion_model extends privilegios_model{
         if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
         {
           foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
-            $dataSeguroCerti[] = array(
-              'id_factura'       => $idFactura,
-              'id_clasificacion' => $_POST['prod_did_prod'][$key],
-              'nrow'             => $nrow_seg_cer,
-              'id_proveedor'     => $_POST['seg_id_proveedor'][$keysecer],
-              'pol_seg'          => $_POST['seg_poliza'][$keysecer],
-              'folio'            => $serieFolio,
-              'bultos'           => 0,
-              'certificado'      => null,
-              'num_operacion'    => null,
-            );
-            ++$nrow_seg_cer;
+            if ($_POST['seg_id_proveedor'][$keysecer] > 0) {
+              $dataSeguroCerti[] = array(
+                'id_factura'       => $idFactura,
+                'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                'nrow'             => $nrow_seg_cer,
+                'id_proveedor'     => $_POST['seg_id_proveedor'][$keysecer],
+                'pol_seg'          => $_POST['seg_poliza'][$keysecer],
+                'folio'            => $serieFolio,
+                'bultos'           => 0,
+                'certificado'      => null,
+                'num_operacion'    => null,
+                'id_orden'         => null,
+                'no_certificado'   => null,
+              );
+              ++$nrow_seg_cer;
+            }
           }
           $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
         }
@@ -947,37 +954,45 @@ class facturacion_model extends privilegios_model{
         if (($_POST['prod_did_prod'][$key] === '51' && !isset($seg_cer_entro['51'])) || ($_POST['prod_did_prod'][$key] === '52' && !isset($seg_cer_entro['52'])))
         {
           foreach ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]] as $keysecer => $data_secer) {
-            $dataSeguroCerti[] = array(
-              'id_factura'       => $idFactura,
-              'id_clasificacion' => $_POST['prod_did_prod'][$key],
-              'nrow'             => $nrow_seg_cer,
-              'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer],
-              'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
-              'folio'            => $serieFolio,
-              'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
-              'pol_seg'          => null,
-              'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
-            );
-            ++$nrow_seg_cer;
+            if ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer] > 0) {
+              $dataSeguroCerti[] = array(
+                'id_factura'       => $idFactura,
+                'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                'nrow'             => $nrow_seg_cer,
+                'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer],
+                'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
+                'folio'            => $serieFolio,
+                'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
+                'pol_seg'          => null,
+                'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
+                'id_orden'         => (!empty($_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
+                'no_certificado'   => (!empty($_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
+              );
+              ++$nrow_seg_cer;
+            }
           }
           $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
         }
 
         if ($_POST['prod_did_prod'][$key] === '53' && !isset($seg_cer_entro['53']))
         {
-          foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
-            $dataSeguroCerti[] = array(
-              'id_factura'       => $idFactura,
-              'id_clasificacion' => $_POST['prod_did_prod'][$key],
-              'nrow'             => $nrow_seg_cer,
-              'id_proveedor'     => $_POST['supcarga_id_proveedor'][$keysecer],
-              'certificado'      => $_POST['supcarga_numero'][$keysecer],
-              'folio'            => $serieFolio,
-              'bultos'           => $_POST['supcarga_bultos'][$keysecer],
-              'pol_seg'          => null,
-              'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
-            );
-            ++$nrow_seg_cer;
+          foreach ($_POST['supcarga_id_proveedor'] as $keysecer => $data_secer) {
+            if ($_POST['supcarga_id_proveedor'][$keysecer] > 0) {
+              $dataSeguroCerti[] = array(
+                'id_factura'       => $idFactura,
+                'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                'nrow'             => $nrow_seg_cer,
+                'id_proveedor'     => $_POST['supcarga_id_proveedor'][$keysecer],
+                'certificado'      => $_POST['supcarga_numero'][$keysecer],
+                'folio'            => $serieFolio,
+                'bultos'           => $_POST['supcarga_bultos'][$keysecer],
+                'pol_seg'          => null,
+                'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
+                'id_orden'         => null,
+                'no_certificado'   => null,
+              );
+              ++$nrow_seg_cer;
+            }
           }
           $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
         }
@@ -1927,23 +1942,28 @@ class facturacion_model extends privilegios_model{
             'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
             'no_identificacion'     => $_POST['no_identificacion'][$key],
             'cfdi_ext'              => json_encode($cfdi_extpp),
+            'ieps_subtotal'         => $_POST['prod_ieps_subtotal'][$key] === 't' ? 't' : 'f',
           );
 
           if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
           {
             foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
-              $dataSeguroCerti[] = array(
-                'id_factura'       => $idBorrador,
-                'id_clasificacion' => $_POST['prod_did_prod'][$key],
-                'nrow'             => $nrow_seg_cer,
-                'id_proveedor'     => $_POST['seg_id_proveedor'][$keysecer],
-                'pol_seg'          => $_POST['seg_poliza'][$keysecer],
-                'folio'            => $serieFolio,
-                'bultos'           => 0,
-                'certificado'      => null,
-                'num_operacion'    => null,
-              );
-              ++$nrow_seg_cer;
+              if ($_POST['seg_id_proveedor'][$keysecer] > 0) {
+                $dataSeguroCerti[] = array(
+                  'id_factura'       => $idBorrador,
+                  'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                  'nrow'             => $nrow_seg_cer,
+                  'id_proveedor'     => $_POST['seg_id_proveedor'][$keysecer],
+                  'pol_seg'          => $_POST['seg_poliza'][$keysecer],
+                  'folio'            => $serieFolio,
+                  'bultos'           => 0,
+                  'certificado'      => null,
+                  'num_operacion'    => null,
+                  'id_orden'         => null,
+                  'no_certificado'   => null,
+                );
+                ++$nrow_seg_cer;
+              }
             }
             $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
           }
@@ -1951,37 +1971,45 @@ class facturacion_model extends privilegios_model{
           if (($_POST['prod_did_prod'][$key] === '51' && !isset($seg_cer_entro['51'])) || ($_POST['prod_did_prod'][$key] === '52' && !isset($seg_cer_entro['52'])))
           {
             foreach ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]] as $keysecer => $data_secer) {
-              $dataSeguroCerti[] = array(
-                'id_factura'       => $idBorrador,
-                'id_clasificacion' => $_POST['prod_did_prod'][$key],
-                'nrow'             => $nrow_seg_cer,
-                'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'folio'            => $serieFolio,
-                'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'pol_seg'          => null,
-                'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
-              );
-              ++$nrow_seg_cer;
+              if ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer] > 0) {
+                $dataSeguroCerti[] = array(
+                  'id_factura'       => $idBorrador,
+                  'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                  'nrow'             => $nrow_seg_cer,
+                  'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer],
+                  'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
+                  'folio'            => $serieFolio,
+                  'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
+                  'pol_seg'          => null,
+                  'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
+                  'id_orden'         => (!empty($_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
+                  'no_certificado'   => (!empty($_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
+                );
+                ++$nrow_seg_cer;
+              }
             }
             $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
           }
 
           if ($_POST['prod_did_prod'][$key] === '53' && !isset($seg_cer_entro['53']))
           {
-            foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
-              $dataSeguroCerti[] = array(
-                'id_factura'       => $idBorrador,
-                'id_clasificacion' => $_POST['prod_did_prod'][$key],
-                'nrow'             => $nrow_seg_cer,
-                'id_proveedor'     => $_POST['supcarga_id_proveedor'][$keysecer],
-                'certificado'      => $_POST['supcarga_numero'][$keysecer],
-                'folio'            => $serieFolio,
-                'bultos'           => $_POST['supcarga_bultos'][$keysecer],
-                'pol_seg'          => null,
-                'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
-              );
-              ++$nrow_seg_cer;
+            foreach ($_POST['supcarga_id_proveedor'] as $keysecer => $data_secer) {
+              if ($_POST['supcarga_id_proveedor'][$keysecer] > 0) {
+                $dataSeguroCerti[] = array(
+                  'id_factura'       => $idBorrador,
+                  'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                  'nrow'             => $nrow_seg_cer,
+                  'id_proveedor'     => $_POST['supcarga_id_proveedor'][$keysecer],
+                  'certificado'      => $_POST['supcarga_numero'][$keysecer],
+                  'folio'            => $serieFolio,
+                  'bultos'           => $_POST['supcarga_bultos'][$keysecer],
+                  'pol_seg'          => null,
+                  'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
+                  'id_orden'         => null,
+                  'no_certificado'   => null,
+                );
+                ++$nrow_seg_cer;
+              }
             }
             $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
           }
@@ -6098,7 +6126,9 @@ class facturacion_model extends privilegios_model{
 
       $pdf->SetXY(10, $pdf->GetY());
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
-      $pdf->Row2(array("Queda estrictamente prohibido exportar a los Estados Unidos los productos de limón que nuestra empresa {$factura['info']->empresa->nombre_fiscal}, le suministre para su distribución en el territorio mexicano, asi como el uso de nuestra información empresarial tales como ID Number y el numero de registro FDA de nuestras instalaciones para fines de exportación. Esta información solo podrá ser utilizada bajo nuestro consentimiento que deba constar por escrito mediante la previa orden de compra . Cualquier acto contrario efectuado por el cliente a lo señalado será directamente responsable dejando a salvo a la empresa de cualquier tipo de reclamación que se quiera atribuir a la empresa {$factura['info']->empresa->nombre_fiscal} por parte de las autoridades competentes; toda vez que la compra que se hace en esta ocasión y que ampara la factura número {$factura['info']->serie}{$factura['info']->folio} que se origina de la orden de compra numero …. Es exclusivamente para venta y distribución en territorio mexicano." ), false, false, 18);
+      $pdf->Row2(array("LA EMPRESA {$factura['info']->empresa->nombre_fiscal}, CERTIFICA QUE LA FRUTA DE LIMON CONVENCIONAL QUE AMPARA LA PRESENTE FACTURA Y/O PREFACTURA, CUMPLE CON LAS NORMAS MEXICANAS QUE SE ESTABLECEN PARA SER VENDIDA Y DISTRIBUIDA UNICA Y EXCLUSIVAMENTE DENTRO DEL TERRITORIO MEXICANO, POR LO TANTO, LA EMPRESA {$factura['info']->empresa->nombre_fiscal}, NO SE HACE RESPONSABLE ANTE NINGUNA INSTITUCION Y/O EMPRESA Y/O AUTORIDAD EXTRANJERA, SI LA FRUTA SE LOCALIZA FUERA DE MEXICO." ), false, false, 18);
+      $pdf->SetXY(10, $pdf->GetY()-6);
+      $pdf->Row2(array("POR LO TANTO, QUEDA ESTRICTAMENTE PROHIBIDO PARA EL CLIENTE {$factura['info']->cliente->nombre_fiscal}., ANTES DESCRITO, EXPORTAR A LOS ESTADOS UNIDOS DE AMERICA, CANADA Y/O CUALQUIER OTRO PAIS, LOS PRODUCTOS DE LIMÓN CONVENCIONAL QUE NUESTRA EMPRESA {$factura['info']->empresa->nombre_fiscal}, LE SUMINISTRA PARA SU DISTRIBUCIÓN Y VENTA EN EL TERRITORIO MEXICANO, ASÍ COMO EL USO DE NUESTRA RAZON SOCIAL E INFORMACIÓN EMPRESARIAL TALES COMO ID NUMBER Y EL NÚMERO DE REGISTRO FDA DE NUESTRAS INSTALACIONES PARA FINES DE EXPORTACIÓN. EL CLIENTE {$factura['info']->cliente->nombre_fiscal}., SERA DIRECTAMENTE RESPONSABLE DE CUALQUIER ACTO CONTRARIO A LO SEÑALADO ANTERIORMENTE Y LA EMPRESA {$factura['info']->empresa->nombre_fiscal}, QUEDA A SALVO DE CUALQUIER TIPO DE RECLAMACIÓN Y/O SANCION QUE LE QUIERA ATRIBUIR POR PARTE DE AUTORIDADES EXTRANJERAS COMPETENTES." ), false, false, 18);
     }
 
     ////////////////////

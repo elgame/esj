@@ -59,6 +59,16 @@
                   <div class="clearfix"></div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="q_conceptos">Quitar Conceptos</label>
+                  <div class="controls">
+                    <select name="q_conceptos" class="span11" id="q_conceptos">
+                      <option value=""></option>
+                      <option value="qgdc">Quitar Gasolina/Diesel/Calcomania</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" id="btn_submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

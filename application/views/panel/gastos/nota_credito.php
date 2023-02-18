@@ -119,7 +119,11 @@
                   </tr>
                   <tr>
                     <td>RET. ISR</td>
-                    <td><input type="text" name="totalRetencionIsr" id="totalRetencionIsr" value="<?php echo set_value('totalRetencionIsr', 0)?>"></td>
+                    <td><input type="text" name="totalIsr" id="totalIsr" value="<?php echo set_value('totalIsr', 0)?>"></td>
+                  </tr>
+                  <tr>
+                    <td>IEPS</td>
+                    <td><input type="text" name="totalIeps" id="totalIeps" value="<?php echo set_value('totalIeps', 0)?>"></td>
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>

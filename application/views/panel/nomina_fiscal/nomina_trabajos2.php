@@ -38,6 +38,9 @@
                 <label for="ffecha" style="margin-top: 15px;">Dia</label>
                 <input type="date" name="ffecha" id="ffecha" value="<?php echo $fecha ?>">
 
+                <label for="buscar">Buscar</label>
+                <input type="text" name="buscar" class="input-xlarge search-query" id="buscar" value="<?php echo set_value_get('buscar'); ?>" size="73" placeholder="Nombre">
+
                 <input type="submit" name="enviar" value="Ir" class="btn">
               </div>
             </form>
@@ -49,27 +52,35 @@
                 <input type="hidden" id="danio" value="<?php echo $filtros['anio']; ?>">
                 <input type="hidden" id="dfecha" value="<?php echo $fecha; ?>">
 
-                <div class="span3">
-                  <label for="dempleado">Empleado</label>
-                  <input type="text" class="span12" id="dempleado" value="">
-                  <input type="hidden" class="valAddTr" id="dempleadoId" value="">
-                </div>
-                <div class="span3">
-                  <label for="dlabor">Labor</label>
-                  <input type="text" class="span12" id="dlabor" value="">
-                  <input type="hidden" class="valAddTr" id="dlaborId" value="">
-                </div>
-                <div class="span1">
-                  <label for="dcosto">Costo</label>
-                  <input type="text" class="span12 valAddTr" id="dcosto" value="" readonly>
-                </div>
-                <div class="span1">
-                  <label for="davance">Avance</label>
-                  <input type="text" class="span12 valAddTr vpositive" id="davance" value="">
-                </div>
-                <div class="span2">
-                  <label for="dimporte">Importe</label>
-                  <input type="text" class="span12 valAddTr not0" id="dimporte" value="" readonly>
+                <div class="row-fluid">
+                  <div class="span3">
+                    <label for="dempleado">Empleado</label>
+                    <input type="text" class="span12" id="dempleado" value="">
+                    <input type="hidden" class="valAddTr" id="dempleadoId" value="">
+                  </div>
+                  <div class="span3">
+                    <label for="dlabor">Labor</label>
+                    <input type="text" class="span12" id="dlabor" value="">
+                    <input type="hidden" class="valAddTr" id="dlaborId" value="">
+                  </div>
+                  <div class="span1">
+                    <label for="dcosto">Costo</label>
+                    <input type="text" class="span12 valAddTr" id="dcosto" value="" readonly>
+                  </div>
+                  <div class="span3">
+                    <div class="span6">
+                      <label for="davance">Avance</label>
+                      <input type="text" class="span12 valAddTr vpositive" id="davance" value="">
+                    </div>
+                    <div class="span6">
+                      <label for="davance_real">Avance Rel</label>
+                      <input type="text" class="span12 vpositive" id="davance_real" value="">
+                    </div>
+                  </div>
+                  <div class="span2">
+                    <label for="dimporte">Importe</label>
+                    <input type="text" class="span12 valAddTr not0" id="dimporte" value="" readonly>
+                  </div>
                 </div>
 
                 <div class="span3">
@@ -82,7 +93,7 @@
                   <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                   <div class="controls">
                     <div class="input-append span12">
-                      <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1">
+                      <input type="text" name="rancho" class="span12" id="rancho" value="" placeholder="Milagro A, Linea 1">
                     </div>
                   </div>
                   <ul class="tags" id="tagsRanchoIds">
@@ -121,7 +132,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <?php foreach ($tareas_dia as $key => $tarea): ?>
+                  <?php foreach ($tareas_dia['tareas_dia'] as $key => $tarea): ?>
                     <tr>
                       <td><?php echo $tarea->trabajador ?></td>
                       <td><?php echo $tarea->labor ?></td>
@@ -154,6 +165,25 @@
                   <?php endforeach ?>
                 </tbody>
               </table>
+
+              <?php
+              //Paginacion
+              $this->pagination->initialize(array(
+                  'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
+                  'total_rows'    => $tareas_dia['total_rows'],
+                  'per_page'      => $tareas_dia['items_per_page'],
+                  'cur_page'      => $tareas_dia['result_page']*$tareas_dia['items_per_page'],
+                  'page_query_string' => TRUE,
+                  'num_links'     => 1,
+                  'anchor_class'  => 'pags corner-all',
+                  'num_tag_open'  => '<li>',
+                  'num_tag_close' => '</li>',
+                  'cur_tag_open'  => '<li class="active"><a href="#">',
+                  'cur_tag_close' => '</a></li>'
+              ));
+              $pagination = $this->pagination->create_links();
+              echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
+              ?>
             </div>
           </div>
         </div><!--/span-->

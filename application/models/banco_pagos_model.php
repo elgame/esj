@@ -428,6 +428,19 @@ class banco_pagos_model extends CI_Model {
     $this->banco_layout_bancomer_simple_model->get($pagos, $cuenta_retiro, 'bascula');
   }
 
+  public function layoutBajioBascula()
+  {
+    $this->load->model('banco_cuentas_model');
+    $this->load->model('banco_layout_bajio_model');
+    $tipo = $_GET['tipo'];
+    $pagos = $this->getPagosBascula(array(
+        'did_empresa' => $_GET['did_empresa'],
+        'con_cuenta' => 'true' ));
+    $cuenta_retiro = $this->banco_cuentas_model->getCuentaInfo($_GET['cuentaretiro'])['info'];
+
+    $this->banco_layout_bajio_model->get($pagos, $cuenta_retiro);
+  }
+
   public function aplicarPagosBascula()
   {
     $this->load->model('bascula_model');

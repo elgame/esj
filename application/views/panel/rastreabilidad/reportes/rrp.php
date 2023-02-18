@@ -20,6 +20,15 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="dempresa">Empresa</label>
+                  <div class="controls">
+                    <input type="text" name="dempresa"
+                      value="<?php echo (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: ''); ?>" id="dempresa" class="span12" placeholder="Nombre">
+                    <input type="hidden" name="did_empresa" value="<?php echo (isset($empresa->id_empresa)? $empresa->id_empresa: ''); ?>" id="did_empresa">
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="farea">Area</label>
                   <div class="controls">
                     <select name="farea" id="farea" class="span12" data-next="fcalidad">

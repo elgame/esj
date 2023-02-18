@@ -254,7 +254,7 @@
             </div>
           </div>
 
-          <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
+          <div class="row-fluid simpleCodArea" id="groupCatalogos">  <!-- Box catalogos-->
             <div class="box span12">
               <div class="box-header well" data-original-title>
                 <h2><i class="icon-truck"></i> Catálogos</h2>
@@ -301,6 +301,17 @@
                         </div>
                       </div>
                     </div>
+
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="codigoArea">Codigo Area </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="codigoArea" class="span11 showCodigoAreaAuto" id="codigoArea" value="<?php echo set_value('codigoArea') ?>" placeholder="">
+                          <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                          <input type="hidden" name="codigoAreaId" id="codigoAreaId" value="<?php echo set_value('codigoAreaId') ?>">
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
                   </div>
 
                   <div class="span6">
@@ -373,6 +384,13 @@
             <div class="span4">
               <div class="control-group">
                 <div class="controls span9">
+                  IEPS <input type="text" name="ieps" class="span12 vpositive" id="ieps" value="<?php echo set_value('ieps', '0'); ?>">
+                </div>
+              </div>
+            </div>
+            <div class="span4">
+              <div class="control-group">
+                <div class="controls span9">
                   TOTAL <input type="text" name="total" class="span12 vpositive" id="total" value="<?php echo set_value('total', '0'); ?>" readonly>
                 </div>
               </div>
@@ -411,6 +429,54 @@
     </div><!--/row-->
   </div><!--/row-->
 </div>
+
+<!-- Modal -->
+<div id="modalAreas" class="modal modal-w70 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalAreasLavel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="modalAreasLavel">Catalogo de maquinaria, equipos e instalaciones</h3>
+  </div>
+  <div class="modal-body">
+
+    <div class="row-fluid">
+
+      <div>
+
+    <?php foreach ($areas as $key => $value)
+    { ?>
+        <div class="span3" id="tblAreasDiv<?php echo $value->id_tipo ?>" style="display: none;">
+          <table class="table table-hover table-condensed <?php echo ($key==0? 'tblAreasFirs': ''); ?>"
+              id="tblAreas<?php echo $value->id_tipo ?>" data-id="<?php echo $value->id_tipo ?>">
+            <thead>
+              <tr>
+                <th style="width:10px;"></th>
+                <th>Codigo</th>
+                <th><?php echo $value->nombre ?></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- <tr class="areaClick" data-id="" data-sig="">
+                <td><input type="radio" name="modalRadioSel" value="" data-uniform="false"></td>
+                <td>9</td>
+                <td>EMPAQUE</td>
+              </tr> -->
+            </tbody>
+          </table>
+        </div>
+    <?php
+    } ?>
+
+      </div>
+
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-primary" id="btnModalAreasSel">Seleccionar</button>
+  </div>
+</div>
+
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){

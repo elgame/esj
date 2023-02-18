@@ -51,7 +51,7 @@
         });
       },
       minLength: 1,
-      selectFirst: true,
+      autoFocus: true,
       select: function( event, ui ) {
         var $area =  $(this);
 
@@ -92,7 +92,7 @@
         });
       },
       minLength: 1,
-      selectFirst: true,
+      autoFocus: true,
       select: function( event, ui ) {
         var $rancho =  $(this);
 
@@ -113,7 +113,7 @@
 
     function addRanchoTag(item) {
       if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
-        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+        $('#tagsRanchoIds').html('<li><span class="tag">'+item.value+'</span>'+
           '<input type="hidden" name="ranchoId[]" class="ranchoId valAddTr" value="'+item.id+'">'+
           '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
           '</li>');
@@ -130,12 +130,16 @@
   var autocompleteCentroCosto = function () {
     $("#centroCosto").autocomplete({
       source: function(request, response) {
-        var params = {term : request.term};
+        var params = {
+          term : request.term,
+          id_area: $('#areaId').val(),
+          rancho: $('#tagsRanchoIds .ranchoId').val()
+        };
 
-        params.tipo = ['gasto', 'melga', 'tabla', 'seccion',];
-        if ($('#tipoOrden').find('option:selected').val() == 'd') {
-          params.tipo = ['servicio'];
-        }
+        params.tipo = ['melga', 'tabla', 'seccion'];
+        // if ($('#tipoOrden').find('option:selected').val() == 'd') {
+        //   params.tipo = ['servicio'];
+        // }
 
         $.ajax({
             url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
@@ -147,7 +151,7 @@
         });
       },
       minLength: 1,
-      selectFirst: true,
+      autoFocus: true,
       select: function( event, ui ) {
         var $centroCosto =  $(this);
 
@@ -193,7 +197,7 @@
     $("#empresa").autocomplete({
         source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
         minLength: 1,
-        selectFirst: true,
+        autoFocus: true,
         select: function( event, ui ) {
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
@@ -225,7 +229,7 @@
         });
       },
       minLength: 1,
-      selectFirst: true,
+      autoFocus: true,
       select: function( event, ui ) {
         $("#dempleadoId").val(ui.item.id);
         $(this).css("background-color", "#B0FFB0");
@@ -244,7 +248,7 @@
       $(this).autocomplete({
         source: base_url+'panel/labores_codigo/ajax_get_labores/',
         minLength: 1,
-        selectFirst: true,
+        autoFocus: true,
         select: function( event, ui ) {
           var $this = $(this);
 
@@ -288,6 +292,7 @@
     postData.id_labor       = $('#dlaborId').val();
     postData.costo          = $('#dcosto').val();
     postData.avance         = $('#davance').val();
+    postData.avance_real    = $('#davance_real').val();
     postData.importe        = $('#dimporte').val();
 
     postData.id_area        = $('#areaId').val();
@@ -359,7 +364,7 @@
           );
           noty({"text": 'Se guardo', "layout":"topRight", "type": 'success'});
 
-          $('#dempleadoId').val('');
+          // $('#dempleadoId').val('');
           $('#dlabor').val('');
           $('#dlaborId').val('');
           $('#dcosto').val('');
@@ -369,6 +374,7 @@
           $('#areaId').val('');
           $('#tagsRanchoIds').html('');
           $('#tagsCCIds').html('');
+          $('#dempleado').focus();
         }
       }, "json");
     } else {

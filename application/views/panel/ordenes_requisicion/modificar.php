@@ -793,6 +793,10 @@
                                   <div class="popover-content">
 
                                     <div class="control-group" style="width: 375px;">
+                                      <input type="text" name="noCertificado[]" class="span11" value="<?php echo $concepto->no_certificado ?>" placeholder="No Certificado">
+                                    </div>
+
+                                    <div class="control-group" style="width: 375px;">
                                       <input type="text" name="observacionesP[]" class="span11" value="<?php echo $concepto->observaciones ?>" placeholder="Observaciones">
                                     </div>
 
@@ -850,6 +854,7 @@
                                         </td>
                                         <td style="width: 66px;">
                                             <input type="text" name="iepsPorcent[]" value="<?php echo $concepto->porcentaje_ieps ?>" id="iepsPorcent" class="span12">
+                                            <input type="hidden" name="iepsSub[]" value="<?php echo $concepto->ieps_sub ?>" id="iepsSub" class="span12">
                                         </td>
                                         <td>
                                           <input type="text" name="observacion[]" value="<?php echo $concepto->observacion ?>" id="observacion" class="span12">

@@ -507,12 +507,14 @@ class compras_ordenes_model extends CI_Model {
           'status'               => $statusp,
           'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'ieps_sub'             => isset($_POST['iepsSub'][$key]) ? $_POST['iepsSub'][$key] : 'f',
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
           'id_compra'            => $prod_id_compra,
           // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
           $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
           'retencion_isr'        => $_POST['ret_isrTotal'][$key],
           'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+          'no_certificado'       => (!empty($_POST['noCertificado'][$key])? $_POST['noCertificado'][$key]: '')
         );
 
         if ($statusp == 'a' && $_POST['productoId'][$key] !== '') {
@@ -895,7 +897,8 @@ class compras_ordenes_model extends CI_Model {
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-                  Date(cp.fecha_aceptacion) AS fecha_aceptacion, cp.folio_aceptacion, cp.observaciones
+                  Date(cp.fecha_aceptacion) AS fecha_aceptacion, cp.folio_aceptacion, cp.observaciones,
+                  cp.ieps_sub, cp.no_certificado
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -1292,12 +1295,14 @@ class compras_ordenes_model extends CI_Model {
         'observaciones'        => $_POST['observaciones'][$key],
         'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
         'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+        'ieps_sub'             => isset($_POST['iepsSub'][$key]) ? $_POST['iepsSub'][$key] : 'f',
         'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
         'id_compra'            => $prod_id_compra,
         // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
         $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
         'retencion_isr'        => $_POST['ret_isrTotal'][$key],
         'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+        'no_certificado'       => (!empty($_POST['noCertificado'][$key])? $_POST['noCertificado'][$key]: '')
       );
 
       if ($statusp === 'a') {
@@ -1336,6 +1341,7 @@ class compras_ordenes_model extends CI_Model {
           'observaciones'        => $_POST['observaciones'][$key],
           'ieps'                 => ($faltantesProd * $pu * floatval($_POST['iepsPorcent'][$key])/100),
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'ieps_sub'             => isset($_POST['iepsSub'][$key]) ? $_POST['iepsSub'][$key] : 'f',
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
           'id_compra'            => NULL,
           // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
@@ -1853,7 +1859,7 @@ class compras_ordenes_model extends CI_Model {
   {
     $tipo = isset($datos['tipoo']{0})? $datos['tipoo']: 'en';
     $filtro = isset($datos['filtro']{0})? " AND b.folio = '{$datos['filtro']}'": '';
-    $accion = isset($datos['accion'][0])? "'".implode("','", $datos['accion'])."'": "'en', 'p', 'b'";
+    $accion = isset($datos['accion'][0])? "'".implode("','", $datos['accion'])."'": "'en', 'sa', 'p', 'b'";
     $area = isset($datos['area']{0})? " AND a.id_area = '{$datos['area']}'": '';
 
     $campos = "p.nombre_fiscal AS proveedor,";
@@ -1885,6 +1891,22 @@ class compras_ordenes_model extends CI_Model {
           {$area}
         ORDER BY b.folio DESC
         LIMIT 100");
+    $response = array();
+    if($query->num_rows() > 0)
+      $response = $query->result();
+    $query->free_result();
+    return $response;
+  }
+
+  public function getNoCertificados($datos)
+  {
+    $sql = isset($datos['empresaId']{0})? " AND id_empresa = {$datos['empresaId']}": '';
+
+    $query = $this->db->query("SELECT *
+        FROM no_certificados_compras
+        WHERE 1 = 1 {$sql}
+        ORDER BY folio DESC
+        LIMIT 300");
     $response = array();
     if($query->num_rows() > 0)
       $response = $query->result();
@@ -2521,9 +2543,24 @@ class compras_ordenes_model extends CI_Model {
         }
 
         if (!empty($orden['info'][0]->folio_hoja)) {
-          $pdf->SetWidths(array(120));
-          $pdf->SetXY(90, $pdf->GetY());
-          $pdf->Row(array("Folio Orden: {$orden['info'][0]->folio_hoja}"), false, true);
+          $pdf->SetWidths(array(110));
+          $pdf->SetXY(100, $pdf->GetY());
+
+          $folio_hoja = $orden['info'][0]->folio_hoja;
+          $parsefh = explode(',', $orden['info'][0]->folio_hoja);
+          if (count($parsefh) > 0) {
+            foreach ($parsefh as $keyfh => $fh) {
+              $parsefh[$keyfh] = str_replace(
+                ['RC', 'RS'],
+                ['REQ. COMPRA ', 'REQ. SERVICIO '],
+                mb_strtoupper($parsefh[$keyfh], 'UTF-8')
+              );
+            }
+            $folio_hoja = implode("\n", $parsefh);
+          }
+
+          $pdf->SetFont('Arial', 'B', 11);
+          $pdf->Row(array("{$folio_hoja}"), false, true);
         }
 
 

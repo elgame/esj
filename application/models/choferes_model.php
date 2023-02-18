@@ -192,9 +192,9 @@ class choferes_model extends CI_Model {
 	 * @param  boolean $basic_info [description]
 	 * @return [type]              [description]
 	 */
-	public function getChoferInfo($id_chofer=FALSE, $basic_info=FALSE)
+	public function getChoferInfo($id_chofer=FALSE, $basic_info=FALSE, $idoblig = false)
 	{
-		$id_chofer = (isset($_GET['id']))? $_GET['id']: $id_chofer;
+		$id_chofer = (isset($_GET['id']) && !$idoblig)? $_GET['id']: $id_chofer;
 
 		$sql_res = $this->db
       ->select("id_chofer, nombre, status, telefono, id_nextel, no_licencia,

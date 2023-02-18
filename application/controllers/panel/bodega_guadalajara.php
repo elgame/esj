@@ -10,16 +10,22 @@ class bodega_guadalajara extends MY_Controller {
     'bodega_guadalajara/guardar/',
     'bodega_guadalajara/saveTotales/',
     'bodega_guadalajara/ajax_get_categorias/',
+    'bodega_guadalajara/ajax_save_rastreo/',
+    'bodega_guadalajara/ajax_del_rastreo/',
     'bodega_guadalajara/cerrar_caja/',
     'bodega_guadalajara/print_caja/',
     'bodega_guadalajara/print_vale/',
     'bodega_guadalajara/print_vale_ipr/',
+    'bodega_guadalajara/print_vale_deudor/',
+    'bodega_guadalajara/print_vale_rastreo/',
     'bodega_guadalajara/rpt_gastos_pdf/',
     'bodega_guadalajara/rpt_gastos_xls/',
     'bodega_guadalajara/rpt_ingresos_pdf/',
     'bodega_guadalajara/rpt_ingresos_xls/',
     'bodega_guadalajara/rpt_estado_res_pdf/',
     'bodega_guadalajara/rpt_estado_res_xls/',
+    'bodega_guadalajara/agregar_abono_deudor/',
+    'bodega_guadalajara/quitar_abono_deudor/',
   );
 
   public function _remap($method)
@@ -515,6 +521,128 @@ class bodega_guadalajara extends MY_Controller {
     echo json_encode($this->bodega_guadalajara_model->ajaxCategorias());
   }
 
+  public function ajax_save_rastreo()
+  {
+    $this->load->model('bodega_guadalajara_model');
+    echo json_encode($this->bodega_guadalajara_model->ajaxSaveRastreo($_GET));
+  }
+
+  public function ajax_del_rastreo()
+  {
+    $this->db->delete('otros.bodega_rastreo_efectivo', "id_rastreo = ".$_GET['id']);
+    echo true;
+  }
+
+
+  public function agregar_abono_deudor() {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/keyjump.js'),
+      array('general/util.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('bodega_guadalajara_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Agregar abonos');
+
+    $params['closeModal'] = false;
+
+    if (isset($_GET['id']{0}) && isset($_GET['no_caja']{0}))
+    {
+      $params['id'] = $_GET['id'];
+      $params['fecha'] = $_GET['fecha'];
+      $params['no_caja'] = $_GET['no_caja'];
+      $params['monto'] = $_GET['monto'];
+
+      if (isset($_POST['btnGuardarAbono'])) {
+        $_POST = array_merge($_POST, $_GET);
+      }
+
+      $this->configAddAbonoDeudor();
+      if($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $respons = $this->bodega_guadalajara_model->addAbonoDeudor($_POST);
+
+        $params['closeModal'] = true;
+        $params['frm_errors'] = $this->showMsgs(4);
+      }
+
+      $params['deudor'] = $this->bodega_guadalajara_model->getInfoDeudor($params['id']);
+
+    }else
+      $_GET['msg'] = 1;
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/bodega_guadalajara/agregar_abonos_deudor', $params);
+  }
+
+  public function quitar_abono_deudor() {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/keyjump.js'),
+      array('general/util.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('bodega_guadalajara_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Agregar abonos');
+
+    $params['closeModal'] = false;
+
+    if (isset($_GET['id']{0}) && isset($_GET['no_caja']{0}))
+    {
+      $params['id']      = $_GET['id'];
+      $params['fecha']   = $_GET['fecha'];
+      $params['no_caja'] = $_GET['no_caja'];
+      $params['monto']   = $_GET['monto'];
+
+      $this->db->delete('otros.bodega_deudores_pagos', ["id_deudor" => $_GET['id'], "fecha_creacion" => $_GET['fecha_creacion']]);
+      $this->agregar_abono_deudor();
+    } else
+      $_GET['msg'] = 1;
+  }
+
+  public function configAddAbonoDeudor()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'dmonto',
+            'label' => 'Monto',
+            'rules' => 'required|numeric'),
+      array('field' => 'id',
+            'label' => 'Id deuda',
+            'rules' => 'required|numeric'),
+      array('field' => 'fecha',
+            'label' => 'Fecha pago',
+            'rules' => 'required'),
+      array('field' => 'no_caja',
+            'label' => 'No Caja',
+            'rules' => 'required|numeric'),
+      array('field' => 'monto',
+            'label' => 'Deuda',
+            'rules' => 'required|numeric'),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
 
   /*
    |------------------------------------------------------------------------
@@ -687,6 +815,28 @@ class bodega_guadalajara extends MY_Controller {
       $this->bodega_guadalajara_model->printValeIngresos($_GET['id_ingresos'], $_GET['noCaja']);
     else{
       $params['url'] = 'panel/bodega_guadalajara/print_vale_ipr/?id_ingresos='.$_GET['id_ingresos'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_deudor()
+  {
+    $this->load->model('bodega_guadalajara_model');
+    if($this->input->get('p') == 'true')
+      $this->bodega_guadalajara_model->printValeDeudor($_GET['id'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/bodega_guadalajara/print_vale_deudor/?id='.$_GET['id'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_rastreo()
+  {
+    $this->load->model('bodega_guadalajara_model');
+    if($this->input->get('p') == 'true')
+      $this->bodega_guadalajara_model->printValeRastreo($_GET['id'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/bodega_guadalajara/print_vale_rastreo/?id='.$_GET['id_rastreo'].'&noCaja='.$_GET['noCaja'].'&p=true';
       $this->load->view('panel/caja_chica/print_ticket', $params);
     }
   }

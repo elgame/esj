@@ -831,19 +831,21 @@ class catalogos_sft_model extends CI_Model{
   public function getDataCodigosCuentas()
   {
     // $this->load->model('compras_areas_model');
-    $sql_compras = $sql_caja = $sql = $sql2 = '';
+    $sql_compras = $sql_gastos = $sql_caja = $sql = $sql2 = '';
     $sql_nom_dia = $sql_nom_hre = '';
 
     //Filtro de fecha.
     if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
       $sql_caja .= " AND Date(cg.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
       $sql_compras .= " AND Date(cp.fecha_aceptacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+      $sql_gastos .= " AND Date(c.fecha_factura) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
     }
     elseif($this->input->get('ffecha1') != '') {
       $sql_caja .= " AND Date(cg.fecha) = '".$this->input->get('ffecha1')."'";
       $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha1')."'";
+      $sql_gastos .= " AND Date(c.fecha_factura) = '".$this->input->get('ffecha1')."'";
       $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha1')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) = '".$this->input->get('ffecha1')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) = '".$this->input->get('ffecha1')."'";
@@ -851,6 +853,7 @@ class catalogos_sft_model extends CI_Model{
     elseif($this->input->get('ffecha2') != ''){
       $sql_caja .= " AND Date(cg.fecha) = '".$this->input->get('ffecha2')."'";
       $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha2')."'";
+      $sql_gastos .= " AND Date(c.fecha_factura) = '".$this->input->get('ffecha2')."'";
       $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha2')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) = '".$this->input->get('ffecha2')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) = '".$this->input->get('ffecha2')."'";
@@ -859,6 +862,7 @@ class catalogos_sft_model extends CI_Model{
     if ($this->input->get('did_empresa') != '') {
       $sql_caja .= " AND cc.id_empresa = ".$this->input->get('did_empresa')."";
       $sql_compras .= " AND co.id_empresa = ".$this->input->get('did_empresa')."";
+      $sql_gastos .= " AND c.id_empresa = ".$this->input->get('did_empresa')."";
       // $sql .= " AND Date(csc.id_empresa) = ".$this->input->get('did_empresa')."";
       $sql_nom_dia .= " AND ndl.id_empresa = ".$this->input->get('did_empresa')."";
       $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('did_empresa')."";
@@ -867,9 +871,19 @@ class catalogos_sft_model extends CI_Model{
     if ($this->input->get('sucursalId') != '') {
       $sql_caja .= " AND cg.id_sucursal = ".$this->input->get('sucursalId')."";
       $sql_compras .= " AND co.id_sucursal = ".$this->input->get('sucursalId')."";
+      $sql_gastos .= " AND c.id_sucursal = ".$this->input->get('sucursalId')."";
       // $sql .= " AND Date(csc.id_empresa) = ".$this->input->get('sucursalId')."";
       // $sql_nom_dia .= " AND ndl.id_empresa = ".$this->input->get('sucursalId')."";
       // $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('sucursalId')."";
+    }
+
+    $sql_co = '';
+    if ($this->input->get('q_conceptos') != '') {
+      switch ($this->input->get('q_conceptos')) {
+        case 'qgdc':
+          $sql_co .= " AND (cp.descripcion <> 'DIESEL' AND cp.descripcion <> 'GASOLINA' AND cp.descripcion <> 'CALCOMANIA FISCAL VEHICULAR')";
+          break;
+      }
     }
 
     $sql2 = $sql;
@@ -889,16 +903,21 @@ class catalogos_sft_model extends CI_Model{
               SELECT Sum(cp.total) importe
               FROM compras_productos cp INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
               WHERE cp.id_cat_codigos In({$ids_hijos}) {$sql_compras} AND cp.status = 'a' AND co.status <> 'ca'
-              UNION
+                {$sql_co}
+              UNION ALL
+              SELECT Sum(c.total) importe
+              FROM compras c
+              WHERE c.status In('p', 'pa') AND c.isgasto = 't' AND c.id_cat_codigos In({$ids_hijos}) {$sql_gastos}
+              UNION ALL
               SELECT Sum(cg.monto) importe
               FROM cajachica_gastos cg INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
               WHERE cg.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
                 AND cg.tipo <> 'pre' {$sql_caja}
-              UNION
+              UNION ALL
               SELECT Sum(ndl.importe) importe
               FROM nomina_trabajos_dia_labores ndl
               WHERE ndl.id_area In({$ids_hijos}) {$sql_nom_dia}
-              UNION
+              UNION ALL
               SELECT Sum(ndh.importe) importe
               FROM nomina_trabajos_dia_hrsext ndh
               WHERE ndh.id_area In({$ids_hijos}) {$sql_nom_hre}
@@ -920,38 +939,67 @@ class catalogos_sft_model extends CI_Model{
                 SELECT
                   ca.id_cat_codigos AS id_area, ca.nombre, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
                   Date(c.fecha) fecha_compra, (c.serie || c.folio) folio_compra, cp.descripcion producto,
-                  cp.total importe
+                  cp.total importe, oranc.areas
                 FROM compras_ordenes co
                   INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
                   LEFT JOIN compras c ON c.id_compra = cp.id_compra
+                  LEFT JOIN (
+                    SELECT cor.id_orden, STRING_AGG(r.nombre, ', ') AS areas
+                    FROM compras_ordenes_rancho cor
+                      LEFT JOIN otros.ranchos r ON r.id_rancho = cor.id_rancho
+                    WHERE r.id_rancho > 0
+                    GROUP BY cor.id_orden
+                  ) oranc ON oranc.id_orden = co.id_orden
                 WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_compras}
-                  AND cp.status = 'a' AND co.status <> 'ca'
-                UNION
+                  AND cp.status = 'a' AND co.status <> 'ca' {$sql_co}
+                UNION ALL
+                SELECT
+                  ca.id_cat_codigos AS id_area, ca.nombre, Date(c.fecha_factura) fecha_orden, (c.serie || c.folio) folio_orden,
+                  NULL fecha_compra, NULL folio_compra, c.concepto producto,
+                  c.total importe, oranc.areas
+                FROM compras c
+                  INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = c.id_cat_codigos
+                  LEFT JOIN (
+                    SELECT cor.id_compra, STRING_AGG(r.nombre, ', ') AS areas
+                    FROM compras_rancho cor
+                      LEFT JOIN otros.ranchos r ON r.id_rancho = cor.id_rancho
+                    WHERE r.id_rancho > 0
+                    GROUP BY cor.id_compra
+                  ) oranc ON oranc.id_compra = c.id_compra
+                WHERE c.status In('p', 'pa') AND c.isgasto = 't' AND ca.id_cat_codigos In({$ids_hijos}) {$sql_gastos}
+                UNION ALL
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(cg.fecha) fecha_orden, cg.folio::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   ('Caja #' || cg.no_caja || ' ' || cg.concepto) producto,
-                  cg.monto AS importe
+                  cg.monto AS importe, oranc.areas
                 FROM cajachica_gastos cg
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cg.id_cat_codigos
                   INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+                  LEFT JOIN (
+                    SELECT cor.id_gasto, STRING_AGG(r.nombre, ', ') AS areas
+                    FROM cajachica_gastos cor
+                      LEFT JOIN otros.ranchos r ON r.id_rancho = cor.id_rancho
+                    WHERE r.id_rancho > 0
+                    GROUP BY cor.id_gasto
+                  ) oranc ON oranc.id_gasto = cg.id_gasto
                 WHERE ca.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
                   AND cg.tipo <> 'pre' {$sql_caja}
-                UNION
+                UNION ALL
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndl.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || ', Labor ' || csl.nombre || ' ' || ndl.horas || 'hrs') producto,
-                  ndl.importe
+                  ndl.importe, '' AS areas
                 FROM nomina_trabajos_dia_labores ndl
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = ndl.id_area
                   INNER JOIN compras_salidas_labores csl ON csl.id_labor = ndl.id_labor
                   INNER JOIN usuarios u ON u.id = ndl.id_usuario
                 WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_nom_dia}
-                UNION
+                UNION ALL
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndh.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || ', horas Ext ' || ndh.horas) producto,
-                  ndh.importe
+                  ndh.importe, '' AS areas
                 FROM nomina_trabajos_dia_hrsext ndh
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = ndh.id_area
                   INNER JOIN usuarios u ON u.id = ndh.id_usuario
@@ -977,7 +1025,7 @@ class catalogos_sft_model extends CI_Model{
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf = new MYpdf('L', 'mm', 'Letter');
     $pdf->show_head = true;
 
     if ($empresa['info']->logo !== '')
@@ -998,11 +1046,11 @@ class catalogos_sft_model extends CI_Model{
     // $links = array('', '', '', '');
     $pdf->SetY(30);
     $aligns = array('L', 'R');
-    $widths = array(170, 35);
-    $header = array('Nombre', 'Importe');
-    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'L', 'R', 'R');
-    $widths2 = array(18, 18, 18, 18, 60, 45, 29);
-    $header2 = array('Fecha O', 'Folio O', 'Fecha C', 'Folio C', 'C Costo', 'Producto', 'Importe');
+    $widths = array(177, 29, 45);
+    $header = array('Nombre', 'Importe', '');
+    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'L', 'R', 'L', 'L');
+    $widths2 = array(18, 18, 18, 18, 60, 45, 29, 45);
+    $header2 = array('Fecha O', 'Folio O', 'Fecha C', 'Folio C', 'C Costo', 'Producto', 'Importe', 'Areas');
 
     $lts_combustible = 0;
     $horas_totales = 0;
@@ -1022,7 +1070,7 @@ class catalogos_sft_model extends CI_Model{
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
+        // $pdf->Row($header, true);
 
         if (isset($vehiculo->detalle)) {
           $pdf->SetX(6);
@@ -1071,6 +1119,7 @@ class catalogos_sft_model extends CI_Model{
             $item->nombre,
             $item->producto,
             MyString::formatoNumero($item->importe, 2, '', false),
+            $item->areas,
           );
 
           $pdf->SetX(6);
@@ -1145,6 +1194,7 @@ class catalogos_sft_model extends CI_Model{
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">C Costo</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Areas</td>
       </tr>';
     }
     $lts_combustible = $horas_totales = 0;
@@ -1168,6 +1218,7 @@ class catalogos_sft_model extends CI_Model{
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->nombre.'</td>
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->producto.'</td>
               <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->importe.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->areas.'</td>
             </tr>';
         }
       }

@@ -6,6 +6,7 @@ class labores_codigo extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'labores_codigo/ajax_get_departamentos/',
     'labores_codigo/ajax_get_labores/',
   );
 
@@ -60,7 +61,7 @@ class labores_codigo extends MY_Controller {
 
     $this->carabiner->js(array(
       array('general/msgbox.js'),
-      array('panel/caja_chica/categorias.js'),
+      array('panel/nomina_fiscal/labores.js'),
     ));
 
     $this->load->model('labores_codigo_model');
@@ -84,6 +85,8 @@ class labores_codigo extends MY_Controller {
         redirect(base_url('panel/labores_codigo/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
       }
     }
+
+    $params['areas'] = $this->labores_codigo_model->getAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -109,7 +112,7 @@ class labores_codigo extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Modificar Categoria'
+      'titulo' => 'Modificar Labor'
     );
 
     $this->configAddLabor();
@@ -128,6 +131,7 @@ class labores_codigo extends MY_Controller {
     }
 
     $params['categoria'] = $this->labores_codigo_model->info($_GET['id'], true);
+    $params['areas'] = $this->labores_codigo_model->getAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -158,6 +162,12 @@ class labores_codigo extends MY_Controller {
       array('field' => 'codigo',
             'label' => 'Codigo',
             'rules' => 'required|max_length[10]|callback_valid_codigo'),
+      array('field' => 'costo',
+            'label' => 'Costo x unidad',
+            'rules' => 'required|numeric'),
+      array('field' => 'departamento',
+            'label' => 'Area',
+            'rules' => 'required|max_length[70]'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -187,6 +197,12 @@ class labores_codigo extends MY_Controller {
   {
     $this->load->model('labores_codigo_model');
     echo json_encode($this->labores_codigo_model->ajaxLabores());
+  }
+
+  public function ajax_get_departamentos()
+  {
+    $this->load->model('labores_codigo_model');
+    echo json_encode($this->labores_codigo_model->ajaxDepartamentos());
   }
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')

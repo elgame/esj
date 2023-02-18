@@ -65,6 +65,15 @@
                     </div>
                   </div><!--/control-group -->
 
+                  <div class="control-group span4">
+                    <label class="control-label" for="tipoNP">Nacional Pallets </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="checkbox" name="tipoNP" id="tipoNP" value="si" <?php echo set_checkbox('tipoNP', 'si'); ?> data-next="empresa_contratante">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+
                 </div>
                 <div class="clearfix"></div>
 
@@ -313,7 +322,7 @@
                   <div class="row-fluid">
                     <div class="span5">
                       <div id="select_pallets">
-                        <?php for ($i = 0; $i < 13; $i++): ?>
+                        <?php for ($i = 0; $i < 15; $i++): ?>
                         <div class="row-fluid">
                           <div class="span1 nums"><?php echo ($i*2)+1 ?></div>
                           <div class="span4 slots">

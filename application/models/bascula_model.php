@@ -119,7 +119,7 @@ class bascula_model extends CI_Model {
       {
         $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula
           WHERE folio = {$this->input->post('pfolio')} AND tipo = '{$this->input->post('ptipo')}'
-          AND id_area = {$this->input->post('parea')}")->row();
+            AND id_area = {$this->input->post('parea')}")->row();
         if ($result->num > 0) {
           $_POST['pfolio'] = $this->getSiguienteFolio($this->input->post('ptipo'), $this->input->post('parea'));
         }
@@ -182,6 +182,8 @@ class bascula_model extends CI_Model {
         $new_boleta = true;
 
         $this->addSnapshot($idb, $data['accion']);
+
+        $this->logBitacora($logBitacora, $idb, $data, $usuario_auth, null, true, true);
       }
 
       $data2 = array(
@@ -268,6 +270,10 @@ class bascula_model extends CI_Model {
           $data2['fecha_pago'] = NULL;
         }
 
+        // Si se cierra la boleta se registra quien la cerro
+        if (!empty($_GET['p']) && $_GET['p'] == 't') {
+          $data2['id_usuario_cerro'] = $this->session->userdata('id_usuario');
+        }
       }
 
       if ($_POST['ptipo'] === 'en')
@@ -358,9 +364,9 @@ class bascula_model extends CI_Model {
     // if (is_numeric($usuario_auth))
     // {
     // }
-    $this->logBitacora($logBitacora, $id, $data, $usuario_auth, $cajas, $all);
 
     $this->db->update('bascula', $data, array('id_bascula' => $id));
+
     if ( ! is_null($cajas) && count($cajas) > 0)
     {
       foreach ($cajas as $key => $caja)
@@ -379,6 +385,8 @@ class bascula_model extends CI_Model {
         $this->db->insert_batch('bascula_productos', $cajas);
       }
     }
+
+    $this->logBitacora($logBitacora, $id, $data, $usuario_auth, $cajas, $all);
 
     return array('passes' => true);
   }
@@ -520,6 +528,7 @@ class bascula_model extends CI_Model {
                 b.certificado,
                 b.intangible,
                 (u.nombre || ' ' || u.apellido_paterno) AS creadox,
+                (uc.nombre || ' ' || uc.apellido_paterno) AS cerradox,
                 (SELECT nombre || ' ' || apellido_paterno FROM usuarios WHERE id = {$this->session->userdata('id_usuario')}) AS usuario,
                 b.no_trazabilidad")
       ->from("bascula AS b")
@@ -531,6 +540,7 @@ class bascula_model extends CI_Model {
       ->join('camiones AS ca', 'ca.id_camion = b.id_camion', "left")
       ->join('otros.productor AS pr', 'pr.id_productor = b.id_productor', "left")
       ->join('usuarios AS u', 'u.id = b.id_usuario', "left")
+      ->join('usuarios AS uc', 'uc.id = b.id_usuario_cerro', "left")
 
       ->where("b.id_bascula", $id)
       ->or_where('b.folio', $folio)
@@ -3625,10 +3635,29 @@ class bascula_model extends CI_Model {
 
   public function pagarBoleta($idBascula)
   {
-    $this->db->update('bascula', array('accion' => 'p', 'fecha_pago' => date("Y-m-d H:i:s")), array('id_bascula' => $idBascula));
+    $bascula = $this->getBasculaInfo($idBascula, 0, $basic_info=true, [], $idBascula);
+    if ($bascula['info'][0]->accion == 'p') {
+      $accion = 'sa';
+      $fecha = null;
+    } else {
+      $accion = 'p';
+      $fecha = date("Y-m-d H:i:s");
+    }
+
+    $this->bascula_model->logBitacora(
+      true,
+      $idBascula,
+      array('accion' => $accion, 'fecha_pago' => $fecha),
+      $this->session->userdata['id_usuario'],
+      null,
+      false
+    );
+
+    $this->db->update('bascula', array('accion' => $accion, 'fecha_pago' => $fecha), array('id_bascula' => $idBascula));
+
   }
 
-  public function logBitacora($logBitacora, $idBascula, $data, $usuario_auth, $cajas = null, $all = true)
+  public function logBitacora($logBitacora, $idBascula, $data, $usuario_auth, $cajas = null, $all = true, $new = false)
   {
     // if (isset($data['tipo']) && $data['tipo'] == 'sa') {
     //   return 'sa';
@@ -3649,30 +3678,31 @@ class bascula_model extends CI_Model {
     // Array asoc que asocia el nombre del campo de la tabla con un nombre
     // mas entendible para el usuario.
     $campos = array(
-      'tipo'            => 'Tipo',
-      'id_area'         => 'Area',
-      'id_empresa'      => 'Empresa',
-      'id_cliente'      => 'Cliente',
-      'id_proveedor'    => 'Proveedor',
-      'id_productor'    => 'Productor',
-      'rancho'          => 'Rancho',
-      'id_camion'       => 'Camion',
-      'id_chofer'       => 'Chofer',
-      'kilos_bruto'     => 'Kilos Brutos',
-      'kilos_tara'      => 'Kilos Tara',
-      'cajas_prestadas' => 'Cajas Prestadas',
-      'kilos_neto'      => 'Kilos Neto',
-      'no_lote'         => 'No. Lote',
+      'folio'               => 'Folio',
+      'tipo'                => 'Tipo',
+      'id_area'             => 'Area',
+      'id_empresa'          => 'Empresa',
+      'id_cliente'          => 'Cliente',
+      'id_proveedor'        => 'Proveedor',
+      'id_productor'        => 'Productor',
+      'rancho'              => 'Rancho',
+      'id_camion'           => 'Camion',
+      'id_chofer'           => 'Chofer',
+      'kilos_bruto'         => 'Kilos Brutos',
+      'kilos_tara'          => 'Kilos Tara',
+      'cajas_prestadas'     => 'Cajas Prestadas',
+      'kilos_neto'          => 'Kilos Neto',
+      'no_lote'             => 'No. Lote',
       'chofer_es_productor' => 'Chofer es productor',
-      'id_bonificacion' => 'Bonificacion',
-      'importe'         => 'Importe',
-      'total_cajas'     => 'Total Cajas',
-      'obcervaciones'   => 'Observaciones',
-      'accion'          => 'Accion',
-      'certificado'     => 'Certificado',
-      'intangible'      => 'Intangible',
-      'fecha_pago'      => 'Fecha de pago',
-      'status'      => 'Estado boleta',
+      'id_bonificacion'     => 'Bonificacion',
+      'importe'             => 'Importe',
+      'total_cajas'         => 'Total Cajas',
+      'obcervaciones'       => 'Observaciones',
+      'accion'              => 'Accion',
+      'certificado'         => 'Certificado',
+      'intangible'          => 'Intangible',
+      'fecha_pago'          => 'Fecha de pago',
+      'status'              => 'Estado boleta',
     );
 
     // Campos que son ids, para facilitar la busqueda de sus valores.
@@ -3689,9 +3719,11 @@ class bascula_model extends CI_Model {
     // Obtiene la informacion de la pesada.
     $info = $this->getBasculaInfo($idBascula);
 
-    // echo "<pre>";
-    //   var_dump($info['info'][0], $data);
-    // echo "</pre>";exit;
+    if ($new) {
+      foreach ($info['info'][0] as $key => $value) {
+        $info['info'][0]->{$key} = '';
+      }
+    }
 
     $camposEditados = array();
     $fecha = date('Y-m-d H:i:s');
@@ -3756,17 +3788,19 @@ class bascula_model extends CI_Model {
             $despues = $data[$campoDb];
           }
 
-          $camposEditados[] = array(
-            'id_usuario_auth'     => (is_numeric($usuario_auth)? $usuario_auth: NULL),
-            'id_usuario_logueado' => $this->session->userdata['id_usuario'],
-            'id_bascula'          => $idBascula,
-            'fecha'               => $fecha,
-            'no_edicion'          => $noEdicion,
-            'antes'               => $antes,
-            'despues'             => $despues,
-            'campo'               => $campos[$campoDb],
-            'tipo'                => $logBitacora,
-          );
+          if (isset($campos[$campoDb])) {
+            $camposEditados[] = array(
+              'id_usuario_auth'     => (is_numeric($usuario_auth)? $usuario_auth: NULL),
+              'id_usuario_logueado' => $this->session->userdata['id_usuario'],
+              'id_bascula'          => $idBascula,
+              'fecha'               => $fecha,
+              'no_edicion'          => $noEdicion,
+              'antes'               => $antes,
+              'despues'             => $despues,
+              'campo'               => $campos[$campoDb],
+              'tipo'                => $logBitacora,
+            );
+          }
         }
       }
     }
@@ -3993,6 +4027,11 @@ class bascula_model extends CI_Model {
       $sql .= " AND ba.id_bascula = {$_GET['boletaId']}";
     }
 
+    if (isset($_GET['folio']) && $_GET['folio'])
+    {
+      $sql .= " AND ba.folio = {$_GET['folio']}";
+    }
+
     $query = $this->db->query(
       "SELECT ba.id_bascula,
               ba.folio,
@@ -4015,7 +4054,7 @@ class bascula_model extends CI_Model {
        INNER JOIN empresas em ON em.id_empresa = ba.id_empresa
        INNER JOIN areas ar ON ar.id_area = ba.id_area
        WHERE 1=1 {$sql} {$sql2}
-       ORDER BY bb.id_bascula, bb.fecha, bb.no_edicion
+       ORDER BY bb.id_bascula, bb.id, bb.fecha, bb.no_edicion
     ");
 
     return $query->result();

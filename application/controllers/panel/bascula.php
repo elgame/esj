@@ -172,7 +172,7 @@ class bascula extends MY_Controller {
     {
       $this->load->model('bascula_model');
 
-      $log = false;
+      $log = true;
       $authId = false;
       if (isset($_POST['autorizar']))
       {
@@ -2320,25 +2320,14 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
 
-    $fechaPago = $this->db->query(
-      "SELECT fecha_pago
-       FROM bascula
-       WHERE id_bascula = {$_GET['idb']}"
-    )->row()->fecha_pago;
-
-    if ($fechaPago !== null)
-    {
-      $this->bascula_model->logBitacora(
-        true,
-        $_GET['idb'],
-        array('accion' => 'p'),
-        $this->session->userdata['id_usuario'],
-        null,
-        false
-      );
-    }
+    // $fechaPago = $this->db->query(
+    //   "SELECT fecha_pago
+    //    FROM bascula
+    //    WHERE id_bascula = {$_GET['idb']}"
+    // )->row()->fecha_pago;
 
     $this->bascula_model->pagarBoleta($_GET['idb']);
+
     echo json_encode(array('passes' => true));
   }
 

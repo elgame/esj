@@ -324,3 +324,7 @@
   width: 80%;
   left: 25%;
 }
+
+.cursorp {
+  cursor: pointer !important;
+}

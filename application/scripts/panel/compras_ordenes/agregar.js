@@ -22,6 +22,7 @@
     eventKeyUpCantPrecio();
     eventOnChangeTraslado();
     eventBtnDelProducto();
+    eventBtnListaActivos();
     eventCheckboxProducto();
     eventOnChangePresentacionTable();
     eventOnChangeTipoOrden();
@@ -828,6 +829,7 @@
           $fpresentacion = $('#fpresentacion'),
           $funidad       = $('#funidad'),
           $fieps         = $('#fieps'),
+          $ieps_sub      = $('#iepsSub'),
           $ftipo_moneda  = $('#ftipo_moneda'),
           $ftipo_cambio  = $('#ftipo_cambio'),
           $ftraslado     = $('#ftraslado'),
@@ -899,11 +901,14 @@
           'concepto': $fconcepto.val(),
           'id': $fconceptoId.val(),
           'cantidad': $fcantidad.val(),
+          'piezas': 0,
           'precio_unitario': $fprecio.val(),
           'presentacion': selectHtml,
           'presentacionCantidad': $fpresentacion.find('option:selected').attr('data-cantidad') || '',
           'unidad': $funidad.find('option:selected').val(),
           'ieps': $fieps.val(),
+          'ieps_sub': $ieps_sub.val(),
+          'isr': 0,
           'traslado': $ftraslado.find('option:selected').val(),
           'tipo_moneda': $ftipo_moneda.val(),
           'tipo_cambio': $ftipo_cambio.val(),
@@ -973,6 +978,18 @@
       $parent.remove();
 
       calculaTotal();
+    });
+  };
+
+  var eventBtnListaActivos = function () {
+    $('#productos').on('click', "#btnListActivos", function(event) {
+      var $this = $(this), $parent = $this.parents("div:first");
+      if ($parent.find(".popover").is(":hidden")){
+        $parent.find(".popover").show(80);
+        $parent.find('.clsActivos').focus();
+      }
+      else
+        $parent.find(".popover").hide(80);
     });
   };
 
@@ -1114,6 +1131,7 @@
                   '</td>' +
                   '<td style="width: 120px;">' +
                       '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
+                      ' | <input type="number" step="any" name="piezas[]" value="'+producto.piezas+'" id="piezas" class="span12 vpositive" min="0">' +
                   '</td>' +
                   '<td style="width: 120px;">' +
                       '<input type="number" name="faltantes[]" value="0" id="faltantes" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
@@ -1133,6 +1151,7 @@
                   '<td style="width: 66px;">' +
                       '<input type="text" name="iepsPorcent[]" value="'+(producto.ieps || 0)+'" id="iepsPorcent" class="span12">' +
                       '<input type="hidden" name="iepsTotal[]" value="0" id="iepsTotal" class="span12">' +
+                      '<input type="hidden" name="iepsSub[]" value="'+(producto['ieps_sub']? producto['ieps_sub']: 'f')+'" id="iepsSub" class="span12">' +
                   '</td>' +
                   '<td style="width: 66px;">'+
                       '<select name="ret_iva[]" id="ret_iva" class="span12">'+
@@ -1143,11 +1162,11 @@
                         '<option value="6" '+(producto.ret_iva === '6' ? "selected" : "")+'>6 %</option>'+
                         '<option value="8" '+(producto.ret_iva === '8' ? "selected" : "")+'>8 %</option>'+
                       '</select>'+
-                      '<input type="text" name="retTotal[]" value="0" id="retTotal" class="span12" readonly>'+
+                      '<input type="hidden" name="retTotal[]" value="0" id="retTotal" class="span12" readonly>'+
                   '</td>'+
                   '<td style="width: 66px;">'+
                       '<input type="text" name="ret_isrPorcent[]" value="'+(producto.ret_isr || 0)+'" id="ret_isrPorcent" class="span12 vpositive">'+
-                      '<input type="text" name="ret_isrTotal[]" value="0" id="ret_isrTotal" class="span12">'+
+                      '<input type="hidden" name="ret_isrTotal[]" value="0" id="ret_isrTotal" class="span12">'+
                   '</td>'+
                   '<td>' +
                     '<span>'+util.darFormatoNum('0')+'</span>' +
@@ -1287,11 +1306,17 @@
         $ieps         = $tr.find('#iepsPorcent'), // Input hidden iva total
         $iepsTotal    = $tr.find('#iepsTotal'), // Input hidden iva total
         $faltantes    = $tr.find('#faltantes'),
+        $iepsSub      = $tr.find('#iepsSub'),
 
         totalImporte = util.trunc2Dec( ( parseFloat($cantidad.val() || 0) - parseFloat($faltantes.val() || 0) ) * parseFloat($precio_uni.val() || 0)),
-        totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
-        totalIeps    = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100),
-        totalRet     = util.trunc2Dec(totalImporte * (parseFloat($ret_iva.find('option:selected').val()) / 100) ),
+        totalIeps    = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100);
+        console.log('iva con el ieps', $iepsSub.val());
+        if($iepsSub.val() == 't') {
+          totalIva = util.trunc2Dec(((totalImporte+totalIeps) * parseFloat($iva.find('option:selected').val())) / 100);
+        } else {
+          totalIva = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100);
+        }
+        var totalRet     = util.trunc2Dec(totalImporte * (parseFloat($ret_iva.find('option:selected').val()) / 100) ),
         totalRetIsr  = util.trunc2Dec(totalImporte * (parseFloat($ret_isrPorcent.val()) / 100) ),
         total        = util.trunc2Dec(totalImporte + totalIva + totalIeps);
 

@@ -954,6 +954,11 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       $sql .= " AND u.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
+    $anioVaca = 2022;
+    if(date("Y") >= 2023) {
+      $anioVaca = date("Y");
+    }
+
     $facturas = $this->db->query(
     "SELECT
         id, COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre as nombre,
@@ -962,7 +967,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
         u.nacionalidad, u.estado_civil, u.cuenta_cpi, u.salario_diario, u.infonavit, u.salario_diario_real, u.fecha_imss, u.telefono,
         u.id_departamente, ud.nombre AS departamento, Date(u.fecha_nacimiento) AS fecha_nacimiento,
         (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) AS antiguedad, up.nombre AS puesto,
-        (SELECT dias FROM nomina_configuracion_vacaciones WHERE (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) >= anio1 AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) <= anio2 ) AS dias_vacaciones
+        (SELECT dias FROM nomina_configuracion_vacaciones WHERE anio = {$anioVaca} AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) >= anio1 AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) <= anio2 ) AS dias_vacaciones
       FROM usuarios AS u
         INNER JOIN usuarios_departamento ud ON u.id_departamente = ud.id_departamento
         LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
@@ -1430,6 +1435,40 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     }
   }
 
+  public function importNomina($filtros)
+  {
+    $this->load->model('nomina_trabajos2_model');
+    $data = $this->nomina_trabajos2_model->totalesXTrabajador($filtros);
+
+    foreach ($data as $key => $value) {
+      if (!empty($value->id_reg)) {
+        $this->db->update('nomina_fiscal_monto_real', [
+          'id_empleado'     => $value->id_usuario,
+          'id_empresa'      => $value->id_empresa,
+          'anio'            => $value->anio,
+          'semana'          => $value->semana,
+          'dias_trabajados' => 0,
+          'monto'           => $value->importe,
+          'bono'            => 0,
+        ], "id_empleado = {$value->id_usuario} AND id_empresa = {$value->id_empresa} AND anio = {$value->anio} AND semana = {$value->semana}");
+      } else {
+        $this->db->insert('nomina_fiscal_monto_real', [
+          'id_empleado'     => $value->id_usuario,
+          'id_empresa'      => $value->id_empresa,
+          'anio'            => $value->anio,
+          'semana'          => $value->semana,
+          'dias_trabajados' => 0,
+          'monto'           => $value->importe,
+          'bono'            => 0,
+        ]);
+      }
+    }
+
+    $val_res = ['error' => '550'];
+
+    return $val_res;
+  }
+
   public function importNominaCorina($semana)
   {
     $config['upload_path'] = APPPATH.'media/temp/';
@@ -1590,6 +1629,211 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       }
       exit;
     }
+  }
+
+  /**
+   * Reporte existencias por unidad
+   *
+   * @return
+   */
+  public function getRptAsistenciasData()
+  {
+    $sql_com = $sql_sal = $sql_req = $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+
+
+    $res = $this->db->query(
+      "SELECT u.id, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        Coalesce(faltas.faltas, 0) AS faltas, Coalesce(inca.inca, 0) AS inca,
+        (extract(days from (timestamp '{$_GET['ffecha2']}' - timestamp '{$_GET['ffecha1']}')) + 1 - Coalesce(faltas.faltas, 0) - Coalesce(inca.inca, 0)) AS asistencias
+      FROM usuarios u
+        LEFT JOIN (
+          SELECT u.id, Count(nf.id_asistencia) AS faltas
+          FROM nomina_asistencia nf
+            INNER JOIN usuarios u ON u.id = nf.id_usuario
+          WHERE Date(nf.fecha_ini) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            AND u.id_empresa = {$_GET['did_empresa']} AND nf.tipo = 'f'
+          GROUP BY u.id
+        ) AS faltas ON u.id = faltas.id
+        LEFT JOIN (
+          SELECT u.id, Count(nf.id_asistencia) AS inca
+          FROM nomina_asistencia nf
+            INNER JOIN usuarios u ON u.id = nf.id_usuario
+          WHERE Date(nf.fecha_ini) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            AND u.id_empresa = {$_GET['did_empresa']} AND nf.tipo = 'in'
+          GROUP BY u.id
+        ) AS inca ON u.id = inca.id
+      WHERE u.user_nomina = 't' AND u.status = 't' AND u.id_empresa = {$_GET['did_empresa']}
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptAsistenciasPdf(){
+    $res = $this->getRptAsistenciasData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte de Asistencia';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'R', 'R', 'R', 'R');
+    $widths = array(15, 80, 30, 30, 30, 25, 25);
+    $header = array('No', 'Trabajador', 'Asistencias', 'Faltas', 'Incapacidades');
+
+    $familia = '';
+    $totales = array(0,0,0);
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $totales[0] += $item->asistencias;
+      $totales[1] += $item->faltas;
+      $totales[2] += $item->inca;
+
+      $datos = array(
+        $item->id,
+        $item->empleado,
+        MyString::formatoNumero($item->asistencias, 2, '', false),
+        MyString::formatoNumero($item->faltas, 2, '', false),
+        MyString::formatoNumero($item->inca, 2, '', false),
+        );
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row(array('','',
+      MyString::formatoNumero($totales[0], 2, '', false),
+      MyString::formatoNumero($totales[1], 2, '', false),
+      MyString::formatoNumero($totales[2], 2, '', false),
+      ), true, false);
+
+    $pdf->Output('rpt_asistencias.pdf', 'I');
+  }
+  public function getRptAsistenciasXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=rpt_asistencias.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptAsistenciasData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Asistencia';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $header = array('No', 'Trabajador', 'Asistencias', 'Faltas', 'Incapacidades');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">No</td>
+          <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Trabajador</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Asistencias</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Faltas</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Incapacidades</td>
+        </tr>';
+
+    $totales = array(0,0,0);
+    foreach($res as $key => $item){
+
+      $totales[0] += $item->asistencias;
+      $totales[1] += $item->faltas;
+      $totales[2] += $item->inca;
+
+      $html .= '<tr>
+              <td style="width:100px;border:1px solid #000;">'.$item->id.'</td>
+              <td style="width:300px;border:1px solid #000;">'.$item->empleado.'</td>
+              <td style="width:200px;border:1px solid #000;">'.MyString::formatoNumero($item->asistencias, 2, '', false).'</td>
+              <td style="width:200px;border:1px solid #000;">'.MyString::formatoNumero($item->faltas, 2, '', false).'</td>
+              <td style="width:200px;border:1px solid #000;">'.MyString::formatoNumero($item->inca, 2, '', false).'</td>
+            </tr>';
+    }
+
+    $html .= '
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">Totales</td>
+              <td style="border:1px solid #000;">'.$totales[0].'</td>
+              <td style="border:1px solid #000;">'.$totales[1].'</td>
+              <td style="border:1px solid #000;">'.$totales[2].'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
   }
 
 }

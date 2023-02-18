@@ -490,7 +490,10 @@ class Usuarios_model extends privilegios_model {
 
   public function changeEmpresaSel($empresa)
   {
+    $this->load->model('empresas_model');
+    $data = $this->empresas_model->getInfoEmpresa($empresa, true);
     $this->session->set_userdata('selempresa', $empresa);
+    $this->session->set_userdata('selempresaname', $data['info']->nombre_fiscal);
     return true;
   }
 
@@ -513,6 +516,8 @@ class Usuarios_model extends privilegios_model {
           'nombre'     => $fun_res[0]->nombre,
           'email'      => $fun_res[0]->email,
           'tipo'       => $fun_res[0]->tipo,
+          'selempresa'  => 2,
+          'selempresaname'  => 'EMPAQUE SAN JORGE',
 					'idunico' => uniqid('l', true));
 				$this->crea_session($user_data);
 		}
@@ -562,7 +567,13 @@ class Usuarios_model extends privilegios_model {
    * Obtiene el listado de empresas para usar en peticiones Ajax.
    */
   public function getUsuariosAjax(){
-    $sql = "";
+    $sql = "(
+        lower(nombre || ' ' || apellido_paterno || ' ' || apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+      )";
+    if (is_numeric($this->input->get('term'))) {
+      $sql = "id = ".trim($_GET['term']);
+    }
+
     if($this->input->get('empleados')!='')
       $sql .= " AND user_nomina = 't'";
     if($this->input->get('did_empresa')!='')
@@ -582,11 +593,7 @@ class Usuarios_model extends privilegios_model {
         "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, salario_diario,
                 DATE(fecha_entrada) as fecha_entrada, DATE(fecha_salida) as fecha_salida, esta_asegurado
         FROM usuarios
-        WHERE
-              (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-               lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-               lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')
-          {$sql}
+        WHERE {$sql}
         ORDER BY nombre ASC
         LIMIT 20");
 

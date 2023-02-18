@@ -125,6 +125,20 @@ $(function(){
     console.log(linkDownXls.attr('href'));
   });
 
+  $('#formasis').on('submit', function(event) {
+    alert('');
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          ffecha2: $("#ffecha2").val(),
+          did_empresa: $("#did_empresa").val(),
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
 });
 
 function cargaListaFamlias ($empresaId) {

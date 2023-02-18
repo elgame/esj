@@ -6,7 +6,7 @@
         <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
       </li>
       <li>
-        <a href="<?php echo base_url('panel/labores_codigo/'); ?>">Categorias</a> <span class="divider">/</span>
+        <a href="<?php echo base_url('panel/labores_codigo/'); ?>">Labores</a> <span class="divider">/</span>
       </li>
       <li>Moficiar</li>
     </ul>
@@ -53,6 +53,19 @@
                   </div>
                 </div>
               </div><!--/control-group -->
+
+              <div class="control-group">
+                <label class="control-label" for="departamento">Area</label>
+                <div class="controls">
+                  <select name="departamento" id="departamento" class="span11">
+                    <option value=""></option>
+                    <?php foreach ($areas as $key => $value): ?>
+                    <option value="<?php echo $value->nombre ?>"
+                      <?php echo set_select('departamento', $categoria['info'][0]->departamento, ($value->nombre == $categoria['info'][0]->departamento)); ?>><?php echo $value->nombre ?></option>
+                    <?php endforeach ?>
+                  </select>
+                </div>
+              </div>
 
             </div>
 

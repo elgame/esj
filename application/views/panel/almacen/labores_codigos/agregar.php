@@ -54,6 +54,19 @@
                 </div>
               </div><!--/control-group -->
 
+              <div class="control-group">
+                <label class="control-label" for="departamento">Area</label>
+                <div class="controls">
+                  <select name="departamento" id="departamento" class="span11">
+                    <option value=""></option>
+                    <?php foreach ($areas as $key => $value): ?>
+                      <?php echo ($value->nombre == $this->input->post('departamento')) ?>
+                    <option value="<?php echo $value->nombre ?>" <?php echo set_select('departamento', $value->nombre, false, $this->input->post('departamento')); ?>><?php echo $value->nombre ?></option>
+                    <?php endforeach ?>
+                  </select>
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">

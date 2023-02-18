@@ -41,7 +41,9 @@ class facturacion extends MY_Controller {
     'facturacion/descarga_masiva/',
     'facturacion/nomina/',
 
-    'facturacion/getRemisiones/'
+    'facturacion/getRemisiones/',
+    'facturacion/notas_credito_pdf/',
+
   );
 
   public function _remap($method)
@@ -117,6 +119,10 @@ class facturacion extends MY_Controller {
     $this->load->view('panel/facturacion/admin_nc',$params);
     $this->load->view('panel/footer',$params);
   }
+  public function notas_credito_pdf(){
+    $this->load->model('facturacion2_model');
+    $this->facturacion2_model->notasCreditosPdf();
+  }
 
   public function pago_parcialidad()
   {
@@ -169,6 +175,7 @@ class facturacion extends MY_Controller {
         array('bootstrap/bootstrap-tab.js'),
         array('bootstrap/bootstrap-tooltip.js'),
         array('libs/jquery.numeric.js'),
+        array('libs/jquery.filtertable.min.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
         array('panel/facturacion/gastos_productos.js'),
@@ -408,12 +415,14 @@ class facturacion extends MY_Controller {
     $formaPago         = new FormaPago();
     $usoCfdi           = new UsoCfdi();
     $tipoDeComprobante = new TipoDeComprobante();
+    $tipoRelacion      = new TipoRelacion();
     // $monedas           = new Monedas();
 
     $params['metodosPago']       = $metodosPago->get()->all();
     $params['formaPago']         = $formaPago->get()->all();
     $params['usoCfdi']           = $usoCfdi->get()->all();
     $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
+    $params['tipoRelacion']      = $tipoRelacion->get()->all();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -594,7 +603,7 @@ class facturacion extends MY_Controller {
     $callback_isValidDate      = 'callback_isValidDate';
     $callback_val_total        = 'callback_val_total';
     $callback_chk_cer_caduca   = 'callback_chk_cer_caduca';
-    if ($borrador)
+    if ($borrador || true)
     {
       // $callback_seriefolio_check = '';
       $callback_isValidDate      = '';
@@ -626,6 +635,9 @@ class facturacion extends MY_Controller {
 
         array('field'   => 'cfdiRelPrev',
               'label'   => 'CFDIREl',
+              'rules'   => ''),
+        array('field'   => 'cfdiRelPrevTipo',
+              'label'   => 'CFDI Rel Prev',
               'rules'   => ''),
 
         array('field'   => 'dfecha',
@@ -789,6 +801,9 @@ class facturacion extends MY_Controller {
         array('field'   => 'dno_trazabilidad',
               'label'   => 'No Trazabilidad',
               'rules'   => 'max_length[15]|callback_check_trazabilidad'),
+        array('field'   => 'dorden_compra',
+              'label'   => 'Orden de compra',
+              'rules'   => 'max_length[50]'),
 
         array('field'   => 'remitente_nombre',
               'label'   => 'Nombre Remitente',

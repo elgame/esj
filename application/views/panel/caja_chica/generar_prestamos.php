@@ -99,6 +99,7 @@
 
                   <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
                     <div class="span4"><a href="<?php echo base_url('panel/caja_chica_prest/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span3"><a href="<?php echo base_url('panel/caja_chica_prest/xls_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Excel</a></div>
                   <?php }  ?>
                 </div>
               </div>
@@ -166,6 +167,133 @@
                     </div>
                     <!--/ Deudores diversos -->
 
+                    <?php
+                    $totalTraspasos = 0;
+                    if (true): ?>
+                    <!-- Traspasos -->
+                    <div class="row-fluid" style="margin-top: 5px;">
+                      <div class="span12">
+                        <div class="row-fluid">
+                          <div class="span12">
+                            <div class="row-fluid">
+                              <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                              <div class="row-fluid">
+                                <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                                  <table class="table table-striped table-bordered table-hover table-condensed" id="table-traspasos">
+                                    <thead>
+                                      <tr>
+                                        <th colspan="2">TRASPASOS
+                                          <?php if (($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '6')): ?>
+                                          <!-- <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button> -->
+                                          <?php endif ?>
+                                        </th>
+                                        <th colspan="2"></th>
+                                        <th colspan="2">IMPORTE</th>
+                                      </tr>
+                                      <tr>
+                                        <th style="width: 15%;">TRASPASAR A</th>
+                                        <th style="width: 15%;">TIPO</th>
+                                        <th style="width: 15%;" title="Afectar el fondo de la caja">AF. FONDO</th>
+                                        <th style="width: 37%;">CONCEPTO</th>
+                                        <th style="width: 15%;">CARGO</th>
+                                        <th style="width: 3%;"></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php
+                                        if (isset($_POST['traspaso_concepto'])) {
+                                          foreach ($_POST['traspaso_concepto'] as $key => $concepto) {
+                                            $totalTraspasos += ($_POST['traspaso_tipo'][$key] == 't'? 1: -1) * floatval($_POST['traspaso_importe'][$key]); ?>
+                                          <tr>
+                                            <td>
+                                              <!-- <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                                <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
+                                                <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
+                                              </select> -->
+                                              <select name="traspaso_tipo[]" class="span12 traspaso_tipo">
+                                                <option value="otros" <?php echo $_POST['traspaso_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
+                                                <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
+                                                <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                                <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
+                                                <option value="caja_plasticos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_plasticos'? 'selected': ''; ?>>Caja Plasticos Gdl</option>
+                                                <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                                <option value="caja_prestamo" <?php echo $_POST['traspaso_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Caja Préstamo</option>
+                                              </select>
+                                              <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
+                                              <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                              <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">
+                                                <option value="f" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 'f' ? 'selected' : '' ?>>No</option>
+                                                <option value="t" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 't' ? 'selected' : '' ?>>Si</option>
+                                              </select>
+                                            </td>
+                                            <td style="">
+                                              <input type="text" name="traspaso_concepto[]" value="<?php echo $_POST['traspaso_concepto'][$key] ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                            </td>
+                                            <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $_POST['traspaso_importe'][$key] ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
+                                            <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                          </tr>
+                                      <?php }} else {
+                                        if (isset($caja['traspasos']))
+                                        foreach ($caja['traspasos'] as $traspaso) {
+                                          $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+                                        ?>
+                                        <tr>
+                                          <td>
+                                            <?php echo ucfirst(str_replace('_', ' ', $traspaso->tipo_caja)); ?>
+                                            <input type="hidden" name="traspaso_tipo[]" value="<?php echo $traspaso->tipo_caja ?>">
+                                            <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
+                                            <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                            <a href="<?php echo base_url('panel/caja_chica/print_vale_tras/?id_traspaso='.$traspaso->id_traspaso.'&noCaja='.$traspaso->no_caja)?>" target="_blank" title="Imprimir Gasto comprobar">
+                                              <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                          </td>
+                                          <td><?php echo $traspaso->tipo == 't' ? 'Ingreso' : 'Egreso' ?></td>
+                                          <td>
+                                            <?php echo $traspaso->afectar_fondo == 't' ? 'Si' : 'No'; ?>
+                                            <input type="hidden" name="traspaso_afectar_fondo[]" value="<?php echo $traspaso->afectar_fondo ?>">
+                                          </td>
+                                          <td style="">
+                                            <?php if ($traspaso->guardado == 't'): ?>
+                                            <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                            <?php else: ?>
+                                              <input type="hidden" name="traspaso_concepto[]" value="-@-" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                              <?php echo $traspaso->concepto." (Traspasado de caja No {$traspaso->no_caja})" ?>
+                                            <?php endif ?>
+                                          </td>
+                                          <td style="width: 60px;">
+                                            <?php if ($traspaso->guardado == 't'): ?>
+                                            <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>>
+                                            <?php else: ?>
+                                              <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>>
+                                              <?php echo $traspaso->monto ?>
+                                            <?php endif ?>
+                                          </td>
+                                          <td style="width: 30px;">
+                                            <?php if ($traspaso->guardado == 't'): ?>
+                                            <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                            <?php endif ?>
+                                          </td>
+                                        </tr>
+                                      <?php }} ?>
+                                      <tr class="row-total">
+                                        <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                        <td><input type="text" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                                        <td colspan="3"></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Traspasos -->
+                    <?php endif ?>
+
                     <!-- Prestamos largo plazo -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
@@ -179,6 +307,7 @@
                               <th colspan="1">IMPORTE</th>
                             </tr>
                             <tr>
+                              <th>FOLIO</th>
                               <th>EMPRESA</th>
                               <th>TRABAJADOR</th>
                               <th>FECHA</th>
@@ -238,12 +367,13 @@
                                         $tipoo = $prestamo->tipo;
                             ?>
                                     <tr>
-                                      <td colspan="10"><strong><?php echo $tipo ?></strong></td>
+                                      <td colspan="11"><strong><?php echo $tipo ?></strong></td>
                                     </tr>
                             <?php
                                       }
                             ?>
                                     <tr>
+                                      <td><?php echo $prestamo->id_prestamo_nom ?></td>
                                       <td><?php echo $prestamo->categoria ?>
                                         <a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->id_prestamo_nom)?>" target="_blank" title="Imprimir vale prestamo">
                                           <i class="ico icon-print" style="cursor:pointer"></i></a>
@@ -273,28 +403,28 @@
                                     </tr>
                             <?php } ?>
                                   <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">SUMAS</td>
+                                    <td colspan="6" style="text-align: right; font-weight: bolder;">SUMAS</td>
                                     <td><?php echo $totalpreslp_salini ?></td>
                                     <td><?php echo $totalpreslp_pago_dia ?></td>
                                     <td colspan="2"></td>
                                     <td><?php echo $totalpreslp_salfin ?></td>
                                   </tr>
                                   <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Fiscal</td>
+                                    <td colspan="6" style="text-align: right; font-weight: bolder;">Fiscal</td>
                                     <td><?php echo $totalpreslp_salini_fi ?></td>
                                     <td><?php echo $totalpreslp_pago_dia_fi ?></td>
                                     <td colspan="2"></td>
                                     <td><?php echo $totalpreslp_salfin_fi ?></td>
                                   </tr>
                                   <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Efectivo</td>
+                                    <td colspan="6" style="text-align: right; font-weight: bolder;">Efectivo</td>
                                     <td><?php echo $totalpreslp_salini_ef ?></td>
                                     <td><?php echo $totalpreslp_pago_dia_ef ?></td>
                                     <td colspan="2"></td>
                                     <td><?php echo $totalpreslp_salfin_ef ?></td>
                                   </tr>
                                   <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Efectivo Fijo</td>
+                                    <td colspan="6" style="text-align: right; font-weight: bolder;">Efectivo Fijo</td>
                                     <td><?php echo $totalpreslp_salini_efd ?></td>
                                     <td><?php echo $totalpreslp_pago_dia_efd ?></td>
                                     <td colspan="2"></td>
@@ -302,19 +432,19 @@
                                   </tr>
 
                                   <tr class="row-total">
-                                    <td colspan="10"><strong>Recuperar Efectivo Fijo</strong></td>
+                                    <td colspan="11"><strong>Recuperar Efectivo Fijo</strong></td>
                                   </tr>
                                   <tr class="row-total">
                                     <td><strong>Saldo Anterior</strong></td>
                                     <td><?php echo $caja['saldo_prest_fijo'] ?></td>
-                                    <td colspan="8"></td>
+                                    <td colspan="9"></td>
                                   </tr>
                             <?php
                               $total_prestamos_recuperar = 0;
                               if (count($totalpreslp_ef_rec) > 0) {
                             ?>
                                 <tr class="row-total">
-                                  <td colspan="10"><strong>Cobro Prestamos Fijos</strong></td>
+                                  <td colspan="11"><strong>Cobro Prestamos Fijos</strong></td>
                                 </tr>
                             <?php
                                 foreach ($totalpreslp_ef_rec as $key => $value) {
@@ -324,7 +454,7 @@
                                 <tr class="row-total">
                                   <td><?php echo $key ?></td>
                                   <td><?php echo $value ?></td>
-                                  <td colspan="8"></td>
+                                  <td colspan="9"></td>
                                 </tr>
                             <?php
                                   }
@@ -333,14 +463,14 @@
                             ?>
                             <tr class="row-total">
                               <td><strong>Traspasos</strong></td>
-                              <td><?php echo $caja['traspasos'] ?></td>
-                              <td colspan="8"></td>
+                              <td><?php echo $totalTraspasos ?></td>
+                              <td colspan="9"></td>
                             </tr>
                             <tr class="row-total">
                               <td><strong>Saldo</strong></td>
-                              <td><?php echo $caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos'] ?></td>
-                              <td colspan="8">
-                                <input type="hidden" name="saldo_prest_fijo" value="<?php echo $caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos'] ?>">
+                              <td><?php echo $caja['saldo_prest_fijo']+$total_prestamos_recuperar-$totalTraspasos ?></td>
+                              <td colspan="9">
+                                <input type="hidden" name="saldo_prest_fijo" value="<?php echo $caja['saldo_prest_fijo']+$total_prestamos_recuperar-$totalTraspasos ?>">
                               </td>
                             </tr>
                           </tbody>
@@ -568,13 +698,14 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-prestamolp">
                           <thead>
                             <tr>
-                              <th colspan="9">DESCUENTO DE MATERIALES Y/O HERRAMIENTAS
+                              <th colspan="10">DESCUENTO DE MATERIALES Y/O HERRAMIENTAS
                                 <!-- <button type="button" class="btn btn-success" id="btn-add-prestamo" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
                                 <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
                               </th>
                               <th colspan="1">IMPORTE</th>
                             </tr>
                             <tr>
+                              <th>FOLIO</th>
                               <th>EMPRESA</th>
                               <th>TRABAJADOR</th>
                               <th>FECHA</th>
@@ -634,12 +765,13 @@
                                         $tipoo = $prestamo->tipo;
                             ?>
                                     <tr>
-                                      <td colspan="10"><strong><?php echo $tipo ?></strong></td>
+                                      <td colspan="11"><strong><?php echo $tipo ?></strong></td>
                                     </tr>
                             <?php
                                       }
                             ?>
                                     <tr>
+                                      <td><?php echo $prestamo->id_prestamo_nom ?></td>
                                       <td><?php echo $prestamo->categoria ?>
                                         <a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->id_prestamo_nom."&herr=1")?>" target="_blank" title="Imprimir vale prestamo">
                                           <i class="ico icon-print" style="cursor:pointer"></i></a>
@@ -669,7 +801,7 @@
                                     </tr>
                             <?php } ?>
                                 <tr class="row-total">
-                                  <td colspan="5" style="text-align: right; font-weight: bolder;">Suma</td>
+                                  <td colspan="6" style="text-align: right; font-weight: bolder;">Suma</td>
                                   <td><?php echo $totalpreslp_salini_fi ?></td>
                                   <td><?php echo $totalpreslp_pago_dia_fi ?></td>
                                   <td colspan="2"></td>

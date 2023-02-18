@@ -55,8 +55,9 @@
                   } ?>
                   </select>
                   <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=banamex&tipo=ba&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBanamex" class="btn"><i class="icon-download-alt"></i> Banamex</a>
-                  <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=banamex&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadInterban" class="btn"><i class="icon-download-alt"></i> Interbancarios</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=banamex&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadInterban" class="btn"><i class="icon-download-alt"></i> Banamex Interb</a>
                   <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=bajio&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBajio" class="btn hide"><i class="icon-download-alt"></i> Bajio</a>
+                  <input type="number" name="bajioCount" id="bajioCount" value="" placeholder="Numeracion archivo">
                   <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=bancomer&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBancomer" class="btn hide"><i class="icon-download-alt"></i> Bancomer</a>
                   | <input type="date" name="fechaAplicacion" id="fechaAplicacion" value="<?php echo date("Y-m-d"); ?>" placeholder="fecha Aplicacion">
                   <a href="<?php echo base_url('panel/banco_pagos/aplica_pagos_bascula/?cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="aplicarPagos" class="btn"

@@ -9,6 +9,18 @@ class nomina_trabajos2 extends MY_Controller {
     'nomina_trabajos2/ajax_save/',
     'nomina_trabajos2/ajax_del/',
     'nomina_trabajos2/nomina_fiscal_ticket/',
+
+    'nomina_trabajos2/rpt_costo_labores_pdf/',
+    'nomina_trabajos2/rpt_costo_labores_xls/',
+    'nomina_trabajos2/rpt_costo_labores_desg_pdf/',
+    'nomina_trabajos2/rpt_costo_labores_desg_xls/',
+
+    'nomina_trabajos2/rpt_prenomina_pdf/',
+
+    'nomina_trabajos2/rpt_auditoria_costos/',
+    'nomina_trabajos2/rpt_auditoria_costos_pdf/',
+    'nomina_trabajos2/rpt_auditoria_costos_xls/',
+
   );
 
   public function _remap($method)
@@ -60,6 +72,7 @@ class nomina_trabajos2 extends MY_Controller {
       'semana'    => '',
       'anio'      => date("Y"),
       'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
+      'buscar'    => isset($_GET['buscar']) ? $_GET['buscar'] : '',
     );
 
     $_GET['anio'] = $filtros['anio'];
@@ -75,7 +88,11 @@ class nomina_trabajos2 extends MY_Controller {
     $filtros['dia_inicia_semana'] = $dia;
 
     $semana = MyString::obtenerSemanaDeFecha($params['fecha'], $filtros['dia_inicia_semana']);
-    $params['filtros'] = array_merge($filtros, $semana);
+    if ($semana) {
+      $params['filtros'] = array_merge($filtros, $semana);
+    } else {
+      redirect(base_url('panel/nomina_trabajos2/?msg=10'));
+    }
 
     $params['tareas_dia'] = $this->nomina_trabajos2_model->getActividades($params['fecha'], $filtros['empresaId'], $params['filtros']);
 
@@ -109,10 +126,139 @@ class nomina_trabajos2 extends MY_Controller {
 
   public function nomina_fiscal_ticket()
   {
-    if (isset($_GET['semana']) && isset($_GET['empresaId']) && isset($_GET['anio'])) {
+    if (isset($_GET['semana']) && isset($_GET['empresaId']) && isset($_GET['anio']) && isset($_GET['fregistro_patronal'])) {
       $this->load->model('nomina_trabajos2_model');
-      $this->nomina_trabajos2_model->ticketNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+      $this->nomina_trabajos2_model->ticketNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['fregistro_patronal'], $_GET['anio']);
     }
+  }
+
+  public function rpt_costo_labores()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_costo_labores.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Costos por Labor');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_costo_labores',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_costo_labores_pdf(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoLaboresPdf();
+  }
+  public function rpt_costo_labores_xls(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoLaboresXls();
+  }
+  public function rpt_costo_labores_desg_pdf(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoLaboresDesglosadoPdf();
+  }
+  public function rpt_costo_labores_desg_xls(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoLaboresDesglosadoXls();
+  }
+
+  public function rpt_auditoria_costos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_costo_labores.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Auditoria de Costos');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_auditoria_costos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_auditoria_costos_xls(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptAuditoriaCostosXls();
+  }
+
+  public function rpt_prenomina()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_prenomina.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('nomina_fiscal_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Pre Nomina');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $empresaId = isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresa']->id_empresa;
+    $anio = isset($_GET['anio']) ? $_GET['anio'] : date("Y");
+
+    if ($empresaId !== '') {
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
+    } else {
+      $dia = '4';
+    }
+    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $anio);
+    $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes(null, 0, $dia);
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual[$params['tipoNomina']];
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($empresaId, true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_prenomina',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_prenomina_pdf(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptPreNominaPdf();
+  }
+  public function rpt_prenomina_xls(){
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptPreNominaXls();
   }
 
 
@@ -164,6 +310,10 @@ class nomina_trabajos2 extends MY_Controller {
         break;
       case 9:
         $txt = 'Favor de especificar una empresa para generar su nomina.';
+        $icono = 'error';
+        break;
+      case 10:
+        $txt = 'La fecha se sale del periodo actual.';
         $icono = 'error';
         break;
 

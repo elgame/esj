@@ -173,8 +173,8 @@ class rastreabilidad_paletas extends MY_Controller {
   public function remisionar()
   {
     $this->load->model('rastreabilidad_paletas_model');
-    $this->rastreabilidad_paletas_model->remisionarPapeleta($this->input->get('id'));
-    redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
+    $result = $this->rastreabilidad_paletas_model->remisionarPapeleta($this->input->get('id'));
+    redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg='.$result['msg']));
   }
 
   /**
@@ -238,6 +238,9 @@ class rastreabilidad_paletas extends MY_Controller {
       array('field' => 'tipo',
             'label' => 'Tipo',
             'rules' => 'required'),
+      array('field' => 'tipoNP',
+            'label' => 'TipoNP',
+            'rules' => ''),
       array('field' => 'fecha',
             'label' => 'Fecha',
             'rules' => 'required'),
@@ -276,9 +279,10 @@ class rastreabilidad_paletas extends MY_Controller {
       array('field' => 'prod_ddescripcion[]',
             'label' => 'Clasificacion',
             'rules' => ''),
+
       array('field' => 'prod_did_prod[]',
             'label' => 'Clasificacion',
-            'rules' => 'required|is_natural_no_zero'),
+            'rules' => 'required|is_natural_no_zero|callback_chkexporta'),
       array('field' => 'prod_dmedida[]',
             'label' => 'Medida',
             'rules' => ''),
@@ -312,6 +316,53 @@ class rastreabilidad_paletas extends MY_Controller {
     //   $this->form_validation->set_message('chkboleta', "La boleta {$_POST['boletasSalidasFolio']} ya esta registrada en otra paleta de salida, intenta con otra.");
     //   return false;
     // }else
+      return true;
+  }
+
+  public function chkexporta($ids_clasificacion)
+  {
+    $msgg = '';
+
+    $result = $this->db->query("SELECT id_area FROM bascula WHERE id_bascula = {$_POST['boletasSalidasId']} ")->row();
+
+    // limon, empaque y gubalu
+    if (isset($result->id_area) && $result->id_area == 2 &&
+      isset($_POST['empresaId']) && ($_POST['empresaId'] == 2 || $_POST['empresaId'] == 15)) {
+      if (count($_POST['prod_did_prod']) > 0) {
+        if ($_POST['tipo'] == 'lo' || $_POST['tipo'] == 'na') {
+          $idss = implode(',', $_POST['prod_did_prod']);
+          $classs = $this->db->query("SELECT Upper(nombre) AS nombre FROM clasificaciones WHERE id_clasificacion in({$idss})")->result();
+          foreach ($classs as $key => $clas) {
+            if (strpos($clas->nombre, 'CONVENCIONAL') === false) {
+              $msgg .= "No es una clasificacion CONVENCIONAL -> {$clas->nombre}<br \>";
+            }
+          }
+        } else { // exportacion
+          $tipo_val = $this->input->post('tipoNP') == 'si'? 'CONVENCIONAL': 'LIMON VERDE';
+          foreach ($_POST['pallets_id'] as $key => $value) {
+            if ($value > 0) {
+              $idss[] = $value;
+            }
+          }
+          $idss = implode(',', $idss);
+          $classs = $this->db->query("SELECT rp.folio, Upper(c.nombre) AS nombre
+            FROM rastria_pallets rp
+              INNER JOIN rastria_pallets_rendimiento rpr ON rp.id_pallet = rpr.id_pallet
+              INNER JOIN clasificaciones c ON c.id_clasificacion = rpr.id_clasificacion
+            WHERE rp.id_pallet in({$idss})")->result();
+          foreach ($classs as $key => $clas) {
+            if (strpos($clas->nombre, $tipo_val) === false) {
+              $msgg .= "Pallet: {$clas->folio}, No es una clasificacion de {$tipo_val} -> {$clas->nombre}<br \>";
+            }
+          }
+        }
+      }
+    }
+
+    if($msgg != ''){
+      $this->form_validation->set_message('chkexporta', $msgg);
+      return false;
+    }else
       return true;
   }
 
@@ -355,6 +406,10 @@ class rastreabilidad_paletas extends MY_Controller {
         break;
       case 8:
         $txt = 'La papeleta de salida se encuentra facturado, para eliminarlo primero tiene que cancelar la factura.';
+        $icono = 'error';
+        break;
+      case 9:
+        $txt = 'Se esta intentando remisionar exportación a un cliente diferente de SAN JORGE PRODUCE';
         $icono = 'error';
         break;
     }
