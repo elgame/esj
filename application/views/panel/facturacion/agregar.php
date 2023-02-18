@@ -352,7 +352,7 @@
                             '02' => 'Definitiva',
                             '03' => 'Temporal',
                           ];
-                          $exportacion = isset($borrador) ? $borrador['info']->cfdi_ext->exportacion : '02';
+                          $exportacion = isset($borrador) ? $borrador['info']->cfdi_ext->exportacion : '01';
                          ?>
                          <?php foreach ($exportacionCats as $key => $textt): ?>
                           <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('exportacion', $key, $exportacion === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>

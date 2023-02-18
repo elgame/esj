@@ -216,6 +216,30 @@
                     </div>
                   </div>
                   <?php }?>
+                  <?php
+                  if (!isset($borrador) || (isset($borrador) && $borrador['info']->version > 3.9)) {
+                  ?>
+                  <div class="control-group">
+                    <label class="control-label" for="exportacion">Exportación</label>
+                    <div class="controls">
+                      <select name="exportacion" class="span9" id="exportacion">
+
+                        <?php
+                          $exportacionCats = [
+                            '01' => 'No aplica',
+                            '02' => 'Definitiva',
+                            '03' => 'Temporal',
+                          ];
+                          $exportacion = isset($borrador) ? $borrador['info']->cfdi_ext->exportacion : '01';
+                         ?>
+                         <?php foreach ($exportacionCats as $key => $textt): ?>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('exportacion', $key, $exportacion === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>
+                         <?php endforeach ?>
+                      </select>
+                      <input type="hidden" name="exportacionText" id="exportacionText" value="<?php echo $exportacionCats[$exportacion] ?>">
+                    </div>
+                  </div>
+                  <?php }?>
 
                 <div class="control-group">
                   <div class="controls">
@@ -296,6 +320,22 @@
                                         <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo $_POST['prod_importe'][$k]?>" id="prod_importe">
                                       </td>
                                       <td>
+                                        <div class="btn-group">
+                                          <button type="button" class="btn impuestosEx">
+                                            <span class="caret"></span>
+                                          </button>
+                                          <ul class="dropdown-menu impuestosEx" style="width: 250px;">
+                                            <li class="clearfix">
+                                              <label class="pull-left">% IEPS:</label> <input type="number" step="any" name="dieps[]" value="<?php echo $_POST['dieps'][$k] ?>" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
+                                              <input type="hidden" name="dieps_total[]" value="<?php echo $_POST['dieps_total'][$k] ?>" id="dieps_total" class="span12">
+                                              <input type="hidden" name="prod_ieps_subtotal[]" value="<?php echo $_POST['prod_ieps_subtotal'][$k] ?>" id="prod_ieps_subtotal" class="span12">
+                                            </li>
+                                            <li class="clearfix">
+                                              <label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="<?php echo $_POST['disr'][$k] ?>" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                                              <input type="hidden" name="disr_total[]" value="<?php echo $_POST['disr_total'][$k] ?>" id="disr_total" class="span12">
+                                            </li>
+                                          </ul>
+                                        </div>
                                         <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
                                       </td>
                                     </tr>
@@ -348,7 +388,25 @@
                                       <td>
                                         <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">
                                       </td>
-                                      <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
+                                      <td>
+                                        <div class="btn-group">
+                                          <button type="button" class="btn impuestosEx">
+                                            <span class="caret"></span>
+                                          </button>
+                                          <ul class="dropdown-menu impuestosEx" style="width: 250px;">
+                                            <li class="clearfix">
+                                              <label class="pull-left">% IEPS:</label> <input type="number" step="any" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
+                                              <input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">
+                                              <input type="hidden" name="prod_ieps_subtotal[]" value="" id="prod_ieps_subtotal" class="span12">
+                                            </li>
+                                            <li class="clearfix">
+                                              <label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="0" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                                              <input type="hidden" name="disr_total[]" value="0" id="disr_total" class="span12">
+                                            </li>
+                                          </ul>
+                                        </div>
+                                        <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
+                                      </td>
                                     </tr>
                         <?php } ?>
                   </tbody>
@@ -368,7 +426,7 @@
                   </thead>
                   <tbody>
                     <tr>
-                      <td rowspan="7">
+                      <td rowspan="9">
                           <textarea name="dttotal_letra" rows="10" class="nokey" style="width:98%;max-width:98%;" id="total_letra"><?php echo set_value('dttotal_letra');?></textarea>
                       </td>
                     </tr>
@@ -391,6 +449,16 @@
                       <td>IVA</td>
                       <td id="iva-format"><?php echo MyString::formatoNumero(set_value('total_iva', 0))?></td>
                       <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', 0); ?>">
+                    </tr>
+                    <tr>
+                      <td>IEPS</td>
+                      <td id="ieps-format"><?php echo MyString::formatoNumero(set_value('total_ieps', isset($borrador) ? $borrador['info']->ieps : 0))?></td>
+                      <input type="hidden" name="total_ieps" id="total_ieps" value="<?php echo set_value('total_ieps', isset($borrador) ? $borrador['info']->ieps : 0); ?>">
+                    </tr>
+                    <tr>
+                      <td>Ret. Isr</td>
+                      <td id="isr-format"><?php echo MyString::formatoNumero(set_value('total_isr', isset($borrador) ? $borrador['info']->isr : 0))?></td>
+                      <input type="hidden" name="total_isr" id="total_isr" value="<?php echo set_value('total_isr', isset($borrador) ? $borrador['info']->isr : 0); ?>">
                     </tr>
                     <tr>
                       <td>Ret. IVA</td>
