@@ -265,6 +265,16 @@
                           </div>
                         </div>
                       </div>
+
+                      <div class="control-group" id="cultivosGrup">
+                        <label class="control-label" for="codigoArea">Codigo Area </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="codigoArea" class="span11 showCodigoAreaAuto" id="codigoArea" value="<?php echo set_value('codigoArea', isset($gasto['info']->codigo_area) ? $gasto['info']->codigo_area : '') ?>" placeholder="" disabled>
+                            <input type="hidden" name="codigoAreaId" id="codigoAreaId" value="<?php echo set_value('codigoAreaId', isset($gasto['info']->id_cat_codigos) ? $gasto['info']->id_cat_codigos : '') ?>">
+                          </div>
+                        </div>
+                      </div><!--/control-group -->
                     </div>
 
                     <div class="span6">

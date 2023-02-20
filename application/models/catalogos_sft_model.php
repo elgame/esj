@@ -956,7 +956,7 @@ class catalogos_sft_model extends CI_Model{
                 UNION ALL
                 SELECT
                   ca.id_cat_codigos AS id_area, ca.nombre, Date(c.fecha_factura) fecha_orden, (c.serie || c.folio) folio_orden,
-                  NULL fecha_compra, NULL folio_compra, c.concepto producto,
+                  NULL fecha_compra, NULL folio_compra, ((CASE WHEN c.intangible = 't' THEN '(Intangible) ' ELSE '' END) || c.concepto) producto,
                   c.total importe, oranc.areas
                 FROM compras c
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = c.id_cat_codigos

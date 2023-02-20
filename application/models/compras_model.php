@@ -106,8 +106,9 @@ class compras_model extends privilegios_model{
 	public function getInfoCompra($id_compra, $info_basic=false)
   {
 		$res = $this->db
-            ->select("*")
-            ->from('compras')
+            ->select("c.*, (cc.codigo || ' ' || cc.nombre) AS codigo_area")
+            ->from('compras c')
+            ->join('otros.cat_codigos cc', 'cc.id_cat_codigos = c.id_cat_codigos')
             ->where("id_compra = {$id_compra}")
             ->get();
 
