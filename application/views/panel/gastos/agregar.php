@@ -306,7 +306,7 @@
                       <label class="control-label" for="codigoArea">Codigo Area </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="codigoArea" class="span11 showCodigoAreaAuto" id="codigoArea" value="<?php echo set_value('codigoArea') ?>" placeholder="">
+                          <input type="text" name="codigoArea" class="span11 showCodigoAreaAuto" id="codigoArea" value="<?php echo set_value('codigoArea') ?>" placeholder="" required>
                           <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                           <input type="hidden" name="codigoAreaId" id="codigoAreaId" value="<?php echo set_value('codigoAreaId') ?>">
                         </div>
