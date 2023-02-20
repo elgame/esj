@@ -478,7 +478,7 @@ class cuentas_cobrar extends MY_Controller {
     {
       $this->load->model('cuentas_cobrar_pago_model');
       if($this->input->get('p') == 'true')
-        $this->cuentas_cobrar_pago_model->generaFacturaPdf33($_GET['id']);
+        $this->cuentas_cobrar_pago_model->generaFacturaPdf($_GET['id']);
       else {
         $params['url'] = 'panel/cuentas_cobrar/imprimir_com_pago/?id='.$_GET['id'].'&p=true';
         $this->load->view('panel/facturacion/print_view', $params);
