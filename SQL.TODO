@@ -3,6 +3,11 @@
    en reporte de relacion de fletes ordenar por fecha los vajes
    Agregar fecha de viaje y tomar esa fecha para el reporte relacion de fecha,
    quitar de gastos los conceptos COSTO MENSUAL GENERAL EST, COSTO ESTIMADO, COSTO MENSUAL GENERAL
+   -- lap
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans ADD COLUMN fecha_viaje date;
+   UPDATE otros.estado_resultado_trans SET fecha_viaje = fecha;
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans ADD COLUMN lts_precios json;
+   UPDATE otros.estado_resultado_trans SET lts_precios = ('[{"rend_lts": ' || rend_lts || ', "rend_precio": ' || rend_precio || '}]')::json;
  ✔ Reporte cuentas por pagar que salgan todos @done (23-02-15 18:34)
  ✔ En captura de actividades 2 de nomina, filtrar las tablas por rancho @done (23-02-16 16:48)
  ✔ Reporte de prenomina agregar bonos, -fonacot, -infonavit, -pencion @done (23-02-17 19:04)

@@ -204,6 +204,16 @@ class estado_resultado_trans_model extends privilegios_model{
     $this->load->model('clientes_model');
     $this->load->model('clasificaciones_model');
 
+    $lts_precios = [];
+    if ($this->input->post('arend_lts')) {
+      foreach ($_POST['arend_lts'] as $key => $value) {
+        $lts_precios[] = [
+          'rend_lts' => $value,
+          'rend_precio' => $_POST['arend_precio'][$key],
+        ];
+      }
+    }
+
     $datosFactura = array(
       'id_chofer'      => $this->input->post('did_chofer'),
       'id_activo'      => $this->input->post('did_activo'),
@@ -216,14 +226,15 @@ class estado_resultado_trans_model extends privilegios_model{
       'rep_lt_hist'    => floatval($this->input->post('drep_lt_hist')),
       'rend_km_gps'    => floatval($this->input->post('rend_km_gps')),
       'rend_actual'    => floatval($this->input->post('rend_actual')),
-      'rend_lts'       => floatval($this->input->post('rend_lts')),
-      'rend_precio'    => floatval($this->input->post('rend_precio')),
+      // 'rend_lts'       => floatval($this->input->post('rend_lts')),
+      // 'rend_precio'    => floatval($this->input->post('rend_precio')),
       'rend_thrs_trab' => floatval($this->input->post('rend_thrs_trab')),
       'rend_thrs_lts'  => floatval($this->input->post('rend_thrs_lts')),
       'rend_thrs_hxl'  => floatval($this->input->post('rend_thrs_hxl')),
       'destino'        => $this->input->post('destino'),
       'id_gasto'       => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
       'gasto_monto'    => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
+      'lts_precios'    => json_encode($lts_precios),
     );
 
     $this->db->insert('otros.estado_resultado_trans', $datosFactura);
@@ -311,6 +322,16 @@ class estado_resultado_trans_model extends privilegios_model{
 
   public function updateEstadoResult($id_estado)
   {
+    $lts_precios = [];
+    if ($this->input->post('arend_lts')) {
+      foreach ($_POST['arend_lts'] as $key => $value) {
+        $lts_precios[] = [
+          'rend_lts' => $value,
+          'rend_precio' => $_POST['arend_precio'][$key],
+        ];
+      }
+    }
+
     $datosFactura = array(
       'id_chofer'      => $this->input->post('did_chofer'),
       'id_activo'      => $this->input->post('did_activo'),
@@ -323,15 +344,15 @@ class estado_resultado_trans_model extends privilegios_model{
       'rep_lt_hist'    => floatval($this->input->post('drep_lt_hist')),
       'rend_km_gps'    => floatval($this->input->post('rend_km_gps')),
       'rend_actual'    => floatval($this->input->post('rend_actual')),
-      'rend_lts'       => floatval($this->input->post('rend_lts')),
-      'rend_precio'    => floatval($this->input->post('rend_precio')),
+      // 'rend_lts'       => floatval($this->input->post('rend_lts')),
+      // 'rend_precio'    => floatval($this->input->post('rend_precio')),
       'rend_thrs_trab' => floatval($this->input->post('rend_thrs_trab')),
       'rend_thrs_lts'  => floatval($this->input->post('rend_thrs_lts')),
       'rend_thrs_hxl'  => floatval($this->input->post('rend_thrs_hxl')),
       'destino'        => $this->input->post('destino'),
       'id_gasto'       => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
       'gasto_monto'    => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
-
+      'lts_precios'    => json_encode($lts_precios),
     );
 
     $this->db->update('otros.estado_resultado_trans', $datosFactura, "id = {$id_estado}");
@@ -506,6 +527,17 @@ class estado_resultado_trans_model extends privilegios_model{
     {
 			$response['info'] = $res->row();
 			$res->free_result();
+
+      if ($response['info']->lts_precios) {
+        $response['info']->lts_precios = json_decode($response['info']->lts_precios);
+        $response['info']->rend_lts = $response['info']->rend_precio = 0;
+        foreach ($response['info']->lts_precios as $key => $value) {
+          $response['info']->rend_lts += $value->rend_lts;
+          $response['info']->rend_precio += $value->rend_precio;
+        }
+        $response['info']->rend_lts = number_format($response['info']->rend_lts/(count($response['info']->lts_precios)>0? count($response['info']->lts_precios): 1), 2, '.', '');
+        $response['info']->rend_precio = number_format($response['info']->rend_precio/(count($response['info']->lts_precios)>0? count($response['info']->lts_precios): 1), 2, '.', '');
+      }
 
       if($info_basic)
 				return $response;
@@ -938,8 +970,9 @@ class estado_resultado_trans_model extends privilegios_model{
 
     $fletes = $this->db->query("SELECT id
       FROM otros.estado_resultado_trans
-      WHERE id_empresa = {$_GET['did_empresa']} AND fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-        AND status = 't' AND id_activo = {$_GET['activoId']}")->result();
+      WHERE id_empresa = {$_GET['did_empresa']} AND fecha_viaje BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        AND status = 't' AND id_activo = {$_GET['activoId']}
+      ORDER BY fecha_viaje ASC")->result();
 
     $response = [
       'activo' => '',
@@ -965,7 +998,7 @@ class estado_resultado_trans_model extends privilegios_model{
       $response['activo'] = $infoFlete['info']->activo->nombre;
 
       $response['destino'][] = $infoFlete['info']->destino;
-      $response['fecha'][] = $infoFlete['info']->fecha;
+      $response['fecha'][] = $infoFlete['info']->fecha_viaje;
       $response['chofer'][] = $infoFlete['info']->chofer->nombre;
 
       $response['km_recorridos'][] = $infoFlete['info']->km_rec;
@@ -1005,35 +1038,40 @@ class estado_resultado_trans_model extends privilegios_model{
       }
 
       // gastos
+      $quit_conceptos = ['COSTO MENSUAL GENERAL EST', 'COSTO ESTIMADO', 'COSTO MENSUAL GENERAL'];
       $gastos = []; // agrupamos por concepto repmant
       foreach ($infoFlete['repmant'] as $key => $rem) {
-        $kkk = MyString::toAscii($rem->concepto);
-        if (isset($gastos[$kkk])) {
-          $gastos[$kkk]['subtotal'] += $rem->subtotal;
-          $gastos[$kkk]['total'] += $rem->total;
-          $gastos[$kkk]['importe_iva'] += $rem->importe_iva;
-        } else {
-          $gastos[$kkk] = [
-            'descripcion' => $rem->concepto,
-            'subtotal' => $rem->subtotal,
-            'total' => $rem->total,
-            'importe_iva' => $rem->importe_iva,
-          ];
+        if (!in_array(mb_strtoupper(trim($rem->concepto), 'UTF-8'), $quit_conceptos)) {
+          $kkk = MyString::toAscii($rem->concepto);
+          if (isset($gastos[$kkk])) {
+            $gastos[$kkk]['subtotal'] += $rem->subtotal;
+            $gastos[$kkk]['total'] += $rem->total;
+            $gastos[$kkk]['importe_iva'] += $rem->importe_iva;
+          } else {
+            $gastos[$kkk] = [
+              'descripcion' => $rem->concepto,
+              'subtotal' => $rem->subtotal,
+              'total' => $rem->total,
+              'importe_iva' => $rem->importe_iva,
+            ];
+          }
         }
       }
       foreach ($infoFlete['gastos'] as $key => $rem) { // agrupamos por concepto gastos
-        $kkk = MyString::toAscii($rem->codg);
-        if (isset($gastos[$kkk])) {
-          $gastos[$kkk]['subtotal'] += $rem->subtotal;
-          $gastos[$kkk]['total'] += $rem->total;
-          $gastos[$kkk]['importe_iva'] += $rem->importe_iva;
-        } else {
-          $gastos[$kkk] = [
-            'descripcion' => $rem->codg,
-            'subtotal' => $rem->subtotal,
-            'total' => $rem->total,
-            'importe_iva' => $rem->importe_iva,
-          ];
+        if (!in_array(mb_strtoupper(trim($rem->codg), 'UTF-8'), $quit_conceptos)) {
+          $kkk = MyString::toAscii($rem->codg);
+          if (isset($gastos[$kkk])) {
+            $gastos[$kkk]['subtotal'] += $rem->subtotal;
+            $gastos[$kkk]['total'] += $rem->total;
+            $gastos[$kkk]['importe_iva'] += $rem->importe_iva;
+          } else {
+            $gastos[$kkk] = [
+              'descripcion' => $rem->codg,
+              'subtotal' => $rem->subtotal,
+              'total' => $rem->total,
+              'importe_iva' => $rem->importe_iva,
+            ];
+          }
         }
       }
       foreach ($gastos as $key => $rem) { // agrega los nuevos conceptos de gastos

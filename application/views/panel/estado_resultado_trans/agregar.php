@@ -1,4 +1,18 @@
 <div id="content" class="span10">
+<style type="text/css">
+  #lts_precios {
+    margin-top: 10px;
+    clear: both;
+  }
+  span.rowltsp {
+    background-color: #ddd;
+    padding: 5px 8px;
+    border-radius: 7px;
+    cursor: not-allowed;
+    margin-right: 5px;
+    margin-top: 5px;
+  }
+</style>
 
   <div>
     <ul class="breadcrumb">
@@ -104,6 +118,13 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="dfecha_viaje">Fecha Viaje</label>
+                <div class="controls">
+                  <input type="date" name="dfecha_viaje" class="span9" id="dfecha_viaje" value="<?php echo set_value('dfecha_viaje', isset($borrador) ? $borrador['info']->fecha_viaje : $fecha); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="rend_km_gps">Rend. Km/Gps</label>
                 <div class="controls">
                   <input type="text" name="rend_km_gps" class="span9" id="rend_km_gps" value="<?php echo set_value('rend_km_gps', isset($borrador) ? $borrador['info']->rend_km_gps : ''); ?>" size="25">
@@ -120,16 +141,32 @@
               <div class="control-group">
                 <label class="control-label" for="rend_lts">Diesel Lts</label>
                 <div class="controls">
-                  <input type="text" name="rend_lts" class="span9" id="rend_lts" value="<?php echo set_value('rend_lts', isset($borrador) ? $borrador['info']->rend_lts : ''); ?>" size="25">
+                  <input type="text" name="rend_lts" class="span9" id="rend_lts" value="" size="25">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="rend_precio">Diesel Precio</label>
                 <div class="controls">
-                  <input type="text" name="rend_precio" class="span9" id="rend_precio" value="<?php echo set_value('rend_precio', isset($borrador) ? $borrador['info']->rend_precio : ''); ?>" size="25">
+                  <input type="text" name="rend_precio" class="input-xlarge" id="rend_precio" value="" size="25">
+                  <span class="help-inline">
+                    <button type="button" class="btn" id="btnAddLtsPrecios">+</button>
+                  </span>
+                </div>
+
+                <?php
+                $ltsps = isset($borrador) ? $borrador['info']->lts_precios : [];
+                ?>
+                <div id="lts_precios">
+                  <?php foreach ($ltsps as $key => $value): ?>
+                  <span class="rowltsp">Lts: <?php echo $value->rend_lts ?> | Precio: <?php echo $value->rend_precio ?>
+                    <input type="hidden" name="arend_lts[]" value="<?php echo $value->rend_lts ?>">
+                    <input type="hidden" name="arend_precio[]" value="<?php echo $value->rend_precio ?>">
+                  </span>
+                  <?php endforeach ?>
                 </div>
               </div>
+
 
               <div class="control-group">
                 <label class="control-label" for="rend_thrs_trab">Termo Hrs Trabajadas</label>

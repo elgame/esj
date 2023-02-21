@@ -252,6 +252,7 @@ class estado_resultado_trans extends MY_Controller {
         ['field' => 'dvel_max'                , 'label' => 'dvel_max'              , 'rules' => 'numeric']          ,
         ['field' => 'drep_lt_hist'            , 'label' => 'drep_lt_hist'          , 'rules' => 'numeric']          ,
         ['field' => 'dfecha'                  , 'label' => 'dfecha'                , 'rules' => '']                 ,
+        ['field' => 'dfecha_viaje'            , 'label' => 'dfecha_viaje'          , 'rules' => '']                 ,
         ['field' => 'rend_km_gps'             , 'label' => 'rend_km_gps'           , 'rules' => 'numeric']          ,
         ['field' => 'rend_actual'             , 'label' => 'rend_actual'           , 'rules' => 'numeric']          ,
         ['field' => 'rend_lts'                , 'label' => 'rend_lts'              , 'rules' => 'numeric']          ,
