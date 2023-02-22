@@ -108,7 +108,7 @@ class compras_model extends privilegios_model{
 		$res = $this->db
             ->select("c.*, (cc.codigo || ' ' || cc.nombre) AS codigo_area")
             ->from('compras c')
-            ->join('otros.cat_codigos cc', 'cc.id_cat_codigos = c.id_cat_codigos')
+            ->join('otros.cat_codigos cc', 'cc.id_cat_codigos = c.id_cat_codigos', 'left')
             ->where("id_compra = {$id_compra}")
             ->get();
 
