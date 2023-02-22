@@ -77,7 +77,7 @@
   var autocompleteRanchos = function () {
     $("#rancho").autocomplete({
       source: function(request, response) {
-        var params = {term : request.term};
+        var params = {term : request.term, nomina: 'true'};
         if(parseInt($("#empresaId").val()) > 0)
           params.did_empresa = $("#empresaId").val();
         if(parseInt($("#areaId").val()) > 0)
@@ -132,6 +132,7 @@
       source: function(request, response) {
         var params = {
           term : request.term,
+          nomina: 'true',
           id_area: $('#areaId').val(),
           rancho: $('#tagsRanchoIds .ranchoId').val()
         };
