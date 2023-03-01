@@ -1752,9 +1752,12 @@ class bascula extends MY_Controller {
         $rules[] = array('field'  => 'pid_proveedor',
                           'label' => 'Proveedor',
                           'rules' => 'required');
-        $rules[] = array('field'  => 'pid_productor',
-                          'label' => 'Productor',
-                          'rules' => 'required');
+
+        if ($_POST['parea'] == 2) {
+          $rules[] = array('field'  => 'pid_productor',
+                            'label' => 'Productor',
+                            'rules' => 'required');
+        }
       }
       else
       {

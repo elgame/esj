@@ -45,7 +45,7 @@
               </div>
             </form>
 
-            <div class="stickcontent">
+            <div class="stickcontent-no">
               <form action="<?php echo base_url('panel/nomina_trabajos2/addTarea/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" class="form row-fluid">
                 <input type="hidden" id="dempresaId" value="<?php echo $filtros['empresaId']; ?>">
                 <input type="hidden" id="dsemana" value="<?php echo $filtros['semana']; ?>">
@@ -54,10 +54,42 @@
 
                 <div class="row-fluid">
                   <div class="span3">
+                    <label for="area">Cultivo / Actividad / Producto</label>
+                    <input type="text" class="span12" id="area" value="">
+                    <input type="hidden" class="valAddTr" id="areaId" value="">
+                  </div>
+
+                  <div class="span3">
+                    <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="rancho" class="span12" id="rancho" value="" placeholder="Milagro A, Linea 1">
+                      </div>
+                    </div>
+                    <ul class="tags" id="tagsRanchoIds">
+                    </ul>
+                  </div>
+
+                  <div class="span3">
                     <label for="dempleado">Empleado</label>
                     <input type="text" class="span12" id="dempleado" value="">
                     <input type="hidden" class="valAddTr" id="dempleadoId" value="">
                   </div>
+
+                  <div class="span3">
+                    <label class="control-label" for="centroCosto">Centro de costo </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general">
+                      </div>
+                    </div>
+                    <ul class="tags" id="tagsCCIds">
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="row-fluid">
+
                   <div class="span3">
                     <label for="dlabor">Labor</label>
                     <input type="text" class="span12" id="dlabor" value="">
@@ -74,45 +106,17 @@
                     </div>
                     <div class="span6">
                       <label for="davance_real">Avance Rel</label>
-                      <input type="text" class="span12 vpositive" id="davance_real" value="">
+                      <input type="text" class="span12 vpositive" id="davance_real" value="" data-next="addTrabajador">
                     </div>
                   </div>
                   <div class="span2">
                     <label for="dimporte">Importe</label>
                     <input type="text" class="span12 valAddTr not0" id="dimporte" value="" readonly>
                   </div>
-                </div>
 
-                <div class="span3">
-                  <label for="area">Cultivo / Actividad / Producto</label>
-                  <input type="text" class="span12" id="area" value="">
-                  <input type="hidden" class="valAddTr" id="areaId" value="">
-                </div>
-
-                <div class="span3">
-                  <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
-                  <div class="controls">
-                    <div class="input-append span12">
-                      <input type="text" name="rancho" class="span12" id="rancho" value="" placeholder="Milagro A, Linea 1">
-                    </div>
+                  <div class="span1">
+                    <button type="button" class="btn" id="addTrabajador">Guardar</button>
                   </div>
-                  <ul class="tags" id="tagsRanchoIds">
-                  </ul>
-                </div>
-
-                <div class="span4">
-                  <label class="control-label" for="centroCosto">Centro de costo </label>
-                  <div class="controls">
-                    <div class="input-append span12">
-                      <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general" data-next="addTrabajador">
-                    </div>
-                  </div>
-                  <ul class="tags" id="tagsCCIds">
-                  </ul>
-                </div>
-
-                <div class="span1">
-                  <button type="button" class="btn" id="addTrabajador">Guardar</button>
                 </div>
               </form>
 
