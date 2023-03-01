@@ -7,9 +7,9 @@
   $(function(){
     $(window).scroll(function(){
       if ($(this).scrollTop() > 135) {
-        $('.stickcontent-no').addClass('fixed');
+        $('.stickcontent').addClass('fixed');
       } else {
-        $('.stickcontent-no').removeClass('fixed');
+        $('.stickcontent').removeClass('fixed');
       }
     });
 
