@@ -370,6 +370,7 @@
           $('#dlaborId').val('');
           $('#dcosto').val('');
           $('#davance').val('');
+          $('#davance_real').val('');
           $('#dimporte').val('');
           // $('#area').val('');
           // $('#areaId').val('');

@@ -1,4 +1,12 @@
 
+ ☐ Catalogo de labores para combustible
+   -- lap|san
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Labores de Combustible',152,true,'labores_codigo/combus/','barcode',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',582,false,'labores_codigo/combus_modificar/','edit',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',582,true,'labores_codigo/combus_agregar/','plus',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',582,false,'labores_codigo/combus_eliminar/','ban-circle',false);
+    ALTER TABLE IF EXISTS public.compras_salidas_labores ADD COLUMN tipo character varying(10) COLLATE pg_catalog."default" DEFAULT 'nom'::character varying;
+    COMMENT ON COLUMN public.compras_salidas_labores.tipo IS 'nom: codigos para nomina, com: codigo para combustible compras';
  ✔ Reporte estado resultado transp agregar multimple los litros y precios en reporte sacar un promedio @done (23-02-22 00:19)
    en reporte de relacion de fletes ordenar por fecha los vajes
    Agregar fecha de viaje y tomar esa fecha para el reporte relacion de fecha,

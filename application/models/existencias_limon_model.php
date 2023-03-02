@@ -2916,7 +2916,7 @@ class existencias_limon_model extends CI_Model {
 
 
     // TOTALES
-    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) + $industrial_importe;
+    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) - $totalGastos + $industrial_importe;
     $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos + $frutaCompra_kilos + $devFruta_kilos;
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
@@ -3022,6 +3022,10 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(120, $pdf->GetY());
     $pdf->Row(array('(-) GASTOS DE VENTAS', MyString::formatoNumero($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe, 2, '', false)), true, 'B');
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) GASTOS GENERALES', MyString::formatoNumero($totalGastos, 2, '', false)), true, 'B');
     $pdf->chkSaltaPag([120, 10]);
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(120, $pdf->GetY());

@@ -365,7 +365,7 @@
 
     $('#datosCombustible').on('focus', 'input#clabor:not(.ui-autocomplete-input)', function(event) {
       $(this).autocomplete({
-        source: base_url+'panel/labores_codigo/ajax_get_labores/',
+        source: base_url+'panel/labores_codigo/ajax_combus_get_labores/',
         minLength: 1,
         selectFirst: true,
         select: function( event, ui ) {

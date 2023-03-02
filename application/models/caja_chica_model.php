@@ -365,14 +365,23 @@ class caja_chica_model extends CI_Model {
       if ($acreedores && $acreedores->num_rows() > 0)
       {
         $info['acreedores'] = $acreedores->result();
-        $info['acreedor_prest_dia'] = 0;
+        // $info['acreedor_prest_dia'] = 0;
         foreach ($info['acreedores'] as $key => $value) {
           $info['acreedores'][$key]->mismo_dia = false;
           if (strtotime($value->fecha) == strtotime($fecha)) {
-            $info['acreedor_prest_dia'] += $value->monto;
+            // $info['acreedor_prest_dia'] += $value->monto;
             $info['acreedores'][$key]->mismo_dia = true;
           }
         }
+      }
+
+      $info['acreedor_prest_dia'] = 0;
+      $acreedores = $this->db->query(
+        "SELECT Sum(cd.monto) AS monto FROM cajachica_deudores cd
+        WHERE cd.no_caja in({$ddNoCaja}) AND cd.fecha = '{$fecha}'" AND cd.tipo = '{$ddTipo}'
+      )->row();
+      if (isset($acreedores->monto)) {
+        $info['acreedor_prest_dia'] = $acreedores->monto;
       }
 
       $info['acreedor_abonos_dia'] = 0;
