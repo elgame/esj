@@ -203,9 +203,11 @@ class existencias_limon_model extends CI_Model {
 
 
     $produccion = $this->db->query(
-      "SELECT STRING_AGG(Distinct c.nombre, ', ') AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
+      "SELECT STRING_AGG(Distinct c.nombre, ', ') AS clasificacion,
+        Sum(CASE WHEN u.codigo <> 'KILOS' THEN rrc.rendimiento ELSE 0 END) AS cantidad,
         Coalesce(elp.costo, 0) AS costo, (Coalesce(elp.costo, 0)*Sum(rrc.rendimiento)) AS importe, u.id_unidad,
-        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kilos,
+        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad,
+        (Sum(rrc.rendimiento) * u.cantidad) AS kilos,
         elp.id AS id_produccion, ca.id_calibre, ca.nombre AS calibre
       FROM rastria_rendimiento rr
         INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento

@@ -286,7 +286,7 @@ class nomina_trabajos2_model extends CI_Model {
       'infonavit' => ['r', 'Infonavit'], 'dePensionAlimenticia' => ['od', 'Pensión Alimenticia'],
       'fonacot' => ['od', 'Fonacot'], 'fondo_ahorro' => ['r', 'Fondo de Ahorro'],
       'descuento_playeras' => ['r', 'Playeras'], 'descuento_cocina' => ['r', 'Cocina'],
-      'deduccion_otros' => ['r', 'Otros'], 'totalDescuentoMaterial' => ['od', 'Material'],
+      'descuento_otros' => ['r', 'Otros'], 'totalDescuentoMaterial' => ['od', 'Material'],
       'totalPrestamosEf' => ['od', 'Prestamos Efectivo'], 'prestamos' => ['r', 'Prestamos']
     ];
     $bonoss = ['bonos', 'otros', 'domingo'];
@@ -413,6 +413,14 @@ class nomina_trabajos2_model extends CI_Model {
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row2(array('Total', MyString::formatoNumero($total_ingresos + $total_bonos - $total_descuentos, 2, '$', false)), false, false, 5);
+
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetWidths(array($pdf->pag_size[0]));
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()+3);
+      $pdf->Row2(array('____________________________'), false, false, 5);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('FIRMA'), false, false, 5);
 
       $pdf->SetXY(0, $pdf->GetY()+10);
     }

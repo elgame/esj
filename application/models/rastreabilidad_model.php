@@ -2049,10 +2049,10 @@ class rastreabilidad_model extends CI_Model {
 
       // Obtenemos los rendimientos en los lotes de ese dia
       $query = $this->db->query(
-        "SELECT c.id_clasificacion,
-          Sum(rrc.rendimiento) AS rendimiento,
-          Sum(rrc.rendimiento*rrc.kilos) AS kilos_total,
-          c.nombre AS clasificacion,
+        "SELECT
+          Sum(CASE WHEN u.codigo <> 'KILOS' THEN rrc.rendimiento ELSE 0 END) AS rendimiento,
+          Sum((CASE WHEN u.codigo <> 'KILOS' THEN rrc.rendimiento ELSE 1 END)*rrc.kilos) AS kilos_total,
+          String_agg(DISTINCT c.nombre, ',') AS clasificacion,
           cas.nombre AS size, a.nombre AS area
         FROM rastria_rendimiento AS rr
           INNER JOIN rastria_rendimiento_clasif AS rrc ON rr.id_rendimiento = rrc.id_rendimiento
@@ -2063,8 +2063,8 @@ class rastreabilidad_model extends CI_Model {
           INNER JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
           INNER JOIN areas AS a ON a.id_area = rr.id_area
         WHERE rr.status = 't' {$sql2}
-        GROUP BY c.id_clasificacion, cas.nombre, a.nombre
-        ORDER BY c.nombre ASC");
+        GROUP BY cas.nombre, a.nombre
+        ORDER BY size ASC");
       // "SELECT c.id_clasificacion,
       //     Sum(rrc.rendimiento) AS rendimiento,
       //     Sum(rrc.rendimiento*rrc.kilos) AS kilos_total,
