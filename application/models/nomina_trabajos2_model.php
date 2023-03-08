@@ -999,7 +999,7 @@ class nomina_trabajos2_model extends CI_Model {
       'desc_otros' => 0,
       'desc_cocina' => 0,
     ];
-    return empty($resultado)? $resempty: $resultado[0];
+    return empty($resultado)? $resempty: array_pop($resultado);
   }
   public function rptPreNominaData()
   {
@@ -1162,9 +1162,16 @@ class nomina_trabajos2_model extends CI_Model {
       $datos[] = MyString::formatoNumero($total_destajo, 2, '', false);
       $totales_destajo['tperce'] += $total_destajo;
 
+      $item->infonavit = isset($item->infonavit)? $item->infonavit: 0;
+      $item->p_alimenticia = isset($item->p_alimenticia)? $item->p_alimenticia: 0;
+      $item->fonacot = isset($item->fonacot)? $item->fonacot: 0;
+      $item->fondo_ahorro = isset($item->fondo_ahorro)? $item->fondo_ahorro: 0;
       $datos[] = MyString::formatoNumero(($item->infonavit + $item->p_alimenticia + $item->fonacot + $item->fondo_ahorro), 2, '', false);
       $totales_destajo['td_fiscales'] += ($item->infonavit + $item->p_alimenticia + $item->fonacot + $item->fondo_ahorro);
 
+      $item->bonos = isset($item->bonos)? $item->bonos: 0;
+      $item->otros = isset($item->otros)? $item->otros: 0;
+      $item->domingo = isset($item->domingo)? $item->domingo: 0;
       $datos[] = MyString::formatoNumero(($item->bonos + $item->otros + $item->domingo), 2, '', false);
       $totales_destajo['tbonos'] += ($item->bonos + $item->otros + $item->domingo);
 
