@@ -247,7 +247,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
           $this->load->model('documentos_model');
           $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosApi['receptor']['nombreFiscal'], $dataTimbrado['serie'], $dataTimbrado['folio']);
 
-          $this->generaFacturaPdf33($id_compago, $pathDocs);
+          $this->generaFacturaPdf($id_compago, $pathDocs);
 
         }
 
@@ -343,7 +343,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
         // Regenera el PDF de la factura.
         $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura->cfdi_ext->receptor->nombreFiscal, $factura->serie, $factura->folio);
-        $this->generaFacturaPdf33($id_compago, $pathDocs);
+        $this->generaFacturaPdf($id_compago, $pathDocs);
 
         $this->db->query("SELECT refreshallmaterializedviews();");
 
@@ -462,7 +462,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
   public function generaFacturaPdf($id_compago, $path = null) {
     $factura = $this->getInfoComPago($id_compago);
     $version = str_replace('.', '', $factura->version);
-    $this->{'generaFacturaPdf'.$version}($factura);
+    $this->{'generaFacturaPdf'.$version}($factura, $path);
   }
 
   public function generaFacturaPdf33($factura, $path = null)
