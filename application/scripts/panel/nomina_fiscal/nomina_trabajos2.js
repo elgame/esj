@@ -77,7 +77,7 @@
   var autocompleteRanchos = function () {
     $("#rancho").autocomplete({
       source: function(request, response) {
-        var params = {term : request.term};
+        var params = {term : request.term, nomina: 'true'};
         if(parseInt($("#empresaId").val()) > 0)
           params.did_empresa = $("#empresaId").val();
         if(parseInt($("#areaId").val()) > 0)
@@ -132,6 +132,7 @@
       source: function(request, response) {
         var params = {
           term : request.term,
+          nomina: 'true',
           id_area: $('#areaId').val(),
           rancho: $('#tagsRanchoIds .ranchoId').val()
         };
@@ -244,7 +245,7 @@
 
   // Autocomplete labores live
   var autocompleteLabores = function () {
-    $('.stickcontent').on('focus', 'input#dlabor:not(.ui-autocomplete-input)', function(event) {
+    $('.stickcontent-no').on('focus', 'input#dlabor:not(.ui-autocomplete-input)', function(event) {
       $(this).autocomplete({
         source: base_url+'panel/labores_codigo/ajax_get_labores/',
         minLength: 1,
@@ -369,12 +370,13 @@
           $('#dlaborId').val('');
           $('#dcosto').val('');
           $('#davance').val('');
+          $('#davance_real').val('');
           $('#dimporte').val('');
-          $('#area').val('');
-          $('#areaId').val('');
-          $('#tagsRanchoIds').html('');
+          // $('#area').val('');
+          // $('#areaId').val('');
+          // $('#tagsRanchoIds').html('');
           $('#tagsCCIds').html('');
-          $('#dempleado').focus();
+          $('#area').focus();
         }
       }, "json");
     } else {
@@ -384,7 +386,7 @@
 
   var validTrabajador = function () {
     var isValid = true, msg='';
-    var campos = $('.stickcontent .valAddTr'), campo = undefined;
+    var campos = $('.stickcontent-no .valAddTr'), campo = undefined;
 
     for (var i = campos.length - 1; i >= 0; i--) {
       campo = $(campos[i]);

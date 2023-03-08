@@ -19,6 +19,7 @@
     btnDelGastos();
     onChanceImporteGastos();
     obtenGastosCajaAjax();
+    ltsPrecios();
 
     autocompleteEmpresas();
     autocompleteActivos();
@@ -40,6 +41,28 @@
       }
     });
   }
+
+  var ltsPrecios = function() {
+    $("#lts_precios").on('click', '.rowltsp', function(){
+      $(this).remove();
+    });
+
+    $('#btnAddLtsPrecios').click(function(event) {
+      let rend_lts = parseFloat($('#rend_lts').val())||0;
+      let rend_precio = parseFloat($('#rend_precio').val())||0;
+      if(rend_lts > 0 && rend_precio > 0) {
+        $('#lts_precios').append(
+          `<span class="rowltsp">Lts: ${rend_lts} | Precio: ${rend_precio}
+            <input type="hidden" name="arend_lts[]" value="${rend_lts}">
+            <input type="hidden" name="arend_precio[]" value="${rend_precio}">
+          </span>`
+        );
+
+        $('#rend_precio').val('');
+        $('#rend_lts').val('').focus();
+      }
+    });
+  };
 
   var termohrs = function() {
     $('.form-horizontal').on('keyup', '#rend_thrs_trab, #rend_thrs_lts', function(){

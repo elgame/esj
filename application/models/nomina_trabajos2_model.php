@@ -286,7 +286,7 @@ class nomina_trabajos2_model extends CI_Model {
       'infonavit' => ['r', 'Infonavit'], 'dePensionAlimenticia' => ['od', 'Pensión Alimenticia'],
       'fonacot' => ['od', 'Fonacot'], 'fondo_ahorro' => ['r', 'Fondo de Ahorro'],
       'descuento_playeras' => ['r', 'Playeras'], 'descuento_cocina' => ['r', 'Cocina'],
-      'deduccion_otros' => ['r', 'Otros'], 'totalDescuentoMaterial' => ['od', 'Material'],
+      'descuento_otros' => ['r', 'Otros'], 'totalDescuentoMaterial' => ['od', 'Material'],
       'totalPrestamosEf' => ['od', 'Prestamos Efectivo'], 'prestamos' => ['r', 'Prestamos']
     ];
     $bonoss = ['bonos', 'otros', 'domingo'];
@@ -414,6 +414,14 @@ class nomina_trabajos2_model extends CI_Model {
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row2(array('Total', MyString::formatoNumero($total_ingresos + $total_bonos - $total_descuentos, 2, '$', false)), false, false, 5);
 
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetWidths(array($pdf->pag_size[0]));
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()+3);
+      $pdf->Row2(array('____________________________'), false, false, 5);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('FIRMA'), false, false, 5);
+
       $pdf->SetXY(0, $pdf->GetY()+10);
     }
 
@@ -467,8 +475,9 @@ class nomina_trabajos2_model extends CI_Model {
     }
 
     $res = $this->db->query(
-      "SELECT cc.id_centro_costo, cc.tabla, Sum(cc.hectareas) AS hectareas,
-        Sum(t2.avance/cc.num) AS avance, Sum(t2.importe/cc.num) AS importe
+      "SELECT cc.id_centro_costo, cc.tabla, Sum(cc.hectareas)/Count(cc.hectareas) AS hectareas,
+        Sum(t2.avance/cc.num) AS avance, Sum(t2.avance_real/cc.num) AS avance_real,
+        Sum(t2.importe/cc.num) AS importe
       FROM nomina_trabajos_dia2 t2
         INNER JOIN nomina_trabajos_dia2_centros cc ON (t2.id_empresa = cc.id_empresa AND
             t2.id_usuario = cc.id_usuario AND t2.fecha = cc.fecha AND t2.rows = cc.rows)
@@ -505,11 +514,11 @@ class nomina_trabajos2_model extends CI_Model {
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'R', 'R', 'R', 'L');
-    $widths = array(110, 30, 30, 30, 30, 30);
-    $header = array('Tabla', 'Superficie', 'Avance', 'Importe');
+    $aligns = array('L', 'R', 'R', 'R', 'R');
+    $widths = array(95, 25, 25, 25, 30);
+    $header = array('Tabla', 'Superficie', 'Avance', 'Avance R.', 'Importe');
 
-    $total_avance = $total_importe = 0;
+    $total_avance = $total_avancerr = $total_importe = 0;
     foreach($res as $key => $item){
       $band_head = false;
       if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
@@ -531,9 +540,11 @@ class nomina_trabajos2_model extends CI_Model {
         $item->tabla,
         $item->hectareas,
         MyString::formatoNumero($item->avance, 2, '', false),
+        MyString::formatoNumero($item->avance_real, 2, '', false),
         MyString::formatoNumero($item->importe, 2, '', false),
       );
       $total_avance += $item->avance;
+      $total_avancerr += $item->avance_real;
       $total_importe += $item->importe;
 
       $_GET['id_centro_costo'] = $item->id_centro_costo;
@@ -548,9 +559,10 @@ class nomina_trabajos2_model extends CI_Model {
     $pdf->SetFont('Arial','B',8);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(['R', 'R', 'R']);
-    $pdf->SetWidths([140, 30, 30]);
+    $pdf->SetWidths([120, 25, 25, 30]);
     $pdf->Row(array('TOTAL',
       MyString::formatoNumero($total_avance, 2, '', false),
+      MyString::formatoNumero($total_avancerr, 2, '', false),
       MyString::formatoNumero($total_importe, 2, '', false),
       ), false, true);
 
@@ -578,33 +590,36 @@ class nomina_trabajos2_model extends CI_Model {
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="7" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="7" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="7" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
+          <td colspan="7"></td>
         </tr>
         <tr style="font-weight:bold">
           <td colspan="3" style="width:200px;border:1px solid #000;background-color: #cccccc;">Tabla</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Superficie</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Avance</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Avance R.</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
         </tr>';
 
-    $total_avance = $total_importe = 0;
+    $total_avance = $total_avancerr = $total_importe = 0;
     foreach($res as $key => $item){
       $html .= '<tr>
           <td colspan="3" style="width:200px;border:1px solid #000;">'.$item->tabla.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->hectareas.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->avance.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->avance_real.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
         </tr>';
       $total_avance += $item->avance;
+      $total_avancerr += $item->avance_real;
       $total_importe += $item->importe;
     }
 
@@ -612,6 +627,7 @@ class nomina_trabajos2_model extends CI_Model {
             <tr style="font-weight:bold">
               <td colspan="4"></td>
               <td style="border:1px solid #000;">'.$total_avance.'</td>
+              <td style="border:1px solid #000;">'.$total_avancerr.'</td>
               <td style="border:1px solid #000;">'.$total_importe.'</td>
             </tr>';
 
@@ -660,8 +676,8 @@ class nomina_trabajos2_model extends CI_Model {
     }
 
     $res = $this->db->query(
-      "SELECT cc.id_centro_costo, cc.tabla, (cc.hectareas) AS hectareas,
-        (t2.avance/cc.num) AS avance, (t2.importe/cc.num) AS importe,
+      "SELECT cc.id_centro_costo, t2.fecha, cc.tabla, (cc.hectareas) AS hectareas,
+        (t2.avance/cc.num) AS avance, (t2.avance_real/cc.num) AS avance_real, (t2.importe/cc.num) AS importe,
         (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
         sl.nombre AS labor
       FROM nomina_trabajos_dia2 t2
@@ -708,11 +724,11 @@ class nomina_trabajos2_model extends CI_Model {
     $pdf->Row(['Excel'], false, false);
     $pdf->SetMyLinks([]);
 
-    $aligns = array('L', 'L', 'R', 'R', 'L');
-    $widths = array(70, 70, 30, 30, 30, 30);
-    $header = array('Trabajador', 'Labor', 'Avance', 'Importe');
+    $aligns = array('L', 'L', 'L', 'R', 'R', 'R');
+    $widths = array(17, 70, 50, 20, 20, 25);
+    $header = array('Fecha', 'Trabajador', 'Labor', 'Avance', 'Avance R.', 'Importe');
 
-    $total_avance = $total_importe = 0;
+    $total_avance = $total_avancerr = $total_importe = 0;
     foreach($res as $key => $item){
       $band_head = false;
       if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
@@ -733,12 +749,15 @@ class nomina_trabajos2_model extends CI_Model {
       $pdf->SetTextColor(0,0,0);
 
       $datos = array(
+        $item->fecha,
         $item->trabajador,
         $item->labor,
         MyString::formatoNumero($item->avance, 2, '', false),
+        MyString::formatoNumero($item->avance_real, 2, '', false),
         MyString::formatoNumero($item->importe, 2, '', false),
       );
       $total_avance += $item->avance;
+      $total_avancerr += $item->avance_real;
       $total_importe += $item->importe;
 
       $pdf->SetX(6);
@@ -750,10 +769,11 @@ class nomina_trabajos2_model extends CI_Model {
     $pdf->SetMyLinks([]);
     $pdf->SetFont('Arial','B',8);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(['R', 'R', 'R']);
-    $pdf->SetWidths([140, 30, 30]);
+    $pdf->SetAligns(['R', 'R', 'R', 'R']);
+    $pdf->SetWidths([137, 20, 20, 25]);
     $pdf->Row(array('TOTAL',
       MyString::formatoNumero($total_avance, 2, '', false),
+      MyString::formatoNumero($total_avancerr, 2, '', false),
       MyString::formatoNumero($total_importe, 2, '', false),
       ), false, true);
 
@@ -781,39 +801,46 @@ class nomina_trabajos2_model extends CI_Model {
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="9" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="9" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="9" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
+          <td colspan="9"></td>
         </tr>
         <tr style="font-weight:bold">
-          <td colspan="4" style="width:200px;border:1px solid #000;background-color: #cccccc;">Trabajador</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+          <td colspan="3" style="width:200px;border:1px solid #000;background-color: #cccccc;">Trabajador</td>
+          <td colspan="2" style="width:200px;border:1px solid #000;background-color: #cccccc;">Labor</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Avance</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Avance R.</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
         </tr>';
 
-    $total_avance = $total_importe = 0;
+    $total_avance = $total_avancerr = $total_importe = 0;
     foreach($res as $key => $item){
       $html .= '<tr>
-          <td colspan="2" style="width:200px;border:1px solid #000;">'.$item->trabajador.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->fecha.'</td>
+          <td colspan="3" style="width:200px;border:1px solid #000;">'.$item->trabajador.'</td>
           <td colspan="2" style="width:200px;border:1px solid #000;">'.$item->labor.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->avance.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->avance_real.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
         </tr>';
       $total_avance += $item->avance;
+      $total_avancerr += $item->avance_real;
       $total_importe += $item->importe;
     }
 
     $html .= '
             <tr style="font-weight:bold">
-              <td colspan="4"></td>
+              <td colspan="6"></td>
               <td style="border:1px solid #000;">'.$total_avance.'</td>
+              <td style="border:1px solid #000;">'.$total_avancerr.'</td>
               <td style="border:1px solid #000;">'.$total_importe.'</td>
             </tr>';
 

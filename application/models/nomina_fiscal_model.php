@@ -5637,30 +5637,34 @@ class nomina_fiscal_model extends CI_Model {
 
     //no mostrar algunas columnas
     $ver_des_cocina = $ver_des_otro = $ver_des_playera = false;
-    foreach ($_POST['empleado_id'] as $key => $empleado){
-      if($_POST['descuento_playeras'][$key]>0) $ver_des_playera = true;
-      if($_POST['descuento_otros'][$key]>0) $ver_des_otro = true;
-      if($_POST['descuento_cocina'][$key]>0) $ver_des_cocina = true;
+    if (isset($_POST['empleado_id']) && count($_POST['empleado_id']) > 0) {
+      foreach ($_POST['empleado_id'] as $key => $empleado){
+        if($_POST['descuento_playeras'][$key]>0) $ver_des_playera = true;
+        if($_POST['descuento_otros'][$key]>0) $ver_des_otro = true;
+        if($_POST['descuento_cocina'][$key]>0) $ver_des_cocina = true;
+      }
     }
 
     $empleados_sin_departamento = [];
     $ver_total_prestamos_ef = $ver_total_desc_materi = $ver_total_prestamos = $ver_total_domingo = $ver_total_otros = $ver_infonavit = $ver_trans = $ver_fondo_arro = 0;
-    foreach ($_POST['empleado_id'] as $key => $empleado)
-    {
-      $ver_infonavit          += $_POST['total_infonavit'][$key];
-      $ver_trans              += $_POST['ttotal_nomina'][$key];
-      $ver_fondo_arro         += $_POST['fondo_ahorro'][$key];
-      $ver_total_prestamos    += $_POST['total_prestamos'][$key];
-      $ver_total_prestamos_ef += $_POST['descuento_prestamoef'][$key];
-      $ver_total_desc_materi  += $_POST['descuento_materiales'][$key];
-      $ver_total_domingo      += $_POST['domingo'][$key];
-      $ver_total_otros        += $_POST['bonos'][$key]+$_POST['otros'][$key];
+    if (isset($_POST['empleado_id']) && count($_POST['empleado_id']) > 0) {
+      foreach ($_POST['empleado_id'] as $key => $empleado)
+      {
+        $ver_infonavit          += $_POST['total_infonavit'][$key];
+        $ver_trans              += $_POST['ttotal_nomina'][$key];
+        $ver_fondo_arro         += $_POST['fondo_ahorro'][$key];
+        $ver_total_prestamos    += $_POST['total_prestamos'][$key];
+        $ver_total_prestamos_ef += $_POST['descuento_prestamoef'][$key];
+        $ver_total_desc_materi  += $_POST['descuento_materiales'][$key];
+        $ver_total_domingo      += $_POST['domingo'][$key];
+        $ver_total_otros        += $_POST['bonos'][$key]+$_POST['otros'][$key];
 
-      $empleados_sin_departamento[$key] = [
-        'row_post'    => $key,
-        'id_empleado' => $empleado,
-        'departamento' => false,
-      ];
+        $empleados_sin_departamento[$key] = [
+          'row_post'    => $key,
+          'id_empleado' => $empleado,
+          'departamento' => false,
+        ];
+      }
     }
 
     $columnas = array('n' => array(), 'w' => array(6, 60, 10, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R'));
@@ -5773,112 +5777,114 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Cell(130, 6, $departamento->nombre, 0, 0, 'L', 0);
 
       $pdf->SetXY(6, $pdf->GetY()+6);
-      foreach ($_POST['empleado_id'] as $key => $empleado)
-      {
-        if($departamento->id_departamento == $_POST['departamento_id'][$key])
+      if (isset($_POST['empleado_id']) && count($_POST['empleado_id']) > 0) {
+        foreach ($_POST['empleado_id'] as $key => $empleado)
         {
-          $numero_empleado++;
-          $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
+          if($departamento->id_departamento == $_POST['departamento_id'][$key])
+          {
+            $numero_empleado++;
+            $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
 
-          $pdf->SetFont('Helvetica','', 8);
-          if($pdf->GetY()+8 >= $pdf->limiteY){
-            $pdf->AddPage();
-            $pdf->SetFont('Helvetica','B', 8);
+            $pdf->SetFont('Helvetica','', 8);
+            if($pdf->GetY()+8 >= $pdf->limiteY){
+              $pdf->AddPage();
+              $pdf->SetFont('Helvetica','B', 8);
+              $pdf->SetXY(6, $pdf->GetY());
+              // $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
+              // $pdf->SetWidths(array(64, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20));
+              $pdf->Row($columnas['n'], false, false, null, 2, 1);
+            }
+
+            $pdf->SetFont('Helvetica','', 8);
+            $total_pagar = $_POST['sueldo_semanal_real'][$key] +
+              ($_POST['bonos'][$key]+$_POST['otros'][$key]) +
+              $_POST['domingo'][$key] -
+              $_POST['total_prestamos'][$key] -
+              $_POST['total_infonavit'][$key] -
+              $_POST['descuento_playeras'][$key] -
+              $_POST['descuento_otros'][$key] -
+              $_POST['descuento_prestamoef'][$key] -
+              $_POST['descuento_materiales'][$key] -
+              $_POST['fondo_ahorro'][$key];
             $pdf->SetXY(6, $pdf->GetY());
-            // $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
-            // $pdf->SetWidths(array(64, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20));
-            $pdf->Row($columnas['n'], false, false, null, 2, 1);
+
+            $dataarr = array();
+            $dataarr[] = $numero_empleado;
+            $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+            $dataarr[] = $_POST['hrs_trabajadas'][$key];
+            $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
+            // $dataarr[] = MyString::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
+            // $dataarr[] = MyString::formatoNumero($_POST['despensa'][$key], 2, '$', false);
+
+            if ($ver_total_otros != 0)
+              $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
+            if ($ver_total_domingo != 0)
+              $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '$', false);
+            if (($ver_total_prestamos+$ver_total_prestamos_ef+$ver_total_desc_materi) != 0)
+              $dataarr[] = MyString::formatoNumero(($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key]), 2, '$', false);
+
+            if ($ver_fondo_arro != 0)
+            {
+              $dataarr[] = MyString::formatoNumero($_POST['fondo_ahorro'][$key], 2, '$', false);
+            }
+
+            if ($ver_infonavit != 0)
+            {
+              $dataarr[] = MyString::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
+            }
+
+            if($ver_des_playera)
+              $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
+            if($ver_des_otro){
+              $dataarr[] = MyString::formatoNumero(
+                floatval($_POST['descuento_otros'][$key])
+                , 2, '$', false);
+            }
+            if($ver_des_cocina)
+              $dataarr[] = MyString::formatoNumero($_POST['descuento_cocina'][$key], 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
+
+            if ($ver_trans != 0)
+            {
+              $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+            }
+
+            $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
+
+            $pdf->Row($dataarr, false, true, null, 2, 1);
+            $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
+            // $premio_asistencia   += $_POST['premio_asistencia'][$key];
+            // $despensa            += $_POST['despensa'][$key];
+            $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
+            $domingo             += $_POST['domingo'][$key];
+            $total_prestamos     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key];
+            $total_infonavit     += $_POST['total_infonavit'][$key];
+            $total_fondo         += $_POST['fondo_ahorro'][$key];
+            $descuento_playeras  += $_POST['descuento_playeras'][$key];
+            $descuento_otros     += floatval($_POST['descuento_otros'][$key]);
+            $descuento_cocina    += floatval($_POST['descuento_cocina'][$key]);
+            $ttotal_pagar        += $total_pagar;
+            $ttotal_nomina       += $_POST['ttotal_nomina'][$key];
+            $total_no_fiscal     += $_POST['total_no_fiscal'][$key];
+            $ttotal_aseg_no_trs  += $_POST['total_percepciones'][$key]-$_POST['total_deducciones'][$key];
+
+            $sueldo_semanal_real1 += $_POST['sueldo_semanal_real'][$key];
+            // $premio_asistencia1   += $_POST['premio_asistencia'][$key];
+            // $despensa1            += $_POST['despensa'][$key];
+            $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
+            $domingo1             += $_POST['domingo'][$key];
+            $total_prestamos1     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key];
+            $total_infonavit1     += $_POST['total_infonavit'][$key];
+            $total_fondo1         += $_POST['fondo_ahorro'][$key];
+            $descuento_playeras1  += $_POST['descuento_playeras'][$key];
+            $descuento_otros1     += floatval($_POST['descuento_otros'][$key]);
+            $descuento_cocina1    += $_POST['descuento_cocina'][$key];
+            $ttotal_pagar1        += $total_pagar;
+            $ttotal_nomina1       += $_POST['ttotal_nomina'][$key];
+            $total_no_fiscal1     += $_POST['total_no_fiscal'][$key];
+
+            unset($empleados_sin_departamento[$key]);
           }
-
-          $pdf->SetFont('Helvetica','', 8);
-          $total_pagar = $_POST['sueldo_semanal_real'][$key] +
-            ($_POST['bonos'][$key]+$_POST['otros'][$key]) +
-            $_POST['domingo'][$key] -
-            $_POST['total_prestamos'][$key] -
-            $_POST['total_infonavit'][$key] -
-            $_POST['descuento_playeras'][$key] -
-            $_POST['descuento_otros'][$key] -
-            $_POST['descuento_prestamoef'][$key] -
-            $_POST['descuento_materiales'][$key] -
-            $_POST['fondo_ahorro'][$key];
-          $pdf->SetXY(6, $pdf->GetY());
-
-          $dataarr = array();
-          $dataarr[] = $numero_empleado;
-          $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-          $dataarr[] = $_POST['hrs_trabajadas'][$key];
-          $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
-          // $dataarr[] = MyString::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
-          // $dataarr[] = MyString::formatoNumero($_POST['despensa'][$key], 2, '$', false);
-
-          if ($ver_total_otros != 0)
-            $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
-          if ($ver_total_domingo != 0)
-            $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '$', false);
-          if (($ver_total_prestamos+$ver_total_prestamos_ef+$ver_total_desc_materi) != 0)
-            $dataarr[] = MyString::formatoNumero(($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key]), 2, '$', false);
-
-          if ($ver_fondo_arro != 0)
-          {
-            $dataarr[] = MyString::formatoNumero($_POST['fondo_ahorro'][$key], 2, '$', false);
-          }
-
-          if ($ver_infonavit != 0)
-          {
-            $dataarr[] = MyString::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
-          }
-
-          if($ver_des_playera)
-            $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
-          if($ver_des_otro){
-            $dataarr[] = MyString::formatoNumero(
-              floatval($_POST['descuento_otros'][$key])
-              , 2, '$', false);
-          }
-          if($ver_des_cocina)
-            $dataarr[] = MyString::formatoNumero($_POST['descuento_cocina'][$key], 2, '$', false);
-          $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
-
-          if ($ver_trans != 0)
-          {
-            $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
-          }
-
-          $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
-
-          $pdf->Row($dataarr, false, true, null, 2, 1);
-          $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
-          // $premio_asistencia   += $_POST['premio_asistencia'][$key];
-          // $despensa            += $_POST['despensa'][$key];
-          $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
-          $domingo             += $_POST['domingo'][$key];
-          $total_prestamos     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key];
-          $total_infonavit     += $_POST['total_infonavit'][$key];
-          $total_fondo         += $_POST['fondo_ahorro'][$key];
-          $descuento_playeras  += $_POST['descuento_playeras'][$key];
-          $descuento_otros     += floatval($_POST['descuento_otros'][$key]);
-          $descuento_cocina    += floatval($_POST['descuento_cocina'][$key]);
-          $ttotal_pagar        += $total_pagar;
-          $ttotal_nomina       += $_POST['ttotal_nomina'][$key];
-          $total_no_fiscal     += $_POST['total_no_fiscal'][$key];
-          $ttotal_aseg_no_trs  += $_POST['total_percepciones'][$key]-$_POST['total_deducciones'][$key];
-
-          $sueldo_semanal_real1 += $_POST['sueldo_semanal_real'][$key];
-          // $premio_asistencia1   += $_POST['premio_asistencia'][$key];
-          // $despensa1            += $_POST['despensa'][$key];
-          $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
-          $domingo1             += $_POST['domingo'][$key];
-          $total_prestamos1     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key];
-          $total_infonavit1     += $_POST['total_infonavit'][$key];
-          $total_fondo1         += $_POST['fondo_ahorro'][$key];
-          $descuento_playeras1  += $_POST['descuento_playeras'][$key];
-          $descuento_otros1     += floatval($_POST['descuento_otros'][$key]);
-          $descuento_cocina1    += $_POST['descuento_cocina'][$key];
-          $ttotal_pagar1        += $total_pagar;
-          $ttotal_nomina1       += $_POST['ttotal_nomina'][$key];
-          $total_no_fiscal1     += $_POST['total_no_fiscal'][$key];
-
-          unset($empleados_sin_departamento[$key]);
         }
       }
 

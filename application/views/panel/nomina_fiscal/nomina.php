@@ -84,7 +84,7 @@
 
                     <?php if ( $nominas_finalizadas){ ?>
                       <a href="<?php echo base_url('panel/nomina_fiscal/recibos_nomina_pdf/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Recibos Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
-                      <a href="<?php echo base_url('panel/nomina_trabajos/nomina_fiscal_ticket/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Tickets Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
+                      <a href="<?php echo base_url('panel/nomina_trabajos2/nomina_fiscal_ticket/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Tickets Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
                     <?php } ?>
 
                   </div>

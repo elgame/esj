@@ -203,9 +203,11 @@ class existencias_limon_model extends CI_Model {
 
 
     $produccion = $this->db->query(
-      "SELECT STRING_AGG(Distinct c.nombre, ', ') AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
+      "SELECT STRING_AGG(Distinct c.nombre, ', ') AS clasificacion,
+        Sum(CASE WHEN u.codigo <> 'KILOS' THEN rrc.rendimiento ELSE 0 END) AS cantidad,
         Coalesce(elp.costo, 0) AS costo, (Coalesce(elp.costo, 0)*Sum(rrc.rendimiento)) AS importe, u.id_unidad,
-        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kilos,
+        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad,
+        (Sum(rrc.rendimiento) * u.cantidad) AS kilos,
         elp.id AS id_produccion, ca.id_calibre, ca.nombre AS calibre
       FROM rastria_rendimiento rr
         INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento
@@ -2916,7 +2918,7 @@ class existencias_limon_model extends CI_Model {
 
 
     // TOTALES
-    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) + $industrial_importe;
+    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) - $totalGastos + $industrial_importe;
     $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos + $frutaCompra_kilos + $devFruta_kilos;
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
@@ -3022,6 +3024,10 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(120, $pdf->GetY());
     $pdf->Row(array('(-) GASTOS DE VENTAS', MyString::formatoNumero($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe, 2, '', false)), true, 'B');
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) GASTOS GENERALES', MyString::formatoNumero($totalGastos, 2, '', false)), true, 'B');
     $pdf->chkSaltaPag([120, 10]);
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(120, $pdf->GetY());

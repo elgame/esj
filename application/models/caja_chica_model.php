@@ -300,15 +300,23 @@ class caja_chica_model extends CI_Model {
       if ($deudores && $deudores->num_rows() > 0)
       {
         $info['deudores'] = $deudores->result();
-        $info['deudores_prest_dia'] = 0;
+        // $info['deudores_prest_dia'] = 0;
         foreach ($info['deudores'] as $key => $value) {
           $info['deudores'][$key]->mismo_dia = 'readonly';
           if (strtotime($value->fecha) == strtotime($fecha)) {
-            $info['deudores_prest_dia'] += $value->monto;
+            // $info['deudores_prest_dia'] += $value->monto;
             $info['deudores'][$key]->mismo_dia = '';
           }
         }
+      }
 
+      $info['deudores_prest_dia'] = 0;
+      $deudores = $this->db->query(
+        "SELECT Sum(cd.monto) AS monto FROM cajachica_deudores cd
+        WHERE cd.no_caja = {$noCaja} AND cd.fecha = '{$fecha}'"
+      )->row();
+      if (isset($deudores->monto)) {
+        $info['deudores_prest_dia'] = $deudores->monto;
       }
 
       $info['deudores_abonos_dia'] = 0;
@@ -357,14 +365,23 @@ class caja_chica_model extends CI_Model {
       if ($acreedores && $acreedores->num_rows() > 0)
       {
         $info['acreedores'] = $acreedores->result();
-        $info['acreedor_prest_dia'] = 0;
+        // $info['acreedor_prest_dia'] = 0;
         foreach ($info['acreedores'] as $key => $value) {
           $info['acreedores'][$key]->mismo_dia = false;
           if (strtotime($value->fecha) == strtotime($fecha)) {
-            $info['acreedor_prest_dia'] += $value->monto;
+            // $info['acreedor_prest_dia'] += $value->monto;
             $info['acreedores'][$key]->mismo_dia = true;
           }
         }
+      }
+
+      $info['acreedor_prest_dia'] = 0;
+      $acreedores = $this->db->query(
+        "SELECT Sum(cd.monto) AS monto FROM cajachica_deudores cd
+        WHERE cd.no_caja in({$ddNoCaja}) AND cd.fecha = '{$fecha}' AND cd.tipo = '{$ddTipo}'"
+      )->row();
+      if (isset($acreedores->monto)) {
+        $info['acreedor_prest_dia'] = $acreedores->monto;
       }
 
       $info['acreedor_abonos_dia'] = 0;

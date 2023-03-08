@@ -1,12 +1,25 @@
 
- ☐ Reporte estado resultado transp agregar multimple los litros y precios en reporte sacar un promedio
+ ☐ Catalogo de labores para combustible
+   -- lap|san
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Labores de Combustible',152,true,'labores_codigo/combus/','barcode',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',582,false,'labores_codigo/combus_modificar/','edit',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',582,true,'labores_codigo/combus_agregar/','plus',false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',582,false,'labores_codigo/combus_eliminar/','ban-circle',false);
+    ALTER TABLE IF EXISTS public.compras_salidas_labores ADD COLUMN tipo character varying(10) COLLATE pg_catalog."default" DEFAULT 'nom'::character varying;
+    COMMENT ON COLUMN public.compras_salidas_labores.tipo IS 'nom: codigos para nomina, com: codigo para combustible compras';
+ ✔ Reporte estado resultado transp agregar multimple los litros y precios en reporte sacar un promedio @done (23-02-22 00:19)
    en reporte de relacion de fletes ordenar por fecha los vajes
    Agregar fecha de viaje y tomar esa fecha para el reporte relacion de fecha,
    quitar de gastos los conceptos COSTO MENSUAL GENERAL EST, COSTO ESTIMADO, COSTO MENSUAL GENERAL
+   -- lap|pcc|san
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans ADD COLUMN fecha_viaje date;
+   UPDATE otros.estado_resultado_trans SET fecha_viaje = fecha;
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans ADD COLUMN lts_precios json;
+   UPDATE otros.estado_resultado_trans SET lts_precios = ('[{"rend_lts": ' || rend_lts || ', "rend_precio": ' || rend_precio || '}]')::json;
  ✔ Reporte cuentas por pagar que salgan todos @done (23-02-15 18:34)
  ✔ En captura de actividades 2 de nomina, filtrar las tablas por rancho @done (23-02-16 16:48)
  ✔ Reporte de prenomina agregar bonos, -fonacot, -infonavit, -pencion @done (23-02-17 19:04)
-   -- lap|san
+   -- lap|san|pcc
    CREATE TABLE IF NOT EXISTS public.nomina_trabajos_dia2_labores_areas
       (
           id bigserial NOT NULL,
@@ -18,10 +31,9 @@
       INSERT INTO public.nomina_trabajos_dia2_labores_areas(nombre) VALUES ('Administrativo'),('Arieros'),('Control de Maleza'),
         ('Control de Plagas'),('Labores Varias'),('Mantenimiento'),('Nutrición'),('Riego'),('Operadores'),('Deshije');
    -- DELETE FROM public.compras_salidas_labores;
-   -- lap
    ALTER TABLE IF EXISTS public.nomina_trabajos_dia2 ADD COLUMN avance_real double precision DEFAULT 0;
  ✔ Agregar codigo en gastos directos y agregar en el reporte @done (23-02-15 18:34)
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE IF EXISTS public.compras ADD COLUMN id_cat_codigos bigint;
    ALTER TABLE IF EXISTS public.compras ADD CONSTRAINT compras_id_cat_codigos_fkey FOREIGN KEY (id_cat_codigos) REFERENCES otros.cat_codigos (id_cat_codigos) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
  ☐ modificar los tickets de nomina como la foto
@@ -35,9 +47,7 @@
    ALTER TABLE IF EXISTS otros.centro_costo ADD COLUMN id_rancho bigint;
    ALTER TABLE IF EXISTS otros.centro_costo ADD CONSTRAINT centro_costo_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Pre Nomina',364,true,'nomina_trabajos2/rpt_prenomina/','print',true);
-   -- pcc|lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Auditoria de Costos',364,true,'nomina_trabajos2/rpt_auditoria_costos/','print',true);
-   -- lap
    CREATE OR REPLACE VIEW public.nomina_trabajos_dia2_centros
      AS
      SELECT cen.id_empresa,

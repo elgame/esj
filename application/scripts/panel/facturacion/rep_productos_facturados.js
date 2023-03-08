@@ -21,6 +21,8 @@
             did_tamanio: $("#did_tamanio").val(),
             dtamanio: $("#dtamanio").val(),
             dtipo: $("#dtipo").val(),
+            dserie: $("#dserie").val(),
+            dcontiene: $("#dcontiene").val(),
             dtipoReporte: $("#dtipoReporte").val(),
             ids_productos: [],
             did_producto: '',

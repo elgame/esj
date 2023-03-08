@@ -183,8 +183,9 @@ class centros_costos_model extends CI_Model {
    */
   public function getCentrosCostosAjax($sqlX = null){
     $sql = '';
+    $fron_nomina = $this->input->get('nomina') == 'true'? true: false;
     if ($this->input->get('term') !== false) {
-      if (strlen($this->input->get('term')) > 4) {
+      if (strlen($this->input->get('term')) > 4 || !$fron_nomina) {
         $sql .= " AND (lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
                   lower(cc.codigo) = '".mb_strtolower($this->input->get('term'), 'UTF-8')."'
                 )";
