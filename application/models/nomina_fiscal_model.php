@@ -164,7 +164,7 @@ class nomina_fiscal_model extends CI_Model {
       $query = $this->db->query(
         "SELECT u.id,
                 u.no_empleado,
-                (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
+                (u.nombre || ' ' || COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '')) as nombre,
                 COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre AS nombre2,
                 u.banco,
                 COALESCE({$field_esta_asegurado}) AS esta_asegurado,
@@ -1872,6 +1872,7 @@ class nomina_fiscal_model extends CI_Model {
           'nombre'                        => $nomina[0]->nombre,
           'rfc'                           => isset($nomina[0]->rfc)? $nomina[0]->rfc: $empleado['info'][0]->rfc,
           'curp'                          => $nomina[0]->curp,
+          'cp'                            => $empleado['info'][0]->cp,
           'noEmpleado'                    => $nomina[0]->nomina->receptor['NumEmpleado'],
           'claveEntFed'                   => $nomina[0]->nomina->receptor['ClaveEntFed'],
           'departamento'                  => $empleado['info'][0]->puesto,
