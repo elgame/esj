@@ -1756,7 +1756,7 @@ class bascula extends MY_Controller {
         if ($_POST['parea'] == 2) {
           $rules[] = array('field'  => 'pid_productor',
                             'label' => 'Productor',
-                            'rules' => 'required');
+                            'rules' => $bonificacion? '': 'required');
         }
       }
       else
