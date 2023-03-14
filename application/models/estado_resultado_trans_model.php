@@ -528,15 +528,14 @@ class estado_resultado_trans_model extends privilegios_model{
 			$response['info'] = $res->row();
 			$res->free_result();
 
-      if ($response['info']->lts_precios) {
+      if (!empty($response['info']->lts_precios)) {
         $response['info']->lts_precios = json_decode($response['info']->lts_precios);
-        $response['info']->rend_lts = $response['info']->rend_precio = 0;
+        $response['info']->rend_lts = $response['info']->rend_precio = $imp_precio = 0;
         foreach ($response['info']->lts_precios as $key => $value) {
           $response['info']->rend_lts += $value->rend_lts;
-          $response['info']->rend_precio += $value->rend_precio;
+          $response['info']->rend_precio += ($value->rend_lts * $value->rend_precio);
         }
-        $response['info']->rend_lts = number_format($response['info']->rend_lts/(count($response['info']->lts_precios)>0? count($response['info']->lts_precios): 1), 2, '.', '');
-        $response['info']->rend_precio = number_format($response['info']->rend_precio/(count($response['info']->lts_precios)>0? count($response['info']->lts_precios): 1), 2, '.', '');
+        $response['info']->rend_precio = number_format($response['info']->rend_precio/($response['info']->rend_lts>0? $response['info']->rend_lts: 1), 2, '.', '');
       }
 
       if($info_basic)
