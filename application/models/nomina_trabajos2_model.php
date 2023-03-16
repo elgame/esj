@@ -272,6 +272,7 @@ class nomina_trabajos2_model extends CI_Model {
       FROM nomina_fiscal nf INNER JOIN usuarios u ON u.id = nf.id_empleado
       WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio}
         AND nf.semana = {$semana['semana']} AND nf.registro_patronal = '{$registro_patronal}'
+      ORDER BY trabajador ASC
       ")->result();
     // echo "<pre>";
     //   var_dump($empleados);

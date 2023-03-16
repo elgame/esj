@@ -398,13 +398,13 @@
           <!-- /SUELDOS -->
 
           <div class="row-fluid">
-            <?php $totalRepMant = 0; ?>
+            <?php $totalRepMantSub = $totalRepMantIva = $totalRepMantTot = 0; ?>
             <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
             <div class="span12" style="margin-top: 1px;">
               <table class="table table-striped table-bordered table-hover table-condensed" id="table-repmant">
                 <thead>
                   <tr>
-                    <th colspan="9">REP Y MTTO DE EQUIPO TRASPORTE
+                    <th colspan="11">REP Y MTTO DE EQUIPO TRASPORTE
                       <button type="button" class="btn btn-success" id="btn-add-repmant" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
                       <a href="#" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-repmant" style="padding: 2px 7px 2px; float: right;">Gastos</a>
                     </th>
@@ -414,6 +414,8 @@
                     <th>FOLIO</th>
                     <th colspan="3">PROVEEDOR</th>
                     <th>DESCRIPCION</th>
+                    <th>SUBTOTAL</th>
+                    <th>IVA</th>
                     <th>IMPORTE</th>
                     <th>COMPRO</th>
                     <th></th>
@@ -435,6 +437,8 @@
                             <input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">
                           </td>
                           <td style=""><input type="text" name="repmant_concepto[]" value="<?php echo $_POST['repmant_concepto'][$key] ?>" class="repmant-concepto" placeholder="Concepto" <?php echo $readonly ?>></td>
+                          <td style=""><input type="number" step="any" name="repmant_subtotal[]" value="<?php echo $_POST['repmant_subtotal'][$key] ?>" class="repmant-subtotal vpositive" placeholder="Subtotal" required <?php echo $readonly ?>></td>
+                          <td style=""><input type="number" step="any" name="repmant_iva[]" value="<?php echo $_POST['repmant_iva'][$key] ?>" class="repmant-iva vpositive" placeholder="Iva" required <?php echo $readonly ?>></td>
                           <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $_POST['repmant_importe'][$key] ?>" class="repmant-importe vpositive" placeholder="Importe" required <?php echo $readonly ?>></td>
                           <td style="">
                             <input type="checkbox" value="true" class="chkcomprobacion" <?php echo ($_POST['repmant_comprobacion'][$key] == 'true'? 'checked': '') ?>>
@@ -459,7 +463,9 @@
                               <input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">
                             </td>
                             <td style=""><input type="text" name="repmant_concepto[]" value="<?php echo $repmant->concepto ?>" class="repmant-concepto" placeholder="Concepto" <?php echo $readonly ?>></td>
-                            <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $repmant->subtotal ?>" class="repmant-importe vpositive" placeholder="Importe" required <?php echo $readonly ?>></td>
+                            <td style=""><input type="number" step="any" name="repmant_subtotal[]" value="<?php echo $repmant->subtotal ?>" class="repmant-subtotal vpositive" placeholder="Subtotal" required <?php echo $readonly ?>></td>
+                            <td style=""><input type="number" step="any" name="repmant_iva[]" value="<?php echo $repmant->importe_iva ?>" class="repmant-iva vpositive" placeholder="Iva" required <?php echo $readonly ?>></td>
+                            <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $repmant->total ?>" class="repmant-importe vpositive" placeholder="Importe" required <?php echo $readonly ?>></td>
                             <td style="">
                               <input type="checkbox" value="true" class="chkcomprobacion" <?php echo (isset($repmant->comprobacion) && $repmant->comprobacion == 't'? 'checked': '') ?>>
                               <input type="hidden" name="repmant_comprobacion[]" value="<?php echo (isset($repmant->comprobacion) && $repmant->comprobacion == 't'? 'true': '') ?>" class="valcomprobacion">
@@ -473,19 +479,23 @@
 
                   <?php if (isset($_POST['repmant_concepto'])) {
                     foreach ($_POST['repmant_concepto'] as $key => $repmant) {
-                        $totalRepMant += floatval($_POST['repmant_importe'][$key]);
+                        $totalRepMantSub += floatval($_POST['repmant_subtotal'][$key]);
+                        $totalRepMantIva += floatval($_POST['repmant_iva'][$key]);
+                        $totalRepMantTot += floatval($_POST['repmant_importe'][$key]);
                       ?>
                   <?php }} elseif(isset($borrador['repmant'])) {
                     foreach ($borrador['repmant'] as $repmant) {
-                        $totalRepMant += floatval($repmant->subtotal);
+                        $totalRepMantSub += floatval($repmant->subtotal);
+                        $totalRepMantIva += floatval($repmant->importe_iva);
+                        $totalRepMantTot += floatval($repmant->total);
                       ?>
                   <?php }} ?>
 
                   <tr class='row-total'>
                     <td colspan="6"></td>
-                    <td>
-                      <input type="text" name="total_repmante" value="<?php echo MyString::float(MyString::formatoNumero($totalRepMant, 2, '')) ?>" class="span12" id="total-repmant" readonly style="text-align: right;">
-                    </td>
+                    <td><input type="text" name="total_repmantesub" value="<?php echo MyString::float(MyString::formatoNumero($totalRepMantSub, 2, '')) ?>" class="span12" id="total-repmantsub" readonly style="text-align: right;"></td>
+                    <td><input type="text" name="total_repmanteiva" value="<?php echo MyString::float(MyString::formatoNumero($totalRepMantIva, 2, '')) ?>" class="span12" id="total-repmantiva" readonly style="text-align: right;"></td>
+                    <td><input type="text" name="total_repmantetot" value="<?php echo MyString::float(MyString::formatoNumero($totalRepMantTot, 2, '')) ?>" class="span12" id="total-repmant" readonly style="text-align: right;"></td>
                     <td colspan="2">
                     </td>
                   </tr>
@@ -496,7 +506,7 @@
           </div>
 
           <!-- GASTOS -->
-          <?php $totalGastos = 0; ?>
+          <?php $totalGastosSubt = $totalGastosIva = $totalGastosTot = 0; ?>
           <div class="row-fluid" style="margin-top: 5px;">
             <div class="span12">
               <div class="row-fluid">
@@ -508,7 +518,7 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                           <thead>
                             <tr>
-                              <th colspan="7">GASTOS
+                              <th colspan="9">GASTOS
                                 <button type="button" class="btn btn-success" id="btn-add-gastos" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
                                 <a href="#" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-gastos" style="padding: 2px 7px 2px; float: right;">Gastos</a>
                               </th>
@@ -518,6 +528,8 @@
                               <th style="width: 12%;">FOLIO</th>
                               <th style="width: 25%;">PROVEEDOR</th>
                               <th style="width: 25%;">CONCEPTO</th>
+                              <th style="width: 12%;">SUBTOTAL</th>
+                              <th style="width: 12%;">IVA</th>
                               <th style="width: 12%;">IMPORTE</th>
                               <th style="width: 3%;">COMPRO</th>
                               <th style="width: 3%;"></th>
@@ -527,7 +539,10 @@
                             <?php
                               if (isset($_POST['gastos_proveedor'])) {
                                 foreach ($_POST['gastos_proveedor'] as $key => $concepto) {
-                                  $totalGastos += floatval($_POST['gastos_importe'][$key]); ?>
+                                  $totalGastosSubt += floatval($_POST['gastos_subtotal'][$key]);
+                                  $totalGastosIva += floatval($_POST['gastos_iva'][$key]);
+                                  $totalGastosTot += floatval($_POST['gastos_importe'][$key]);
+                            ?>
                                 <tr>
                                   <td><input type="date" name="gastos_fecha[]" value="<?php echo $_POST['gastos_fecha'][$key] ?>" required></td>
                                   <td><input type="text" name="gastos_folio[]" value="<?php echo $_POST['gastos_folio'][$key] ?>"></td>
@@ -541,6 +556,8 @@
                                     <input type="text" name="gastos_codg[]" value="<?php echo $_POST['gastos_codg'][$key] ?>" class="span12 codsgastos" required>
                                     <input type="hidden" name="gastos_codg_id[]" value="<?php echo $_POST['gastos_codg_id'][$key] ?>" class="span12 vpositive codsgastos-id">
                                   </td>
+                                  <td style=""><input type="text" name="gastos_subtotal[]" value="<?php echo $_POST['gastos_subtotal'][$key] ?>" class="span12 vpositive gastos-subtotal" required></td>
+                                  <td style=""><input type="text" name="gastos_iva[]" value="<?php echo $_POST['gastos_iva'][$key] ?>" class="span12 vpositive gastos-iva" required></td>
                                   <td style=""><input type="text" name="gastos_importe[]" value="<?php echo $_POST['gastos_importe'][$key] ?>" class="span12 vpositive gastos-importe" required></td>
                                   <td style="">
                                     <input type="checkbox" value="true" class="chkcomprobacion" <?php echo ($_POST['gastos_comprobacion'][$key] == 'true'? 'checked': '') ?>>
@@ -554,7 +571,9 @@
                             <?php }} else {
                               if (isset($borrador['gastos']))
                               foreach ($borrador['gastos'] as $gasto) {
-                                $totalGastos += floatval($gasto->subtotal);
+                                $totalGastosSubt += floatval($gasto->subtotal);
+                                $totalGastosIva += floatval($gasto->importe_iva);
+                                $totalGastosTot += floatval($gasto->total);
                               ?>
                               <tr>
                                 <td><input type="date" name="gastos_fecha[]" value="<?php echo $gasto->fecha ?>" required></td>
@@ -569,7 +588,9 @@
                                   <input type="text" name="gastos_codg[]" value="<?php echo $gasto->codg ?>" class="span12 codsgastos" required>
                                   <input type="hidden" name="gastos_codg_id[]" value="<?php echo $gasto->id_codg ?>" class="span12 vpositive codsgastos-id">
                                 </td>
-                                <td style=""><input type="text" name="gastos_importe[]" value="<?php echo $gasto->subtotal ?>" class="span12 vpositive gastos-importe" required></td>
+                                <td style=""><input type="text" name="gastos_subtotal[]" value="<?php echo $gasto->subtotal ?>" class="span12 vpositive gastos-subtotal" required></td>
+                                <td style=""><input type="text" name="gastos_iva[]" value="<?php echo $gasto->importe_iva ?>" class="span12 vpositive gastos-iva" required></td>
+                                <td style=""><input type="text" name="gastos_importe[]" value="<?php echo $gasto->total ?>" class="span12 vpositive gastos-importe" required></td>
                                 <td style="">
                                   <input type="checkbox" value="true" class="chkcomprobacion" <?php echo (isset($gasto->comprobacion) && $gasto->comprobacion == 't'? 'checked': '') ?>>
                                   <input type="hidden" name="gastos_comprobacion[]" value="<?php echo (isset($gasto->comprobacion) && $gasto->comprobacion == 't'? 'true': '') ?>" class="valcomprobacion">
@@ -582,7 +603,9 @@
                             <?php }} ?>
                             <tr class="row-total">
                               <td colspan="4" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                              <td><input type="text" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                              <td><input type="text" value="<?php echo $totalGastosSubt ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                              <td><input type="text" value="<?php echo $totalGastosIva ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                              <td><input type="text" value="<?php echo $totalGastosTot ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                               <td colspan="3"></td>
                             </tr>
                           </tbody>

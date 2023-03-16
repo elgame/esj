@@ -47,6 +47,10 @@ class bascula extends MY_Controller {
 
     'bascula/rpt_ent_pina_pdf/',
     'bascula/rpt_ent_pina_xls/',
+    'bascula/rpt_boletas_salida_pdf/',
+    'bascula/rpt_boletas_salida_xls/',
+    'bascula/rpt_boletas_porpagar_pdf/',
+    'bascula/rpt_boletas_porpagar_xls/',
 
     'bascula/imprimir_pagadas/',
 
@@ -841,6 +845,85 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     $this->bascula_model->rbp_xls();
+  }
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE BOLETAS PAGADAS"
+   *
+   * @return void
+   */
+  public function rpt_boletas_salida()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rpt_boletas_salida.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Salidas de Boletas'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rpt_boletas_salida', $params);
+    $this->load->view('panel/footer');
+  }
+  /**
+   * Procesa los datos para mostrar el reporte rcr en pdf
+   * @return void
+   */
+  public function rpt_boletas_salida_pdf()
+  {
+    $this->load->model('bascula2_model');
+    $this->bascula2_model->rpt_boletas_salida_pdf();
+  }
+  public function rpt_boletas_salida_xls()
+  {
+    $this->load->model('bascula2_model');
+    $this->bascula2_model->rpt_boletas_salida_pdf();
+  }
+
+  public function rpt_boletas_porpagar()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rpt_boletas_porpagar.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Boletas Por Pagar'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rpt_boletas_porpagar', $params);
+    $this->load->view('panel/footer');
+  }
+  public function rpt_boletas_porpagar_pdf()
+  {
+    $this->load->model('bascula2_model');
+    $this->bascula2_model->rpt_boletas_porpagar_pdf();
+  }
+  public function rpt_boletas_porpagar_xls()
+  {
+    $this->load->model('bascula2_model');
+    $this->bascula2_model->rpt_boletas_porpagar_xls();
   }
 
   public function rpt_ent_pina()

@@ -113,7 +113,7 @@ class estado_resultado_trans_model extends privilegios_model{
   {
     $gastos = $this->db->query(
       "SELECT c.id_compra, Date(c.fecha) AS fecha, p.id_proveedor, p.nombre_fiscal AS proveedor,
-        (c.serie || c.folio) AS folio, c.concepto, c.subtotal, c.total
+        (c.serie || c.folio) AS folio, c.concepto, c.subtotal, c.total, c.importe_iva
        FROM compras c
          INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
        WHERE c.id_empresa = {$id_empresa} AND c.status <> 'ca'
@@ -220,6 +220,7 @@ class estado_resultado_trans_model extends privilegios_model{
       'id_empresa'     => $this->input->post('did_empresa'),
       'id_creo'        => $this->session->userdata('id_usuario'),
       'fecha'          => $this->input->post('dfecha'),
+      'fecha_viaje'    => $this->input->post('dfecha_viaje'),
       'folio'          => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
       'km_rec'         => floatval($this->input->post('dkm_rec')),
       'vel_max'        => floatval($this->input->post('dvel_max')),
@@ -283,7 +284,9 @@ class estado_resultado_trans_model extends privilegios_model{
           'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
           'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
           'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
-          'subtotal'     => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
+          'subtotal'     => $_POST['repmant_subtotal'][$key] !== '' ? $_POST['repmant_subtotal'][$key] : null,
+          'iva'          => $_POST['repmant_iva'][$key] !== '' ? $_POST['repmant_iva'][$key] : null,
+          'importe'      => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
         );
       }
       if(count($repmant) > 0)
@@ -304,6 +307,8 @@ class estado_resultado_trans_model extends privilegios_model{
           'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
           'id_cod'       => $id_cod,
           'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+          'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
+          'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
           'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
           'cantidad'     => 0,
           'precio'       => 0,
@@ -338,6 +343,7 @@ class estado_resultado_trans_model extends privilegios_model{
       'id_empresa'     => $this->input->post('did_empresa'),
       'id_creo'        => $this->session->userdata('id_usuario'),
       'fecha'          => $this->input->post('dfecha'),
+      'fecha_viaje'    => $this->input->post('dfecha_viaje'),
       // 'folio'       => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
       'km_rec'         => floatval($this->input->post('dkm_rec')),
       'vel_max'        => floatval($this->input->post('dvel_max')),
@@ -415,7 +421,9 @@ class estado_resultado_trans_model extends privilegios_model{
           'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
           'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
           'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
-          'subtotal'     => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
+          'subtotal'     => $_POST['repmant_subtotal'][$key] !== '' ? $_POST['repmant_subtotal'][$key] : null,
+          'iva'          => $_POST['repmant_iva'][$key] !== '' ? $_POST['repmant_iva'][$key] : null,
+          'importe'      => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
         );
       }
 
@@ -441,6 +449,8 @@ class estado_resultado_trans_model extends privilegios_model{
             'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
             'id_cod'       => $id_cod,
             'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+            'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
+            'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
             'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
             'cantidad'     => 0,
             'precio'       => 0,
@@ -452,6 +462,8 @@ class estado_resultado_trans_model extends privilegios_model{
             'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
             'id_cod'       => $id_cod,
             'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+            'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
+            'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
             'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
             'cantidad'     => 0,
             'precio'       => 0,
@@ -589,8 +601,8 @@ class estado_resultado_trans_model extends privilegios_model{
       $res = $this->db->query("SELECT v.id_compra AS id_compra, Coalesce(Date(f.fecha), v.fecha ) AS fecha,
           Coalesce((f.serie || f.folio), v.folio ) AS folio, p.id_proveedor,
           Coalesce(p.nombre_fiscal, v.proveedor ) AS proveedor,
-          Coalesce(f.subtotal, v.subtotal ) AS subtotal, Coalesce(f.total, v.subtotal ) AS total,
-          Coalesce(f.importe_iva, 0::double precision ) AS importe_iva,
+          Coalesce(f.subtotal, v.subtotal ) AS subtotal, Coalesce(f.total, v.importe ) AS total,
+          Coalesce(f.importe_iva, v.iva ) AS importe_iva,
           Coalesce(f.concepto, v.concepto ) AS concepto, v.comprobacion
         FROM otros.estado_resultado_trans_rep_mtto v
           LEFT JOIN compras f ON v.id_compra = f.id_compra
@@ -602,8 +614,8 @@ class estado_resultado_trans_model extends privilegios_model{
       $res = $this->db->query("SELECT v.id, v.id_compra AS id_compra,
           Coalesce((f.serie || f.folio), v.folio ) AS folio, p.id_proveedor,
           p.nombre_fiscal AS proveedor, Coalesce(Date(f.fecha), v.fecha ) AS fecha,
-          Coalesce(f.subtotal, v.importe ) AS subtotal, Coalesce(f.total, v.importe ) AS total,
-          Coalesce(f.importe_iva, 0::double precision ) AS importe_iva,
+          Coalesce(f.subtotal, v.subtotal ) AS subtotal, Coalesce(f.total, v.importe ) AS total,
+          Coalesce(f.importe_iva, v.iva ) AS importe_iva,
           c.nombre AS codg, c.id AS id_codg, v.comprobacion
         FROM otros.estado_resultado_trans_gastos v
           INNER JOIN proveedores p ON p.id_proveedor = v.id_proveedor

@@ -1,5 +1,19 @@
 
- ☐ Catalogo de labores para combustible
+ ☐ Imprimir gastos
+ ✔ Reporte de salidas de boletas @done (23-03-15 15:43)
+   -- lap
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas de Boletas',365,true,'bascula/rpt_boletas_salida/','print',true);
+ ✔ Reporte de boletas pendientes de pago por proveedor @done (23-03-15 17:52)
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Boletas Por Pagar',365,true,'bascula/rpt_boletas_porpagar/','print',true);
+ ☐ Estado result de fletes, poner en gastos y mantenimiento subtotal, iva e importe, en el reporte usar el subtotal
+   -- lap
+    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN subtotal double precision DEFAULT 0;
+    ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN iva double precision DEFAULT 0;
+    ALTER TABLE IF EXISTS otros.estado_resultado_trans_rep_mtto ADD COLUMN importe double precision DEFAULT 0;
+    ALTER TABLE IF EXISTS otros.estado_resultado_trans_rep_mtto ADD COLUMN iva double precision DEFAULT 0;
+    UPDATE otros.estado_resultado_trans_rep_mtto SET importe = subtotal;
+    UPDATE otros.estado_resultado_trans_gastos SET subtotal = importe;
+ ✔ Catalogo de labores para combustible @done (23-03-15 13:56)
    -- lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Labores de Combustible',152,true,'labores_codigo/combus/','barcode',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',582,false,'labores_codigo/combus_modificar/','edit',false);
@@ -39,7 +53,6 @@
  ☐ modificar los tickets de nomina como la foto
  ☐ Revisar el checador con adrian y cargar las asistencias directamente
  ☐ Reporte de asistencias cambiar como la foto
- ☐ Reporte de boletas pendientes de pago por proveedor
  ☐ Reportes de nomina
    -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Costo x Labor',364,true,'nomina_trabajos2/rpt_costo_labores/','print',true);

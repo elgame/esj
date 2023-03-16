@@ -287,7 +287,9 @@
         for (var key in json) {
           html += '<tr>'+
               '<td><input type="checkbox" class="chk-repmant" data-id="'+json[key].id_compra+'" '+
-                'data-folio="'+json[key].folio+'" data-total="'+json[key].subtotal+'" '+
+                'data-folio="'+json[key].folio+'" data-total="'+json[key].total+'" '+
+                'data-subtotal="'+json[key].subtotal+'" '+
+                'data-iva="'+json[key].importe_iva+'" '+
                 'data-proveedor="'+json[key].proveedor+'" '+
                 'data-proveedorid="'+json[key].id_proveedor+'" '+
                 'data-concepto="'+json[key].concepto+'" '+
@@ -295,7 +297,7 @@
               '<td style="width: 66px;">'+json[key].fecha+'</td>'+
               '<td>'+json[key].folio+'</td>'+
               '<td>'+json[key].proveedor+'</td>'+
-              '<td style="text-align: right;">'+json[key].subtotal+'</td>'+
+              '<td style="text-align: right;">'+json[key].total+'</td>'+
             '</tr>';
         }
 
@@ -317,6 +319,8 @@
             agregarRepMant({
               id: $this.attr('data-id'),
               folio: $this.attr('data-folio'),
+              subtotal: $this.attr('data-subtotal'),
+              iva: $this.attr('data-iva'),
               total: $this.attr('data-total'),
               proveedor: $this.attr('data-proveedor'),
               concepto: $this.attr('data-concepto'),
@@ -326,6 +330,8 @@
             agregarGastos({
               id: $this.attr('data-id'),
               folio: $this.attr('data-folio'),
+              subtotal: $this.attr('data-subtotal'),
+              iva: $this.attr('data-iva'),
               total: $this.attr('data-total'),
               proveedor: $this.attr('data-proveedor'),
               proveedorId: $this.attr('data-proveedorid'),
@@ -364,6 +370,8 @@
       agregarRepMant({
         id: '',
         folio: '',
+        subtotal: '',
+        iva: '',
         total: '',
         proveedor: '',
         concepto: '',
@@ -377,6 +385,7 @@
 
     if ($('#table-repmant').find('.repmant-id[value='+compra.id+']').length == 0 || compra.id == '') {
       var folio = '', folio = '', id = '', total = '0', proveedor = '', concepto = '', fecha = '';
+      let subtotal = iva = '';
       if (compra) {
         id        = compra.id;
         folio     = compra.folio;
@@ -384,7 +393,10 @@
         proveedor = compra.proveedor;
         concepto  = compra.concepto;
         fecha     = compra.fecha;
+        iva       = compra.iva;
+        subtotal  = compra.subtotal;
       }
+      console.log('aaaaaa', compra);
 
       const readonly = id > 0 ? 'readonly' : '';
 
@@ -397,6 +409,8 @@
                 '<input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">' +
               '</td>' +
               '<td style=""><input type="text" name="repmant_concepto[]" value="'+concepto+'" class="repmant-concepto" placeholder="Concepto" '+readonly+'></td>' +
+              '<td style=""><input type="number" step="any" name="repmant_subtotal[]" value="'+subtotal+'" class="repmant-subtotal vpositive" placeholder="Subtotal" required '+readonly+'></td>' +
+              '<td style=""><input type="number" step="any" name="repmant_iva[]" value="'+iva+'" class="repmant-iva vpositive" placeholder="Iva" required '+readonly+'></td>' +
               '<td style=""><input type="number" step="any" name="repmant_importe[]" value="'+total+'" class="repmant-importe vpositive" placeholder="Importe" required '+readonly+'></td>' +
               '<td style="">' +
                 '<input type="checkbox" value="true" class="chkcomprobacion">' +
@@ -447,6 +461,8 @@
         id: '',
         folio: '',
         total: '',
+        subtotal: '',
+        iva: '',
         proveedor: '',
         proveedorId: '',
         concepto: '',
@@ -469,6 +485,8 @@
                 '<input type="text" name="gastos_codg[]" value="' + compra.concepto + '" class="span12 codsgastos" required>'+
                 '<input type="hidden" name="gastos_codg_id[]" value="" class="span12 vpositive codsgastos-id">'+
               '</td>'+
+              '<td style=""><input type="text" name="gastos_subtotal[]" value="' + compra.subtotal + '" class="span12 vpositive gastos-subtotal" required></td>'+
+              '<td style=""><input type="text" name="gastos_iva[]" value="' + compra.iva + '" class="span12 vpositive gastos-iva" required></td>'+
               '<td style=""><input type="text" name="gastos_importe[]" value="' + compra.total + '" class="span12 vpositive gastos-importe" required></td>'+
               '<td style="">' +
                 '<input type="checkbox" value="true" class="chkcomprobacion">' +
