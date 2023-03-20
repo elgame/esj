@@ -1,9 +1,9 @@
 <?php
 class gastos_model extends privilegios_model{
 
-	function __construct(){
-		parent::__construct();
-	}
+  function __construct(){
+    parent::__construct();
+  }
 
   /**
    * Argegar un gasto.
@@ -362,6 +362,474 @@ class gastos_model extends privilegios_model{
     $result->free_result();
 
     return $response;
+  }
+
+
+  public function print($ordenId, $path = null)
+  {
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+    $this->load->model('proveedores_model');
+    $this->load->model('banco_cuentas_model');
+    $this->load->model('compras_model');
+
+    $gasto     = $this->compras_model->getInfoCompra($_GET['id'], false);
+    $proveedor = $this->proveedores_model->getProveedorInfo($gasto['info']->id_proveedor, true);
+    $empresa   = $this->empresas_model->getInfoEmpresa($gasto['info']->id_empresa, true);
+    $emp_cuenta = $this->banco_cuentas_model->getCuentaConcentradora($gasto['info']->id_empresa);
+    $proveedor_cuentas = $this->proveedores_model->getCuentas($gasto['info']->id_proveedor);
+    // echo "<pre>";
+    //   var_dump($empresa);
+    // echo "</pre>";exit;
+
+    // $orden = $this->info($ordenId, true);
+    // $ordenPago = $this->infoPago($ordenId);
+    // $ordenHistImp = $this->infoHistNoImpreciones($ordenId);
+    // $almacen = $this->almacenes_model->getAlmacenInfo($orden['info'][0]->id_almacen);
+    // $proveedor = $this->proveedores_model->getProveedorInfo($orden['info'][0]->id_proveedor);
+    // echo "<pre>";
+    //   var_dump($orden);
+    // echo "</pre>";exit;
+
+    $orientacion = 'P';
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf($orientacion, 'mm', 'Letter');
+    $pdf->show_head = false;
+    $pdf->noShowPagesPos = ($orientacion==='L'? 265: 205);
+    $pdf->titulo1 = "{$empresa['info']->nombre_fiscal}";
+
+    // $pdf->titulo3 = 'Almacen: '.$orden['info'][0]->almacen;
+    $tipo_orden = 'COMPRA DIRECTA';
+    // if($orden['info'][0]->tipo_orden == 'd') {
+    //   $tipo_orden = 'ORDEN DE SERVICIO';
+    //   if (count($orden['info'][0]->comprasligadas) > 0) {
+    //     $tipo_orden = 'SERVICIO INTERNO';
+    //   }
+    // }
+    // elseif($orden['info'][0]->tipo_orden == 'f')
+    //   $tipo_orden = 'ORDEN DE FLETE';
+    // // $pdf->titulo2 = $tipo_orden;
+    // // $pdf->titulo2 = 'Proveedor: ' . $orden['info'][0]->proveedor;
+    // // $pdf->titulo3 = " Fecha: ". date('Y-m-d') . ' Orden: ' . $orden['info'][0]->folio;
+
+    $pdf->SetLeftMargin(5);
+    $pdf->AliasNbPages();
+    $pdf->limiteY = 235;
+    $pdf->AddPage();
+
+    $pdf->logo = $empresa['info']->logo!=''? (file_exists($empresa['info']->logo)? $empresa['info']->logo: '') : '';
+    if($pdf->logo != '')
+      $pdf->Image(APPPATH.(str_replace(APPPATH, '', $pdf->logo)), 6, 5, 50);
+
+    $pdf->SetXY(150, $pdf->GetY());
+    $pdf->SetFillColor(200,200,200);
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(60));
+    $pdf->Row(array($tipo_orden), true, true);
+    $pdf->SetXY(150, $pdf->GetY());
+    $pdf->Row(array($gasto['info']->serie.' '.MyString::formatoNumero($gasto['info']->folio, 2, '')."\n \n "), false, true);
+    $pdf->SetFont('helvetica','B', 8.5);
+    $pdf->SetXY(150, $pdf->GetY()-8);
+    $pdf->Row(array(MyString::fechaATexto($gasto['info']->fecha, '/c', true)), false, false);
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetXY(150, $pdf->GetY());
+
+    $pdf->SetFont('helvetica','', 9);
+    $pdf->SetXY(80, $pdf->GetY()-20);
+    $pdf->Row(array('Impresión '.($gasto['info']->no_impresiones==0? 'ORIGINAL': ($gasto['info']->no_impresiones==1? 'COPIA ARCHIVO': 'COPIA '.$gasto['info']->no_impresiones)).
+      "\n".MyString::fechaATexto(date("Y-m-d H:i:s"), '/c', true)), false, false);
+
+    $pdf->SetXY(95, $pdf->GetY()+4);
+    $aux_y1 = $pdf->getY();
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(100));
+    $pdf->Row(array('Modo de Facturación'), false, false);
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetWidths(array(30, 50));
+    $pdf->SetXY(95, $pdf->GetY()-1.5);
+    $pdf->Row(array('Condiciones:', ($proveedor['info']->condicion_pago=='co'? 'Contado': "Crédito {$proveedor['info']->dias_credito} DIAS")), false, false);
+    $pdf->SetXY(95, $pdf->GetY()-1.5);
+    $formaPago = "99 (Por Definir)";
+    // if ($orden['info'][0]->forma_pago_all) { // agroinsumos
+    //   $formaPago = "{$orden['info'][0]->forma_pago_all['key']} ({$orden['info'][0]->forma_pago_all['value']})";
+    // }
+    $pdf->Row(array('Forma de Pago:', $formaPago), false, false);
+    $pdf->SetXY(95, $pdf->GetY()-1.5);
+    $pdf->Row(array('Método de Pago:', "PPD (Pago Parcialidades/Diferido)"), false, false);
+    $usoCFDI = 'G03 (Gastos en General)';
+    // if ($orden['info'][0]->uso_cfdi_all) { // agroinsumos
+    //   $usoCFDI = "{$orden['info'][0]->uso_cfdi_all['key']} ({$orden['info'][0]->uso_cfdi_all['value']})";
+    // }
+
+    $pdf->SetXY(95, $pdf->GetY()-1.5);
+    $pdf->Row(array('Uso del CFDI:', $usoCFDI), false, false);
+    // $pdf->SetXY(95, $pdf->GetY()-1.5);
+    // $pdf->Row(array('Almacén:', $orden['info'][0]->almacen), false, false);
+
+    $pdf->SetXY(95, $pdf->GetY()+3);
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(100));
+    $pdf->Row(array('Complementos de Pago'), false, false);
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetWidths(array(30, 40));
+    $pdf->SetXY(95, $pdf->GetY()-1.5);
+    $pdf->Row(array('Método de Pago:', 'Transferencia'), false, false);
+    $pdf->SetWidths(array(30, 40, 40));
+    if (isset($emp_cuenta['info']->id_cuenta)) {
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Cta. Ordenante:', $emp_cuenta['info']->banco, $emp_cuenta['info']->cuenta), false, false);
+    }
+    if (count($proveedor_cuentas) > 0) {
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Cta. Beneficiario:', $proveedor_cuentas[0]->banco, $proveedor_cuentas[0]->cuenta), false, false);
+      $pdf->SetWidths(array(30, 40));
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Ref Bancaria:', $proveedor_cuentas[0]->referencia), false, false);
+    }
+
+    $pdf->SetXY(95, $pdf->GetY()+3);
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(100));
+    $pdf->Row(array('Requisitos para la Entrega de Mercancía'), false, false);
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(95, $pdf->GetY()-1.5);
+    $pdf->Row(array('( No ) Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.'), false, false);
+    $pdf->SetXY(95, $pdf->GetY()-1.5);
+    $pdf->Row(array('( No ) Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura.'), false, false);
+
+    $aux_y2 = $pdf->GetY();
+
+    $pdf->SetXY(5, $aux_y1+15);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetXY(5, $pdf->GetY());
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(150));
+    $pdf->Row(array($empresa['info']->nombre_fiscal), false, false);
+    if(!empty($empresa['info']->sucursal)){
+      $pdf->Row(array($empresa['info']->sucursal), false, false);
+    }
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(90));
+    $pdf->Row(array('Proveedor / Beneficiario'), false, false);
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetXY(5, $pdf->GetY()-1.5);
+    $pdf->Row(array($proveedor['info']->nombre_fiscal), false, false);
+    $pdf->SetXY(5, $pdf->GetY()-1.5);
+    $direccion = ($proveedor['info']->calle!=''? $proveedor['info']->calle: '').
+      ($proveedor['info']->no_exterior!=''? " No {$proveedor['info']->no_exterior}": '').
+      ($proveedor['info']->no_interior!=''? " {$proveedor['info']->no_interior}": '').
+      ($proveedor['info']->cp!=''? ", CP {$proveedor['info']->cp}": '').
+      ($proveedor['info']->colonia!=''? ", Col. {$proveedor['info']->colonia}": '').
+      ($proveedor['info']->municipio!=''? " {$proveedor['info']->municipio}": '').
+      ($proveedor['info']->estado!=''? " {$proveedor['info']->estado}": '');
+    $pdf->Row(array($direccion), false, false);
+    $pdf->SetXY(5, $pdf->GetY()-1.5);
+    $pdf->Row(array("RFC {$proveedor['info']->rfc} / Tel. {$proveedor['info']->telefono}"), false, false);
+
+    // $pdf->SetXY(5, $pdf->GetY()+3);
+    // $pdf->SetFont('helvetica','B', 8);
+    // $pdf->SetAligns(array('L', 'L', 'L'));
+    // $pdf->SetWidths(array(90));
+    // $pdf->Row(array('Dirección de Entrega'), false, false);
+    // $pdf->SetFont('helvetica', '', 8);
+    // $pdf->SetXY(5, $pdf->GetY()-1.5);
+    // $pdf->Row(array($proveedor['info']->nombre_fiscal), false, false);
+    // $pdf->SetXY(5, $pdf->GetY()-1.5);
+    // $direccion = ($almacen['info']->calle!=''? $almacen['info']->calle: '').
+    //   ($almacen['info']->no_exterior!=''? " No {$almacen['info']->no_exterior}": '').
+    //   ($almacen['info']->no_interior!=''? " {$almacen['info']->no_interior}": '').
+    //   ($almacen['info']->cp!=''? ", CP {$almacen['info']->cp}": '').
+    //   ($almacen['info']->colonia!=''? ", Col. {$almacen['info']->colonia}": '').
+    //   ($almacen['info']->municipio!=''? " {$almacen['info']->municipio}": '').
+    //   ($almacen['info']->estado!=''? " {$almacen['info']->estado}": '');
+    // $pdf->Row(array($direccion), false, false);
+    // $pdf->SetFont('helvetica','B', 8);
+    // $pdf->SetXY(5, $pdf->GetY()-1.5);
+    // $pdf->Row(array("Horario de Entrega: {$almacen['info']->horario}"), false, false);
+
+    // // Pagos de la orden
+    // if (count($ordenPago) > 0) {
+    //   // $aux_y2 = $pdf->GetY();
+    //   $pdf->SetXY(215, $aux_y1);
+    //   $pdf->SetFont('helvetica','B', 8);
+    //   $pdf->SetAligns(array('C', 'C', 'C'));
+    //   $pdf->SetWidths(array(55));
+
+    //   if ($ordenPago[0]->status == 'pa') {
+    //     $pdf->Row(array('Orden Cerrada'), true, true);
+    //     $pdf->SetXY(215, $pdf->GetY());
+    //   }
+
+    //   $pdf->Row(array('Datos del Pago'), false, false);
+    //   $pdf->SetFont('helvetica', '', 8);
+    //   // $pdf->SetWidths(array(20, 25));
+    //   $pdf->SetAligns(array('L'));
+    //   $pdf->SetXY(215, $pdf->GetY());
+    //   foreach ($ordenPago as $key => $value) {
+    //     $pdf->SetXY(215, $pdf->GetY());
+    //     $pdf->Row(array(
+    //       "Fecha: {$value->fecha}\nFactura: {$value->serie}{$value->folio}\nCuenta: {$value->alias}\nImporte: ".MyString::formatoNumero($value->total, 2, '$', false).""), false, true);
+    //     $pdf->Line(215, $pdf->GetY(), 250, $pdf->GetY());
+    //   }
+    // }
+
+    // // Boletas ligadas
+    // if (isset($orden['info'][0]->boletas_lig) && count($orden['info'][0]->boletas_lig) > 0 && $orientacion === 'L') {
+    //   // $aux_y2 = $pdf->GetY();
+    //   $pdf->SetXY(221, $pdf->GetY());
+    //   if (count($ordenPago) === 0) {
+    //     $pdf->SetXY(221, $aux_y1+10);
+    //   }
+
+    //   $pdf->SetFont('helvetica','B', 8);
+    //   $pdf->SetAligns(array('C', 'C', 'C'));
+    //   $pdf->SetWidths(array(45));
+    //   $pdf->Row(array('Bascula'), false, false);
+    //   $pdf->SetFont('helvetica', '', 8);
+    //   $pdf->SetWidths(array(20, 25));
+    //   $pdf->SetXY(221, $pdf->GetY());
+    //   $pdf->Row(array('Fecha', 'Boleta'), true, true);
+    //   foreach ($orden['info'][0]->boletas_lig as $key => $value) {
+    //     $pdf->SetXY(221, $pdf->GetY());
+    //     $pdf->Row(array(substr($value->fecha_bruto, 0, 10), $value->folio), false, true);
+    //   }
+    // }
+
+    if ($aux_y2 > $pdf->getY()) {
+      $pdf->SetY($aux_y2);
+    }
+
+    $pdf->SetY($pdf->getY()+5);
+
+    $aligns = array('L', 'R');
+    $widths = array(170, 35);
+    $header = array('DESCRIPCION', 'IMPORTE');
+
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row($header, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row([
+      $gasto['info']->concepto,
+      MyString::formatoNumero($gasto['info']->subtotal, 2, '$', false)
+    ], false);
+
+    $yy = $pdf->GetY();
+
+    //Totales
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(140, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(35, 35));
+    $pdf->Row(array('SUB-TOTAL', MyString::formatoNumero($gasto['info']->subtotal, 2, '$', false)), false, true);
+    $pdf->SetX(140);
+    $pdf->Row(array('IVA', MyString::formatoNumero($gasto['info']->importe_iva, 2, '$', false)), false, true);
+    if ($gasto['info']->importe_ieps > 0)
+    {
+      $pdf->SetX(140);
+      $pdf->Row(array('IEPS', MyString::formatoNumero($gasto['info']->importe_ieps, 2, '$', false)), false, true);
+    }
+    if ($gasto['info']->retencion_iva > 0)
+    {
+      $pdf->SetX(140);
+      $pdf->Row(array('Ret. IVA', MyString::formatoNumero($gasto['info']->retencion_iva, 2, '$', false)), false, true);
+    }
+    if ($gasto['info']->retencion_isr > 0)
+    {
+      $pdf->SetX(140);
+      $pdf->Row(array('Ret. ISR', MyString::formatoNumero($gasto['info']->retencion_isr, 2, '$', false)), false, true);
+    }
+    $pdf->SetX(140);
+    $pdf->Row(array('TOTAL', MyString::formatoNumero($gasto['info']->total, 2, '$', false)), false, true);
+
+    // //Otros datos
+    // $pdf->SetXY(6, $yy);
+    // $pdf->SetX(6);
+    // $pdf->SetAligns(array('L', 'L'));
+    // $pdf->SetWidths(array(154));
+    // if($orden['info'][0]->tipo_orden == 'f'){
+    //   // $this->load->model('facturacion_model');
+    //   $this->load->model('documentos_model');
+    //   // $facturasss = explode('|', $orden['info'][0]->ids_facrem);
+    //   $info_bascula = false;
+    //   if (count($orden['info'][0]->facturasligadas) > 0 || count($orden['info'][0]->boletasligadas) > 0 || count($orden['info'][0]->comprasligadas) > 0)
+    //   {
+    //     $tituloclientt = $clientessss = $facturassss = $tituloclient = '';
+    //     if ($orden['info'][0]->flete_de == 'v') {
+    //       foreach ($orden['info'][0]->facturasligadas as $key => $value)
+    //       {
+    //         $facturassss .= ' / '.$value->serie.$value->folio.' '.$value->fechaT;
+    //         $clientessss .= ', '.$value->cliente->nombre_fiscal;
+
+    //         if($info_bascula === false)
+    //         {
+    //           $info_bascula = $this->documentos_model->getClienteDocs($value->id_factura, 1);
+    //           if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
+    //             $info_bascula = false;
+    //         }
+    //       }
+    //       $tituloclient = 'FOLIO: ';
+    //       $tituloclientt = 'Clientes: ';
+    //     } else {
+    //       foreach ($orden['info'][0]->boletasligadas as $key => $value)
+    //       {
+    //         $facturassss .= ' / '.$value->folio.' '.substr($value->fecha_tara, 0, 10);
+    //         $clientessss .= ', '.$value->proveedor;
+    //       }
+    //       $tituloclient = 'BOLETAS: ';
+    //       $tituloclientt = 'Proveedores: ';
+    //     }
+
+    //     // array_pop($facturasss);
+    //     // foreach ($facturasss as $key => $value)
+    //     // {
+    //     //   $facturaa = explode(':', $value);
+    //     //   $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1]);
+    //     //   $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio.' '.$facturaa['info']->fechaT;
+    //     //   $clientessss .= ', '.$facturaa['info']->cliente->nombre_fiscal;
+
+    //     //   if($info_bascula === false)
+    //     //   {
+    //     //     $info_bascula = $this->documentos_model->getClienteDocs($facturaa['info']->id_factura, 1);
+    //     //     if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
+    //     //       $info_bascula = false;
+    //     //   }
+    //     // }
+    //     $pdf->SetXY(6, $pdf->GetY());
+    //     $pdf->Row(array($tituloclient.substr($facturassss, 3) ), false, false);
+    //   }
+    //   $pdf->SetX(6);
+    //   $pdf->Row(array('CLIENTE: '.$orden['info'][0]->cliente), false, false);
+    //   $pdf->SetXY(6, $pdf->GetY()+6);
+    //   $pdf->Row(array('________________________________________________________________________________________________'), false, false);
+    //   $pdf->SetXY(6, $pdf->GetY()-2);
+    //   $pdf->Row(array('CHOFER: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+    // } elseif ($orden['info'][0]->tipo_orden == 'd' && count($orden['info'][0]->comprasligadas) > 0) {
+    //   $facturassss = $clientessss = '';
+    //   foreach ($orden['info'][0]->comprasligadas as $key => $value)
+    //   {
+    //     $facturassss .= ' / '.$value->serie.$value->folio.' '.substr($value->fecha, 0, 10);
+    //     $clientessss .= ', '.$value->proveedor->nombre_fiscal;
+    //   }
+    //   $tituloclient = 'FOLIO: ';
+    //   $tituloclientt = 'Proveedor: ';
+    //   $pdf->SetXY(6, $pdf->GetY());
+    //   $pdf->Row(array($tituloclient.substr($facturassss, 3) ), false, false);
+    //   $pdf->SetX(6);
+    //   $pdf->Row(array('PROVEEDOR: '.$orden['info'][0]->proveedor), false, false);
+    //   $pdf->SetXY(6, $pdf->GetY()+6);
+    //   $pdf->Row(array('________________________________________________________________________________________________'), false, false);
+    //   $pdf->SetXY(6, $pdf->GetY()-2);
+    //   $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+    // } else {
+    //   $pdf->SetAligns(array('L', 'R'));
+    //   $pdf->SetWidths(array(104, 50));
+    //   $pdf->SetXY(6, $pdf->GetY());
+    //   $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), ($tipoCambio>1 ? "TIPO DE CAMBIO: " . $tipoCambio : '') ), false, false);
+    //   $pdf->SetAligns(array('L', 'L'));
+    //   $pdf->SetWidths(array(154));
+    //   $pdf->SetXY(6, $pdf->GetY()-2);
+    //   $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+    // }
+
+    $pdf->SetWidths(array(154));
+    $pdf->SetXY(6, $pdf->GetY()+6);
+    $pdf->Row(array('________________________________________________________________________________________________'), false, false);
+    $pdf->SetXY(6, $pdf->GetY()-2);
+    $pdf->Row(array('AUTORIZA'), false, false);
+    $yy2 = $pdf->GetY();
+
+    $yy2 = $pdf->GetY();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetWidths(array(155));
+    $pdf->Row(array('COD/AREA: ' . $gasto['info']->codigo_area), false, false);
+
+    $pdf->SetWidths(array(205));
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->SetXY(5, $pdf->GetY());
+    $pdf->Row(array('ESTIMADO PROVEEDOR: PARA QUE PROCEDA SU PAGO, LE SOLICITAMOS REALIZAR SU FACTURA CON LAS ESPECIFICACIONES ARRIBA SEÑALADAS, CUMPLIENDO CON LOS REQUISITOS DE ENTREGA Y ENVIARLA AL CORREO: compras@empaquesanjorge.com'), true, true);
+
+    $pdf->SetXY(6, $pdf->GetY()+2);
+    $y_compras = $pdf->GetY();
+
+    if (!empty($gasto['info']->area)) {
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 70));
+      $areas = [];
+      foreach ([$gasto['info']->area] as $key => $value) {
+        $areas[] = $value->nombre;
+      }
+      $pdf->Row(array('Cultivo / Actividad / Producto', implode(' | ', $areas)), false, true);
+    }
+    if (!empty($gasto['info']->rancho)) {
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 70));
+      $ranchos = [];
+      foreach ($gasto['info']->rancho as $key => $value) {
+        $ranchos[] = $value->nombre;
+      }
+      $pdf->Row(array('Areas / Ranchos / Lineas', implode(' | ', $ranchos)), false, true);
+    }
+    if (!empty($gasto['info']->centroCosto)) {
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 70));
+      $centroCosto = [];
+      foreach ($gasto['info']->centroCosto as $key => $value) {
+        $centroCosto[] = $value->nombre;
+      }
+      $pdf->Row(array('Centro de costo', implode(' | ', $centroCosto)), false, true);
+    }
+    if (!empty($gasto['info']->activo)) {
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 70));
+      $activos = [];
+      foreach ($gasto['info']->activo as $key => $value) {
+        $activos[] = $value->nombre;
+      }
+      $pdf->Row(array('Activo', implode(' | ', $activos)), false, true);
+    }
+    if ($gasto['info']->intangible = 't') {
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 70));
+      $pdf->Row(array('Intangible', 'Si'), false, true);
+    }
+
+
+    $this->db->where('id_compra', $gasto['info']->id_compra)->set('no_impresiones', 'no_impresiones+1', false)->update('compras');
+
+    if ($path)
+    {
+      $file = $path.'compra_directa'.date('Y-m-d').'.pdf';
+      $pdf->Output($file, 'F');
+      return $file;
+    }
+    else
+    {
+      $pdf->Output('compra_directa'.date('Y-m-d').'.pdf', 'I');
+    }
   }
 
 

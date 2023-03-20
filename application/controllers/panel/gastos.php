@@ -395,6 +395,20 @@ class gastos extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function imprimir()
+  {
+    $this->load->model('gastos_model');
+
+    if (isset($_GET['p']))
+    {
+      $this->gastos_model->print($_GET['id']);
+    }
+    else
+    {
+      $this->load->view('panel/gastos/print');
+    }
+  }
+
   public function configAddNotaCredito()
   {
     $this->load->library('form_validation');
