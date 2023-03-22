@@ -1482,7 +1482,7 @@ class nomina_fiscal_model extends CI_Model {
               u.no_empleado,
               u.id_empresa,
               u.id_puesto, u.id_departamente,
-              (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
+              (u.nombre || ' ' || COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '')) as nombre,
               u.curp,
               DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
               '{$fechaSalida->format('Y-m-d')}' as fecha_salida,
@@ -1869,7 +1869,7 @@ class nomina_fiscal_model extends CI_Model {
         array(
           'serie'                         => $nomina[0]->nomina->receptor['NumEmpleado'],
           'folio'                         => $nomina[0]->folio,
-          'nombre'                        => $nomina[0]->nombre,
+          'nombre'                        => "{$nomina[0]->nombre2} {$nomina[0]->apellido_paterno} {$nomina[0]->apellido_materno}",
           'rfc'                           => isset($nomina[0]->rfc)? $nomina[0]->rfc: $empleado['info'][0]->rfc,
           'curp'                          => $nomina[0]->curp,
           'cp'                            => $empleado['info'][0]->cp,
