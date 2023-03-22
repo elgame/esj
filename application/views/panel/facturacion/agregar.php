@@ -352,7 +352,7 @@
                             '02' => 'Definitiva',
                             '03' => 'Temporal',
                           ];
-                          $exportacion = isset($borrador) ? $borrador['info']->cfdi_ext->exportacion : '01';
+                          $exportacion = (isset($borrador) && isset($borrador['info']->cfdi_ext->exportacion) ? $borrador['info']->cfdi_ext->exportacion : '01');
                          ?>
                          <?php foreach ($exportacionCats as $key => $textt): ?>
                           <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('exportacion', $key, $exportacion === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>
@@ -364,6 +364,71 @@
                   <?php
                 // /*/}
                   ?>
+
+                  <div class="control-group">
+                    <label class="control-label" for="ig_periodicidad">Información Global</label>
+                    <div class="controls">
+                      Periodicidad:
+                      <select name="ig_periodicidad" class="span9" id="ig_periodicidad">
+                        <?php
+                          $periodicidadCats = [
+                            '' => '',
+                            '01' => 'Diario',
+                            '02' => 'Semanal',
+                            '03' => 'Quincenal',
+                            '04' => 'Mensual',
+                            '05' => 'Bimestral',
+                          ];
+                          $periodicidad = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal) ? $borrador['info']->cfdi_ext->informacionGlobal->periodicidad : '');
+                         ?>
+                         <?php foreach ($periodicidadCats as $key => $textt): ?>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('periodicidad', $key, $periodicidad === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>
+                         <?php endforeach ?>
+                      </select>
+                      <input type="hidden" name="ig_periodicidadText" id="ig_periodicidadText" value="<?php echo $periodicidadCats[$periodicidad] ?>">
+                      <br>
+                      Meses:
+                      <select name="ig_meses" class="span9" id="ig_meses">
+                        <?php
+                          $mesesCats = [
+                            '' => '',
+                            '01' => 'Enero',
+                            '02' => 'Febrero',
+                            '03' => 'Marzo',
+                            '04' => 'Abril',
+                            '05' => 'Mayo',
+                            '06' => 'Junio',
+                            '07' => 'Julio',
+                            '08' => 'Agosto',
+                            '09' => 'Septiembre',
+                            '10' => 'Octubre',
+                            '11' => 'Noviembre',
+                            '12' => 'Diciembre',
+                            '13' => 'Enero-Febrero',
+                            '14' => 'Marzo-Abril',
+                            '15' => 'Mayo-Junio',
+                            '16' => 'Julio-Agosto',
+                            '17' => 'Septiembre-Octubre',
+                            '18' => 'Noviembre-Diciembre',
+                          ];
+                          echo "<pre>";
+                          var_dump(222, $borrador['info']->cfdi_ext);
+                          echo "</pre>";
+                          $meses = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal)? $borrador['info']->cfdi_ext->informacionGlobal->meses : '');
+                         ?>
+                         <?php foreach ($mesesCats as $key => $textt): ?>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('meses', $key, $meses === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>
+                         <?php endforeach ?>
+                      </select>
+                      <input type="hidden" name="ig_mesesText" id="ig_mesesText" value="<?php echo $mesesCats[$meses] ?>">
+                      <br>
+                      Año:
+                      <?php
+                        $anioo = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal)? $borrador['info']->cfdi_ext->informacionGlobal->anio : '');
+                      ?>
+                      <input type="text" name="ig_anio" id="ig_anio" value="<?php echo $anioo ?>">
+                    </div>
+                  </div>
 
                   <div style="text-align: center;">
                     <button type="button" id="btnCfdiRelPrev" class="btn">Sustitución de CFDI</button>

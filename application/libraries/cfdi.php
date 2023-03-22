@@ -985,6 +985,11 @@ class cfdi{
     elseif ($data['dtipo_comprobante'] == 'nomina')
       $tipoComprobante = 'N';
 
+    $nombre_receptor = $cliente['info']->nombre_fiscal;
+    if ($cliente['info']->rfc == 'XAXX010101000') {
+      $nombre_receptor = 'PUBLICO EN GENERAL';
+    }
+
 
     $datosApi = array(
       'emisor' => array(
@@ -1004,7 +1009,7 @@ class cfdi{
         'key'           => $this->obtenKey($this->path_key),
       ),
       'receptor' => array(
-        'nombreFiscal' => $cliente['info']->nombre_fiscal,
+        'nombreFiscal' => $nombre_receptor,
         'rfc'          => $cliente['info']->rfc,
         'calle'        => $cliente['info']->calle,
         'noExterior'   => $cliente['info']->no_exterior,
@@ -1045,6 +1050,14 @@ class cfdi{
 
     if (isset($cfdiRel) && $cfdiRel) {
       $datosApi['cfdiRelacionados'] = $cfdiRel;
+    }
+
+    if ($cliente['info']->rfc == 'XAXX010101000') {
+      $datosApi['informacionGlobal'] = [
+        'periodicidad' => (!empty($data['ig_periodicidad'])? $data['ig_periodicidad']: ''),
+        'meses' => (!empty($data['ig_meses'])? $data['ig_meses']: ''),
+        'anio' => (!empty($data['ig_anio'])? $data['ig_anio']: ''),
+      ];
     }
 
     if ($tipoComprobante === 'T') {

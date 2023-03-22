@@ -651,11 +651,18 @@ class facturacion_model extends privilegios_model{
       'usoCfdi'           => $this->input->post('duso_cfdi'),
       'exportacion'       => $_POST['exportacion'],
       'exportacionText'   => $_POST['exportacionText'],
-
-      // 'informacionGlobal.periodicidad'         => 'nullable|in:01,02,03,04,05',
-      // 'informacionGlobal.meses'                => 'nullable|in:01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18',
-      // 'informacionGlobal.anio'                 => 'nullable|numeric|min:2021',
     ];
+
+    if (!empty($_POST['ig_periodicidad']) && !empty($_POST['ig_meses']) && !empty($_POST['ig_anio'])) {
+      $cfdi_ext['informacionGlobal'] = [
+        'periodicidad' => (!empty($data['ig_periodicidad'])? $data['ig_periodicidad']: ''),
+        'periodicidadText' => (!empty($data['ig_periodicidadText'])? $data['ig_periodicidadText']: ''),
+        'meses' => (!empty($data['ig_meses'])? $data['ig_meses']: ''),
+        'mesesText' => (!empty($data['ig_mesesText'])? $data['ig_mesesText']: ''),
+        'anio' => (!empty($data['ig_anio'])? $data['ig_anio']: ''),
+      ];
+    }
+
     if (!empty($_POST['cp']['ubicaciones']) &&
         !empty($_POST['cp']['mercancias']['mercancias']) &&
         !empty($_POST['cp']['figuraTransporte']['tiposFigura']) &&
@@ -1826,7 +1833,18 @@ class facturacion_model extends privilegios_model{
       $cfdi_ext = [
         'tipoDeComprobante' => ($this->input->post('dtipo_comprobante')=='ingreso'? 'I': 'E'),
         'usoCfdi'           => $this->input->post('duso_cfdi'),
+        'exportacion'       => $_POST['exportacion'],
+        'exportacionText'   => $_POST['exportacionText'],
       ];
+      if (!empty($_POST['ig_periodicidad']) && !empty($_POST['ig_meses']) && !empty($_POST['ig_anio'])) {
+        $cfdi_ext['informacionGlobal'] = [
+          'periodicidad' => (!empty($data['ig_periodicidad'])? $data['ig_periodicidad']: ''),
+          'periodicidadText' => (!empty($data['ig_periodicidadText'])? $data['ig_periodicidadText']: ''),
+          'meses' => (!empty($data['ig_meses'])? $data['ig_meses']: ''),
+          'mesesText' => (!empty($data['ig_mesesText'])? $data['ig_mesesText']: ''),
+          'anio' => (!empty($data['ig_anio'])? $data['ig_anio']: ''),
+        ];
+      }
       if (!empty($_POST['cp']['ubicaciones']) &&
           !empty($_POST['cp']['mercancias']['mercancias']) &&
           !empty($_POST['cp']['figuraTransporte']['tiposFigura']) &&
