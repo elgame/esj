@@ -339,7 +339,7 @@
                   </div>
                   <?php }?>
                   <?php
-                  if (!isset($borrador) || (isset($borrador) && $borrador['info']->version > 3.9)) {
+                  // if (!isset($borrador) || (isset($borrador) && $borrador['info']->version > 3.9)) {
                   ?>
                   <div class="control-group">
                     <label class="control-label" for="exportacion">Exportación</label>
@@ -361,7 +361,9 @@
                       <input type="hidden" name="exportacionText" id="exportacionText" value="<?php echo $exportacionCats[$exportacion] ?>">
                     </div>
                   </div>
-                  <?php }?>
+                  <?php
+                // /*/}
+                  ?>
 
                   <div style="text-align: center;">
                     <button type="button" id="btnCfdiRelPrev" class="btn">Sustitución de CFDI</button>
