@@ -1,15 +1,15 @@
 
  ✔ Imprimir gastos @done (23-03-20 10:21)
-   -- pcc
+   -- pcc|san
    ALTER TABLE IF EXISTS public.compras ADD COLUMN no_impresiones integer DEFAULT 0;
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas de Boletas',365,true,'bascula/rpt_boletas_salida/','print',true);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',166,true,'gastos/imprimir/','print',false);
  ✔ Reporte de salidas de boletas @done (23-03-15 15:43)
-   -- lap|pcc
+   -- lap|pcc|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas de Boletas',365,true,'bascula/rpt_boletas_salida/','print',true);
  ✔ Reporte de boletas pendientes de pago por proveedor @done (23-03-15 17:52)
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Boletas Por Pagar',365,true,'bascula/rpt_boletas_porpagar/','print',true);
  ✔ Estado result de fletes, poner en gastos y mantenimiento subtotal, iva e importe, en el reporte usar el subtotal @done (23-03-20 09:03)
-   -- lap|pcc
+   -- lap|pcc|san
     ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN subtotal double precision DEFAULT 0;
     ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN iva double precision DEFAULT 0;
     ALTER TABLE IF EXISTS otros.estado_resultado_trans_rep_mtto ADD COLUMN importe double precision DEFAULT 0;
