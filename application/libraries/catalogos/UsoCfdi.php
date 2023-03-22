@@ -31,7 +31,8 @@ class UsoCfdi {
     'D08' => ['key' => 'D08', 'value' => 'Gastos de transportación escolar obligatoria.', 'fisica' => true, 'moral' => false],
     'D09' => ['key' => 'D09', 'value' => 'Depósitos en cuentas para el ahorro, primas que tengan como base planes de pensiones.', 'fisica' => true, 'moral' => false],
     'D10' => ['key' => 'D10', 'value' => 'Pagos por servicios educativos (colegiaturas)', 'fisica' => true, 'moral' => false],
-    'P01' => ['key' => 'P01', 'value' => 'Por definir', 'fisica' => true, 'moral' => true],
+    'S01' => ['key' => 'S01', 'value' => 'Sin efectos fiscales.', 'fisica' => true, 'moral' => true],
+    // 'CP01' => ['key' => 'CP01', 'value' => 'Pagos', 'fisica' => true, 'moral' => true],
   ];
 
   /**
