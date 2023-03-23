@@ -41,7 +41,12 @@
               <?php
                 if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/prod_descripciones/')){ ?>
                   <input type="hidden" value="si" name="privAddDescripciones" id="privAddDescripciones">
-              <?php } ?>
+              <?php }
+
+              if (!empty($borrador['info'])) {
+                $borrador['info']->cfdi_ext = !empty($borrador['info']->cfdi_ext) ? json_decode($borrador['info']->cfdi_ext) : null;
+              }
+              ?>
 
               <div class="row-fluid">
                 <div class="span6">
@@ -429,7 +434,7 @@
                       <?php
                         $anioo = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal)? $borrador['info']->cfdi_ext->informacionGlobal->anio : '');
                       ?>
-                      <input type="text" name="ig_anio" id="ig_anio" value="<?php echo $anioo ?>">
+                      <input type="text" name="ig_anio" id="ig_anio" class="span9" value="<?php echo $anioo ?>">
                     </div>
                   </div>
 

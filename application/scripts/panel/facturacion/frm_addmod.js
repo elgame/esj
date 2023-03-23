@@ -559,6 +559,12 @@ $(function(){
   $('#exportacion').on('change', function(){
     $('#exportacionText').val($('#exportacion option:selected').attr('data-text'));
   });
+  $('#ig_periodicidad').on('change', function(){
+    $('#ig_periodicidadText').val($('#ig_periodicidad option:selected').attr('data-text'));
+  });
+  $('#ig_meses').on('change', function(){
+    $('#ig_mesesText').val($('#ig_meses option:selected').attr('data-text'));
+  });
 
   modalCfdiRel();
 });
