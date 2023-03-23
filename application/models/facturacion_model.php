@@ -655,11 +655,11 @@ class facturacion_model extends privilegios_model{
 
     if (!empty($_POST['ig_periodicidad']) && !empty($_POST['ig_meses']) && !empty($_POST['ig_anio'])) {
       $cfdi_ext['informacionGlobal'] = [
-        'periodicidad' => (!empty($data['ig_periodicidad'])? $data['ig_periodicidad']: ''),
-        'periodicidadText' => (!empty($data['ig_periodicidadText'])? $data['ig_periodicidadText']: ''),
-        'meses' => (!empty($data['ig_meses'])? $data['ig_meses']: ''),
-        'mesesText' => (!empty($data['ig_mesesText'])? $data['ig_mesesText']: ''),
-        'anio' => (!empty($data['ig_anio'])? $data['ig_anio']: ''),
+        'periodicidad' => (!empty($_POST['ig_periodicidad'])? $_POST['ig_periodicidad']: ''),
+        'periodicidadText' => (!empty($_POST['ig_periodicidadText'])? $_POST['ig_periodicidadText']: ''),
+        'meses' => (!empty($_POST['ig_meses'])? $_POST['ig_meses']: ''),
+        'mesesText' => (!empty($_POST['ig_mesesText'])? $_POST['ig_mesesText']: ''),
+        'anio' => (!empty($_POST['ig_anio'])? $_POST['ig_anio']: ''),
       ];
     }
 
@@ -1838,11 +1838,11 @@ class facturacion_model extends privilegios_model{
       ];
       if (!empty($_POST['ig_periodicidad']) && !empty($_POST['ig_meses']) && !empty($_POST['ig_anio'])) {
         $cfdi_ext['informacionGlobal'] = [
-          'periodicidad' => (!empty($data['ig_periodicidad'])? $data['ig_periodicidad']: ''),
-          'periodicidadText' => (!empty($data['ig_periodicidadText'])? $data['ig_periodicidadText']: ''),
-          'meses' => (!empty($data['ig_meses'])? $data['ig_meses']: ''),
-          'mesesText' => (!empty($data['ig_mesesText'])? $data['ig_mesesText']: ''),
-          'anio' => (!empty($data['ig_anio'])? $data['ig_anio']: ''),
+          'periodicidad' => (!empty($_POST['ig_periodicidad'])? $_POST['ig_periodicidad']: ''),
+          'periodicidadText' => (!empty($_POST['ig_periodicidadText'])? $_POST['ig_periodicidadText']: ''),
+          'meses' => (!empty($_POST['ig_meses'])? $_POST['ig_meses']: ''),
+          'mesesText' => (!empty($_POST['ig_mesesText'])? $_POST['ig_mesesText']: ''),
+          'anio' => (!empty($_POST['ig_anio'])? $_POST['ig_anio']: ''),
         ];
       }
       if (!empty($_POST['cp']['ubicaciones']) &&

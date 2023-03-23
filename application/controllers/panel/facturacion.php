@@ -199,19 +199,24 @@ class facturacion extends MY_Controller {
 
     if ( ! isset($_POST['borrador']))
     {
-      $this->configAddModFactura();
+      $extraVal = $this->configAddModFactura();
       if($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
       }
       else
       {
-        $respons = $this->facturacion_model->addFactura();
+        if (!$extraVal) {
+          $params['frm_errors'] = $this->showMsgs(12);
+        } else {
+          $respons = $this->facturacion_model->addFactura();
 
-        if($respons['passes'])
-          redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura'].'&of='.$_POST['new_orden_flete']));
-        else
-          $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
+          if($respons['passes'])
+            redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura'].'&of='.$_POST['new_orden_flete']));
+          else{
+            $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
+          }
+        }
       }
     }
     else
@@ -329,19 +334,27 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
 
-    $this->configAddModFactura(true);
+    $extraVal = $this->configAddModFactura(true);
     if($this->form_validation->run() == FALSE)
     {
       return $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
     }
     else
     {
-      if (isset($_GET['idb']))
-        $this->facturacion_model->updateFacturaBorrador($_GET['idb']);
-      else
-        $this->facturacion_model->addFacturaBorrador();
+      if (!$extraVal) {
+        if (isset($_GET['idb'])) {
+          redirect(base_url('panel/facturacion/agregar/?idb='.$_GET['idb'].'&msg=12'));
+        } else {
+          return $this->showMsgs(12);
+        }
+      } else {
+        if (isset($_GET['idb']))
+          $this->facturacion_model->updateFacturaBorrador($_GET['idb']);
+        else
+          $this->facturacion_model->addFacturaBorrador();
 
-      redirect(base_url('panel/facturacion/agregar/?&msg=11'));
+        redirect(base_url('panel/facturacion/agregar/?&msg=11'));
+      }
     }
   }
 
@@ -1262,6 +1275,17 @@ class facturacion extends MY_Controller {
     }
 
     $this->form_validation->set_rules($rules);
+
+    $pass = true;
+    if (!empty($_POST['cp']['transpInternac'])) {
+      $pass = (!empty($_POST['cp']['ubicaciones']) &&
+        !empty($_POST['cp']['mercancias']['mercancias']) &&
+        !empty($_POST['cp']['figuraTransporte']['tiposFigura']) &&
+        count($_POST['cp']['ubicaciones']) > 0 &&
+        count($_POST['cp']['mercancias']['mercancias']) > 0 &&
+        count($_POST['cp']['figuraTransporte']['tiposFigura']) > 0);
+    }
+    return $pass;
   }
 
   /**
@@ -2606,6 +2630,10 @@ class facturacion extends MY_Controller {
       case 11:
         $txt = 'Factura guardada!';
         $icono = 'success';
+        break;
+      case 12:
+        $txt = 'Hay datos en Complemento Carta Porte, complétalos para que se registre el complemento o quítalos para que se genere sin el complemento.';
+        $icono = 'error';
         break;
 
        case 97:

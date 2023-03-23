@@ -204,8 +204,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         // echo "<pre>";
         // var_dump($queryMov);
         // echo "</pre>";exit;
-        // $cfdiRel = $cfdiRel['tipo'] != '' && isset($cfdiRel['uuids'])? $cfdiRel: null;
-        $cfdiRel = $cfdiRel['tipo'] != ''? $cfdiRel: null;
+        $cfdiRel = $cfdiRel['tipo'] != '' && isset($cfdiRel['uuids'])? $cfdiRel: null;
         $datosApi = $this->cfdi->obtenDatosCfdi40ComP($queryMov, $queryCliente, $folio, $cfdiRel, $posts);
         // echo "<pre>";
         //   var_dump($datosApi);

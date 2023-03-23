@@ -29,6 +29,12 @@
             <li><a href="#tabCartaPorte">Carta Porte</a></li>
           </ul>
 
+          <?php
+            if (isset($borrador)) {
+              $borrador['info']->cfdi_ext = json_decode($borrador['info']->cfdi_ext);
+            }
+           ?>
+
           <div id="myTabContent" class="tab-content">
 
             <div class="tab-pane active" id="tabFactura">
@@ -332,7 +338,7 @@
                           $metodo = isset($borrador) ? $borrador['info']->cfdi_ext->uso_cfdi : '';
                          ?>
                         <?php foreach ($usoCfdi as $key => $usoCfd) { ?>
-                          <option value="<?php echo $usoCfd['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfd['key'], $metodo === $usoCfd['key'] ? true : false); ?>><?php echo $usoCfd['key'].' - '.$usoCfd['value'] ?></option>
+                          <option value="<?php echo $usoCfd['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfd['key'], ($metodo === $usoCfd['key'] ? true : false), $metodo); ?>><?php echo $usoCfd['key'].' - '.$usoCfd['value'] ?></option>
                         <?php } ?>
                       </select>
                     </div>
@@ -355,7 +361,7 @@
                           $exportacion = (isset($borrador) && isset($borrador['info']->cfdi_ext->exportacion) ? $borrador['info']->cfdi_ext->exportacion : '01');
                          ?>
                          <?php foreach ($exportacionCats as $key => $textt): ?>
-                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('exportacion', $key, $exportacion === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('exportacion', $key, ($exportacion === $key ? true : false), $exportacion); ?>><?php echo "{$key} - {$textt}" ?></option>
                          <?php endforeach ?>
                       </select>
                       <input type="hidden" name="exportacionText" id="exportacionText" value="<?php echo $exportacionCats[$exportacion] ?>">
@@ -382,7 +388,7 @@
                           $periodicidad = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal) ? $borrador['info']->cfdi_ext->informacionGlobal->periodicidad : '');
                          ?>
                          <?php foreach ($periodicidadCats as $key => $textt): ?>
-                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('periodicidad', $key, $periodicidad === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('periodicidad', $key, ($periodicidad === $key ? true : false), $periodicidad); ?>><?php echo "{$key} - {$textt}" ?></option>
                          <?php endforeach ?>
                       </select>
                       <input type="hidden" name="ig_periodicidadText" id="ig_periodicidadText" value="<?php echo $periodicidadCats[$periodicidad] ?>">
@@ -411,13 +417,10 @@
                             '17' => 'Septiembre-Octubre',
                             '18' => 'Noviembre-Diciembre',
                           ];
-                          echo "<pre>";
-                          var_dump(222, $borrador['info']->cfdi_ext);
-                          echo "</pre>";
                           $meses = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal)? $borrador['info']->cfdi_ext->informacionGlobal->meses : '');
                          ?>
                          <?php foreach ($mesesCats as $key => $textt): ?>
-                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('meses', $key, $meses === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('meses', $key, ($meses === $key ? true : false), $meses); ?>><?php echo "{$key} - {$textt}" ?></option>
                          <?php endforeach ?>
                       </select>
                       <input type="hidden" name="ig_mesesText" id="ig_mesesText" value="<?php echo $mesesCats[$meses] ?>">
@@ -1854,7 +1857,7 @@
                         <label class="control-label" for="cp_transpInternac">Transporte Internacional <i class="icon-question-sign helpover" data-title=""></i></label>
                         <div class="controls">
                           <?php
-                            $cfdi_ext = empty($borrador['info']->cfdi_ext)? (!empty($cfdiExt)? json_decode($cfdiExt): null): json_decode($borrador['info']->cfdi_ext);
+                            $cfdi_ext = empty($borrador['info']->cfdi_ext)? (!empty($cfdiExt)? json_decode($cfdiExt): null): $borrador['info']->cfdi_ext;
                             // echo "<pre>";
                             //   var_dump($cfdi_ext);
                             // echo "</pre>";exit;
