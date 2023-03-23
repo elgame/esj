@@ -3,6 +3,7 @@
    -- pcc|san
    ALTER TABLE IF EXISTS public.compras ADD COLUMN no_impresiones integer DEFAULT 0;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',166,true,'gastos/imprimir/','print',false);
+   UPDATE public.empresas SET cfdi_version=4.0;
  ✔ Reporte de salidas de boletas @done (23-03-15 15:43)
    -- lap|pcc|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas de Boletas',365,true,'bascula/rpt_boletas_salida/','print',true);

@@ -35,7 +35,12 @@
               <?php
                 if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/prod_descripciones/')){ ?>
                   <input type="hidden" value="si" name="privAddDescripciones" id="privAddDescripciones">
-              <?php } ?>
+              <?php }
+
+              if (!empty($borrador['info'])) {
+                $borrador['info']->cfdi_ext = !empty($borrador['info']->cfdi_ext) ? json_decode($borrador['info']->cfdi_ext) : null;
+              }
+              ?>
 
               <div class="row-fluid">
                 <div class="span6">
@@ -411,9 +416,6 @@
                             '17' => 'Septiembre-Octubre',
                             '18' => 'Noviembre-Diciembre',
                           ];
-                          echo "<pre>";
-                          var_dump(222, $borrador['info']->cfdi_ext);
-                          echo "</pre>";
                           $meses = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal)? $borrador['info']->cfdi_ext->informacionGlobal->meses : '');
                          ?>
                          <?php foreach ($mesesCats as $key => $textt): ?>
@@ -426,7 +428,7 @@
                       <?php
                         $anioo = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal)? $borrador['info']->cfdi_ext->informacionGlobal->anio : '');
                       ?>
-                      <input type="text" name="ig_anio" id="ig_anio" value="<?php echo $anioo ?>">
+                      <input type="text" name="ig_anio" id="ig_anio" class="span9" value="<?php echo $anioo ?>">
                     </div>
                   </div>
 
@@ -1854,7 +1856,7 @@
                         <label class="control-label" for="cp_transpInternac">Transporte Internacional <i class="icon-question-sign helpover" data-title=""></i></label>
                         <div class="controls">
                           <?php
-                            $cfdi_ext = empty($borrador['info']->cfdi_ext)? (!empty($cfdiExt)? json_decode($cfdiExt): null): json_decode($borrador['info']->cfdi_ext);
+                            $cfdi_ext = empty($borrador['info']->cfdi_ext)? (!empty($cfdiExt)? json_decode($cfdiExt): null): $borrador['info']->cfdi_ext;
                             // echo "<pre>";
                             //   var_dump($cfdi_ext);
                             // echo "</pre>";exit;
