@@ -7,6 +7,7 @@ class nomina_trabajos2 extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'nomina_trabajos2/ajax_save/',
+    'nomina_trabajos2/ajax_get/',
     'nomina_trabajos2/ajax_del/',
     'nomina_trabajos2/nomina_fiscal_ticket/',
 
@@ -115,6 +116,12 @@ class nomina_trabajos2 extends MY_Controller {
   {
     $this->load->model('nomina_trabajos2_model');
     echo json_encode($this->nomina_trabajos2_model->save($_POST));
+  }
+
+  public function ajax_get()
+  {
+    $this->load->model('nomina_trabajos2_model');
+    echo json_encode($this->nomina_trabajos2_model->getActividad($_POST));
   }
 
   public function ajax_del()

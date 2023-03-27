@@ -71,6 +71,8 @@ class nomina_trabajos2_model extends CI_Model {
       }
     }
 
+    $data['empresaId'] = $datos['id_empresa'];
+    $data['ffecha'] = $datos['fecha'];
     return array('passess' => true, 'data' => $this->getActividad($data));
   }
 
@@ -187,13 +189,13 @@ class nomina_trabajos2_model extends CI_Model {
       "SELECT nt2.id_empresa, e.nombre_fiscal AS empresa, nt2.id_usuario,
         (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
         nt2.fecha, nt2.rows, nt2.id_labor, l.nombre AS labor, nt2.id_area, a.nombre AS cultivo,
-        nt2.anio, nt2.semana, nt2.costo, nt2.avance, nt2.importe
+        nt2.anio, nt2.semana, nt2.costo, nt2.avance, nt2.avance_real, nt2.importe
       FROM nomina_trabajos_dia2 nt2
         INNER JOIN empresas e ON e.id_empresa = nt2.id_empresa
         INNER JOIN usuarios u ON u.id = nt2.id_usuario
         INNER JOIN compras_salidas_labores l ON l.id_labor = nt2.id_labor
         LEFT JOIN areas a ON a.id_area = nt2.id_area
-      WHERE e.id_empresa = {$params['id_empresa']} AND nt2.fecha = '{$params['fecha']}'
+      WHERE e.id_empresa = {$params['empresaId']} AND nt2.fecha = '{$params['ffecha']}'
         AND u.id = {$params['id_usuario']} AND nt2.rows = '{$params['rows']}'
       ");
 
@@ -205,8 +207,8 @@ class nomina_trabajos2_model extends CI_Model {
         "SELECT cc.id_centro_costo, cc.nombre, ntd.num
         FROM nomina_trabajos_dia2_centro_costo ntd
           INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = ntd.id_centro_costo
-        WHERE ntd.id_empresa = {$params['id_empresa']} AND ntd.id_usuario = {$params['id_usuario']}
-          AND ntd.fecha = '{$params['fecha']}' AND ntd.rows = '{$params['rows']}'
+        WHERE ntd.id_empresa = {$params['empresaId']} AND ntd.id_usuario = {$params['id_usuario']}
+          AND ntd.fecha = '{$params['ffecha']}' AND ntd.rows = '{$params['rows']}'
         ORDER BY nombre ASC
         ")->result();
 
@@ -214,8 +216,8 @@ class nomina_trabajos2_model extends CI_Model {
         "SELECT r.id_rancho, r.nombre, ntd.num
         FROM nomina_trabajos_dia2_rancho ntd
           INNER JOIN otros.ranchos r ON r.id_rancho = ntd.id_rancho
-        WHERE ntd.id_empresa = {$params['id_empresa']} AND ntd.id_usuario = {$params['id_usuario']}
-          AND ntd.fecha = '{$params['fecha']}' AND ntd.rows = '{$params['rows']}'
+        WHERE ntd.id_empresa = {$params['empresaId']} AND ntd.id_usuario = {$params['id_usuario']}
+          AND ntd.fecha = '{$params['ffecha']}' AND ntd.rows = '{$params['rows']}'
         ORDER BY nombre ASC
         ")->result();
     }
