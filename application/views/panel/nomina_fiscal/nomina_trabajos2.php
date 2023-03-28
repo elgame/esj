@@ -51,6 +51,7 @@
                 <input type="hidden" id="dsemana" value="<?php echo $filtros['semana']; ?>">
                 <input type="hidden" id="danio" value="<?php echo $filtros['anio']; ?>">
                 <input type="hidden" id="dfecha" value="<?php echo $fecha; ?>">
+                <input type="hidden" id="rows" value="">
 
                 <div class="row-fluid">
                   <div class="span3">
@@ -137,7 +138,7 @@
                 </thead>
                 <tbody>
                   <?php foreach ($tareas_dia['tareas_dia'] as $key => $tarea): ?>
-                    <tr>
+                    <tr class="rowlb" style="cursor: pointer;" id="<?php echo "{$tarea->rows}{$tarea->id_usuario}{$tarea->id_empresa}{$tarea->fecha}" ?>">
                       <td><?php echo $tarea->trabajador ?></td>
                       <td><?php echo $tarea->labor ?></td>
                       <td><?php echo $tarea->cultivo ?></td>
@@ -160,7 +161,7 @@
                       <td><?php echo $tarea->costo ?></td>
                       <td><?php echo $tarea->avance ?></td>
                       <td><?php echo $tarea->importe ?></td>
-                      <td>
+                      <td class="no">
                         <a class="btn btn-danger btnDelAct" data-params="<?php echo 'rows='.$tarea->rows.'&id_usuario='.$tarea->id_usuario.'&'.MyString::getVarsLink(array('msg')); ?>">
                           <i class="icon-ban-circle icon-white"></i>
                         </a>

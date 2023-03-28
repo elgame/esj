@@ -30,8 +30,8 @@
           </ul>
 
           <?php
-            if (isset($borrador)) {
-              $borrador['info']->cfdi_ext = json_decode($borrador['info']->cfdi_ext);
+            if (!empty($borrador['info'])) {
+              $borrador['info']->cfdi_ext = !empty($borrador['info']->cfdi_ext) ? json_decode($borrador['info']->cfdi_ext) : null;
             }
            ?>
 
@@ -42,10 +42,6 @@
                 if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/prod_descripciones/')){ ?>
                   <input type="hidden" value="si" name="privAddDescripciones" id="privAddDescripciones">
               <?php }
-
-              if (!empty($borrador['info'])) {
-                $borrador['info']->cfdi_ext = !empty($borrador['info']->cfdi_ext) ? json_decode($borrador['info']->cfdi_ext) : null;
-              }
               ?>
 
               <div class="row-fluid">
