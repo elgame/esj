@@ -107,8 +107,8 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
   private function comPagoImpuestos($productos, $pago_factura)
   {
-    $fielss = ['iva' => ['porcentaje_iva', 'iva'], 'retencion_iva' => ['porcentaje_retencion', 'ret_iva'],
-      'ieps' => ['porcentaje_ieps', 'ieps'], 'isr' => ['porcentaje_isr', 'isr']];
+    $fielss = ['iva' => ['porcentaje_iva', 'iva', true], 'retencion_iva' => ['porcentaje_retencion', 'ret_iva', false],
+      'ieps' => ['porcentaje_ieps', 'ieps', true], 'isr' => ['porcentaje_isr', 'isr', true]];
     $impuestos = [];
     if (count($productos) > 0) {
       foreach ($productos as $key => $value) {
@@ -120,7 +120,8 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
               $impuestos["{$key2}{$value->{$field[0]}}"]['total'] += $value->total;
             } else {
               $impuestos["{$key2}{$value->{$field[0]}}"] = [
-                'impuesto' => $field[1], 'percent' => number_format($value->{$field[0]}/100, 6, '.', ''),
+                'impuesto' => $field[1],
+                'percent' => number_format($value->{$field[0]}/($field[2]? 100: 1), 6, '.', ''),
                 'base' => $value->{'importe'}, 'importe' => $value->{$key2},
                 'total' => $value->total
               ];
