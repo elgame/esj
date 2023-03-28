@@ -1263,29 +1263,27 @@ class catalogos_sft_model extends CI_Model{
 
     $response = array();
 
-
-    if (isset($_GET['dareas']) && count($_GET['dareas']) > 0)
-    {
-      $ids_hijos = [];
+    $ids_hijos = [];
+    if (isset($_GET['dareas']) && count($_GET['dareas']) > 0) {
       foreach ($_GET['dareas'] as $key => $value) {
         $ids_hijos[] = $value.$this->getHijos($value);
       }
-      if (count($ids_hijos) > 0) {
-        $ids_hijos = implode(',', $ids_hijos);
-        $sql_compras .= " AND ca.id_cat_codigos In({$ids_hijos})";
-      }
-
-      $response = $this->db->query("
-        SELECT
-          cp.id_producto, cp.descripcion producto, Sum(cp.piezas) AS piezas
-        FROM compras_ordenes co
-          INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
-          LEFT JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
-          LEFT JOIN compras c ON c.id_compra = cp.id_compra
-        WHERE cp.status = 'a' AND co.status <> 'ca' AND cp.piezas > 0
-          {$sql_compras}
-        GROUP BY cp.id_producto, cp.descripcion")->result();
     }
+    if (count($ids_hijos) > 0) {
+      $ids_hijos = implode(',', $ids_hijos);
+      $sql_compras .= " AND ca.id_cat_codigos In({$ids_hijos})";
+    }
+
+    $response = $this->db->query("
+      SELECT
+        cp.id_producto, cp.descripcion producto, Sum(cp.piezas) AS piezas
+      FROM compras_ordenes co
+        INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+        LEFT JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
+        LEFT JOIN compras c ON c.id_compra = cp.id_compra
+      WHERE cp.status = 'a' AND co.status <> 'ca' AND cp.piezas > 0
+        {$sql_compras}
+      GROUP BY cp.id_producto, cp.descripcion")->result();
 
     return $response;
   }
