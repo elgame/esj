@@ -1611,7 +1611,7 @@ class cfdi{
           "serie"          => $pago->serie,
           "folio"          => $pago->folio,
           "moneda"         => (floatval($pago->version) > 3.2? $pago->moneda: 'MXN'),
-          "equivalencia"   => number_format($pago->tipo_cambio, 2, '.', ''),
+          "equivalencia"   => ($pago_moneda != $pago->moneda? number_format($pago->tipo_cambio, 2, '.', ''): 1),
           "metodoDePago"   => (floatval($pago->version) > 3.2? $metodoDePago: 'PUE'),
           "numParcialidad" => $pago->parcialidades,
           "saldoAnterior"  => number_format($saldoAnt/$pago->tipo_cambio, 2, '.', ''),
