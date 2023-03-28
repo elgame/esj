@@ -1625,7 +1625,7 @@ class cfdi{
     }
 
     if ($override_monto) {
-      $comPago['monto'] = $monto;
+      $comPago['monto'] = bcdiv($monto, 1, 2);
     }
 
     $noCertificado = $this->obtenNoCertificado();
