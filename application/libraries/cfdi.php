@@ -1598,8 +1598,8 @@ class cfdi{
         ];
         foreach ($pago->impuestos as $keyim => $imp) {
           $impuestos[(($imps[$imp['impuesto']]['tipo'] === 't')? 'traslados': 'retenciones')][] = [
-            "base" => $imp['base'],
-            "importe" => $imp['importe'],
+            "base" => number_format($imp['base']/$pago->tipo_cambio, 2, '.', ''),
+            "importe" => number_format($imp['importe']/$pago->tipo_cambio, 2, '.', ''),
             "impuesto" => $imps[$imp['impuesto']]['imps'],
             "tasaOCuota" => $imp['percent'],
             "tipoFactor" => "Tasa"
