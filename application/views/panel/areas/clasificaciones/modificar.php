@@ -33,7 +33,7 @@
               <div class="control-group">
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">
-                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="300"
+                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="1000"
                   value="<?php echo (isset($data['info']->nombre)? $data['info']->nombre: ''); ?>" required autofocus placeholder="Limon verde, limon industrial">
                 </div>
               </div>
