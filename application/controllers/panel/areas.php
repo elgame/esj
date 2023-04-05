@@ -667,7 +667,7 @@ class areas extends MY_Controller {
 		$rules = array(
 			array('field' => 'fnombre',
 						'label' => 'Nombre',
-						'rules' => 'required|max_length[300]'),
+						'rules' => 'required|max_length[1000]'),
 			array('field' => 'fcodigo',
 						'label' => 'Codigo',
 						'rules' => 'max_length[15]'),
