@@ -1177,6 +1177,7 @@ class bascula2_model extends bascula_model {
     }
 
     $sql .= " AND DATE(b.{$fecha_compara}) <= '".$_GET['ffecha1']."'";
+    $sql .= " AND b.intangible 'f'";
 
 
     $query = $this->db->query(
