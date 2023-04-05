@@ -933,7 +933,7 @@ class bascula2_model extends bascula_model {
         LEFT JOIN otros.productor op ON op.id_productor = b.id_productor
         LEFT JOIN empresas e ON e.id_empresa = b.id_empresa
         ".(empty($sql2)? 'LEFT': 'INNER')." JOIN (
-          SELECT id_bascula, String_agg(descripcion, ', ') AS productos
+          SELECT id_bascula, String_agg(('Cajas: ' || cantidad || ' | Producto: ' || descripcion), ',&') AS productos
           FROM bascula_productos
           WHERE 1 = 1 {$sql2}
           GROUP BY id_bascula
@@ -1037,7 +1037,7 @@ class bascula2_model extends bascula_model {
         MyString::formatoNumero($caja->kilos_neto, 2, '', false),
         substr($caja->empresa, 0, 28),
         substr($caja->proveedor, 0, 28),
-        substr($caja->productos, 0, 28),
+        str_replace(',&', "\n", $caja->productos),
       );
 
       $pdf->SetY($pdf->GetY());
@@ -1130,7 +1130,7 @@ class bascula2_model extends bascula_model {
         <td style="width:150px;border:1px solid #000;">'.$caja->kilos_neto.'</td>
         <td style="width:150px;border:1px solid #000;">'.$caja->empresa.'</td>
         <td style="width:150px;border:1px solid #000;">'.$caja->proveedor.'</td>
-        <td style="width:150px;border:1px solid #000;">'.$caja->productos.'</td>
+        <td style="width:150px;border:1px solid #000;">'.str_replace(',&', "\n", $caja->productos).'</td>
       </tr>';
     }
 
