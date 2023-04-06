@@ -11,6 +11,32 @@ var util = {
     return Math.round(val * 100) / 100;
   },
 
+  trunc6Dec: function(num, digits) {
+    digits = digits? digits: 6;
+    var result = Math.round(num*Math.pow(10,digits))/Math.pow(10,digits);
+    return result;
+
+    var numS = num.toString(),
+        decPos = numS.indexOf('.'),
+        result;
+    if(decPos > -1)
+      result = numS.substr(0, 1 + decPos + digits);
+    else
+      result = numS;
+
+    if (isNaN(result)) {
+      result = 0;
+    }
+
+    return parseFloat(result);
+    // return Math.floor(num * 100) / 100;
+  },
+
+  darFormatoNum6: function(num, prefix='$', decimal=6) {
+    num = util.trunc6Dec(num);
+    return prefix + num.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+  },
+
 	//dar dormato a un numero estilo moneda
 	darFormatoNum: function(moneda, prefix, conSigno){
 		var precio = '' + parseFloat(moneda),

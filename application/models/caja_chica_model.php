@@ -609,7 +609,7 @@ class caja_chica_model extends CI_Model {
       $sql .= " AND cg.tipo = 'gc' AND cg.fecha <= '{$fecha[1]}'";
       $sql .= " AND (
         ( (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}') AND cg.monto_ini-1 > Coalesce(cga.abonos, 0) )
-        OR (cg.monto_ini > 0 AND cg.status = 'f' AND '{$fecha[1]}' < cg.fecha_cancelado)
+        OR (cg.monto_ini >= 0 AND cg.status = 'f' AND '{$fecha[1]}' < cg.fecha_cancelado)
       )";
       $fecha1 = $fecha[1];
     } elseif (is_array($fecha) && $fecha[0] === 'rg') {
