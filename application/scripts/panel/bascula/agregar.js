@@ -718,6 +718,7 @@ $(function(){
     $importe.val(precio);
     $tdimporte.html(precio);
 
+    console.log('ppromedio', promedio, cajas, kilos, precio, kilosNeto, parseFloat(kilos));
     calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
   });
 
@@ -742,7 +743,24 @@ $(function(){
       }
 
       $form.attr('action', $form.attr('action') + printt);
-      $form.submit();
+
+      let totalKg = parseFloat($('#pkilos_neto').val())||0;
+      let totalKgVal = 0;
+      if($('#ptipo').val() == 'en' && totalKg > 0) {
+        $('#tableCajas #pkilos').each(function(index, el) {
+          totalKgVal += parseFloat($(el).val())||0;
+        });
+
+        let userId = parseInt($('#userId').val())||0;
+        if((totalKg+10) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
+          noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+10) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+        } else {
+          $form.submit();
+        }
+      } else {
+        $form.submit();
+      }
+      console.log(totalKg, totalKgVal);
     } else {
       var win=window.open($('#btnPrint').attr('href'), '_blank');
       win.focus();
@@ -750,6 +768,7 @@ $(function(){
   };
 
   $('button#btnGuardar:not(.bonificar)').on('click' , function(event) {
+    event.preventDefault();
     $.ajax({
       url: base_url + 'panel/bascula/puede_modificar/',
       type: 'get',
@@ -759,15 +778,29 @@ $(function(){
     .done(function(response) {
       if (response.puede_modificar == false)
         location.reload();
-      else
-        $('#form').submit();
+      else {
+        let totalKg = parseFloat($('#pkilos_neto').val())||0;
+        let totalKgVal = 0;
+        if($('#ptipo').val() == 'en' && totalKg > 0) {
+          $('#tableCajas #pkilos').each(function(index, el) {
+            totalKgVal += parseFloat($(el).val())||0;
+          });
+
+          let userId = parseInt($('#userId').val())||0;
+          if((totalKg+10) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
+            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+10) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          } else {
+            $('#form').submit();
+          }
+        } else {
+          $('#form').submit();
+        }
+        console.log(totalKg, totalKgVal);
+      }
     });
   });
 
   // $('#form').submit(function ($t) {
-
-  //   console.log($t);
-
   //   return false;
 
   //   if ($('input#pstatus').is(':checked')) {
@@ -783,11 +816,12 @@ $(function(){
 
   $('#pstatus').on('click', function(event) {
 
-    var $this = $(this);
+    var $this = $(this),
+    $pagada = $this.hasClass('active');
 
-    if ($this.hasClass('active') === false) {
+    // if ($pagada === false) {
 
-      msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+      msb.confirm('Estas seguro de ' + ($pagada? 'quitar el pago a': 'pagar') + ' la boleta?', 'Bascula', this, function($this, $obj)
       {
         console.log('test', parseInt($('#pidb').val()));
         if ((parseInt($('#pidb').val())||0) > 0) {
@@ -796,7 +830,7 @@ $(function(){
             url: base_url + 'panel/bascula/ajax_pagar_boleta/',
             type: 'get',
             dataType: 'json',
-            data: {idb: $('#pidb').val()},
+            data: { idb: $('#pidb').val(), pagada: $pagada },
           })
           .done(function() {
             // location.reload();
@@ -808,7 +842,7 @@ $(function(){
       }, function () {
         $('#pstatus').trigger('click');
       });
-    }
+    // }
 
   });
 
@@ -831,8 +865,25 @@ $(function(){
     .done(function(resp) {
       console.log(resp);
       if (resp.passes) {
-        $('#autorizar').val(resp.user_id);
-        $('#form').submit();
+        let totalKg = parseFloat($('#pkilos_neto').val())||0;
+        let totalKgVal = 0;
+        if($('#ptipo').val() == 'en' && totalKg > 0) {
+          $('#tableCajas #pkilos').each(function(index, el) {
+            totalKgVal += parseFloat($(el).val())||0;
+          });
+
+          let userId = parseInt($('#userId').val())||0;
+          if((totalKg+10) < totalKgVal && userId != 1 && userId != 1908 && userId != 4 && userId != 3700 && userId != 5442) {
+            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+10) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          } else {
+            $('#autorizar').val(resp.user_id);
+            $('#form').submit();
+          }
+        } else {
+          $('#autorizar').val(resp.user_id);
+          $('#form').submit();
+        }
+        console.log(totalKg, totalKgVal);
       } else {
         noty({"text": resp.msg, "layout":"topRight", "type": 'error'});
       }
@@ -1016,6 +1067,7 @@ var validaCalidad = function (calidad) {
 };
 
 var calculaTotales = function (trIndex, kilosNeto) {
+  console.log('calculaTotales', kilosNeto);
   var $ptotal_cajas = $('#ptotal_cajas'),
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
@@ -1023,14 +1075,15 @@ var calculaTotales = function (trIndex, kilosNeto) {
       $pisrPorcent  = $('#pisrPorcent'),
       $area         = $('#parea'),
 
-      kilosNeto  = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
-      totalCajas = 0,
+      kilosNeto   = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
+      totalCajas  = 0,
       totalCajasP = 0,
       isrTotal    = 0,
-      total      = 0,
+      total       = 0,
 
       trIndex = trIndex || 0;
 
+  console.log('calculaTotales', kilosNeto);
   // Recorre todas las cajas/calidades para obtener el total de cajas.
   $('input#pcajas').each(function(e, i) {
     totalCajas += parseFloat($(this).val());

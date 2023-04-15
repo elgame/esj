@@ -39,6 +39,7 @@ class notas_credito extends MY_Controller {
           array('general/keyjump.js'),
           array('general/util.js'),
           array('panel/notas_credito/agregar.js'),
+          array('panel/facturacion/frm_otros.js'),
       ));
 
       $params['info_empleado']  = $this->info_empleado['info']; //info empleado

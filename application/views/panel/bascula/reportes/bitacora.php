@@ -78,6 +78,22 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="folio">Folio</label>
+                  <div class="controls">
+                    <input type="text" name="folio"
+                      value="<?php echo set_value('folio') ?>" id="folio" class="span12" placeholder="Folio">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="boletaId">Id</label>
+                  <div class="controls">
+                    <input type="text" name="boletaId"
+                      value="<?php echo set_value('boletaId') ?>" id="boletaId" class="span12" placeholder="Id">
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

@@ -345,15 +345,16 @@ class nomina
       $this->empleado->nomina->subtotal        += floatval($otroPago['total']);
     }
 
+    if ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se') {
+      if ((isset($this->empleado->p_alimenticia) && $this->empleado->p_alimenticia > 0) ||
+          isset($this->empleado->otros_datos->dePensionAlimenticia)) {
+        $this->empleado->nomina->deducciones['pencion_alimenticia'] = $this->dPencionAlimenticia();
+      }
 
-    if ((isset($this->empleado->p_alimenticia) && $this->empleado->p_alimenticia > 0) ||
-        isset($this->empleado->otros_datos->dePensionAlimenticia)) {
-      $this->empleado->nomina->deducciones['pencion_alimenticia'] = $this->dPencionAlimenticia();
-    }
-
-    if ((isset($this->empleado->fonacot) && $this->empleado->fonacot > 0) ||
-        isset($this->empleado->otros_datos->deInfonacot)) {
-      $this->empleado->nomina->deducciones['infonacot'] = $this->dInfonacot();
+      if ((isset($this->empleado->fonacot) && $this->empleado->fonacot > 0) ||
+          isset($this->empleado->otros_datos->deInfonacot)) {
+        $this->empleado->nomina->deducciones['infonacot'] = $this->dInfonacot();
+      }
     }
 
     // Totales Deducciones
@@ -586,9 +587,10 @@ class nomina
    *
    * @return float
    */
-  public function diasPrimaVacacional()
+  public function diasPrimaVacacional($dias = null)
   {
-    return (intval($this->empresaConfig->prima_vacacional) / 100) * $this->empleado->dias_vacaciones;
+    $dias = $dias? $dias: $this->empleado->dias_vacaciones;
+    return (intval($this->empresaConfig->prima_vacacional) / 100) * $dias;
   }
 
   /**
@@ -598,7 +600,9 @@ class nomina
    */
   public function factorIntegracion()
   {
-    return round((365 + $this->empresaConfig->aguinaldo + $this->empleado->dias_prima_vacacional) / 365, 4);
+    // dias completos de vacaciones para el calculo de sdi
+    $dias_prima_full = $this->diasPrimaVacacional($this->diasDeVacaciones());
+    return round((365 + $this->empresaConfig->aguinaldo + $dias_prima_full) / 365, 4);
   }
 
   /**
@@ -667,7 +671,10 @@ class nomina
    */
   public function pPremioPuntualidad()
   {
-    $premioPuntualidad = $this->empleado->nomina->sueldo * ($this->empresaConfig->puntualidad / 100);
+    $dias = $this->empleado->dias_trabajados==7? 1: ($this->empleado->dias_trabajados - floor($this->empleado->dias_trabajados));
+    $septimo = $this->empleado->salario_diario * $dias;
+    $sueldo = $this->empleado->nomina->sueldo - $septimo;
+    $premioPuntualidad = $sueldo * ($this->empresaConfig->puntualidad / 100);
     $premioPuntualidad = $this->empleado->ttipo_nnomina == 'quincena'? 0: $premioPuntualidad;
 
     return array(
@@ -688,7 +695,10 @@ class nomina
    */
   public function pPremioAsistencia()
   {
-    $premioAsistencia = $this->empleado->nomina->sueldo * ($this->empresaConfig->asistencia / 100);
+    $dias = $this->empleado->dias_trabajados==7? 1: ($this->empleado->dias_trabajados - floor($this->empleado->dias_trabajados));
+    $septimo = $this->empleado->salario_diario * $dias;
+    $sueldo = $this->empleado->nomina->sueldo - $septimo;
+    $premioAsistencia = $sueldo * ($this->empresaConfig->asistencia / 100);
     $premioAsistencia = $this->empleado->ttipo_nnomina == 'quincena'? 0: $premioAsistencia;
 
     return array(
@@ -933,6 +943,10 @@ class nomina
     }
     $totalImss = round($cuotaAdicionalImss + $retencionImss, 2);
 
+    if($this->empleado->nomina_guardada != 'f') {
+      $totalImss = $this->empleado->imss;
+    }
+
     return array(
       'TipoDeduccion' => '001',
       'Clave'          => $this->clavesPatron['imss'],
@@ -963,6 +977,10 @@ class nomina
       $baseRcv = $this->empleado->nomina->salario_diario_integrado;
     }
     $rcv = round(0.01125 * (floatval($baseRcv) * floatval($this->empleado->dias_trabajados)), 2);
+
+    if($this->empleado->nomina_guardada != 'f') {
+      $totalImss = $this->empleado->vejez;
+    }
 
     return array(
       'TipoDeduccion' => '003',
@@ -1390,6 +1408,10 @@ class nomina
         }
       }
     }
+    // else {
+    //   $diasVacaciones = $this->vacacionesConfig[0]->dias;
+    // }
+
     return $diasVacaciones;
   }
 

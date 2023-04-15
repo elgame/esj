@@ -84,7 +84,7 @@
 
                     <?php if ( $nominas_finalizadas){ ?>
                       <a href="<?php echo base_url('panel/nomina_fiscal/recibos_nomina_pdf/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Recibos Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
-                      <a href="<?php echo base_url('panel/nomina_trabajos/nomina_fiscal_ticket/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Tickets Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
+                      <a href="<?php echo base_url('panel/nomina_trabajos2/nomina_fiscal_ticket/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Tickets Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
                     <?php } ?>
 
                   </div>
@@ -115,6 +115,8 @@
                   <?php } ?>
                 </div>
               </div>
+
+              <div id="msgResultTimbres" class="alert alert-error" style="display: none;"></div>
 
               <input type="hidden" value="<?php echo $numSemanaSelected?>" name="numSemana">
               <input type="hidden" name="calcMes" value="<?php echo $calcMes ?>">
@@ -346,6 +348,7 @@
                         <td style="background-color: #eee; height: 39px;width: 170px;padding-left: 40px!important;border-right: 1px #ccc solid; position: absolute; <?php echo $bgColor ?>">
                           <?php echo strtoupper($e->nombre) ?>
                           <?php echo $htmlLabel ?>
+                          <input type="hidden" name="empleado_nombre[]" value="<?php echo strtoupper($e->nombre) ?>" class="span12 empleado_nombre">
                           <input type="hidden" name="empleado_id[]" value="<?php echo $e->id ?>" class="span12 empleado-id">
                           <input type="hidden" name="esta_asegurado[]" value="<?php echo $e->esta_asegurado ?>" class="span12 empleado-esta_asegurado">
                           <input type="hidden" name="puesto_id[]" value="<?php echo $e->id_puesto ?>" class="span12">

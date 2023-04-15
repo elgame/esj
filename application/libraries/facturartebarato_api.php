@@ -8,21 +8,21 @@ class facturartebarato_api {
    *
    * @var string
    */
-  protected $user = 'sanjorge'; //sanjorge
+  protected $user = 'sanjorge'; //sanjorge|admin
 
   /**
    * Password.
    *
    * @var string
    */
-  protected $password = 'S4nj0rg3'; //S4nj0rg3
+  protected $password = 'S4nj0rg3'; //S4nj0rg3|A12345678
 
   /**
    * URL base de la api.
    *
    * @var string
    */
-  protected $apiURL = 'https://api.kubox.mx/v2/';
+  protected $apiURL = 'https://api.kubox.mx/v2/'; //api|development
 
   /**
    * Almacena la informacion de la peticion por curl.
@@ -118,7 +118,7 @@ class facturartebarato_api {
       return $resLogin;
     }
 
-    $apiURL = "{$this->apiURL}timbre/factura33";
+    $apiURL = "{$this->apiURL}timbre/factura40";
 
     $postData = json_encode($postData);
     // Checa si ahi conexion a internet.
@@ -206,7 +206,7 @@ class facturartebarato_api {
       return $resLogin;
     }
 
-    $apiURL = "{$this->apiURL}timbre/nomina33";
+    $apiURL = "{$this->apiURL}timbre/nomina40";
 
     $postData = json_encode($postData);
     // Checa si ahi conexion a internet.

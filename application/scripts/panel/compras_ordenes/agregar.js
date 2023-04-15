@@ -22,6 +22,7 @@
     eventKeyUpCantPrecio();
     eventOnChangeTraslado();
     eventBtnDelProducto();
+    eventBtnListaActivos();
     eventCheckboxProducto();
     eventOnChangePresentacionTable();
     eventOnChangeTipoOrden();
@@ -977,6 +978,18 @@
       $parent.remove();
 
       calculaTotal();
+    });
+  };
+
+  var eventBtnListaActivos = function () {
+    $('#productos').on('click', "#btnListActivos", function(event) {
+      var $this = $(this), $parent = $this.parents("div:first");
+      if ($parent.find(".popover").is(":hidden")){
+        $parent.find(".popover").show(80);
+        $parent.find('.clsActivos').focus();
+      }
+      else
+        $parent.find(".popover").hide(80);
     });
   };
 

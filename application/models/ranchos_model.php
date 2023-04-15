@@ -181,11 +181,17 @@ class ranchos_model extends CI_Model {
 	 */
 	public function getRanchosAjax($sqlX = null){
 		$sql = '';
-		if ($this->input->get('term') !== false)
-			$sql = " AND (
-        lower(r.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
-        OR lower(r.codigo) LIKE '".mb_strtolower($this->input->get('term'), 'UTF-8')."'
-      )";
+    $fron_nomina = $this->input->get('nomina') == 'true'? true: false;
+		if ($this->input->get('term') !== false){
+      if (strlen($this->input->get('term')) > 4 || !$fron_nomina) {
+  			$sql = " AND (
+          lower(r.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+          OR lower(r.codigo) = '".mb_strtolower($this->input->get('term'), 'UTF-8')."'
+        )";
+      } else {
+        $sql = " AND (lower(r.codigo) = '".mb_strtolower($this->input->get('term'), 'UTF-8')."')";
+      }
+    }
 
 		if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
       $sql .= " AND r.id_empresa in(".$this->input->get('did_empresa').")";
@@ -197,7 +203,7 @@ class ranchos_model extends CI_Model {
       $sql .= $sqlX;
 
 		$res = $this->db->query(
-      	"SELECT r.id_rancho, r.nombre, r.status, a.id_area, a.nombre AS area
+      	"SELECT r.id_rancho, r.nombre, r.status, a.id_area, a.nombre AS area, r.codigo
         FROM otros.ranchos r
           INNER JOIN public.areas a ON a.id_area = r.id_area
   			WHERE r.status = 't'
@@ -211,8 +217,8 @@ class ranchos_model extends CI_Model {
 			foreach($res->result() as $itm){
 				$response[] = array(
 						'id'    => $itm->id_rancho,
-						'label' => $itm->nombre,
-						'value' => $itm->nombre,
+						'label' => ($itm->codigo!=''? "{$itm->codigo} - ": '').$itm->nombre,
+						'value' => ($itm->codigo!=''? "{$itm->codigo} - ": '').$itm->nombre,
 						'item'  => $itm,
 				);
 			}

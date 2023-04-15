@@ -940,7 +940,7 @@ class devoluciones_iva_model extends privilegios_model{
             -- ) fh ON f.id_factura = fh.id_remision
           WHERE f.id_abono_factura IS NULL
             AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
-            AND (Date(f.fecha) BETWEEN {$sql_fecha})
+            AND (Date(acf.fecha) BETWEEN {$sql_fecha})
             AND f.is_factura = 't'
             AND (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(15,2) <= 0
              {$sql}
@@ -950,7 +950,7 @@ class devoluciones_iva_model extends privilegios_model{
         INNER JOIN facturacion_productos cp ON cp.id_factura = d.id_factura
         INNER JOIN clasificaciones AS pr ON pr.id_clasificacion = cp.id_clasificacion
         INNER JOIN unidades AS pu ON pu.id_unidad = pr.id_unidad
-      WHERE cp.ieps > 0 AND d.fecha BETWEEN {$sql_fecha}
+      WHERE cp.ieps > 0 AND d.fecha_pago BETWEEN {$sql_fecha}
         ORDER BY cp.porcentaje_ieps ASC
       ");
     $response = $facturas->result();

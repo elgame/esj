@@ -352,6 +352,20 @@ class mypdf_ticket extends FPDF {
       $this->SetAligns(array('L'));
       $this->SetY($this->GetY()-1);
       $this->Row(array($data->creadox ), false, false, 4);
+      if (!empty($data->cerradox)) {
+        $this->SetFont($this->fount_txt, '', $this->font_size+1);
+        $this->SetFounts(array($this->fount_txt), array(-1));
+        $this->SetWidths(array(35, 27));
+        $this->SetAligns(array('L', 'R'));
+        $this->Row(array('CERRADO:' ), false, false);
+        $this->SetWidths(array($this->pag_size[0]));
+        $this->SetFounts(array($this->fount_txt), array(-1));
+        $this->SetAligns(array('L'));
+        $this->SetY($this->GetY() - 3.5);
+        $this->Row(array(MyString::fechaATexto(substr($data->fecha_imp_orig, 0, 10), '/c').' '.substr($data->fecha_imp_orig, -11, -3)), false, false, 4);
+        $this->SetY($this->GetY()-1);
+        $this->Row(array($data->cerradox ), false, false, 4);
+      }
       if ($data->no_impresiones > 0) {
         $this->SetFounts(array($this->fount_txt), array(-1));
         $this->SetWidths(array(35, 27));

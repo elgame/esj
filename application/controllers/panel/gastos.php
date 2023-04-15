@@ -46,6 +46,7 @@ class gastos extends MY_Controller {
       array('general/msgbox.js'),
       array('general/supermodal.js'),
       // array('panel/compras_ordenes/agregar.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
       array('panel/gastos/agregar.js')
     ));
 
@@ -58,6 +59,7 @@ class gastos extends MY_Controller {
     $this->load->model('proveedores_model');
     $this->load->model('banco_cuentas_model');
     $this->load->model('empresas_model');
+    $this->load->model('compras_areas_model');
 
     $this->configAddGasto();
     if ($this->form_validation->run() == FALSE)
@@ -117,6 +119,8 @@ class gastos extends MY_Controller {
     {
       $params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_POST['proveedorId']);
     }
+
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -391,6 +395,20 @@ class gastos extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function imprimir()
+  {
+    $this->load->model('gastos_model');
+
+    if (isset($_GET['p']))
+    {
+      $this->gastos_model->print($_GET['id']);
+    }
+    else
+    {
+      $this->load->view('panel/gastos/print');
+    }
+  }
+
   public function configAddNotaCredito()
   {
     $this->load->library('form_validation');
@@ -557,6 +575,12 @@ class gastos extends MY_Controller {
             'rules' => ''),
       array('field' => 'intangible',
             'label' => 'Gasto intangible',
+            'rules' => ''),
+      array('field' => 'codigoArea',
+            'label' => 'Codigo Area',
+            'rules' => ''),
+      array('field' => 'codigoAreaId',
+            'label' => 'Codigo Area',
             'rules' => ''),
 
       array('field' => 'subtotal',

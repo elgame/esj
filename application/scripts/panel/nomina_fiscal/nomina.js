@@ -570,6 +570,7 @@
       } else {
         errorTimbrar = true;
         idUltimoError = result.empleadoId;
+        $('#msgResultTimbres').append(`<span>${$tr.find('.empleado_nombre').val()} => ${result.msg} <br /></span>`).show();
       }
 
       // Si el empleado que se timbro es el ultimo que se tenia que timbrar

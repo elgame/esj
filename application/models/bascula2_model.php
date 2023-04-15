@@ -874,6 +874,512 @@ class bascula2_model extends bascula_model {
     return $data;
   }
 
+
+  public function rpt_boletas_salida_data()
+  {
+    $sql = $sql2 = '';
+
+    $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
+    $_GET['ffecha2'] = $this->input->get('ffecha2') != '' ? $_GET['ffecha2'] : date('Y-m-d');
+    $fecha_compara = 'fecha_tara';
+
+    $this->load->model('areas_model');
+    $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : $this->areas_model->getAreaDefault();
+    if ($this->input->get('farea') != '') {
+      $sql .= " AND b.id_area = " . $_GET['farea'];
+    }
+
+    if ($this->input->get('fid_proveedor') != ''){
+      if($this->input->get('ftipo') == 'sa'){
+        $sql .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+      }else{
+        $sql .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+      }
+    }
+
+    if ($this->input->get('fid_empresa') != ''){
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+
+    $sql .= " AND DATE(b.{$fecha_compara}) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+
+    //Filtros del tipo de pesadas
+    if ($this->input->get('ftipo') != '')
+      $sql .= " AND b.tipo = '{$_GET['ftipo']}'";
+
+    $campos = "p.nombre_fiscal AS proveedor, ";
+    $table_ms = 'LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor';
+    $tipo_rpt = "Entrada";
+    if($this->input->get('ftipo') == 'sa') {
+      $campos = "c.nombre_fiscal AS proveedor, ";
+      $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
+      $tipo_rpt = "Salida";
+    }
+
+    if ($this->input->get('fid_producto') > 0) {
+      $sql2 .= " AND id_clasificacion = {$_GET['fid_producto']}";
+    }
+
+    $query = $this->db->query(
+      "SELECT b.id_bascula,
+        b.total_cajas, b.importe, {$campos}
+        b.folio, b.accion, Date(b.{$fecha_compara}) AS fecha,
+        b.kilos_bruto, b.kilos_tara, b.kilos_neto,
+        Coalesce(op.nombre_fiscal, '') AS productor,
+        Coalesce(e.nombre_fiscal, '') AS empresa,
+        pro.productos
+      FROM bascula AS b
+        {$table_ms}
+        LEFT JOIN otros.productor op ON op.id_productor = b.id_productor
+        LEFT JOIN empresas e ON e.id_empresa = b.id_empresa
+        ".(empty($sql2)? 'LEFT': 'INNER')." JOIN (
+          SELECT id_bascula, String_agg(('Cajas: ' || cantidad || ' | Producto: ' || descripcion), ',&') AS productos
+          FROM bascula_productos
+          WHERE 1 = 1 {$sql2}
+          GROUP BY id_bascula
+        ) pro ON pro.id_bascula = b.id_bascula
+      WHERE b.status = true
+        {$sql}
+      ORDER BY b.folio ASC
+      "
+    );
+
+    $this->load->model('areas_model');
+
+    // Obtiene la informacion del Area filtrada.
+    $area = $this->areas_model->getAreaInfo($_GET['farea']);
+
+    $rsb = array();
+    if ($query->num_rows() > 0)
+    {
+      $rsb = $query->result();
+    }
+
+    return array('area' => $area, 'data' => $rsb, 'tipo' => $tipo_rpt);
+  }
+  /**
+  * Visualiza/Descarga el PDF para el Reporte boletas pagadas.
+  *
+  * @return void
+  */
+  public function rpt_boletas_salida_pdf()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_boletas_salida_data();
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $area = $data['area'];
+    // echo "<pre>";
+    //   var_dump($area);
+    // echo "</pre>";exit;
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'] !== '')
+    {
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('fid_empresa'));
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    }
+
+    $pdf->titulo2 = "REPORTE SALIDAS DE BOLETAS <".(isset($area['info'])? $area['info']->nombre: '')."> <".(isset($data['tipo'])? $data['tipo']: '').'>';
+    $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproducto');
+    $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+    $aligns1 = array('L', 'R', 'R', 'R', 'L', 'L', 'L', 'R', 'R', 'R');
+    $widths = array(18, 20, 25, 25, 40, 40, 40);
+    $header = array('FECHA', 'BOLETA', 'IMPORTE', 'KG', 'EMPRESA', 'CLIENTE', 'PRODUCTOS');
+
+    $kgt    = 0;
+    $importe  = 0;
+    foreach ($data['data'] as $key => $caja) {
+      if($pdf->GetY()+15 >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        if($key != 0)
+          $pdf->AddPage();
+
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false);
+      }
+
+      $pdf->SetFont('helvetica','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $kgt += $caja->kilos_neto;
+      $importe += $caja->importe;
+
+      $datos = array(
+        MyString::fechaAT($caja->fecha),
+        $caja->folio,
+        MyString::formatoNumero($caja->importe, 2, '$', false),
+        MyString::formatoNumero($caja->kilos_neto, 2, '', false),
+        substr($caja->empresa, 0, 28),
+        substr($caja->proveedor, 0, 28),
+        str_replace(',&', "\n", $caja->productos),
+      );
+
+      $pdf->SetY($pdf->GetY());
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns1);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+      if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+      }
+    }
+
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetY($pdf->GetY()-1);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(38, 25, 25));
+    $pdf->Row(array(
+      'TOTALES',
+      MyString::formatoNumero($importe, 2, '$', false),
+      MyString::formatoNumero($kgt, 2, '', false),
+    ), false, false);
+
+    $pdf->Output('salidas_boletas.pdf', 'I');
+  }
+
+  public function rpt_boletas_salida_xls()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_boletas_salida_data();
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $area = $data['area'];
+
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=salidas_boletas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($_GET['fid_empresa']{0})? $_GET['fid_empresa']: 2));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "REPORTE SALIDAS DE BOLETAS <".$area['info']->nombre."> <".(isset($data['tipo'])? $data['tipo']: '').'>';
+    $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproducto');
+    $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="7" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="7" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="7" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="7"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">BOLETA</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">KG</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CLIENTE</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRODUCTOS</td>
+      </tr>';
+    $kgt    = 0;
+    $importe  = 0;
+    foreach ($data['data'] as $key => $caja) {
+      $kgt += $caja->kilos_neto;
+      $importe += $caja->importe;
+
+      $html .= '<tr>
+        <td style="width:150px;border:1px solid #000;">'.$caja->fecha.'</td>
+        <td style="width:150px;border:1px solid #000;">'.$caja->folio.'</td>
+        <td style="width:400px;border:1px solid #000;">'.$caja->importe.'</td>
+        <td style="width:150px;border:1px solid #000;">'.$caja->kilos_neto.'</td>
+        <td style="width:150px;border:1px solid #000;">'.$caja->empresa.'</td>
+        <td style="width:150px;border:1px solid #000;">'.$caja->proveedor.'</td>
+        <td style="width:150px;border:1px solid #000;">'.str_replace(',&', "\n", $caja->productos).'</td>
+      </tr>';
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="2">TOTALES</td>
+          <td style="border:1px solid #000;">'.$kgt.'</td>
+          <td style="border:1px solid #000;">'.$importe.'</td>
+          <td colspan="3"></td>
+        </tr>
+        <tr>
+          <td colspan="7"></td>
+        </tr>';
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  public function rpt_boletas_porpagar_data()
+  {
+    $sql = $sql2 = '';
+
+    $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
+    $_GET['ffecha2'] = $this->input->get('ffecha2') != '' ? $_GET['ffecha2'] : date('Y-m-d');
+    $fecha_compara = 'fecha_tara';
+
+    $this->load->model('areas_model');
+    $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : $this->areas_model->getAreaDefault();
+    if ($this->input->get('farea') != ''){
+      $sql .= " AND b.id_area = " . $_GET['farea'];
+    }
+
+    if ($this->input->get('fid_empresa') != ''){
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+
+    if ($this->input->get('fstatus') === 'pb') { // pagados
+      $sql .= " AND b.accion In('p', 'b')";
+    } else {  // pendientes -> se
+      $sql .= " AND b.accion = 'sa'";
+    }
+
+    $sql .= " AND DATE(b.{$fecha_compara}) <= '".$_GET['ffecha1']."'";
+    $sql .= " AND b.intangible = 'f'";
+
+
+    $query = $this->db->query(
+      "SELECT p.id_proveedor, p.nombre_fiscal AS proveedor, e.nombre_fiscal AS empresa, sal.importe
+      FROM proveedores p
+        INNER JOIN (
+          SELECT b.id_proveedor, Sum(b.importe) AS importe
+          FROM bascula AS b
+          WHERE b.status = true AND b.id_bonificacion IS NULL
+            AND b.tipo = 'en' {$sql}
+          GROUP BY b.id_proveedor
+        ) sal ON p.id_proveedor = sal.id_proveedor
+        INNER JOIN empresas e ON e.id_empresa = p.id_empresa
+      ORDER BY empresa ASC, proveedor ASC
+      ");
+
+    $this->load->model('areas_model');
+
+    // Obtiene la informacion del Area filtrada.
+    $area = $this->areas_model->getAreaInfo($_GET['farea']);
+
+    $data = array();
+    if ($query->num_rows() > 0)
+    {
+      $data = $query->result();
+    }
+
+    return array('data' => $data, 'area' => $area);
+  }
+  public function rpt_boletas_porpagar_pdf()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_boletas_porpagar_data();
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $area = $data['area'];
+    // echo "<pre>";
+    //   var_dump($area);
+    // echo "</pre>";exit;
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'] !== '')
+    {
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('fid_empresa'));
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    }
+
+    $pdf->titulo2 = "REPORTE BOLETAS POR PAGAR <".(isset($area['info'])? $area['info']->nombre: '').">";
+    $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+    $pdf->titulo3 = "Hasta ".$fecha->format('d/m/Y')." | ".$this->input->get('fempresa');
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $aligns = array('L', 'L', 'R', 'C', 'C', 'C', 'C', 'C', 'C');
+    $widths = array(80, 95, 30);
+    $header = array('EMPRESA', 'PROVEEDOR', 'IMPORTE');
+
+    $importe = 0;
+    foreach($data['data'] as $key => $caja)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        if($key != 0)
+          $pdf->AddPage();
+
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false);
+      }
+
+      $pdf->SetFont('helvetica','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $importe  += $caja->importe;
+
+      $datos = array(
+        $caja->empresa,
+        $caja->proveedor,
+        MyString::formatoNumero($caja->importe, 2, '$', false)
+      );
+
+      $pdf->SetY($pdf->GetY());
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+    }
+
+    if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+    {
+      $pdf->AddPage();
+    }
+
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetY($pdf->GetY()-1);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(175, 30, 30, 25, 17, 25));
+    $pdf->Row(array(
+      'TOTALES',
+      MyString::formatoNumero($importe, 2, '$', false)
+    ), false, false);
+
+    $pdf->Output('reporte_boletas_porpagar.pdf', 'I');
+  }
+
+  public function rpt_boletas_porpagar_xls()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_boletas_porpagar_data();
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+    $area = $data['area'];
+
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_boletas_porpagar.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($_GET['fid_empresa']{0})? $_GET['fid_empresa']: 2));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "REPORTE BOLETAS POR PAGAR <".$area['info']->nombre.">";
+    $titulo3 = "Hasta ".$fecha->format('d/m/Y')." | ".$this->input->get('fempresa');
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:250px;border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+        <td style="width:250px;border:1px solid #000;background-color: #cccccc;">PROVEEDOR</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+      </tr>';
+
+    $importe = 0;
+    foreach($data['data'] as $key => $caja)
+    {
+      $importe  += $caja->importe;
+
+      $html .= '<tr>
+        <td style="width:250px;border:1px solid #000;">'.$caja->empresa.'</td>
+        <td style="width:250px;border:1px solid #000;">'.$caja->proveedor.'</td>
+        <td style="width:150px;border:1px solid #000;">'.$caja->importe.'</td>
+      </tr>';
+
+    }
+
+    $html .= '
+      <tr style="font-weight:bold">
+        <td colspan="2">TOTALES</td>
+        <td style="border:1px solid #000;">'.$importe.'</td>
+      </tr>
+      <tr>
+        <td colspan="3"></td>
+      </tr>';
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }
 /* End of file bascula_model.php */
 /* Location: ./application/models/bascula_model.php */

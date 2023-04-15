@@ -6,7 +6,9 @@ class labores_codigo extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'labores_codigo/ajax_get_departamentos/',
     'labores_codigo/ajax_get_labores/',
+    'labores_codigo/ajax_combus_get_labores/',
   );
 
   public function _remap($method)
@@ -60,7 +62,7 @@ class labores_codigo extends MY_Controller {
 
     $this->carabiner->js(array(
       array('general/msgbox.js'),
-      array('panel/caja_chica/categorias.js'),
+      array('panel/nomina_fiscal/labores.js'),
     ));
 
     $this->load->model('labores_codigo_model');
@@ -84,6 +86,8 @@ class labores_codigo extends MY_Controller {
         redirect(base_url('panel/labores_codigo/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
       }
     }
+
+    $params['areas'] = $this->labores_codigo_model->getAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -109,7 +113,7 @@ class labores_codigo extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Modificar Categoria'
+      'titulo' => 'Modificar Labor'
     );
 
     $this->configAddLabor();
@@ -128,6 +132,7 @@ class labores_codigo extends MY_Controller {
     }
 
     $params['categoria'] = $this->labores_codigo_model->info($_GET['id'], true);
+    $params['areas'] = $this->labores_codigo_model->getAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -158,6 +163,12 @@ class labores_codigo extends MY_Controller {
       array('field' => 'codigo',
             'label' => 'Codigo',
             'rules' => 'required|max_length[10]|callback_valid_codigo'),
+      array('field' => 'costo',
+            'label' => 'Costo x unidad',
+            'rules' => 'required|numeric'),
+      array('field' => 'departamento',
+            'label' => 'Area',
+            'rules' => 'required|max_length[70]'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -183,10 +194,160 @@ class labores_codigo extends MY_Controller {
   }
 
 
+  public function combus()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Labores de Combustible'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('labores_codigo_model');
+
+    $params['labores'] = $this->labores_codigo_model->getLabores(40, 'com');
+    // echo "<pre>";
+    //   var_dump($params['categorias']);
+    // echo "</pre>";exit;
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/almacen/labores_codigos/combus_admin', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function combus_agregar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/labores.js'),
+    ));
+
+    $this->load->model('labores_codigo_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar Labor'
+    );
+
+    $this->configAddLaborCombus();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->labores_codigo_model->agregar($_POST, 'com');
+
+      if ($res_mdl)
+      {
+        redirect(base_url('panel/labores_codigo/combus_agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
+      }
+    }
+
+    $params['areas'] = $this->labores_codigo_model->getAreas();
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/almacen/labores_codigos/combus_agregar', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function combus_modificar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/caja_chica/categorias.js'),
+    ));
+
+    $this->load->model('labores_codigo_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Modificar Labor'
+    );
+
+    $this->configAddLaborCombus();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->labores_codigo_model->modificar($_GET['id'], $_POST, 'com');
+
+      if ($res_mdl)
+      {
+        redirect(base_url('panel/labores_codigo/combus_modificar/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
+      }
+    }
+
+    $params['categoria'] = $this->labores_codigo_model->info($_GET['id'], true);
+    $params['areas'] = $this->labores_codigo_model->getAreas();
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/almacen/labores_codigos/combus_modificar', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function combus_eliminar()
+  {
+    $this->load->model('labores_codigo_model');
+    $this->labores_codigo_model->elimimnar($_GET['id']);
+
+    redirect(base_url('panel/labores_codigo/combus/?&msg=6'));
+  }
+
+  public function ajax_combus_get_labores()
+  {
+    $this->load->model('labores_codigo_model');
+    echo json_encode($this->labores_codigo_model->ajaxLabores('com'));
+  }
+
+
   public function ajax_get_labores()
   {
     $this->load->model('labores_codigo_model');
     echo json_encode($this->labores_codigo_model->ajaxLabores());
+  }
+
+  public function ajax_get_departamentos()
+  {
+    $this->load->model('labores_codigo_model');
+    echo json_encode($this->labores_codigo_model->ajaxDepartamentos());
+  }
+
+  public function configAddLaborCombus()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'nombre',
+            'label' => 'Nombre',
+            'rules' => 'required|max_length[120]')
+    );
+
+    $this->form_validation->set_rules($rules);
   }
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')

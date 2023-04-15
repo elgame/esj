@@ -65,6 +65,7 @@
       </div>
 
       <form action="<?php echo base_url('panel/bascula/agregar?'.MyString::getVarsLink(array('msg', 'fstatus', 'p', 'f'))); ?>" method="post" class="form-horizontal" id="form">
+        <input type="hidden" id="userId" value="<?php echo $this->session->userdata('id_usuario') ?>">
 
         <?php if ($accion === 'en') { ?>
           <button type="button" class="btn btn-info" id="btnSetFocoKilosTara">Cargar Kilos Tara</button>
@@ -508,7 +509,7 @@
                       <?php if (isset($_POST['pcajas'])) {
                               foreach ($_POST['pcajas'] as $key => $caja) {
                       ?>
-                                <tr data-kneto="">
+                                <tr data-kneto="<?php echo $this->input->post('pkilos_neto') ?>">
                                   <td><?php echo $caja ?>
                                     <input type="hidden" name="pnum_registro[]" value="<?php echo $_POST['pnum_registro'][$key] ?>" id="pnum_registro">
                                     <input type="hidden" name="pcajas[]" value="<?php echo $caja ?>" id="pcajas">

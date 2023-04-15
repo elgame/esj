@@ -76,7 +76,7 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     $sql .= " AND u.registro_patronal = '{$filtros['regPatronal']}'";
-    $sqlg .= " AND nf.registro_patronal = '{$filtros['regPatronal']}'";
+    // $sqlg .= " AND nf.registro_patronal = '{$filtros['regPatronal']}'";
 
     if ($filtros['puestoId'] !== '')
     {
@@ -152,18 +152,19 @@ class nomina_fiscal_model extends CI_Model {
     // Query para obtener los empleados de la semana de la nomina.
     if($nm_guardada->num > 0)
     {
-      $sql_nm_guardadas = "((nf.anio = {$semana['anio']} AND nf.semana = {$semana[$tipoNomina]}) or
-                (nagui.anio = {$semana['anio']} AND nagui.semana = {$semana[$tipoNomina]})) {$sqlg}
+      $sql_nm_guardadas = "((nf.anio = {$semana['anio']} AND nf.semana = {$semana[$tipoNomina]} AND nf.registro_patronal = '{$filtros['regPatronal']}') OR
+                (nagui.anio = {$semana['anio']} AND nagui.semana = {$semana[$tipoNomina]} AND nagui.registro_patronal = '{$filtros['regPatronal']}')) {$sqlg}
          {$ordenar}";
       if($nm_tipo == 'pt') {
-        $sql_nm_guardadas = "nptu.anio = {$semana['anio']} AND nptu.semana = {$semana[$tipoNomina]} {$sqlpt} {$ordenar}";
+        $sql_nm_guardadas = "nptu.anio = {$semana['anio']} AND nptu.semana = {$semana[$tipoNomina]}
+          AND nptu.registro_patronal = '{$filtros['regPatronal']}' {$sqlpt} {$ordenar}";
       }
 
       $show_ag = ($nm_tipo=='ag'? 't': 'f');
       $query = $this->db->query(
         "SELECT u.id,
                 u.no_empleado,
-                (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
+                (u.nombre || ' ' || COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '')) as nombre,
                 COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre AS nombre2,
                 u.banco,
                 COALESCE({$field_esta_asegurado}) AS esta_asegurado,
@@ -768,6 +769,16 @@ class nomina_fiscal_model extends CI_Model {
       'desc_otros'    => isset($data->desc_otros)? $data->desc_otros: 0,
       'desc_cocina'   => isset($data->desc_cocina)? $data->desc_cocina: 0,
     );
+  }
+  public function getDescPreNomina($empresaId, $anio, $semana)
+  {
+    $data = $this->db->query("SELECT id_empleado, Sum(horas_extras) horas_extras, Sum(desc_playeras) desc_playeras,
+        Sum(desc_otros) desc_otros, Sum(desc_cocina) desc_cocina
+      FROM nomina_fiscal_presave
+      WHERE id_empresa = {$empresaId} AND anio = {$anio} AND semana = {$semana}
+      GROUP BY id_empleado")->result();
+
+    return $data;
   }
 
   public function add_nominas($datos, $empresaId, $empleadoId)
@@ -1471,7 +1482,7 @@ class nomina_fiscal_model extends CI_Model {
               u.no_empleado,
               u.id_empresa,
               u.id_puesto, u.id_departamente,
-              (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
+              (u.nombre || ' ' || COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '')) as nombre,
               u.curp,
               DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
               '{$fechaSalida->format('Y-m-d')}' as fecha_salida,
@@ -1858,9 +1869,10 @@ class nomina_fiscal_model extends CI_Model {
         array(
           'serie'                         => $nomina[0]->nomina->receptor['NumEmpleado'],
           'folio'                         => $nomina[0]->folio,
-          'nombre'                        => $nomina[0]->nombre,
+          'nombre'                        => !empty($nomina[0]->nombre2) ? "{$nomina[0]->nombre2} {$nomina[0]->apellido_paterno} {$nomina[0]->apellido_materno}": $nomina[0]->nombre,
           'rfc'                           => isset($nomina[0]->rfc)? $nomina[0]->rfc: $empleado['info'][0]->rfc,
           'curp'                          => $nomina[0]->curp,
+          'cp'                            => $empleado['info'][0]->cp,
           'noEmpleado'                    => $nomina[0]->nomina->receptor['NumEmpleado'],
           'claveEntFed'                   => $nomina[0]->nomina->receptor['ClaveEntFed'],
           'departamento'                  => $empleado['info'][0]->puesto,
@@ -2030,9 +2042,13 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function getConfigNominaVacaciones()
   {
+    $anio = 2022;
+    if(date("Y") >= 2023) {
+      $anio = date("Y");
+    }
     $config = $this->db->query(
       "SELECT *
-       FROM nomina_configuracion_vacaciones")->result();
+       FROM nomina_configuracion_vacaciones WHERE anio = {$anio}")->result();
     return $config;
   }
 
@@ -3231,13 +3247,15 @@ class nomina_fiscal_model extends CI_Model {
     $empleados = $this->nomina($configuraciones, $filtros);
     $nombre = "PAGO-{$semana['anio']}-{$tipoNomina}-{$semana[$tipoNomina]}.txt";
 
-    $content           = array();
+    $cuentasSantander = [2 => '92001449876', 12 => '65506721517'];
+
+    $content           = array(); //BBVA Bancomer
     $contentSantr      = array();
     $contentBanorte    = array();
     $contador          = 1;
     $contadorSantr     = 1;
     $contadorBanorte   = 1;
-    $cuentaSantr       = '92001449876'; // Cuenta cargo santander empaque
+    $cuentaSantr       = $cuentasSantander[$empresaId]; // Cuenta cargo santander empaque
     $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte empaque
     $emisoraBanorte    = '21071'; // Emisora banorte empaque
     $total_nominaSantr = 0;
@@ -3572,7 +3590,8 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY() + 0);
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(35, 35, 25, 35, 70));
-          $pdf->Row(array("Dias Pagados: {$empleado->dias_trabajados}", "Tot Hrs trab: " . $empleado->dias_trabajados * 8, 'Hrs dia: 8.00', "Hrs extras: " . number_format($horasExtras, 2), "CURP: {$empleado->curp}"), false, false, null, 1, 1);
+          $dias_reales = $empleado->dias_trabajados == 7? 6: intval($empleado->dias_trabajados);
+          $pdf->Row(array("Dias Pagados: {$empleado->dias_trabajados}", "Tot Hrs trab: " . $dias_reales * 8, 'Hrs dia: 8.00', "Hrs extras: " . number_format($horasExtras, 2), "CURP: {$empleado->curp}"), false, false, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -5619,30 +5638,34 @@ class nomina_fiscal_model extends CI_Model {
 
     //no mostrar algunas columnas
     $ver_des_cocina = $ver_des_otro = $ver_des_playera = false;
-    foreach ($_POST['empleado_id'] as $key => $empleado){
-      if($_POST['descuento_playeras'][$key]>0) $ver_des_playera = true;
-      if($_POST['descuento_otros'][$key]>0) $ver_des_otro = true;
-      if($_POST['descuento_cocina'][$key]>0) $ver_des_cocina = true;
+    if (isset($_POST['empleado_id']) && count($_POST['empleado_id']) > 0) {
+      foreach ($_POST['empleado_id'] as $key => $empleado){
+        if($_POST['descuento_playeras'][$key]>0) $ver_des_playera = true;
+        if($_POST['descuento_otros'][$key]>0) $ver_des_otro = true;
+        if($_POST['descuento_cocina'][$key]>0) $ver_des_cocina = true;
+      }
     }
 
     $empleados_sin_departamento = [];
     $ver_total_prestamos_ef = $ver_total_desc_materi = $ver_total_prestamos = $ver_total_domingo = $ver_total_otros = $ver_infonavit = $ver_trans = $ver_fondo_arro = 0;
-    foreach ($_POST['empleado_id'] as $key => $empleado)
-    {
-      $ver_infonavit          += $_POST['total_infonavit'][$key];
-      $ver_trans              += $_POST['ttotal_nomina'][$key];
-      $ver_fondo_arro         += $_POST['fondo_ahorro'][$key];
-      $ver_total_prestamos    += $_POST['total_prestamos'][$key];
-      $ver_total_prestamos_ef += $_POST['descuento_prestamoef'][$key];
-      $ver_total_desc_materi  += $_POST['descuento_materiales'][$key];
-      $ver_total_domingo      += $_POST['domingo'][$key];
-      $ver_total_otros        += $_POST['bonos'][$key]+$_POST['otros'][$key];
+    if (isset($_POST['empleado_id']) && count($_POST['empleado_id']) > 0) {
+      foreach ($_POST['empleado_id'] as $key => $empleado)
+      {
+        $ver_infonavit          += $_POST['total_infonavit'][$key];
+        $ver_trans              += $_POST['ttotal_nomina'][$key];
+        $ver_fondo_arro         += $_POST['fondo_ahorro'][$key];
+        $ver_total_prestamos    += $_POST['total_prestamos'][$key];
+        $ver_total_prestamos_ef += $_POST['descuento_prestamoef'][$key];
+        $ver_total_desc_materi  += $_POST['descuento_materiales'][$key];
+        $ver_total_domingo      += $_POST['domingo'][$key];
+        $ver_total_otros        += $_POST['bonos'][$key]+$_POST['otros'][$key];
 
-      $empleados_sin_departamento[$key] = [
-        'row_post'    => $key,
-        'id_empleado' => $empleado,
-        'departamento' => false,
-      ];
+        $empleados_sin_departamento[$key] = [
+          'row_post'    => $key,
+          'id_empleado' => $empleado,
+          'departamento' => false,
+        ];
+      }
     }
 
     $columnas = array('n' => array(), 'w' => array(6, 60, 10, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R'));
@@ -5755,112 +5778,114 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Cell(130, 6, $departamento->nombre, 0, 0, 'L', 0);
 
       $pdf->SetXY(6, $pdf->GetY()+6);
-      foreach ($_POST['empleado_id'] as $key => $empleado)
-      {
-        if($departamento->id_departamento == $_POST['departamento_id'][$key])
+      if (isset($_POST['empleado_id']) && count($_POST['empleado_id']) > 0) {
+        foreach ($_POST['empleado_id'] as $key => $empleado)
         {
-          $numero_empleado++;
-          $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
+          if($departamento->id_departamento == $_POST['departamento_id'][$key])
+          {
+            $numero_empleado++;
+            $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
 
-          $pdf->SetFont('Helvetica','', 8);
-          if($pdf->GetY()+8 >= $pdf->limiteY){
-            $pdf->AddPage();
-            $pdf->SetFont('Helvetica','B', 8);
+            $pdf->SetFont('Helvetica','', 8);
+            if($pdf->GetY()+8 >= $pdf->limiteY){
+              $pdf->AddPage();
+              $pdf->SetFont('Helvetica','B', 8);
+              $pdf->SetXY(6, $pdf->GetY());
+              // $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
+              // $pdf->SetWidths(array(64, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20));
+              $pdf->Row($columnas['n'], false, false, null, 2, 1);
+            }
+
+            $pdf->SetFont('Helvetica','', 8);
+            $total_pagar = $_POST['sueldo_semanal_real'][$key] +
+              ($_POST['bonos'][$key]+$_POST['otros'][$key]) +
+              $_POST['domingo'][$key] -
+              $_POST['total_prestamos'][$key] -
+              $_POST['total_infonavit'][$key] -
+              $_POST['descuento_playeras'][$key] -
+              $_POST['descuento_otros'][$key] -
+              $_POST['descuento_prestamoef'][$key] -
+              $_POST['descuento_materiales'][$key] -
+              $_POST['fondo_ahorro'][$key];
             $pdf->SetXY(6, $pdf->GetY());
-            // $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
-            // $pdf->SetWidths(array(64, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20));
-            $pdf->Row($columnas['n'], false, false, null, 2, 1);
+
+            $dataarr = array();
+            $dataarr[] = $numero_empleado;
+            $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+            $dataarr[] = $_POST['hrs_trabajadas'][$key];
+            $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
+            // $dataarr[] = MyString::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
+            // $dataarr[] = MyString::formatoNumero($_POST['despensa'][$key], 2, '$', false);
+
+            if ($ver_total_otros != 0)
+              $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
+            if ($ver_total_domingo != 0)
+              $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '$', false);
+            if (($ver_total_prestamos+$ver_total_prestamos_ef+$ver_total_desc_materi) != 0)
+              $dataarr[] = MyString::formatoNumero(($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key]), 2, '$', false);
+
+            if ($ver_fondo_arro != 0)
+            {
+              $dataarr[] = MyString::formatoNumero($_POST['fondo_ahorro'][$key], 2, '$', false);
+            }
+
+            if ($ver_infonavit != 0)
+            {
+              $dataarr[] = MyString::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
+            }
+
+            if($ver_des_playera)
+              $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
+            if($ver_des_otro){
+              $dataarr[] = MyString::formatoNumero(
+                floatval($_POST['descuento_otros'][$key])
+                , 2, '$', false);
+            }
+            if($ver_des_cocina)
+              $dataarr[] = MyString::formatoNumero($_POST['descuento_cocina'][$key], 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
+
+            if ($ver_trans != 0)
+            {
+              $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+            }
+
+            $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
+
+            $pdf->Row($dataarr, false, true, null, 2, 1);
+            $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
+            // $premio_asistencia   += $_POST['premio_asistencia'][$key];
+            // $despensa            += $_POST['despensa'][$key];
+            $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
+            $domingo             += $_POST['domingo'][$key];
+            $total_prestamos     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key];
+            $total_infonavit     += $_POST['total_infonavit'][$key];
+            $total_fondo         += $_POST['fondo_ahorro'][$key];
+            $descuento_playeras  += $_POST['descuento_playeras'][$key];
+            $descuento_otros     += floatval($_POST['descuento_otros'][$key]);
+            $descuento_cocina    += floatval($_POST['descuento_cocina'][$key]);
+            $ttotal_pagar        += $total_pagar;
+            $ttotal_nomina       += $_POST['ttotal_nomina'][$key];
+            $total_no_fiscal     += $_POST['total_no_fiscal'][$key];
+            $ttotal_aseg_no_trs  += $_POST['total_percepciones'][$key]-$_POST['total_deducciones'][$key];
+
+            $sueldo_semanal_real1 += $_POST['sueldo_semanal_real'][$key];
+            // $premio_asistencia1   += $_POST['premio_asistencia'][$key];
+            // $despensa1            += $_POST['despensa'][$key];
+            $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
+            $domingo1             += $_POST['domingo'][$key];
+            $total_prestamos1     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key];
+            $total_infonavit1     += $_POST['total_infonavit'][$key];
+            $total_fondo1         += $_POST['fondo_ahorro'][$key];
+            $descuento_playeras1  += $_POST['descuento_playeras'][$key];
+            $descuento_otros1     += floatval($_POST['descuento_otros'][$key]);
+            $descuento_cocina1    += $_POST['descuento_cocina'][$key];
+            $ttotal_pagar1        += $total_pagar;
+            $ttotal_nomina1       += $_POST['ttotal_nomina'][$key];
+            $total_no_fiscal1     += $_POST['total_no_fiscal'][$key];
+
+            unset($empleados_sin_departamento[$key]);
           }
-
-          $pdf->SetFont('Helvetica','', 8);
-          $total_pagar = $_POST['sueldo_semanal_real'][$key] +
-            ($_POST['bonos'][$key]+$_POST['otros'][$key]) +
-            $_POST['domingo'][$key] -
-            $_POST['total_prestamos'][$key] -
-            $_POST['total_infonavit'][$key] -
-            $_POST['descuento_playeras'][$key] -
-            $_POST['descuento_otros'][$key] -
-            $_POST['descuento_prestamoef'][$key] -
-            $_POST['descuento_materiales'][$key] -
-            $_POST['fondo_ahorro'][$key];
-          $pdf->SetXY(6, $pdf->GetY());
-
-          $dataarr = array();
-          $dataarr[] = $numero_empleado;
-          $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-          $dataarr[] = $_POST['hrs_trabajadas'][$key];
-          $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
-          // $dataarr[] = MyString::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
-          // $dataarr[] = MyString::formatoNumero($_POST['despensa'][$key], 2, '$', false);
-
-          if ($ver_total_otros != 0)
-            $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
-          if ($ver_total_domingo != 0)
-            $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '$', false);
-          if (($ver_total_prestamos+$ver_total_prestamos_ef+$ver_total_desc_materi) != 0)
-            $dataarr[] = MyString::formatoNumero(($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key]), 2, '$', false);
-
-          if ($ver_fondo_arro != 0)
-          {
-            $dataarr[] = MyString::formatoNumero($_POST['fondo_ahorro'][$key], 2, '$', false);
-          }
-
-          if ($ver_infonavit != 0)
-          {
-            $dataarr[] = MyString::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
-          }
-
-          if($ver_des_playera)
-            $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
-          if($ver_des_otro){
-            $dataarr[] = MyString::formatoNumero(
-              floatval($_POST['descuento_otros'][$key])
-              , 2, '$', false);
-          }
-          if($ver_des_cocina)
-            $dataarr[] = MyString::formatoNumero($_POST['descuento_cocina'][$key], 2, '$', false);
-          $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
-
-          if ($ver_trans != 0)
-          {
-            $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
-          }
-
-          $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
-
-          $pdf->Row($dataarr, false, true, null, 2, 1);
-          $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
-          // $premio_asistencia   += $_POST['premio_asistencia'][$key];
-          // $despensa            += $_POST['despensa'][$key];
-          $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
-          $domingo             += $_POST['domingo'][$key];
-          $total_prestamos     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key];
-          $total_infonavit     += $_POST['total_infonavit'][$key];
-          $total_fondo         += $_POST['fondo_ahorro'][$key];
-          $descuento_playeras  += $_POST['descuento_playeras'][$key];
-          $descuento_otros     += floatval($_POST['descuento_otros'][$key]);
-          $descuento_cocina    += floatval($_POST['descuento_cocina'][$key]);
-          $ttotal_pagar        += $total_pagar;
-          $ttotal_nomina       += $_POST['ttotal_nomina'][$key];
-          $total_no_fiscal     += $_POST['total_no_fiscal'][$key];
-          $ttotal_aseg_no_trs  += $_POST['total_percepciones'][$key]-$_POST['total_deducciones'][$key];
-
-          $sueldo_semanal_real1 += $_POST['sueldo_semanal_real'][$key];
-          // $premio_asistencia1   += $_POST['premio_asistencia'][$key];
-          // $despensa1            += $_POST['despensa'][$key];
-          $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
-          $domingo1             += $_POST['domingo'][$key];
-          $total_prestamos1     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]+$_POST['descuento_materiales'][$key];
-          $total_infonavit1     += $_POST['total_infonavit'][$key];
-          $total_fondo1         += $_POST['fondo_ahorro'][$key];
-          $descuento_playeras1  += $_POST['descuento_playeras'][$key];
-          $descuento_otros1     += floatval($_POST['descuento_otros'][$key]);
-          $descuento_cocina1    += $_POST['descuento_cocina'][$key];
-          $ttotal_pagar1        += $total_pagar;
-          $ttotal_nomina1       += $_POST['ttotal_nomina'][$key];
-          $total_no_fiscal1     += $_POST['total_no_fiscal'][$key];
-
-          unset($empleados_sin_departamento[$key]);
         }
       }
 
@@ -9958,7 +9983,7 @@ class nomina_fiscal_model extends CI_Model {
       }
       $empleado['info'][0]->dias_anio_vacaciones = $anio_anterior->diff($fechaSalida)->days + 1;
 
-      $empleado['info'][0]->dias_vacaciones = $empleado['info'][0]->dias_vacaciones==0? 6: $empleado['info'][0]->dias_vacaciones;
+      $empleado['info'][0]->dias_vacaciones = $empleado['info'][0]->dias_vacaciones==0? $configuraciones['vacaciones'][0]->dias : $empleado['info'][0]->dias_vacaciones;
       $diasProporcionVacaciones = round(($empleado['info'][0]->dias_anio_vacaciones / 365) * $empleado['info'][0]->dias_vacaciones, 2);
       $diasProporcionVacaciones = $diasProporcionVacaciones > $empleado['info'][0]->dias_vacaciones? $empleado['info'][0]->dias_vacaciones: $diasProporcionVacaciones;
 
@@ -12384,7 +12409,6 @@ class nomina_fiscal_model extends CI_Model {
         ];
 
         $regPatronal = isset($datos['fregistro_patronal']) ? $datos['fregistro_patronal'] : '';
-
         $empleadoNomina = $this->nomina(
           $configuraciones,
           array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
@@ -12740,10 +12764,14 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'anio' => $semana['anio'],
-                'dia_inicia_semana' => $dia,
-                'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
-              );
+    $filtros = array(
+      'semana'      => $semana[$tipoNomina],
+      'anio'        => $semana['anio'],
+      'empresaId'   => $empresaId,
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
+      'dia_inicia_semana' => $dia,
+      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
+    );
     $empleados = $this->nomina(
           $configuraciones, $filtros,
           $empleadoId,
@@ -12834,7 +12862,8 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY() + 0);
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetWidths(array(50, 35, 35, 35, 30));
-        $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
+        $fechaa = isset($cfdi_ext->data[0]->ex_FechaInicioRelLaboral) ? $cfdi_ext->data[0]->ex_FechaInicioRelLaboral : $empleado->fecha_entrada;
+        $pdf->Row(array("Fecha Ingr: {$fechaa}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -13112,9 +13141,14 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
-      'anio' => $semana['anio'],
-      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']);
+    $filtros = array(
+      'semana'      => $semana[$tipoNomina],
+      'anio'        => $semana['anio'],
+      'empresaId'   => $empresaId,
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
+      'dia_inicia_semana' => $dia,
+      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
+    );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ag' );
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
@@ -13210,7 +13244,8 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY() + 0);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(50, 35, 35, 35, 30));
-      $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
+      $fechaa = isset($cfdi_ext->data[0]->ex_FechaInicioRelLaboral) ? $cfdi_ext->data[0]->ex_FechaInicioRelLaboral : $empleado->fecha_entrada;
+      $pdf->Row(array("Fecha Ingr: {$fechaa}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
@@ -13581,6 +13616,11 @@ class nomina_fiscal_model extends CI_Model {
       $y = $pdf->GetY();
       foreach ($empleados as $key => $empleado)
       {
+        $cfdiext = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_aguinaldo
+          WHERE id_empleado = {$empleado->id} AND id_empresa = {$empresaId} AND anio = {$semana['anio']}
+            AND semana = {$semana[$tipoNomina]} AND registro_patronal = '{$filtros['regPatronal']}'")->row();
+        $cfdi_ext = json_decode($cfdiext->cfdi_ext);
+
         if($departamento->id_departamento == $empleado->id_departamente)
         {
           if($dep_tiene_empleados)
@@ -13620,7 +13660,8 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY() + 0);
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(50, 35, 35, 35, 30));
-          $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
+          $fechaa = isset($cfdi_ext->data[0]->ex_FechaInicioRelLaboral) ? $cfdi_ext->data[0]->ex_FechaInicioRelLaboral : $empleado->fecha_entrada;
+          $pdf->Row(array("Fecha Ingr: {$fechaa}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -14207,7 +14248,7 @@ class nomina_fiscal_model extends CI_Model {
     echo $html;
   }
 
-  public function descargarTxtBancoAguinaldo($semana, $empresaId, $anio=null)
+  public function descargarTxtBancoAguinaldo($semana, $empresaId, $anio=null, $regPatronal='')
   {
     $anio = $anio==null?date("Y"):$anio;
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
@@ -14220,18 +14261,21 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
+      'regPatronal' => $regPatronal,
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
     );
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ag');
     $nombre = "PAGO-{$semana['anio']}-{$tipoNomina}-{$semana[$tipoNomina]}.txt";
 
-    $content           = array();
+    $cuentasSantander = [2 => '92001449876', 12 => '65506721517'];
+
+    $content           = array(); //BBVA Bancomer
     $contentSantr      = array();
     $contentBanorte    = array();
     $contador          = 1;
     $contadorSantr     = 1;
     $contadorBanorte   = 1;
-    $cuentaSantr       = '92001449876'; // Cuenta cargo santander
+    $cuentaSantr       = $cuentasSantander[$empresaId]; // Cuenta cargo santander empaque
     $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte empaque
     $emisoraBanorte    = '21071'; // Emisora banorte empaque
     $total_nominaSantr = 0;
@@ -14302,6 +14346,7 @@ class nomina_fiscal_model extends CI_Model {
     {
       $zip->addFromString('SANTANDER.txt', $contentSantr);
       $zip->addFromString('BBVA Bancomer.txt', $content);
+      $zip->addFromString("NI{$emisoraBanorte}01.PAG", $contentBanorte);
 
       $zip->close();
     }

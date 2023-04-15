@@ -1859,7 +1859,7 @@ class compras_ordenes_model extends CI_Model {
   {
     $tipo = isset($datos['tipoo']{0})? $datos['tipoo']: 'en';
     $filtro = isset($datos['filtro']{0})? " AND b.folio = '{$datos['filtro']}'": '';
-    $accion = isset($datos['accion'][0])? "'".implode("','", $datos['accion'])."'": "'en', 'p', 'b'";
+    $accion = isset($datos['accion'][0])? "'".implode("','", $datos['accion'])."'": "'en', 'sa', 'p', 'b'";
     $area = isset($datos['area']{0})? " AND a.id_area = '{$datos['area']}'": '';
 
     $campos = "p.nombre_fiscal AS proveedor,";
@@ -2543,9 +2543,24 @@ class compras_ordenes_model extends CI_Model {
         }
 
         if (!empty($orden['info'][0]->folio_hoja)) {
-          $pdf->SetWidths(array(120));
-          $pdf->SetXY(90, $pdf->GetY());
-          $pdf->Row(array("Folio Orden: {$orden['info'][0]->folio_hoja}"), false, true);
+          $pdf->SetWidths(array(110));
+          $pdf->SetXY(100, $pdf->GetY());
+
+          $folio_hoja = $orden['info'][0]->folio_hoja;
+          $parsefh = explode(',', $orden['info'][0]->folio_hoja);
+          if (count($parsefh) > 0) {
+            foreach ($parsefh as $keyfh => $fh) {
+              $parsefh[$keyfh] = str_replace(
+                ['RC', 'RS'],
+                ['REQ. COMPRA ', 'REQ. SERVICIO '],
+                mb_strtoupper($parsefh[$keyfh], 'UTF-8')
+              );
+            }
+            $folio_hoja = implode("\n", $parsefh);
+          }
+
+          $pdf->SetFont('Arial', 'B', 11);
+          $pdf->Row(array("{$folio_hoja}"), false, true);
         }
 
 

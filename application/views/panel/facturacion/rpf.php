@@ -88,7 +88,7 @@
                 <div class="control-group">
                   <label class="control-label" for="dpagadas">Pagadas</label>
                   <div class="controls">
-                    <input type="checkbox" name="dpagadas" value="1">
+                    <input type="checkbox" name="dpagadas" value="1" id="dpagadas">
                   </div>
                 </div>
 

@@ -30,6 +30,8 @@ class caja_chica_model extends CI_Model {
       'deudores_abonos_dia'      => 0,
       'acreedor_prest_dia'       => 0,
       'acreedor_abonos_dia'      => 0,
+      'efectivo_tabulado'        => 0,
+      'efectivo_tabulado_ant'    => 0,
     );
 
     // Obtiene el saldo incial.
@@ -46,7 +48,7 @@ class caja_chica_model extends CI_Model {
 
     // Obtiene el saldo incial.
     $ultimoSaldo = $this->db->query(
-      "SELECT saldo
+      "SELECT saldo, fecha
        FROM cajachica_efectivo
        WHERE fecha < '{$fecha}' AND no_caja = {$noCaja}
        ORDER BY fecha DESC
@@ -55,84 +57,20 @@ class caja_chica_model extends CI_Model {
 
     if ($ultimoSaldo->num_rows() > 0)
     {
-      $info['saldo_inicial'] = $ultimoSaldo->result()[0]->saldo;
+      $ultimoSaldo = $ultimoSaldo->result()[0];
+      $info['saldo_inicial'] = $ultimoSaldo->saldo;
     }
 
     // Denominaciones
-    $denominaciones = $this->db->query(
-      "SELECT *
-       FROM cajachica_efectivo
-       WHERE fecha = '{$fecha}' AND no_caja = {$noCaja}"
-    );
-    if ($denominaciones->num_rows() === 0)
-    {
-      $denominaciones = new StdClass;
-      $denominaciones->den_05 = 0;
-      $denominaciones->den_1 = 0;
-      $denominaciones->den_2 = 0;
-      $denominaciones->den_5 = 0;
-      $denominaciones->den_10 = 0;
-      $denominaciones->den_20 = 0;
-      $denominaciones->den_50 = 0;
-      $denominaciones->den_100 = 0;
-      $denominaciones->den_200 = 0;
-      $denominaciones->den_500 = 0;
-      $denominaciones->den_1000 = 0;
-    }
-    else
-    {
-      $denominaciones = $denominaciones->result()[0];
-      $info['status'] = $denominaciones->status;
-      $info['id'] = $denominaciones->id_efectivo;
-    }
-    foreach ($denominaciones as $den => $cantidad)
-    {
-      if (strrpos($den, 'den_') !== false)
-      {
-        switch ($den)
-        {
-          case 'den_05':
-            $denominacion = '0.50';
-            break;
-          case 'den_1':
-            $denominacion = '1.00';
-            break;
-          case 'den_2':
-            $denominacion = '2.00';
-            break;
-          case 'den_5':
-            $denominacion = '5.00';
-            break;
-          case 'den_10':
-            $denominacion = '10.00';
-            break;
-          case 'den_20':
-            $denominacion = '20.00';
-            break;
-          case 'den_50':
-            $denominacion = '50.00';
-            break;
-          case 'den_100':
-            $denominacion = '100.00';
-            break;
-          case 'den_200':
-            $denominacion = '200.00';
-            break;
-          case 'den_500':
-            $denominacion = '500.00';
-            break;
-          case 'den_1000':
-            $denominacion = '1000.00';
-            break;
-        }
+    $denomina = $this->getDenominaciones($fecha, $noCaja);
+    isset($denomina['status'])? $info['status'] = $denomina['status'] : '';
+    isset($denomina['id'])? $info['id'] = $denomina['id'] : '';
+    $info['denominaciones'] = $denomina['denominaciones'];
+    $info['efectivo_tabulado'] = $denomina['efectivo_tabulado'];
 
-        $info['denominaciones'][] = array(
-          'denominacion' => $denominacion,
-          'cantidad'     => $cantidad,
-          'total'        => floatval($denominacion) * $cantidad,
-          'denom_abrev'  => $den,
-        );
-      }
+    if (isset($ultimoSaldo->fecha)) {
+      $denomina = $this->getDenominaciones($ultimoSaldo->fecha, $noCaja);
+      $info['efectivo_tabulado_ant'] = $denomina['efectivo_tabulado'];
     }
 
     // Ingresos
@@ -274,6 +212,23 @@ class caja_chica_model extends CI_Model {
         GROUP BY pr.id_proveedor
         ORDER BY proveedor ASC"
       );
+      // "SELECT pr.id_proveedor, pr.nombre_fiscal as proveedor, Sum(b.importe)::Numeric(12, 2) AS importe
+      //   FROM bascula b
+      //     INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
+      //     INNER JOIN areas a ON a.id_area = b.id_area
+      //     LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
+      //     LEFT JOIN (
+      //       SELECT bpbb.* FROM bascula_pagos bp
+      //         LEFT JOIN bascula_pagos_basculas bpbb ON bp.id_pago = bpbb.id_pago
+      //       WHERE bp.status = 't' and Date(bp.created_at) <= '2022-08-31'
+      //     ) bpb ON b.id_bascula = bpb.id_bascula
+      //   WHERE a.tipo = 'fr' AND DATE(b.fecha_bruto) <= '{$fecha}'
+      //     AND b.fecha_pago IS NOT NULL
+      //     AND DATE(b.fecha_pago) >= '2017-01-01'
+      //     AND b.accion = 'p' AND b.status = 't' AND bpb.id_bascula IS NULL
+      //     {$sql}
+      //   GROUP BY pr.id_proveedor
+      //   ORDER BY proveedor ASC"
 
       if ($boletas->num_rows() > 0)
       {
@@ -338,21 +293,30 @@ class caja_chica_model extends CI_Model {
             SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
             WHERE no_caja = {$noCaja} AND fecha <= '{$fecha}' GROUP BY id_deudor
           ) ab ON cd.id_deudor = ab.id_deudor
-        WHERE cd.no_caja = {$noCaja} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+        WHERE cd.no_caja = {$noCaja} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0
+        ORDER BY fecha ASC"
       );
 
       if ($deudores && $deudores->num_rows() > 0)
       {
         $info['deudores'] = $deudores->result();
-        $info['deudores_prest_dia'] = 0;
+        // $info['deudores_prest_dia'] = 0;
         foreach ($info['deudores'] as $key => $value) {
           $info['deudores'][$key]->mismo_dia = 'readonly';
           if (strtotime($value->fecha) == strtotime($fecha)) {
-            $info['deudores_prest_dia'] += $value->monto;
+            // $info['deudores_prest_dia'] += $value->monto;
             $info['deudores'][$key]->mismo_dia = '';
           }
         }
+      }
 
+      $info['deudores_prest_dia'] = 0;
+      $deudores = $this->db->query(
+        "SELECT Sum(cd.monto) AS monto FROM cajachica_deudores cd
+        WHERE cd.no_caja = {$noCaja} AND cd.fecha = '{$fecha}'"
+      )->row();
+      if (isset($deudores->monto)) {
+        $info['deudores_prest_dia'] = $deudores->monto;
       }
 
       $info['deudores_abonos_dia'] = 0;
@@ -401,14 +365,23 @@ class caja_chica_model extends CI_Model {
       if ($acreedores && $acreedores->num_rows() > 0)
       {
         $info['acreedores'] = $acreedores->result();
-        $info['acreedor_prest_dia'] = 0;
+        // $info['acreedor_prest_dia'] = 0;
         foreach ($info['acreedores'] as $key => $value) {
           $info['acreedores'][$key]->mismo_dia = false;
           if (strtotime($value->fecha) == strtotime($fecha)) {
-            $info['acreedor_prest_dia'] += $value->monto;
+            // $info['acreedor_prest_dia'] += $value->monto;
             $info['acreedores'][$key]->mismo_dia = true;
           }
         }
+      }
+
+      $info['acreedor_prest_dia'] = 0;
+      $acreedores = $this->db->query(
+        "SELECT Sum(cd.monto) AS monto FROM cajachica_deudores cd
+        WHERE cd.no_caja in({$ddNoCaja}) AND cd.fecha = '{$fecha}' AND cd.tipo = '{$ddTipo}'"
+      )->row();
+      if (isset($acreedores->monto)) {
+        $info['acreedor_prest_dia'] = $acreedores->monto;
       }
 
       $info['acreedor_abonos_dia'] = 0;
@@ -493,6 +466,93 @@ class caja_chica_model extends CI_Model {
     return $info;
   }
 
+  public function getDenominaciones($fecha, $noCaja)
+  {
+    $response = [];
+
+    // Denominaciones
+    $denominaciones = $this->db->query(
+      "SELECT *
+       FROM cajachica_efectivo
+       WHERE fecha = '{$fecha}' AND no_caja = {$noCaja}"
+    );
+    if ($denominaciones->num_rows() === 0)
+    {
+      $denominaciones = new StdClass;
+      $denominaciones->den_05 = 0;
+      $denominaciones->den_1 = 0;
+      $denominaciones->den_2 = 0;
+      $denominaciones->den_5 = 0;
+      $denominaciones->den_10 = 0;
+      $denominaciones->den_20 = 0;
+      $denominaciones->den_50 = 0;
+      $denominaciones->den_100 = 0;
+      $denominaciones->den_200 = 0;
+      $denominaciones->den_500 = 0;
+      $denominaciones->den_1000 = 0;
+    }
+    else
+    {
+      $denominaciones = $denominaciones->result()[0];
+      $response['status'] = $denominaciones->status;
+      $response['id'] = $denominaciones->id_efectivo;
+    }
+
+    $response['efectivo_tabulado'] = 0;
+    foreach ($denominaciones as $den => $cantidad)
+    {
+      if (strrpos($den, 'den_') !== false)
+      {
+        switch ($den)
+        {
+          case 'den_05':
+            $denominacion = '0.50';
+            break;
+          case 'den_1':
+            $denominacion = '1.00';
+            break;
+          case 'den_2':
+            $denominacion = '2.00';
+            break;
+          case 'den_5':
+            $denominacion = '5.00';
+            break;
+          case 'den_10':
+            $denominacion = '10.00';
+            break;
+          case 'den_20':
+            $denominacion = '20.00';
+            break;
+          case 'den_50':
+            $denominacion = '50.00';
+            break;
+          case 'den_100':
+            $denominacion = '100.00';
+            break;
+          case 'den_200':
+            $denominacion = '200.00';
+            break;
+          case 'den_500':
+            $denominacion = '500.00';
+            break;
+          case 'den_1000':
+            $denominacion = '1000.00';
+            break;
+        }
+
+        $response['denominaciones'][] = array(
+          'denominacion' => $denominacion,
+          'cantidad'     => $cantidad,
+          'total'        => floatval($denominacion) * $cantidad,
+          'denom_abrev'  => $den,
+        );
+        $response['efectivo_tabulado'] += floatval($denominacion) * $cantidad;
+      }
+    }
+
+    return $response;
+  }
+
   public function getCajaIngresos($fecha, $noCaja, $sql = '')
   {
     $response = [];
@@ -549,7 +609,7 @@ class caja_chica_model extends CI_Model {
       $sql .= " AND cg.tipo = 'gc' AND cg.fecha <= '{$fecha[1]}'";
       $sql .= " AND (
         ( (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}') AND cg.monto_ini-1 > Coalesce(cga.abonos, 0) )
-        OR (cg.monto_ini > 0 AND cg.status = 'f' AND '{$fecha[1]}' < cg.fecha_cancelado)
+        OR (cg.monto_ini >= 0 AND cg.status = 'f' AND '{$fecha[1]}' < cg.fecha_cancelado)
       )";
       $fecha1 = $fecha[1];
     } elseif (is_array($fecha) && $fecha[0] === 'rg') {
@@ -1340,9 +1400,9 @@ class caja_chica_model extends CI_Model {
             'id_rancho'       => (!empty($data['reposicionGasto_ranchoId'][$key])? $data['reposicionGasto_ranchoId'][$key]: NULL),
             'id_centro_costo' => (!empty($data['reposicionGasto_centroCostoId'][$key])? $data['reposicionGasto_centroCostoId'][$key]: NULL),
             'id_activo'       => (!empty($data['reposicionGasto_activoId'][$key])? $data['reposicionGasto_activoId'][$key]: NULL),
-            'fecha_compro_gasto' => (!empty($data['reposicionGasto_fechaComproGasto'][$key])?
-                                      $data['reposicionGasto_fechaComproGasto'][$key]:
-                                      ($data['reposicionGasto_reposicion'][$key]=='t'? $data['fecha_caja_chica']: NULL)),
+            // 'fecha_compro_gasto' => (!empty($data['reposicionGasto_fechaComproGasto'][$key])?
+            //                           $data['reposicionGasto_fechaComproGasto'][$key]:
+            //                           ($data['reposicionGasto_reposicion'][$key]=='t'? $data['fecha_caja_chica']: NULL)),
           );
 
           // Bitacora
@@ -2487,8 +2547,14 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(104));
     $pdf->Row(array('FECHA ' . MyString::fechaAT($fecha)), false, false);
 
+    // Fecha dia
+    $pdf->SetXY(6, $pdf->GetY() - 2);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array('IMPRESION ' . MyString::fechaAT(Date("Y-m-d")). ' '.Date("H:i")), false, false);
+
     // Saldo inicial
-    $pdf->SetXY(6, $pdf->GetY() + 5);
+    $pdf->SetXY(6, $pdf->GetY() );
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(104));
     $pdf->Row(array('SALDO INICIAL '.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
@@ -2684,7 +2750,7 @@ class caja_chica_model extends CI_Model {
 
     // Acreedores
     $totalAcreedores = $totalAcreedoresHoy = 0;
-    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['acreedores']) > 0) {
+    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6)) {
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
@@ -2742,10 +2808,10 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFont('Arial', 'B', 6.4);
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
-      $pdf->SetWidths(array(105, 50, 50));
+      $pdf->SetWidths(array(68, 69, 68));
       $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['acreedor_prest_dia'], 2, '$', false),
-        'ABONADO: '.MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false),
+        "({$fecha}) ABONADO: ".MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false),
         'TOTAL: '.MyString::formatoNumero($totalAcreedores, 2, '$', false)), true, true);
     }
 
@@ -3219,6 +3285,7 @@ class caja_chica_model extends CI_Model {
 
         $totalDeudores += floatval($deudor->saldo);
 
+        $pdf->SetFont('Arial','', 6);
         $pdf->SetAligns(array('C', 'L', 'C', 'L', 'L', 'R', 'R', 'R'));
         $pdf->SetX(6);
         $pdf->Row(array(
@@ -3239,10 +3306,10 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFont('Arial', 'B', 6.4);
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
-      $pdf->SetWidths(array(105, 50, 50));
+      $pdf->SetWidths(array(68, 69, 68));
       $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
-        'ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
+        "({$fecha}) ABONADO: ".MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
         'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), true, true);
     }
 
@@ -3601,7 +3668,7 @@ class caja_chica_model extends CI_Model {
     if ( $pdf->GetY()-$y_aux < 0 ) {
       $pdf->page = $page_aux;
     }
-    $pdf->SetY($y_aux);
+    $pdf->SetY($y_aux-10);
 
     if ($noCajas == 1) {
       $pdf->SetFont('Arial', 'B', 6);
@@ -3613,17 +3680,22 @@ class caja_chica_model extends CI_Model {
       $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
       $pdf->SetX(153);
-      $pdf->Row(array('SALDOS X RECUP', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
+      $pdf->Row(array('SALDOS X RECUP (+)', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
       $pdf->SetX(153);
-      $pdf->Row(array('CHEQUES EN TRANSITO', MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false)), false, false);
+      $pdf->Row(array('CHEQUES EN TRANSITO (+)', MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false)), false, false);
       if ($totalDeudores > 0) {
         $pdf->SetX(153);
-        $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
+        $pdf->Row(array('TOTAL DEUDORES (+)', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
       }
       if ($totalAcreedores > 0) {
         $pdf->SetX(153);
-        $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
+        $pdf->Row(array('TOTAL ACREEDORES (-)', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
       }
+      if ($caja['gastosAcumuladosCaja1'] > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL GASTOS (+)', MyString::formatoNumero(($caja['gastosAcumuladosCaja1']), 2, '$', false)), false, false);
+      }
+
       $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1'];
       $pdf->SetX(153);
       $pdf->Row(array('SALDO EFECTIVO', MyString::formatoNumero($saldoEfectivo, 2, '$', false)), false, false);
@@ -3641,6 +3713,29 @@ class caja_chica_model extends CI_Model {
         $pdf->SetX(153);
         $pdf->Row(array('PAGO LIMON CR', MyString::formatoNumero($totalBoletasPendientes, 2, '$', false)), false, false);
       }
+
+      if (!$this->saltaPag($pdf, 5)) {
+        $pdf->SetY($pdf->GetY()+5);
+      }
+      $pdf->SetX(153); //$caja['efectivo_tabulado_ant']
+      $pdf->Row(array('EFECTIVO ANT', MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL ING ACREED', MyString::formatoNumero($caja['acreedor_prest_dia'], 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL ING DEUDOR', MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('PAGO LIMON EF', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL EGR ACREED', MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL EGR DEUDOR', MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false)), false, false);
+      $comppp = $caja['saldo_inicial'] + $totalIngresos + $caja['acreedor_prest_dia'] + $caja['deudores_abonos_dia'] - $totalBoletasPagadas - $caja['acreedor_abonos_dia'] - $caja['deudores_prest_dia'];
+      $pdf->SetX(153);
+      $pdf->Row(array('RESULTADO', MyString::formatoNumero($comppp, 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('DIF', MyString::formatoNumero($totalEfectivo - $comppp, 2, '$', false)), false, false);
 
       // $pdf->SetX(153);
       // $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
@@ -3715,6 +3810,23 @@ class caja_chica_model extends CI_Model {
 
 
     $pdf->Output('CAJA_CHICA.pdf', 'I');
+  }
+
+  private function saltaPag($pdf, $max = 0, $x = 6)
+  {
+    $salto = false;
+    if($pdf->GetY() >= $pdf->limiteY + $max){
+      if (count($pdf->pages) > $pdf->page) {
+        $pdf->page++;
+        $pdf->SetY(10);
+      } else {
+        $pdf->AddPage();
+      }
+      $pdf->SetX($x);
+      $salto = true;
+    }
+
+    return $salto;
   }
 
   public function xlsCaja($fecha, $noCajas){
@@ -4451,7 +4563,7 @@ class caja_chica_model extends CI_Model {
     if ($noCajas == 1) {
       $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo);
       $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores);
-      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $caja['gastosAcumuladosCaja1'];
       $totalFondoCaja = false;
 
       $html .= '<tr style="font-weight:bold">
@@ -4498,38 +4610,45 @@ class caja_chica_model extends CI_Model {
 
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false).'</td>
         </tr>';
 
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false).'</td>
         </tr>';
 
       if ($totalDeudores > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalDeudores), 2, '$', false).'</td>
         </tr>';
       }
       if ($totalAcreedores > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES (-)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalAcreedores), 2, '$', false).'</td>
         </tr>';
       }
-      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores;
+      if ($caja['gastosAcumuladosCaja1'] > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL GASTOS (+)</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($caja['gastosAcumuladosCaja1']), 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1'];
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
           <td style="border:1px solid #000;background-color: #cccccc;">SALDO EFECTIVO</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($saldoEfectivo, 2, '$', false).'</td>
         </tr>';
 
-      $pdf->SetY($pdf->GetY()+5);
       if ($totalIngresos > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
@@ -5805,6 +5924,7 @@ class caja_chica_model extends CI_Model {
             INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
             INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
           WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            AND ci.otro = 'f' AND ci.status = 't'
             {$sql} {$sql2}
           ORDER BY id_categoria ASC, fecha ASC");
       $response['movimientos'] = $movimientos->result();

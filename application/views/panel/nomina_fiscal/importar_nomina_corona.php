@@ -53,6 +53,10 @@
               </ul>
             </div>
           <?php endif ?>
+          <br><br><br>
+          <button type="submit" name="btnActividades" class="btn btn-success" style="zoom: 150%;">Cargar Actividades</button>
+          <br><br><br>
+          <br><br><br>
         </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-success" id="btn-impirtar">Guardar</button>

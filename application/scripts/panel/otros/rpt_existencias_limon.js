@@ -11,6 +11,7 @@
     existenciaReProceso();
     compraFruta();
     devolucionFruta();
+    manoObraInsumos();
     descuentoVentas();
     comisionTerceros();
     industrial();
@@ -413,6 +414,90 @@
     $('#devFrutaCantidad').text(cantidadt);
     $('#devFrutaKilos').text(kilost);
     $('#devFrutaImporte').text(importet);
+  };
+
+  const manoObraInsumos = () => {
+    // $('#table-manoo-insumos').on('focus', 'input.devFruta_calibre:not(.ui-autocomplete-input)', function(event) {
+    //   $(this).autocomplete({
+    //     source: base_url+'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
+    //     minLength: 1,
+    //     selectFirst: true,
+    //     select: function( event, ui ) {
+    //       var $this = $(this),
+    //           $tr = $this.parent().parent();
+
+    //       $this.css("background-color", "#B0FFB0");
+
+    //       $tr.find('.devFruta_id_calibre').val(ui.item.id);
+    //     }
+    //   }).keydown(function(event){
+    //     if(event.which == 8 || event == 46) {
+    //       var $tr = $(this).parent().parent();
+
+    //       $(this).css("background-color", "#FFD9B3");
+    //       $tr.find('.devFruta_id_calibre').val('');
+    //     }
+    //   });
+    // });
+
+    $('#btnAddManooInsumos').click(function(event) {
+      const unidades = JSON.parse($('#unidades').val());
+      htmlUnidad = '';
+      $.each(unidades, function(index, val) {
+         htmlUnidad += '<option value="' + val.id_unidad + '" data-cantidad="' + val.cantidad + '">' + val.nombre + '</option>';
+      });
+
+      html =
+        '<tr>'+
+          '<td>'+
+            '<input type="text" name="manooInsumos_descripcion[]" value="" class="span12 manooInsumos_descripcion" required>'+
+          '</td>'+
+          '<td>'+
+            '<select name="manooInsumos_id_unidad[]" class="span12 manooInsumos_id_unidad" required>'+
+            htmlUnidad+
+            '</select>'+
+          '</td>'+
+          '<td><input type="text" name="manooInsumos_cantidad[]" value="" class="span12 vpositive manooInsumos_cantidad" required></td>'+
+          '<td><input type="text" name="manooInsumos_kilos[]" value="" class="span12 vpositive manooInsumos_kilos" readonly></td>'+
+          '<td><input type="text" name="manooInsumos_costo[]" value="" class="span12 vpositive manooInsumos_costo" required></td>'+
+          '<td><input type="text" name="manooInsumos_importe[]" value="" class="span12 vpositive manooInsumos_importe" readonly></td>'+
+          '<td style="width: 30px;">'+
+            '<button type="button" class="btn btn-danger manooInsumos_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+          '</td>'+
+        '</tr>';
+      $(html).insertBefore($('#table-manoo-insumos tbody tr.footer'));
+      $("#table-manoo-insumos tbody .vpositive").numeric({ negative: false }); //Numero positivo
+    });
+
+    $('#table-manoo-insumos').on('click', '.manooInsumos_del', function(event) {
+      var $tr = $(this).parents('tr');
+      $tr.remove();
+
+      calculaTotalManooInsumos();
+    });
+
+    $('#table-manoo-insumos').on('keyup', '.manooInsumos_cantidad, .manooInsumos_costo', function(event) {
+      let $tr = $(this).parents('tr');
+      let cantidad = parseFloat($tr.find('.manooInsumos_cantidad').val())||0;
+      let costo = parseFloat($tr.find('.manooInsumos_costo').val())||0;
+      let unidad = parseFloat($tr.find('.manooInsumos_id_unidad option:selected').attr('data-cantidad'))||0;
+
+      $tr.find('.manooInsumos_kilos').val(cantidad*unidad);
+      $tr.find('.manooInsumos_importe').val(cantidad*costo);
+
+      calculaTotalManooInsumos();
+    });
+  };
+  const calculaTotalManooInsumos = () => {
+    cantidadt = kilost = importet = 0;
+    $("#table-manoo-insumos tbody tr:not(.footer)").each(function(index, el) {
+      cantidadt += parseFloat($(el).find('.manooInsumos_cantidad').val())||0;
+      kilost += parseFloat($(el).find('.manooInsumos_kilos').val())||0;
+      importet += parseFloat($(el).find('.manooInsumos_importe').val())||0;
+    });
+    $('#manooInsumosCantidad').text(cantidadt);
+    $('#manooInsumosKilos').text(kilost);
+    $('#manooInsumosImporte').text(importet);
   };
 
   const descuentoVentas = () => {

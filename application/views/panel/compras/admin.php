@@ -158,6 +158,12 @@
                             'btn_type' => '',
                             'attrs' => array(''))
                           );
+
+                          echo $this->usuarios_model->getLinkPrivSm('gastos/imprimir/', array(
+                            'params'   => 'id='.$compra->id_compra,
+                            'btn_type' => '',
+                            'attrs' => array('target' => '_blank'))
+                          );
                         }
                         else
                         {

@@ -27,10 +27,10 @@
 
       console.log(linkDownXls.attr('href'));
 
-      if (url.dareas.length == 0) {
-        noty({"text": 'Seleccione una area', "layout":"topRight", "type": 'error'});
-        return false;
-      }
+      // if (url.dareas.length == 0) {
+      //   noty({"text": 'Seleccione una area', "layout":"topRight", "type": 'error'});
+      //   return false;
+      // }
     });
 
     $(".treeviewcustom").treeview({

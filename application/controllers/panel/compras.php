@@ -364,7 +364,7 @@ class compras extends MY_Controller {
             'rules' => ''),
       array('field' => 'folio',
             'label' => 'Folio',
-            'rules' => 'required'),
+            'rules' => 'required|numeric|callback_serie_folio_nc'),
 
       array('field' => 'fecha',
             'label' => 'Fecha',
@@ -437,6 +437,25 @@ class compras extends MY_Controller {
     );
 
     $this->form_validation->set_rules($rules);
+  }
+
+  public function serie_folio_nc($folio)
+  {
+    $serie = mb_strtoupper($this->input->post('serie'), 'utf-8');
+    $compra = $this->compras_model->getInfoCompra($_GET['id'])['info'];
+    $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND folio = {$folio} AND UPPER(serie) = '{$serie}'
+      AND id_empresa = {$compra->id_empresa} AND id_proveedor = {$compra->id_proveedor}
+      AND id_nc IS NOT NULL "
+    )->row();
+    if ($query->num > 0)
+    {
+      $this->form_validation->set_message('serie_folio_nc', 'El %s ya esta asignado.');
+      return false;
+    }
+    else
+    {
+      return true;
+    }
   }
 
   /*

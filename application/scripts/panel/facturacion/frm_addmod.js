@@ -14,6 +14,7 @@ $(function(){
 
   $("#form").submit(function(){
     var result = validaProductosEspecials();
+    console.log(result, $("#privAddDescripciones").length);
     if(result == false)
     {
       event.preventDefault();
@@ -555,6 +556,16 @@ $(function(){
     });
   }
 
+  $('#exportacion').on('change', function(){
+    $('#exportacionText').val($('#exportacion option:selected').attr('data-text'));
+  });
+  $('#ig_periodicidad').on('change', function(){
+    $('#ig_periodicidadText').val($('#ig_periodicidad option:selected').attr('data-text'));
+  });
+  $('#ig_meses').on('change', function(){
+    $('#ig_mesesText').val($('#ig_meses option:selected').attr('data-text'));
+  });
+
   modalCfdiRel();
 });
 
@@ -775,18 +786,18 @@ function calculaTotalProducto ($tr, $calculaT) {
       $totalIeps      = $tr.find('#dieps_total'),
       $totalIsr       = $tr.find('#disr_total'),
 
-      totalImporte   = trunc2Dec(parseFloat(($cantidad.val() || 0)) * parseFloat($precio_uni.val() || 0)),
+      totalImporte   = trunc2Dec(parseFloat(($cantidad.val() || 0)) * parseFloat($precio_uni.val() || 0), 6),
       // totalIva       = trunc2Dec(((totalImporte) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100),
-      totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val())),
-      totalIeps      = trunc2Dec(((totalImporte) * (parseFloat($ieps.val())||0) ) / 100),
-      totalIsr       = trunc2Dec(((totalImporte) * (parseFloat($isr.val())||0) ) / 100)
+      totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val()), 6),
+      totalIeps      = trunc2Dec(((totalImporte) * (parseFloat($ieps.val())||0) ) / 100, 6),
+      totalIsr       = trunc2Dec(((totalImporte) * (parseFloat($isr.val())||0) ) / 100, 6)
       ;
       // totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
   console.log('iva con el ieps', $iepsSub.val());
   if($iepsSub.val() == 't') {
-    totalIva = trunc2Dec(((totalImporte+totalIeps) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100)
+    totalIva = trunc2Dec(((totalImporte+totalIeps) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100, 6)
   } else {
-    totalIva = trunc2Dec(((totalImporte) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100);
+    totalIva = trunc2Dec(((totalImporte) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100, 6);
   }
 
   $totalIva.val(totalIva);
@@ -1546,6 +1557,7 @@ var loadModalSegCert = function (idClasificacion) {
   // sus datos.
   if (idClasificacion === '49') {
     $('#modal-seguro').modal('show');
+    $("#pproveedor_seguro").focus();
   }
 
   // Si la clasificacion es el supervisor de carga abre modal
@@ -1557,6 +1569,7 @@ var loadModalSegCert = function (idClasificacion) {
   // muestra el modal para agregar sus datos.
   if (idClasificacion === '51' || idClasificacion === '52') {
     $('#modal-certificado'+idClasificacion).modal('show');
+    $("#pproveedor_certificado"+idClasificacion).focus();
   }
 };
 
@@ -1637,6 +1650,7 @@ var enabledCloseModal = function (idModal) {
         close = false;
       }
     });
+
     if (close) {
       $modal.find('#btnClose').prop('disabled', '');
     } else {

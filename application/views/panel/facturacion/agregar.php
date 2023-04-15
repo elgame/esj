@@ -29,13 +29,20 @@
             <li><a href="#tabCartaPorte">Carta Porte</a></li>
           </ul>
 
+          <?php
+            if (!empty($borrador['info'])) {
+              $borrador['info']->cfdi_ext = !empty($borrador['info']->cfdi_ext) ? json_decode($borrador['info']->cfdi_ext) : null;
+            }
+           ?>
+
           <div id="myTabContent" class="tab-content">
 
             <div class="tab-pane active" id="tabFactura">
               <?php
                 if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/prod_descripciones/')){ ?>
                   <input type="hidden" value="si" name="privAddDescripciones" id="privAddDescripciones">
-              <?php } ?>
+              <?php }
+              ?>
 
               <div class="row-fluid">
                 <div class="span6">
@@ -332,12 +339,100 @@
                           $metodo = isset($borrador) ? $borrador['info']->cfdi_ext->uso_cfdi : '';
                          ?>
                         <?php foreach ($usoCfdi as $key => $usoCfd) { ?>
-                          <option value="<?php echo $usoCfd['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfd['key'], $metodo === $usoCfd['key'] ? true : false); ?>><?php echo $usoCfd['key'].' - '.$usoCfd['value'] ?></option>
+                          <option value="<?php echo $usoCfd['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfd['key'], ($metodo === $usoCfd['key'] ? true : false), $metodo); ?>><?php echo $usoCfd['key'].' - '.$usoCfd['value'] ?></option>
                         <?php } ?>
                       </select>
                     </div>
                   </div>
                   <?php }?>
+                  <?php
+                  // if (!isset($borrador) || (isset($borrador) && $borrador['info']->version > 3.9)) {
+                  ?>
+                  <div class="control-group">
+                    <label class="control-label" for="exportacion">Exportación</label>
+                    <div class="controls">
+                      <select name="exportacion" class="span9" id="exportacion">
+
+                        <?php
+                          $exportacionCats = [
+                            '01' => 'No aplica',
+                            '02' => 'Definitiva',
+                            '03' => 'Temporal',
+                          ];
+                          $exportacion = (isset($borrador) && isset($borrador['info']->cfdi_ext->exportacion) ? $borrador['info']->cfdi_ext->exportacion : '01');
+                         ?>
+                         <?php foreach ($exportacionCats as $key => $textt): ?>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('exportacion', $key, ($exportacion === $key ? true : false), $exportacion); ?>><?php echo "{$key} - {$textt}" ?></option>
+                         <?php endforeach ?>
+                      </select>
+                      <input type="hidden" name="exportacionText" id="exportacionText" value="<?php echo $exportacionCats[$exportacion] ?>">
+                    </div>
+                  </div>
+                  <?php
+                // /*/}
+                  ?>
+
+                  <div class="control-group">
+                    <label class="control-label" for="ig_periodicidad">Información Global</label>
+                    <div class="controls">
+                      Periodicidad:
+                      <select name="ig_periodicidad" class="span9" id="ig_periodicidad">
+                        <?php
+                          $periodicidadCats = [
+                            '' => '',
+                            '01' => 'Diario',
+                            '02' => 'Semanal',
+                            '03' => 'Quincenal',
+                            '04' => 'Mensual',
+                            '05' => 'Bimestral',
+                          ];
+                          $periodicidad = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal) ? $borrador['info']->cfdi_ext->informacionGlobal->periodicidad : '');
+                         ?>
+                         <?php foreach ($periodicidadCats as $key => $textt): ?>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('periodicidad', $key, ($periodicidad === $key ? true : false), $periodicidad); ?>><?php echo "{$key} - {$textt}" ?></option>
+                         <?php endforeach ?>
+                      </select>
+                      <input type="hidden" name="ig_periodicidadText" id="ig_periodicidadText" value="<?php echo $periodicidadCats[$periodicidad] ?>">
+                      <br>
+                      Meses:
+                      <select name="ig_meses" class="span9" id="ig_meses">
+                        <?php
+                          $mesesCats = [
+                            '' => '',
+                            '01' => 'Enero',
+                            '02' => 'Febrero',
+                            '03' => 'Marzo',
+                            '04' => 'Abril',
+                            '05' => 'Mayo',
+                            '06' => 'Junio',
+                            '07' => 'Julio',
+                            '08' => 'Agosto',
+                            '09' => 'Septiembre',
+                            '10' => 'Octubre',
+                            '11' => 'Noviembre',
+                            '12' => 'Diciembre',
+                            '13' => 'Enero-Febrero',
+                            '14' => 'Marzo-Abril',
+                            '15' => 'Mayo-Junio',
+                            '16' => 'Julio-Agosto',
+                            '17' => 'Septiembre-Octubre',
+                            '18' => 'Noviembre-Diciembre',
+                          ];
+                          $meses = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal)? $borrador['info']->cfdi_ext->informacionGlobal->meses : '');
+                         ?>
+                         <?php foreach ($mesesCats as $key => $textt): ?>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('meses', $key, ($meses === $key ? true : false), $meses); ?>><?php echo "{$key} - {$textt}" ?></option>
+                         <?php endforeach ?>
+                      </select>
+                      <input type="hidden" name="ig_mesesText" id="ig_mesesText" value="<?php echo $mesesCats[$meses] ?>">
+                      <br>
+                      Año:
+                      <?php
+                        $anioo = (isset($borrador) && isset($borrador['info']->cfdi_ext->informacionGlobal)? $borrador['info']->cfdi_ext->informacionGlobal->anio : '');
+                      ?>
+                      <input type="text" name="ig_anio" id="ig_anio" class="span9" value="<?php echo $anioo ?>">
+                    </div>
+                  </div>
 
                   <div style="text-align: center;">
                     <button type="button" id="btnCfdiRelPrev" class="btn">Sustitución de CFDI</button>
@@ -345,9 +440,9 @@
                     <br>
                     <span id="cfdiRelPrevText"><?php echo set_value('cfdiRelPrev'); ?></span>
                     <br>
-                    <select name="cfdiRelPrevTipo" id="cfdiRelPrevTipo" style="display: none;width: 55%;">
+                    <?php $cfdirel = !empty($_POST['cfdiRelPrevTipo']) ? $_POST['cfdiRelPrevTipo'] : '04'; ?>
+                    <select name="cfdiRelPrevTipo" id="cfdiRelPrevTipo" style="display: <?php echo (set_value('cfdiRelPrev') != '' ? 'initial' : 'none'); ?>;width: 55%;">
                       <?php
-                      $cfdirel = !empty($_POST['cfdiRelPrevTipo']) ? $_POST['cfdiRelPrevTipo'] : '04';
                       foreach ($tipoRelacion as $key => $tipoRel) { ?>
                         <option value="<?php echo $tipoRel['key'] ?>" <?php echo set_select('cfdiRelPrevTipo', $tipoRel['key'], ($cfdirel === $tipoRel['key'] ? true : false)); ?>><?php echo $tipoRel['key'].' - '.$tipoRel['value'] ?></option>
                       <?php } ?>
@@ -927,6 +1022,8 @@
                       $_POST['cert_certificado51'][]       = $prodesp->certificado;
                       $_POST['cert_bultos51'][]            = $prodesp->bultos;
                       $_POST['cert_num_operacion51'][]     = $prodesp->num_operacion;
+                      $_POST['cert_no_certificado51'][]    = $prodesp->no_certificado;
+                      $_POST['cert_id_orden51'][]          = $prodesp->id_orden;
                     }
                   }
 
@@ -959,6 +1056,13 @@
                         <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo $_POST['cert_num_operacion51'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
                       </div>
                     </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_no_certificado51" style="width: auto;">Certificado de compra</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_no_certificado51[]" class="span12 sikey cursorp cert_no_certificado51" id="cert_no_certificado51" value="<?php echo $_POST['cert_no_certificado51'][$key] ?>" placeholder="Num Certificado" data-next="pproveedor_certificado51" readonly>
+                        <input type="hidden" name="cert_id_orden51[]" class="span12 sikey" id="cert_id_orden51" value="<?php echo $_POST['cert_id_orden51'][$key] ?>">
+                      </div>
+                    </div>
                   </div>
                 <?php }
                 } else { ?>
@@ -988,6 +1092,13 @@
                         <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo set_value('cert_num_operacion51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
                       </div>
                     </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_no_certificado51" style="width: auto;">Certificado de compra</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_no_certificado51[]" class="span12 sikey cursorp cert_no_certificado51" id="cert_no_certificado51" value="<?php echo set_value('cert_no_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->no_certificado : ''); ?>" placeholder="Num Certificado" data-next="pproveedor_certificado51" readonly>
+                        <input type="hidden" name="cert_id_orden51[]" class="span12 sikey" id="cert_id_orden51" value="<?php echo set_value('cert_id_orden51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->id_orden : ''); ?>">
+                      </div>
+                    </div>
                   </div>
                 <?php } ?>
                 </div>
@@ -1010,6 +1121,8 @@
                     $_POST['cert_certificado52'][]       = $prodesp->certificado;
                     $_POST['cert_bultos52'][]            = $prodesp->bultos;
                     $_POST['cert_num_operacion52'][]     = $prodesp->num_operacion;
+                    $_POST['cert_no_certificado52'][]    = $prodesp->no_certificado;
+                    $_POST['cert_id_orden52'][]          = $prodesp->id_orden;
                   }
                 }
 
@@ -1042,6 +1155,13 @@
                         <input type="text" name="cert_num_operacion52[]" class="span12 sikey field-check" id="cert_num_operacion52" value="<?php echo $_POST['cert_num_operacion52'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_certificado52">
                       </div>
                     </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_no_certificado52" style="width: auto;">Certificado de compra</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_no_certificado52[]" class="span12 sikey cursorp cert_no_certificado52" id="cert_no_certificado52" value="<?php echo $_POST['cert_no_certificado52'][$key] ?>" placeholder="Num Certificado" data-next="pproveedor_certificado52" readonly>
+                        <input type="hidden" name="cert_id_orden52[]" class="span12 sikey" id="cert_id_orden52" value="<?php echo $_POST['cert_id_orden52'][$key] ?>">
+                      </div>
+                    </div>
                   </div>
                 <?php }
                 } else { ?>
@@ -1069,6 +1189,13 @@
                       <label class="control-label" for="cert_num_operacion52" style="width: auto;">Num Operacion</label>
                       <div class="controls" style="margin-left: 0">
                         <input type="text" name="cert_num_operacion52[]" class="span12 sikey field-check" id="cert_num_operacion52" value="<?php echo set_value('cert_num_operacion52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado52">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_no_certificado52" style="width: auto;">Certificado de compra</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_no_certificado52[]" class="span12 sikey cursorp cert_no_certificado52" id="cert_no_certificado52" value="<?php echo set_value('cert_no_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->no_certificado : ''); ?>" placeholder="Num Certificado" data-next="pproveedor_certificado52" readonly>
+                        <input type="hidden" name="cert_id_orden52[]" class="span12 sikey" id="cert_id_orden52" value="<?php echo set_value('cert_id_orden52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->id_orden : ''); ?>">
                       </div>
                     </div>
                   </div>
@@ -1731,7 +1858,7 @@
                         <label class="control-label" for="cp_transpInternac">Transporte Internacional <i class="icon-question-sign helpover" data-title=""></i></label>
                         <div class="controls">
                           <?php
-                            $cfdi_ext = empty($borrador['info']->cfdi_ext)? (!empty($cfdiExt)? json_decode($cfdiExt): null): json_decode($borrador['info']->cfdi_ext);
+                            $cfdi_ext = empty($borrador['info']->cfdi_ext)? (!empty($cfdiExt)? json_decode($cfdiExt): null): $borrador['info']->cfdi_ext;
                             // echo "<pre>";
                             //   var_dump($cfdi_ext);
                             // echo "</pre>";exit;
@@ -3039,6 +3166,31 @@
       <button class="btn btn-primary hide" id="BtnClearCfdiRel">Quitar</button>
     </div>
   </div><!--/modal pallets -->
+
+  <!-- Modal No Certificados compras -->
+  <div id="modal-no-certificados" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 700px;left: 45%;">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">No Certificados Compras</h3>
+    </div>
+    <div class="modal-body" style="max-height: 370px;">
+      <table id="lista_certificados_modal" class="table table-striped table-bordered table-hover table-condensed">
+        <caption></caption>
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Empresa</th>
+            <th>Certificado</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+    </div>
+  </div>
 
 </div>
 

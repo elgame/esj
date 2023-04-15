@@ -55,6 +55,8 @@
 							</fieldset>
             </div>
 
+            <a href="<?php echo base_url('panel/cuentas_pagar/historial_abonos_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm pull-left" target="_blank">
+              <i class="icon-print"></i> Imprimir</a>
 						<?php echo $this->usuarios_model->getLinkPrivSm('cuentas_pagar/agregar_abono/', array(
 						    'params'   => "id={$_GET['id']}&tipo={$_GET['tipo']}",
                 'btn_type' => 'btn-success pull-right',

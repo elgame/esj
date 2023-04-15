@@ -742,7 +742,7 @@
                             <td style="width: 35px;">
                               <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
                                 <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
-                                  <div class="arrow"></div><h3 class="popover-title">Activos</h3>
+                                  <div class="arrow"></div><h3 class="popover-title">Activos / Certificados</h3>
                                   <div class="popover-content">
 
                                     <div class="control-group" style="width: 375px;">

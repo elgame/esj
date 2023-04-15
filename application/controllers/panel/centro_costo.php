@@ -259,6 +259,13 @@ class centro_costo extends MY_Controller {
       array('field' => 'did_area',
             'label' => 'Área',
             'rules' => ($val? 'required|numeric': '')),
+      array('field' => 'rancho',
+            'label' => '',
+            'rules' => ($val? 'required': '')),
+      array('field' => 'ranchoId',
+            'label' => 'Rancho',
+            'rules' => ($val? 'required|numeric': '')),
+
       array('field' => 'hectareas',
             'label' => 'Hectáreas',
             'rules' => ($val? 'required|numeric': '')),

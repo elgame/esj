@@ -29,6 +29,7 @@
       ajaxSave();
     });
     ajaxDelAct();
+    ajaxGetAct();
 
     $("#davance").keyup(function(event) {
       calculaTotales();
@@ -51,7 +52,7 @@
         });
       },
       minLength: 1,
-      selectFirst: true,
+      autoFocus: true,
       select: function( event, ui ) {
         var $area =  $(this);
 
@@ -77,7 +78,7 @@
   var autocompleteRanchos = function () {
     $("#rancho").autocomplete({
       source: function(request, response) {
-        var params = {term : request.term};
+        var params = {term : request.term, nomina: 'true'};
         if(parseInt($("#empresaId").val()) > 0)
           params.did_empresa = $("#empresaId").val();
         if(parseInt($("#areaId").val()) > 0)
@@ -92,11 +93,11 @@
         });
       },
       minLength: 1,
-      selectFirst: true,
+      autoFocus: true,
       select: function( event, ui ) {
         var $rancho =  $(this);
 
-        addRanchoTag(ui.item);
+        autocompleteRanchos.addRanchoTag(ui.item);
         setTimeout(function () {
           $rancho.val('');
         }, 200);
@@ -111,9 +112,9 @@
       }
     });
 
-    function addRanchoTag(item) {
+    autocompleteRanchos.addRanchoTag = function(item) {
       if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
-        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+        $('#tagsRanchoIds').html('<li><span class="tag">'+item.value+'</span>'+
           '<input type="hidden" name="ranchoId[]" class="ranchoId valAddTr" value="'+item.id+'">'+
           '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
           '</li>');
@@ -130,12 +131,17 @@
   var autocompleteCentroCosto = function () {
     $("#centroCosto").autocomplete({
       source: function(request, response) {
-        var params = {term : request.term};
+        var params = {
+          term : request.term,
+          nomina: 'true',
+          id_area: $('#areaId').val(),
+          rancho: $('#tagsRanchoIds .ranchoId').val()
+        };
 
-        params.tipo = ['gasto', 'melga', 'tabla', 'seccion',];
-        if ($('#tipoOrden').find('option:selected').val() == 'd') {
-          params.tipo = ['servicio'];
-        }
+        params.tipo = ['melga', 'tabla', 'seccion'];
+        // if ($('#tipoOrden').find('option:selected').val() == 'd') {
+        //   params.tipo = ['servicio'];
+        // }
 
         $.ajax({
             url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
@@ -147,11 +153,11 @@
         });
       },
       minLength: 1,
-      selectFirst: true,
+      autoFocus: true,
       select: function( event, ui ) {
         var $centroCosto =  $(this);
 
-        addCCTag(ui.item);
+        autocompleteCentroCosto.addCCTag(ui.item);
         setTimeout(function () {
           $centroCosto.val('');
         }, 200);
@@ -166,7 +172,7 @@
       }
     });
 
-    function addCCTag(item) {
+    autocompleteCentroCosto.addCCTag = function(item) {
       if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
         $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
           '<input type="hidden" name="centroCostoId[]" class="centroCostoId valAddTr" value="'+item.id+'">'+
@@ -193,7 +199,7 @@
     $("#empresa").autocomplete({
         source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
         minLength: 1,
-        selectFirst: true,
+        autoFocus: true,
         select: function( event, ui ) {
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
@@ -225,7 +231,7 @@
         });
       },
       minLength: 1,
-      selectFirst: true,
+      autoFocus: true,
       select: function( event, ui ) {
         $("#dempleadoId").val(ui.item.id);
         $(this).css("background-color", "#B0FFB0");
@@ -240,11 +246,11 @@
 
   // Autocomplete labores live
   var autocompleteLabores = function () {
-    $('.stickcontent').on('focus', 'input#dlabor:not(.ui-autocomplete-input)', function(event) {
+    $('.stickcontent-no').on('focus', 'input#dlabor:not(.ui-autocomplete-input)', function(event) {
       $(this).autocomplete({
         source: base_url+'panel/labores_codigo/ajax_get_labores/',
         minLength: 1,
-        selectFirst: true,
+        autoFocus: true,
         select: function( event, ui ) {
           var $this = $(this);
 
@@ -288,6 +294,7 @@
     postData.id_labor       = $('#dlaborId').val();
     postData.costo          = $('#dcosto').val();
     postData.avance         = $('#davance').val();
+    postData.avance_real    = $('#davance_real').val();
     postData.importe        = $('#dimporte').val();
 
     postData.id_area        = $('#areaId').val();
@@ -335,8 +342,12 @@
             }
           }
 
+          if ($('#rows').val() != '') { // si esta editando
+            $('#'+data.data.rows+data.data.id_usuario+data.data.id_empresa+data.data.fecha).remove();
+          }
+
           $('#actividades_tra tbody').prepend(
-            '<tr>'+
+            '<tr class="rowlb" style="cursor: pointer;" id="'+data.data.rows+data.data.id_usuario+data.data.id_empresa+data.data.fecha+'">'+
               '<td>'+data.data.trabajador+'</td>'+
               '<td>'+data.data.labor+'</td>'+
               '<td>'+data.data.cultivo+'</td>'+
@@ -349,7 +360,7 @@
               '<td>'+data.data.costo+'</td>'+
               '<td>'+data.data.avance+'</td>'+
               '<td>'+data.data.importe+'</td>'+
-              '<td>'+
+              '<td class="no">'+
                 '<a class="btn btn-danger btnDelAct" '+
                   'data-params="rows='+data.data.rows+'&id_usuario='+data.data.id_usuario+'&empresa='+data.data.empresa+'&empresaId='+data.data.id_empresa+'&ffecha='+data.data.fecha+'">'+
                   '<i class="icon-ban-circle icon-white"></i>'+
@@ -359,16 +370,19 @@
           );
           noty({"text": 'Se guardo', "layout":"topRight", "type": 'success'});
 
-          $('#dempleadoId').val('');
+          // $('#dempleadoId').val('');
+          $('#rows').val('');
           $('#dlabor').val('');
           $('#dlaborId').val('');
           $('#dcosto').val('');
           $('#davance').val('');
+          $('#davance_real').val('');
           $('#dimporte').val('');
-          $('#area').val('');
-          $('#areaId').val('');
-          $('#tagsRanchoIds').html('');
+          // $('#area').val('');
+          // $('#areaId').val('');
+          // $('#tagsRanchoIds').html('');
           $('#tagsCCIds').html('');
+          $('#area').focus();
         }
       }, "json");
     } else {
@@ -378,7 +392,7 @@
 
   var validTrabajador = function () {
     var isValid = true, msg='';
-    var campos = $('.stickcontent .valAddTr'), campo = undefined;
+    var campos = $('.stickcontent-no .valAddTr'), campo = undefined;
 
     for (var i = campos.length - 1; i >= 0; i--) {
       campo = $(campos[i]);
@@ -403,6 +417,39 @@
     }
 
     return [isValid, msg];
+  };
+
+  var ajaxGetAct = function () {
+    $('#actividades_tra').on('click', '.rowlb td:not(.no)', function(event) {
+      var $this = $(this), $tr = $(this).parent();
+      let postData = $tr.find('.btnDelAct').attr('data-params');
+      $.post(base_url + 'panel/nomina_trabajos2/ajax_get/', postData, function(data) {
+        console.log('ajax_get', data);
+        $('#area').val(data.cultivo);
+        $('#areaId').val(data.id_area);
+        $('#dempleado').val(data.trabajador);
+        $('#dempleadoId').val(data.id_usuario);
+        $('#dlabor').val(data.labor);
+        $('#dlaborId').val(data.id_labor);
+        $('#dcosto').val(data.costo);
+        $('#davance').val(data.avance);
+        $('#davance_real').val(data.avance_real);
+        $('#dimporte').val(data.importe);
+        $('#rows').val(data.rows);
+
+        if(data.ranchos && data.ranchos.length > 0){
+          let rancho = {id: data.ranchos[0].id_rancho, value: data.ranchos[0].nombre};
+          autocompleteRanchos.addRanchoTag(rancho);
+        }
+
+        if(data.centros_costos && data.centros_costos.length > 0){
+          data.centros_costos.forEach(element => {
+            let cc = {id: element.id_centro_costo, value: element.nombre};
+            autocompleteCentroCosto.addCCTag(cc);
+          });
+        }
+      }, "json");
+    });
   };
 
   var ajaxDelAct = function () {

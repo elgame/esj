@@ -53,6 +53,15 @@
 
                 <input type="hidden" name="id_proveedor" id="id_proveedor" value="<?php echo set_value_get('id_proveedor'); ?>">
 
+
+                <label for="ftipodoc">Tipo:</label>
+                <select name="ftipodoc" id="ftipodoc" class="input-large search-query">
+                  <option value="" <?php echo set_select_get('ftipodoc', ''); ?>>Todas</option>
+                  <option value="fa" <?php echo set_select_get('ftipodoc', 'fa'); ?>>Facturas</option>
+                  <option value="nv" <?php echo set_select_get('ftipodoc', 'nv'); ?>>Notas Venta</option>
+                </select>
+                |
+
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
