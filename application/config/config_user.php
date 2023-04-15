@@ -21,7 +21,7 @@ $config['snapshot_cam2']  = 'http://Bascula:Basc.2021$.@192.168.1.244/Streaming/
 $config['snapshot_cam3']  = 'http://admin:12345@192.168.1.241/Streaming/channels/1/picture';
 $config['snapshot_cam4']  = 'http://admin:12345@192.168.1.242/Streaming/channels/1/picture';
 
-$config['is_bodega'] = 0;
+$config['is_bodega'] = 1;
 
 // configuracion de clasificaciones unidas
 $config['clasif_joins']  = ['2' => '29', '29' => '2'];
