@@ -1027,52 +1027,50 @@ class caja_chica_prest_model extends CI_Model {
     $page_aux = $pdf->page;
 
     // Deudores diversos
-    if (false) {
-      $pdf->SetFont('Arial','B', 8);
-      $pdf->SetTextColor(0, 0, 0);
-      $pdf->SetFillColor(230, 230, 230);
-      $pdf->SetXY(6, 32);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(204));
-      $pdf->Row(array('DEUDORES DIVERSOS'), true, 'B');
+    // $pdf->SetFont('Arial','B', 8);
+    // $pdf->SetTextColor(0, 0, 0);
+    // $pdf->SetFillColor(230, 230, 230);
+    // $pdf->SetXY(6, 32);
+    // $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(204));
+    // $pdf->Row(array('DEUDORES DIVERSOS'), true, 'B');
 
-      $pdf->SetFont('Arial','B', 6);
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(25, 55, 16, 35, 20, 20, 20, 13));
-      $pdf->Row(array('EMPRESA', 'FONDO DE CAJA', 'FECHA', 'REFERENCIA', 'INGRESOS', 'EGRESOS', 'SALDOS', 'TICKET'), FALSE, FALSE);
+    // $pdf->SetFont('Arial','B', 6);
+    // $pdf->SetX(6);
+    // $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C'));
+    // $pdf->SetWidths(array(25, 55, 16, 35, 20, 20, 20, 13));
+    // $pdf->Row(array('EMPRESA', 'FONDO DE CAJA', 'FECHA', 'REFERENCIA', 'INGRESOS', 'EGRESOS', 'SALDOS', 'TICKET'), FALSE, FALSE);
 
-      $pdf->SetFont('Arial','', 7);
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(25, 55, 16, 35, 20, 20, 20, 13));
+    // $pdf->SetFont('Arial','', 7);
+    // $pdf->SetXY(6, $pdf->GetY());
+    // $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'R'));
+    // $pdf->SetWidths(array(25, 55, 16, 35, 20, 20, 20, 13));
 
-      $totalfondo = $total_prestamos = 0;
-      $saldofc = 0;
-      foreach ($caja['fondos_caja'] as $fondoc) {
-        if($pdf->GetY() >= $pdf->limiteY){
-          if (count($pdf->pages) > $pdf->page) {
-            $pdf->page++;
-            $pdf->SetXY(6, 10);
-          } else
-            $pdf->AddPage();
-        }
-
-        $totalfondo += floatval($fondoc->monto);
-        $saldofc = ($fondoc->tipo_movimiento=='t'? $saldofc+$fondoc->monto: $saldofc-$fondoc->monto);
-
-        $pdf->SetX(6);
-        $pdf->Row(array(
-          $fondoc->categoria,
-          $fondoc->empresa,
-          MyString::fechaAT($fondoc->fecha),
-          $fondoc->referencia,
-          MyString::formatoNumero(($fondoc->tipo_movimiento=='t'? $fondoc->monto: ''), 2, '', false),
-          MyString::formatoNumero(($fondoc->tipo_movimiento=='f'? $fondoc->monto: ''), 2, '', false),
-          MyString::formatoNumero($saldofc, 2, '', false),
-          $fondoc->id_fondo
-        ), false, 'B');
+    $totalfondo = $total_prestamos = 0;
+    $saldofc = 0;
+    foreach ($caja['fondos_caja'] as $fondoc) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
       }
+
+      $totalfondo += floatval($fondoc->monto);
+      $saldofc = ($fondoc->tipo_movimiento=='t'? $saldofc+$fondoc->monto: $saldofc-$fondoc->monto);
+
+      // $pdf->SetX(6);
+      // $pdf->Row(array(
+      //   $fondoc->categoria,
+      //   $fondoc->empresa,
+      //   MyString::fechaAT($fondoc->fecha),
+      //   $fondoc->referencia,
+      //   MyString::formatoNumero(($fondoc->tipo_movimiento=='t'? $fondoc->monto: ''), 2, '', false),
+      //   MyString::formatoNumero(($fondoc->tipo_movimiento=='f'? $fondoc->monto: ''), 2, '', false),
+      //   MyString::formatoNumero($saldofc, 2, '', false),
+      //   $fondoc->id_fondo
+      // ), false, 'B');
     }
 
     // Traspasos
