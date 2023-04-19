@@ -9547,9 +9547,10 @@ class nomina_fiscal_model extends CI_Model {
       }
 
       $data = $this->db->query(
-        "SELECT np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha) as fecha, DATE(np.inicio_pago) as inicio_pago, np.prestado - COALESCE(SUM(nfp.monto), 0) as total_pagado
+        "SELECT np.id_prestamo, np.tipo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha) as fecha,
+          DATE(np.inicio_pago) as inicio_pago, np.prestado - COALESCE(SUM(nfp.monto), 0) as total_pagado
         FROM nomina_prestamos as np
-        LEFT JOIN nomina_fiscal_prestamos as nfp ON nfp.id_prestamo = np.id_prestamo AND (nfp.anio < {$semana['anio']} OR (nfp.anio <= {$semana['anio']} AND nfp.semana <= {$semana['semana']}))
+          LEFT JOIN nomina_fiscal_prestamos as nfp ON nfp.id_prestamo = np.id_prestamo AND (nfp.anio < {$semana['anio']} OR (nfp.anio <= {$semana['anio']} AND nfp.semana <= {$semana['semana']}))
         WHERE '1' {$sql}
         GROUP BY np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha), DATE(np.inicio_pago)
         {$having}
@@ -9580,10 +9581,11 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->AddPage();
 
       $columnas = array(
-        'n' => array('FECHA', 'FECHA INICIO PAGO', 'PRESTADO', 'PAGO X SEMANA', 'SALDO'),
-        'w' => array(40, 40, 40, 40, 40),
-        'a' => array('L', 'L', 'L', 'L', 'R')
+        'n' => array('FECHA', 'FECHA INICIO PAGO', 'TIPO', 'PRESTADO', 'PAGO X SEMANA', 'SALDO'),
+        'w' => array(25, 35, 35, 35, 35, 35),
+        'a' => array('L', 'L', 'L', 'L', 'L', 'R')
       );
+      $tipospp = ['fi' => 'Fiscal', 'ef' => 'Efectivo', 'mt' => 'Materiales', 'efd' => 'Efectivo Dir']
 
       $pdf->SetFont('Helvetica','B', 8);
       $pdf->SetXY(6, $pdf->GetY());
@@ -9617,6 +9619,7 @@ class nomina_fiscal_model extends CI_Model {
         $data2 = array(
           $prestamo->fecha,
           $prestamo->inicio_pago,
+          $tipospp[$prestamo->tipo],
           MyString::formatoNumero($prestamo->prestado),
           MyString::formatoNumero($prestamo->pago_semana),
           MyString::formatoNumero($prestamo->total_pagado),
