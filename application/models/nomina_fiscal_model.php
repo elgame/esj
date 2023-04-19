@@ -9585,7 +9585,7 @@ class nomina_fiscal_model extends CI_Model {
         'w' => array(25, 35, 35, 35, 35, 35),
         'a' => array('L', 'L', 'L', 'L', 'L', 'R')
       );
-      $tipospp = ['fi' => 'Fiscal', 'ef' => 'Efectivo', 'mt' => 'Materiales', 'efd' => 'Efectivo Dir']
+      $tipospp = ['fi' => 'Fiscal', 'ef' => 'Efectivo', 'mt' => 'Materiales', 'efd' => 'Efectivo Dir'];
 
       $pdf->SetFont('Helvetica','B', 8);
       $pdf->SetXY(6, $pdf->GetY());
