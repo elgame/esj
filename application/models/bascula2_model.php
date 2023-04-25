@@ -1156,7 +1156,7 @@ class bascula2_model extends bascula_model {
   {
     $sql = $sql2 = '';
 
-    $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
+    $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-').'01';
     $_GET['ffecha2'] = $this->input->get('ffecha2') != '' ? $_GET['ffecha2'] : date('Y-m-d');
     $fecha_compara = 'fecha_tara';
 
@@ -1176,9 +1176,8 @@ class bascula2_model extends bascula_model {
       $sql .= " AND b.accion = 'sa'";
     }
 
-    $sql .= " AND DATE(b.{$fecha_compara}) <= '".$_GET['ffecha1']."'";
+    $sql .= " AND DATE(b.{$fecha_compara}) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."'";
     $sql .= " AND b.intangible = 'f'";
-
 
     $query = $this->db->query(
       "SELECT p.id_proveedor, p.nombre_fiscal AS proveedor, e.nombre_fiscal AS empresa, sal.importe

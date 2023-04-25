@@ -8,7 +8,10 @@
 
                 <div class="control-group">
                   <div class="controls">
-                    <label for="ffecha1" class="pull-left span12">Hasta <input type="date" name="ffecha1" class="span12 getjsval" id="ffecha1"
+                    <label for="ffecha1" class="pull-left span12">De <input type="date" name="ffecha1" class="span12 getjsval" id="ffecha1"
+                      value="<?php echo date('Y-m-').'01'; ?>"></label>
+                    <br />
+                    <label for="ffecha2" class="pull-left span12">Hasta <input type="date" name="ffecha2" class="span12 getjsval" id="ffecha2"
                       value="<?php echo date('Y-m-d'); ?>"></label>
                   </div>
                 </div>
