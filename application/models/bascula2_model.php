@@ -1239,7 +1239,7 @@ class bascula2_model extends bascula_model {
 
     $pdf->titulo2 = "REPORTE BOLETAS POR PAGAR <".(isset($area['info'])? $area['info']->nombre: '').">";
     $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
-    $pdf->titulo3 = "Hasta ".$fecha->format('d/m/Y')." | ".$this->input->get('fempresa');
+    $pdf->titulo3 = "De ".$fecha->format('d/m/Y')." Hasta ".$fecha2->format('d/m/Y')." | ".$this->input->get('fempresa');
 
     $pdf->AliasNbPages();
     $pdf->AddPage();
