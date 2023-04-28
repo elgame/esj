@@ -20,6 +20,7 @@ class cfdi{
   private $estado         = 'Michoacán';
   private $pais           = 'México';
   private $cp             = '60800';
+  private $curp           = '';
 
   private $isNomina = false;
   public $anio     = '2013'; // variable util para las nominas.
@@ -1004,6 +1005,7 @@ class cfdi{
         'estado'        => $this->estado,
         'pais'          => $this->pais,
         'cp'            => $this->cp,
+        'curp'          => $this->curp,
         'regimenFiscal' => $this->regimen_fiscal,
         'cer'           => $this->obtenCer($this->path_certificado),
         'key'           => $this->obtenKey($this->path_key),
@@ -1760,6 +1762,10 @@ class cfdi{
     $this->estado         = $data->estado;
     $this->pais           = $data->pais;
     $this->cp             = $data->cp;
+    $this->curp           = '';
+    if (strlen($this->rfc) === 13) {
+      $this->curp = $data->curp;
+    }
 	}
 
 	public function generaArchivos($data, $isNomina = false, $semana = null, $path = null, $nameAppend = null)
