@@ -804,8 +804,12 @@ class gastos_model extends privilegios_model{
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(25, 70));
       $activos = [];
-      foreach ($gasto['info']->activo as $key => $value) {
-        $activos[] = $value->nombre;
+      if (is_array($gasto['info']->activo)) {
+        foreach ($gasto['info']->activo as $key => $value) {
+          $activos[] = $value->nombre;
+        }
+      } elseif (is_object($gasto['info']->activo)) {
+        $activos[] = $gasto['info']->activo->nombre;
       }
       $pdf->Row(array('Activo', implode(' | ', $activos)), false, true);
     }
