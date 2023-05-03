@@ -1,6 +1,6 @@
 
  ✔ Imprimir gastos @done (23-03-20 10:21)
-   -- pcc|san
+   -- pcc|san|lap
    ALTER TABLE IF EXISTS public.compras ADD COLUMN no_impresiones integer DEFAULT 0;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',166,true,'gastos/imprimir/','print',false);
    UPDATE public.empresas SET cfdi_version=4.0;
