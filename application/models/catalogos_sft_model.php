@@ -877,11 +877,17 @@ class catalogos_sft_model extends CI_Model{
       // $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('sucursalId')."";
     }
 
-    $sql_co = '';
+    $sql_co = $sql_cg = $sql_c = '';
     if ($this->input->get('q_conceptos') != '') {
       switch ($this->input->get('q_conceptos')) {
         case 'qgdc':
-          $sql_co .= " AND (cp.descripcion <> 'DIESEL' AND cp.descripcion <> 'GASOLINA' AND cp.descripcion <> 'CALCOMANIA FISCAL VEHICULAR')";
+          $quitar = ['DIESEL', 'GASOLINA', 'CALCOMANIA FISCAL VEHICULAR', 'GASOLINA PREMIUM', '%TAZA FIJA%',
+            'PRIMA NETA', '%TAZA FINANCIAMIENTO%', '%Caja #1%', '%Caja #5%'];
+          foreach ($quitar as $key => $value) {
+            $sql_co .= " AND Trim(cp.descripcion) NOT LIKE '{$value}'";
+            $sql_cg .= " AND ('Caja #' || cg.no_caja || ' ' || cg.concepto) NOT LIKE '{$value}'";
+            $sql_c .= " AND ((CASE WHEN c.intangible = 't' THEN '(Intangible) ' ELSE '' END) || c.concepto) NOT LIKE '{$value}'";
+          }
           break;
       }
     }
@@ -908,11 +914,12 @@ class catalogos_sft_model extends CI_Model{
               SELECT Sum(c.total) importe
               FROM compras c
               WHERE c.status In('p', 'pa') AND c.isgasto = 't' AND c.id_cat_codigos In({$ids_hijos}) {$sql_gastos}
+                {$sql_c}
               UNION ALL
               SELECT Sum(cg.monto) importe
               FROM cajachica_gastos cg INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
               WHERE cg.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
-                AND cg.tipo <> 'pre' {$sql_caja}
+                AND cg.tipo <> 'pre' {$sql_caja} {$sql_cg}
               UNION ALL
               SELECT Sum(ndl.importe) importe
               FROM nomina_trabajos_dia_labores ndl
@@ -968,6 +975,7 @@ class catalogos_sft_model extends CI_Model{
                     GROUP BY cor.id_compra
                   ) oranc ON oranc.id_compra = c.id_compra
                 WHERE c.status In('p', 'pa') AND c.isgasto = 't' AND ca.id_cat_codigos In({$ids_hijos}) {$sql_gastos}
+                  {$sql_c}
                 UNION ALL
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(cg.fecha) fecha_orden, cg.folio::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
@@ -984,7 +992,7 @@ class catalogos_sft_model extends CI_Model{
                     GROUP BY cor.id_gasto
                   ) oranc ON oranc.id_gasto = cg.id_gasto
                 WHERE ca.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
-                  AND cg.tipo <> 'pre' {$sql_caja}
+                  AND cg.tipo <> 'pre' {$sql_caja} {$sql_cg}
                 UNION ALL
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndl.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,

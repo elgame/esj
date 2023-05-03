@@ -125,7 +125,7 @@ class productos_traspasos_model extends CI_Model {
             'id_empresa'      => $data['empresa_id_de'],
             'id_empleado'     => $this->session->userdata('id_usuario'),
             'folio'           => 0,
-            'concepto'        => 'Nivelacion de inventario',
+            'concepto'        => 'Traspaso de inventario',
             'status'          => 'n',
             'fecha_creacion'  => date('Y-m-d'),
             'fecha_registro'  => date('Y-m-d'),
@@ -140,7 +140,7 @@ class productos_traspasos_model extends CI_Model {
                 'no_row'          => $key,
                 'id_producto'     => $productoId,
                 'cantidad'        => abs($data['productos_cantidad'][$key]),
-                'precio_unitario' => 0, //$data['productos_precio'][$key],
+                'precio_unitario' => $data['productos_precio'][$key],
             );
         }
 
@@ -185,8 +185,8 @@ class productos_traspasos_model extends CI_Model {
                 'id_presentacion'  => (count($presenta) > 0 ? $presenta->id_presentacion : NULL),
                 'descripcion' => $data['productos_nombre'][$key],
                 'cantidad' => abs($data['productos_cantidad'][$key]),
-                'precio_unitario'  => 0,
-                'importe' => 0, //(abs($data['productos_cantidad'][$key]) * $data['productos_precio'][$key]),
+                'precio_unitario'  => $data['productos_precio'][$key],
+                'importe' => (abs($data['productos_cantidad'][$key]) * $data['productos_precio'][$key]),
                 'status' => 'a',
                 'fecha_aceptacion' => $fecha,
                 'observacion' => $data['productos_descripcion'][$key],
