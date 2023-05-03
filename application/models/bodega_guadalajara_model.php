@@ -2499,7 +2499,7 @@ class bodega_guadalajara_model extends CI_Model {
     // $caja_destino = $this->getCajaByCode($deudor->tipo);
 
     // echo "<pre>";
-    //   var_dump($deudor, $caja_destino);
+    //   var_dump($deudor);
     // echo "</pre>";exit;
 
     $this->load->library('mypdf');
