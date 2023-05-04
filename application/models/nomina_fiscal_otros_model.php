@@ -1631,6 +1631,254 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     }
   }
 
+
+  /**
+   * Reporte existencias por unidad
+   *
+   * @return
+   */
+  public function getRptAsistenciasDetallData()
+  {
+    $sql_com = $sql_sal = $sql_req = $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    $empresa = $this->empresas_model->getInfoEmpresa($_GET['did_empresa']);
+
+    $fechaini = new DateTime($_GET['ffecha1']);
+    $fechafin = new DateTime($_GET['ffecha2']);
+    $semanas = [];
+    while ($fechaini <= $fechafin) {
+      $sem = MyString::obtenerSemanaDeFecha($fechaini->format("Y-m-d"), $empresa['info']->dia_inicia_semana);
+      if (!isset($semanas[$sem['semana']])) {
+        $semanas[$sem['semana']] = $sem;
+      }
+      $fechaini->modify('+1 day');
+    }
+
+    $response = [];
+    if (count($semanas) > 0) {
+      foreach ($semanas as $sem => $semana) {
+        $diass = [];
+        for ($i=0; $i < 7; $i++) {
+          $dia = MyString::dia(MyString::suma_fechas($semana['fecha_inicio'], $i), 'c');
+          $diass[$dia] = MyString::suma_fechas($semana['fecha_inicio'], $i);
+        }
+
+        $filtros = array(
+          'semana'    => $sem,
+          'empresaId' => $empresa['info']->id_empresa,
+          'puestoId'  => '',
+          'dia_inicia_semana' => $empresa['info']->dia_inicia_semana
+        );
+        $empleados = $this->listadoEmpleadosAsistencias($filtros);
+        // echo "<pre>";
+        // var_dump($empleados);
+        // echo "</pre>";exit;
+
+        foreach ($empleados as $keye => $empl) {
+          $dias = $diass;
+
+          foreach ($dias as $kd => $fecha) {
+            if (isset($empl->dias_faltantes) && count($empl->dias_faltantes) > 0) {
+              $exist = array_values(
+                array_filter($empl->dias_faltantes, function($v) use($fecha) {
+                  return $v['fecha'] == $fecha;
+                })
+              );
+              if (count($exist) > 0) {
+                $dias[$kd] = mb_strtoupper($exist[0]['tipo'], 'UTF-8');
+              } else {
+                $dias[$kd] = 'A';
+              }
+            } else {
+              $dias[$kd] = 'A';
+            }
+          }
+
+          $response[$keye][] = array_merge([
+            'semana' => $sem,
+            'fecha_ini' => $semana['fecha_inicio'],
+            'fecha_fin' => $semana['fecha_final'],
+            'codigo' => $empl->id,
+            'nombre' => $empl->nombre,
+          ], $dias);
+
+        }
+      }
+    }
+
+    return ['val' => $response, 'dias' => $diass];
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptAsistenciasDetallPdf(){
+    $res = $this->getRptAsistenciasDetallData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte de Asistencia';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','', 8);
+
+    $aligns = array('L', 'L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+    $widths = array(15, 15, 80, 12, 12, 12, 12, 12, 12, 12, 12, 12);
+    $header = array('Semana', 'No', 'Trabajador');
+    foreach ($res['dias'] as $key => $fecha) {
+      $header[] = $key;
+    }
+
+    $familia = '';
+    $totales = array(0,0,0);
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res['val'] as $key => $empleado){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+      }
+
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFillColor(160,160,160);
+      $pdf->SetY($pdf->GetY()+5);
+      $pdf->SetX(10);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($header, true);
+
+      // $totales[0] += $item->asistencias;
+      // $totales[1] += $item->faltas;
+      // $totales[2] += $item->inca;
+
+      foreach ($empleado as $keyem => $item) {
+        unset($item['fecha_ini'], $item['fecha_fin']);
+        $datos = array_values($item);
+
+        $pdf->SetX(10);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false);
+      }
+    }
+
+    // $pdf->SetFont('Arial','B',8);
+    // $pdf->SetX(6);
+    // $pdf->SetAligns($aligns);
+    // $pdf->SetWidths($widths);
+    // $pdf->Row(array('','',
+    //   MyString::formatoNumero($totales[0], 2, '', false),
+    //   MyString::formatoNumero($totales[1], 2, '', false),
+    //   MyString::formatoNumero($totales[2], 2, '', false),
+    //   ), true, false);
+
+    $pdf->Output('rpt_asistencias.pdf', 'I');
+  }
+  public function getRptAsistenciasDetallXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=rpt_asistencias.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptAsistenciasDetallData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Asistencia';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    $header = '<tr>
+        <td colspan="10">&nbsp;</td>
+      </tr>
+      <tr style="font-weight:bold">
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Semana</td>
+          <td style="width:300px;border:1px solid #000;background-color: #cccccc;">No</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Trabajador</td>';
+    foreach ($res['dias'] as $key => $fecha) {
+      $header .= '<td style="width:200px;border:1px solid #000;background-color: #cccccc;">'.$key.'</td>';
+    }
+    $header .= '</tr>';
+
+    $totales = array(0,0,0);
+    foreach($res['val'] as $key => $empleado){
+
+      // $totales[0] += $item->asistencias;
+      // $totales[1] += $item->faltas;
+      // $totales[2] += $item->inca;
+
+      $html .= $header;
+
+      foreach ($empleado as $keyem => $item) {
+        unset($item['fecha_ini'], $item['fecha_fin']);
+        $html .= '<tr>';
+        foreach ($item as $key => $value) {
+          $html .= '<td style="width:100px;border:1px solid #000;">'.$value.'</td>';
+        }
+        $html .= '</tr>';
+      }
+    }
+
+    // $html .= '
+    //         <tr>
+    //           <td colspan="6"></td>
+    //         </tr>
+    //         <tr style="font-weight:bold">
+    //           <td></td>
+    //           <td style="border:1px solid #000;">Totales</td>
+    //           <td style="border:1px solid #000;">'.$totales[0].'</td>
+    //           <td style="border:1px solid #000;">'.$totales[1].'</td>
+    //           <td style="border:1px solid #000;">'.$totales[2].'</td>
+    //         </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
   /**
    * Reporte existencias por unidad
    *
@@ -1681,7 +1929,6 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
 
     return $response;
   }
-
   /**
    * Reporte existencias por unidad pdf
    */

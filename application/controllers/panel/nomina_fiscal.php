@@ -1430,11 +1430,13 @@ class nomina_fiscal extends MY_Controller {
   }
   public function rpt_asistencias_pdf(){
     $this->load->model('nomina_fiscal_otros_model');
-    $this->nomina_fiscal_otros_model->getRptAsistenciasPdf();
+    $this->nomina_fiscal_otros_model->getRptAsistenciasDetallPdf();
+    // $this->nomina_fiscal_otros_model->getRptAsistenciasPdf();
   }
   public function rpt_asistencias_xls(){
     $this->load->model('nomina_fiscal_otros_model');
-    $this->nomina_fiscal_otros_model->getRptAsistenciasXls();
+    $this->nomina_fiscal_otros_model->getRptAsistenciasDetallXls();
+    // $this->nomina_fiscal_otros_model->getRptAsistenciasXls();
   }
 
   public function recibo_nomina_ptu_pdf()

@@ -126,7 +126,6 @@ $(function(){
   });
 
   $('#formasis').on('submit', function(event) {
-    alert('');
     var linkDownXls = $("#linkDownXls"),
         url = {
           ffecha1: $("#ffecha1").val(),
