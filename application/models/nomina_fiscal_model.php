@@ -75,8 +75,10 @@ class nomina_fiscal_model extends CI_Model {
       // $sqlg .= " AND ".($tipo=='ag'? 'nagui': 'nf').".id_empresa = {$filtros['empresaId']}";
     }
 
-    $sql .= " AND u.registro_patronal = '{$filtros['regPatronal']}'";
-    // $sqlg .= " AND nf.registro_patronal = '{$filtros['regPatronal']}'";
+    if($tipo != 'ptu') {
+      $sql .= " AND u.registro_patronal = '{$filtros['regPatronal']}'";
+      // $sqlg .= " AND nf.registro_patronal = '{$filtros['regPatronal']}'";
+    }
 
     if ($filtros['puestoId'] !== '')
     {
