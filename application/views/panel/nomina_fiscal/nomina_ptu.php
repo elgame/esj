@@ -94,7 +94,7 @@
                 </div>
                 <div class="span5" style="text-align: center;">
                   <div style="font-size: 1.5em;">
-                    <?php echo ucfirst($tipoNomina)." <span class=\"label\" style=\"font-size: 1em;\">{$semana2[$tipoNomina]}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
+                    <?php echo ucfirst($tipoNomina)." <span class=\"label cerrarPtuu\" style=\"font-size: 1em;\">{$semana2[$tipoNomina]}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
                   </div>
                 </div>
                 <form action="<?php echo base_url('panel/nomina_fiscal/nomina_ptu_rpt_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form" target="_blank">

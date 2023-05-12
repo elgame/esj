@@ -10430,7 +10430,7 @@ class nomina_fiscal_model extends CI_Model {
               'id_empresa'          => $empresaId,
               'anio'                => $fechasSemana['anio'],
               'semana'              => $datos['numSemana'],
-              'registro_patronal'   => $regPatronal,
+              'registro_patronal'   => $regPatronal, // $datosApi['registroPatronal']
               'fecha_inicio'        => $fechasSemana['fecha_inicio'],
               'fecha_final'         => $fechasSemana['fecha_final'],
               'dias_trabajados'     => $empleadoNomina[0]->dias_trabajados,
