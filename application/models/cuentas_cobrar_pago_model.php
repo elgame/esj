@@ -116,13 +116,13 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
           if ($value->{$key2} > 0 || ($key2 == 'iva' && $value->{$key2} == 0)) {
             if (isset($impuestos["{$key2}{$value->{$field[0]}}"])) {
               $impuestos["{$key2}{$value->{$field[0]}}"]['importe'] += $value->{$key2};
-              $impuestos["{$key2}{$value->{$field[0]}}"]['base'] += ($value->ieps_subtotal? $value->importe_ieps: $value->importe);
+              $impuestos["{$key2}{$value->{$field[0]}}"]['base'] += ($value->ieps_subtotal && $key2 == 'iva'? $value->importe_ieps: $value->importe);
               $impuestos["{$key2}{$value->{$field[0]}}"]['total'] += $value->total;
             } else {
               $impuestos["{$key2}{$value->{$field[0]}}"] = [
                 'impuesto' => $field[1],
                 'percent' => number_format($value->{$field[0]}/($field[2]? 100: 1), 6, '.', ''),
-                'base' => ($value->ieps_subtotal? $value->importe_ieps: $value->importe),
+                'base' => ($value->ieps_subtotal && $key2 == 'iva'? $value->importe_ieps: $value->importe),
                 'importe' => $value->{$key2},
                 'total' => $value->total
               ];
