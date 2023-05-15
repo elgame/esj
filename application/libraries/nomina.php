@@ -807,13 +807,20 @@ class nomina
    */
   public function pVacaciones()
   {
+    $vacaciones = 0;
+    if ($this->empleado->nomina_guardada == 'f') {
+      $vacaciones = floatval($this->empleado->nomina->vacaciones);
+    } elseif (isset($this->empleado->nomina_fiscal_vacaciones)) {
+      $vacaciones = floatval($this->empleado->nomina_fiscal_vacaciones);
+    }
+
     return array(
       'TipoPercepcion' => '038',
       'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'vacaciones1': 'vacaciones2')],
       'Concepto'       => 'Vacaciones',
-      'ImporteGravado' => round($this->empleado->nomina->vacaciones, 2),
+      'ImporteGravado' => round($vacaciones, 2),
       'ImporteExcento' => 0,
-      'total'          => round($this->empleado->nomina->vacaciones, 2) + 0,
+      'total'          => round($vacaciones, 2) + 0,
       'ApiKey'         => 'pe_sueldo_',
     );
   }
@@ -825,18 +832,23 @@ class nomina
    */
   public function pPrimaVacacional()
   {
-    $topeExcento = 15 * floatval($this->salariosZonasConfig->zona_a);
+    if ($this->empleado->nomina_guardada == 'f') {
+      $topeExcento = 15 * floatval($this->salariosZonasConfig->zona_a);
 
-    // Si los que se le dara de aguinaldo al empleado excede el tope excento.
-    if ($this->empleado->nomina->prima_vacacional > $topeExcento)
-    {
-      $gravado = $this->empleado->nomina->prima_vacacional - $topeExcento;
-      $excento = $topeExcento;
-    }
-    else
-    {
-      $gravado = 0;
-      $excento = $this->empleado->nomina->prima_vacacional;
+      // Si los que se le dara de aguinaldo al empleado excede el tope excento.
+      if ($this->empleado->nomina->prima_vacacional > $topeExcento)
+      {
+        $gravado = $this->empleado->nomina->prima_vacacional - $topeExcento;
+        $excento = $topeExcento;
+      }
+      else
+      {
+        $gravado = 0;
+        $excento = $this->empleado->nomina->prima_vacacional;
+      }
+    } else {
+      $gravado = $this->empleado->nomina_fiscal_prima_vacacional_grabable;
+      $excento = $this->empleado->nomina_fiscal_prima_vacacional_exento;
     }
 
     return array(
