@@ -116,13 +116,14 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
           if ($value->{$key2} > 0 || ($key2 == 'iva' && $value->{$key2} == 0)) {
             if (isset($impuestos["{$key2}{$value->{$field[0]}}"])) {
               $impuestos["{$key2}{$value->{$field[0]}}"]['importe'] += $value->{$key2};
-              $impuestos["{$key2}{$value->{$field[0]}}"]['base'] += $value->{'importe'};
+              $impuestos["{$key2}{$value->{$field[0]}}"]['base'] += ($value->ieps_subtotal? $value->importe_ieps: $value->importe);
               $impuestos["{$key2}{$value->{$field[0]}}"]['total'] += $value->total;
             } else {
               $impuestos["{$key2}{$value->{$field[0]}}"] = [
                 'impuesto' => $field[1],
                 'percent' => number_format($value->{$field[0]}/($field[2]? 100: 1), 6, '.', ''),
-                'base' => $value->{'importe'}, 'importe' => $value->{$key2},
+                'base' => ($value->ieps_subtotal? $value->importe_ieps: $value->importe),
+                'importe' => $value->{$key2},
                 'total' => $value->total
               ];
             }
@@ -194,7 +195,8 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
           $queryProductos = $this->db->query(
             "SELECT fp.importe, fp.iva, fp.porcentaje_iva, fp.retencion_iva, fp.porcentaje_retencion,
               fp.ieps, fp.porcentaje_ieps, fp.isr, fp.porcentaje_isr,
-              (fp.importe + fp.iva + fp.ieps - fp.retencion_iva - fp.isr) AS total
+              (fp.importe + fp.iva + fp.ieps - fp.retencion_iva - fp.isr) AS total,
+              fp.ieps_subtotal, (fp.importe + fp.ieps) AS importe_ieps
             FROM facturacion v
               INNER JOIN facturacion_productos fp ON v.id_factura = fp.id_factura
             WHERE v.id_factura = {$value->id_factura} AND v.version::float >= 3.2 AND v.is_factura = 't'"
