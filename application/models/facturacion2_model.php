@@ -417,6 +417,11 @@ class facturacion2_model extends privilegios_model{
       $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
     }
 
+    if ($this->input->get('dserie') != '')
+    {
+      $sql .= " AND f.serie = '" . $this->input->get('dserie') . "'";
+    }
+
     // filtra por pagadas
     if (isset($_GET['dpagadas']))
     {

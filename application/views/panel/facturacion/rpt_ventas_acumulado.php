@@ -20,15 +20,28 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="dempresa">Empresa</label>
+                  <label class="control-label" for="dempresar">Empresa</label>
                   <div class="controls">
-                    <input type="text" name="dempresa" class="input-xlarge search-query" id="dempresa" value="<?php echo set_value_get('dempresa', $empresa->nombre_fiscal); ?>" size="73">
+                    <input type="text" name="dempresar" class="input-xlarge search-query" id="dempresar" value="<?php echo set_value_get('dempresar', $empresa->nombre_fiscal); ?>" size="73">
                     <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', $empresa->id_empresa); ?>">
                   </div>
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="dempresa">Tipo Reporte</label>
+                  <label class="control-label" for="dserie">Serie</label>
+                  <div class="controls">
+                    <select name="dserie" class="span9" id="dserie">
+                      <option></option>
+                      <?php foreach ($series['data'] as $key => $value): ?>
+                      <option value="<?php echo $value->serie ?>"><?php echo $value->serie ?> - <?php echo $value->leyenda ?></option>
+                      <?php endforeach ?>
+                    </select>
+                    <input type="hidden" id="serie-selected" value="">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="dtipoReporte">Tipo Reporte</label>
                   <div class="controls">
                     <select name="dtipoReporte" id="dtipoReporte">
                       <option value="piezas">Por unidades</option>

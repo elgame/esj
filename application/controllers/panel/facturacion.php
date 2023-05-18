@@ -2429,6 +2429,7 @@ class facturacion extends MY_Controller {
       array('panel/facturacion/rep_productos_facturados.js'),
     ));
 
+    $this->load->model('facturacion_model');
     $this->load->model('empresas_model');
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
@@ -2436,6 +2437,7 @@ class facturacion extends MY_Controller {
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Reporte de ventas acumulado');
 
+    $params['series'] = $this->facturacion_model->get_series($params['empresa']->id_empresa, 'r');
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);
