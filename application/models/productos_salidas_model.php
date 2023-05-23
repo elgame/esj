@@ -620,7 +620,8 @@ class productos_salidas_model extends CI_Model {
 
         if ($data['info'][0]->tipo == 'c') {
           $data['info'][0]->combustible = $this->db->query("SELECT sc.id_combustible, sc.id_salida, sc.id_labor, sc.fecha,
-              sc.implemento, sc.hora_carga, sc.odometro, sc.lts_combustible, sc.precio, sl.nombre AS labor
+              sc.implemento, sc.hora_carga, sc.odometro, sc.odometro_fin, sc.lts_combustible, sc.precio, sl.nombre AS labor,
+              sc.horometro, sc.horometro_fin
            FROM compras_salidas_combustible sc
             INNER JOIN compras_salidas_labores sl ON sl.id_labor = sc.id_labor
            WHERE sc.id_salida = {$data['info'][0]->id_salida}")->row();
@@ -1187,8 +1188,11 @@ class productos_salidas_model extends CI_Model {
         $pdf->SetWidths(array(32, 32));
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetXY(0, $pdf->GetY()-2);
-        $pdf->Row2(array('Odometro: '.MyString::formatoNumero($orden['info'][0]->combustible->odometro, 2, ''),
+        $pdf->Row2(array('Odometro: '.MyString::formatoNumero($orden['info'][0]->combustible->odometro_fin, 2, ''),
                         'Hr Carga: '.substr($orden['info'][0]->combustible->hora_carga, 0, 8) ), false, false);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Hrs Trab: '.MyString::formatoNumero($orden['info'][0]->combustible->horometro_fin - $orden['info'][0]->combustible->horometro, 2, ''),
+                        ''), false, false);
         $pdf->SetXY(0, $pdf->GetY()-2);
         $pdf->Row2(array('Labor: '.$orden['info'][0]->combustible->labor, 'Implemento: '.$orden['info'][0]->combustible->implemento ), false, false);
       }
