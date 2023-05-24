@@ -93,7 +93,7 @@ class control_maquinaria extends MY_Controller {
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);
-    $this->load->view('panel/almacen/control_maquinaria/rptcombustible',$params);
+    $this->load->view('panel/almacen/control_maquinaria/rptcombustible', $params);
     $this->load->view('panel/footer',$params);
   }
   public function rptcombustible_pdf()

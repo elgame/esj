@@ -124,12 +124,13 @@ class control_maquinaria_model extends CI_Model {
     if (isset($_GET['did_empresa']{0})) {
       $sql .= " AND cs.id_empresa_ap = {$_GET['did_empresa']}";
     }
-
     // vehiculos
-    if (isset($_GET['activoId']) && intval($_GET['activoId']) > 0)
-    {
-      $sql .= " AND cs.id_activo = {$_GET['activoId']}";
+    if (isset($_GET['dactivos']) && count($_GET['dactivos']) > 0) {
+      $sql .= " AND cs.id_activo In(".implode(',', $_GET['dactivos']).")";
     }
+    // if (isset($_GET['activoId']) && intval($_GET['activoId']) > 0) {
+    //   $sql .= " AND cs.id_activo = {$_GET['activoId']}";
+    // }
 
     $response = array();
 
@@ -150,7 +151,7 @@ class control_maquinaria_model extends CI_Model {
           GROUP BY csr.id_salida
         ) ran ON ran.id_salida = cs.id_salida
       WHERE cs.status <> 'ca' {$sql}
-      ORDER BY id_activo ASC, labor ASC, fecha ASC, hora_carga ASC")->result();
+      ORDER BY id_activo ASC, fecha ASC, hora_carga ASC, labor ASC")->result();
 
     return $response;
   }
@@ -195,13 +196,13 @@ class control_maquinaria_model extends CI_Model {
     $aligns2 = array('L', 'L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
     $widths2 = array(12, 13, 11, 16, 40, 40, 16, 16, 16, 14, 12, 17, 29, 26);
     $header2 = array('Emp', 'Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'Hor Ini', 'Hor Fin', 'Hor Total',
-        'Litros', 'Precio', 'Total', 'Implemento', 'Observa');
+        'Litros', 'Precio', 'Total', 'Implemento', 'Labor');
 
     $aligns3 = array('R', 'R', 'R', 'R');
-    $widths3 = array(14, 18, 14, 18);
-    $header3 = array('Rendi lt/Hr', 'Acumulado');
     // $widths3 = array(14, 18, 14, 18);
-    // $header3 = array('Rendi lt/Hr', 'Kilómetros', 'Rendi Km/lt', 'Acumulado');
+    // $header3 = array('Rendi lt/Hr', 'Acumulado');
+    $widths3 = array(14, 18, 14, 18);
+    $header3 = array('Rendi lt/Hr', 'Kilómetros', 'Rendi Km/lt', 'Acumulado');
 
     $alignst = [['R', 'R', 'R', 'R', 'R'], $aligns3];
     $widthst = [[164, 16, 14, 12, 17], $widths3];
@@ -216,18 +217,18 @@ class control_maquinaria_model extends CI_Model {
     {
       $cantidad = 0;
       $importe = 0;
-      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      if($key == 0) //salta de pagina si exede el max
       {
-        if ($pdf->GetY() >= $pdf->limiteY || $key==0) {
-          $pdf->AddPage();
-        }
+        $pdf->AddPage();
+      } elseif ($pdf->GetY()+15 >= $pdf->limiteY) {
+        $pdf->AddPage();
       }
 
-      if ($auxvehi != ($vehiculo->id_activo.$vehiculo->labor)) {
+      if ($auxvehi != ($vehiculo->id_activo)) {
         if ($key != 0) {
           // ------
-          $auxy = $pdf->GetY();
-          $pdf->SetX(6);
+          $auxy = $pdf->GetY()+2;
+          $pdf->SetXY(6, $auxy);
           $pdf->SetAligns($alignst[0]);
           $pdf->SetWidths($widthst[0]);
 
@@ -249,8 +250,8 @@ class control_maquinaria_model extends CI_Model {
           $pdf->SetWidths($widths3);
           $pdf->Row([
             MyString::formatoNumero($total_litros/($total_hrs>0? $total_hrs: 1), 2, '', false),
-            // MyString::formatoNumero($total_kms, 2, '', false),
-            // MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
+            MyString::formatoNumero($total_kms, 2, '', false),
+            MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
             ''
           ], false, false);
           // ------
@@ -282,7 +283,7 @@ class control_maquinaria_model extends CI_Model {
         $pdf->Row($header3, true);
         // ------
 
-        $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
+        $auxvehi = $vehiculo->id_activo;
         $costoacumulado = 0;
       }
 
@@ -312,7 +313,7 @@ class control_maquinaria_model extends CI_Model {
         substr($vehiculo->hora_carga, 0, 5),
         $vehiculo->folio,
         $vehiculo->rancho,
-        $vehiculo->operador,
+        substr($vehiculo->operador, 0, 45),
         MyString::formatoNumero($vehiculo->horometro, 2, ''),
         MyString::formatoNumero($vehiculo->horometro_fin, 2, ''),
         MyString::formatoNumero($hrs, 2, '', false),
@@ -322,8 +323,8 @@ class control_maquinaria_model extends CI_Model {
         // MyString::formatoNumero(($vehiculo->lts_combustible/($hrs>0? $hrs: 1)), 2, '', false),
         // MyString::formatoNumero($costoacumulado, 2, '', false),
         $vehiculo->implemento,
-        $vehiculo->observaciones,
-      ), false, false);
+        $vehiculo->labor,
+      ), false, false, null, 5);
 
       $pdf->SetY($auxy);
 
@@ -332,8 +333,8 @@ class control_maquinaria_model extends CI_Model {
       $pdf->SetWidths($widths3);
       $pdf->Row(array(
         MyString::formatoNumero(($vehiculo->lts_combustible/($hrs>0? $hrs: 1)), 2, '', false),
-        // MyString::formatoNumero($kms, 2, '', false),
-        // MyString::formatoNumero(($kms/($vehiculo->lts_combustible>0? $vehiculo->lts_combustible: 1)), 2, '', false),
+        MyString::formatoNumero($kms, 2, '', false),
+        MyString::formatoNumero(($kms/($vehiculo->lts_combustible>0? $vehiculo->lts_combustible: 1)), 2, '', false),
         MyString::formatoNumero($costoacumulado, 2, '', false),
       ), false, false);
       // ------
@@ -426,8 +427,8 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetWidths($widths3);
     $pdf->Row([
       MyString::formatoNumero($total_litros/($total_hrs>0? $total_hrs: 1), 2, '', false),
-      // MyString::formatoNumero($total_kms, 2, '', false),
-      // MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
+      MyString::formatoNumero($total_kms, 2, '', false),
+      MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
       ''
     ], false, false);
     // ------
@@ -458,8 +459,8 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetWidths($widths3);
     $pdf->Row([
       MyString::formatoNumero($ttotal_litros/($ttotal_hrs>0? $ttotal_hrs: 1), 2, '', false),
-      // MyString::formatoNumero($ttotal_kms, 2, '', false),
-      // MyString::formatoNumero($ttotal_kms/($ttotal_litros>0? $ttotal_litros: 1), 2, '', false),
+      MyString::formatoNumero($ttotal_kms, 2, '', false),
+      MyString::formatoNumero($ttotal_kms/($ttotal_litros>0? $ttotal_litros: 1), 2, '', false),
       ''
     ], false, false);
     // ------

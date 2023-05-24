@@ -32,10 +32,12 @@
                   <label class="control-label" for="activos">Activos </label>
                   <div class="controls">
                     <div class="input-append span12">
-                      <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
+                      <input type="text" name="activos" class="span12" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
                     </div>
                     <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
                   </div>
+                  <ul id="dactivos">
+                  </ul>
                 </div>
 
                 <div class="control-group">

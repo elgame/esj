@@ -16,10 +16,15 @@
           activoId    : $("#activoId").val(),
           ddesglosado : $("#ddesglosado:checked").val(),
           dareas      : [],
+          dactivos    : [],
         };
 
       $(".treeviewcustom input[type=checkbox]:checked").each(function(index, el) {
         url.dareas.push($(this).val());
+      });
+
+      $("#dactivos input[type=hidden]").each(function(index, el) {
+        url.dactivos.push($(this).val());
       });
 
       linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
@@ -100,15 +105,24 @@
       select: function( event, ui ) {
         var $activos =  $(this);
 
-        $activos.val(ui.item.id);
-        $("#activoId").val(ui.item.id);
-        $activos.css("background-color", "#A1F57A");
+        // $activos.val(ui.item.id);
+        // $("#activoId").val(ui.item.id);
+        // $activos.css("background-color", "#A1F57A");
+
+        $("#dactivos").append('<li><input type="hidden" name="dactivos[]" value="'+ui.item.id+'"> '+ui.item.value+'</li>');
+        setTimeout(function(){
+          $('#activos').val('');
+        }, 100);
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#activos").css("background-color", "#FFD071");
         $("#activoId").val('');
       }
+    });
+
+    $("#dactivos").on('click', 'li', function(){
+      $(this).remove();
     });
   }
 

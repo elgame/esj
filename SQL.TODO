@@ -1,4 +1,7 @@
 
+ ✔ Reporte de combustible agrupar por tractor y agregar labor (quitar observacion), km y rendimiento por km @done (23-05-24 12:18)
+ ☐ Crear Reporte de gastos de tractores, sacar de los gastos y ordenes
+ ☐ Estado de resultado transporte, poner como catalogo los conceptos y que solo se puedan selecionar
  ☐ Descuentos bodega gdl
    CREATE TABLE otros.bodega_deudores
       (
