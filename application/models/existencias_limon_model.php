@@ -363,11 +363,14 @@ class existencias_limon_model extends CI_Model {
         $info['costo_ventas_fletes'] = $costo_ventas_fletes->result();
         foreach ($info['costo_ventas_fletes'] as $key => $value) {
           $ids_facrem = str_replace(['f:', 't:', '|'], ['', '', ','], $value->ids_facrem);
-          $facturas_fletes = $this->db->query(
-            "SELECT String_agg((f.serie || f.folio::text), ', ') AS facturas
-            FROM facturacion f
-            WHERE f.id_factura in({$ids_facrem})"
-          )->row();
+          $ids_facrem = substr($ids_facrem, 0, strlen($ids_facrem)-1);
+          if ($ids_facrem != '') {
+            $facturas_fletes = $this->db->query(
+              "SELECT String_agg((f.serie || f.folio::text), ', ') AS facturas
+              FROM facturacion f
+              WHERE f.id_factura in({$ids_facrem})"
+            )->row();
+          }
 
           $info['costo_ventas_fletes'][$key]->facturas = (isset($facturas_fletes->facturas)? $facturas_fletes->facturas: '');
         }
@@ -2654,14 +2657,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R'));
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R'));
     $pdf->SetWidths(array(54, 15, 15, 57, 17, 23));
     $pdf->Row(array('FLETE CONTRATADO', 'FOLIO', 'REM/FAC', 'PROVEEDOR', 'CANTIDAD', 'IMPORTE'), true, 'B');
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(60, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R'));
-    $pdf->SetWidths(array(60, 25, 17, 25));
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R'));
+    $pdf->SetWidths(array(15, 15, 57, 17, 23));
 
     $descuentoVentasFletes_cantidad = $descuentoVentasFletes_importe = 0;
     foreach ($caja['costo_ventas_fletes'] as $existencia) {
