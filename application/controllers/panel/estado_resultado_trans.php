@@ -295,7 +295,7 @@ class estado_resultado_trans extends MY_Controller {
         ['field' => 'gastos_proveedor[]'      , 'label' => 'gastos_proveedor'      , 'rules' => '']                 ,
         ['field' => 'gastos_proveedor_id[]'   , 'label' => 'gastos_proveedor_id'   , 'rules' => 'numeric']          ,
         ['field' => 'gastos_codg[]'           , 'label' => 'gastos_codg'           , 'rules' => '']                 ,
-        ['field' => 'gastos_codg_id[]'        , 'label' => 'gastos_codg_id'        , 'rules' => '']                 ,
+        ['field' => 'gastos_codg_id[]'        , 'label' => 'gastos_codg_id'        , 'rules' => 'required|numeric'] ,
         ['field' => 'gastos_importe[]'        , 'label' => 'gastos_importe'        , 'rules' => '']                 ,
         ['field' => 'gastos_comprobacion[]'   , 'label' => 'gastos_comprobacion'   , 'rules' => '']                 ,
         ['field' => 'gastos_del[]'            , 'label' => 'gastos_del'            , 'rules' => '']                 ,
@@ -323,6 +323,141 @@ class estado_resultado_trans extends MY_Controller {
     }
     else
       redirect(base_url('panel/estado_resultado_trans/?msg=1'));
+  }
+
+
+  public function cods()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Conceptos gastos'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('estado_resultado_trans_model');
+
+    $params['conceptos'] = $this->estado_resultado_trans_model->codsGet();
+    // echo "<pre>";
+    //   var_dump($params['categorias']);
+    // echo "</pre>";exit;
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/estado_resultado_trans/codsAdmin', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function codsAgregar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/labores.js'),
+    ));
+
+    $this->load->model('estado_resultado_trans_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar Concepto Gasto'
+    );
+
+    $this->configAddConceptoGasto();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->estado_resultado_trans_model->codsAgregar($_POST);
+
+      if ($res_mdl)
+      {
+        redirect(base_url('panel/estado_resultado_trans/codsAgregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
+      }
+    }
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/estado_resultado_trans/codsAgregar', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function codsModificar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/caja_chica/categorias.js'),
+    ));
+
+    $this->load->model('estado_resultado_trans_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Modificar Concepto Gasto'
+    );
+
+    $this->configAddConceptoGasto();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->estado_resultado_trans_model->codsModificar($_GET['id'], $_POST);
+
+      if ($res_mdl)
+      {
+        redirect(base_url('panel/estado_resultado_trans/codsModificar/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
+      }
+    }
+
+    $params['categoria'] = $this->estado_resultado_trans_model->codsInfo($_GET['id'], true);
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/estado_resultado_trans/codsModificar', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function codsEliminar()
+  {
+    $this->load->model('estado_resultado_trans_model');
+    $this->estado_resultado_trans_model->codsElimimnar($_GET['id']);
+
+    redirect(base_url('panel/estado_resultado_trans/cods/?&msg=6'));
+  }
+
+  public function configAddConceptoGasto()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'nombre',
+            'label' => 'Nombre',
+            'rules' => 'required|max_length[150]'),
+    );
+
+    $this->form_validation->set_rules($rules);
   }
 
 
@@ -358,6 +493,10 @@ class estado_resultado_trans extends MY_Controller {
         break;
       case 5:
         $txt = 'La Nota de remisión se cancelo correctamente.';
+        $icono = 'success';
+        break;
+      case 6:
+        $txt = 'El conceto de gasto se elimino correctamente.';
         $icono = 'success';
         break;
       case 8:

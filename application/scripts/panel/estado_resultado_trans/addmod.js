@@ -335,7 +335,7 @@
               total: $this.attr('data-total'),
               proveedor: $this.attr('data-proveedor'),
               proveedorId: $this.attr('data-proveedorid'),
-              concepto: $this.attr('data-concepto'),
+              concepto: '', // $this.attr('data-concepto'),
               fecha: $this.attr('data-fecha')
             });
           }
@@ -401,9 +401,9 @@
       const readonly = id > 0 ? 'readonly' : '';
 
       tr =  '<tr>' +
-              '<td style=""><input type="date" name="repmant_fecha[]" value="'+fecha+'" class="repmant_fecha" placeholder="Fecha" '+readonly+'></td>' +
-              '<td style=""><input type="text" name="repmant_numero[]" value="'+folio+'" class="repmant-numero vpositive" placeholder="" '+readonly+' style=""></td>' +
-              '<td colspan="3">' +
+              '<td style=""><input type="date" name="repmant_fecha[]" value="'+fecha+'" class="span12 repmant_fecha" placeholder="Fecha" '+readonly+'></td>' +
+              '<td style=""><input type="text" name="repmant_numero[]" value="'+folio+'" class="span12 repmant-numero vpositive" placeholder="" '+readonly+' style=""></td>' +
+              '<td>' +
                 '<input type="text" name="repmant_proveedor[]" value="'+proveedor+'" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required '+readonly+'>' +
                 '<input type="hidden" name="repmant_id[]" value="'+id+'" class="repmant-id span12">' +
                 '<input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">' +
@@ -473,8 +473,8 @@
   var agregarGastos = function (compra) {
     var $table = $('#table-gastos').find('tbody .row-total'),
       tr = '<tr>'+
-              '<td><input type="date" name="gastos_fecha[]" value="' + compra.fecha + '" required></td>'+
-              '<td><input type="text" name="gastos_folio[]" value="' + compra.folio + '"></td>'+
+              '<td><input type="date" name="gastos_fecha[]" value="' + compra.fecha + '" class="span12" required></td>'+
+              '<td><input type="text" name="gastos_folio[]" value="' + compra.folio + '" class="span12"></td>'+
               '<td>'+
                 '<input type="hidden" name="gastos_id_compra[]" value="' + compra.id + '" id="gastos_id_compra">'+
                 '<input type="hidden" name="gastos_id_gasto[]" value="" id="gastos_id_gasto">'+

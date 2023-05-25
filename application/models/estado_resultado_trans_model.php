@@ -298,9 +298,9 @@ class estado_resultado_trans_model extends privilegios_model{
       foreach ($_POST['gastos_proveedor'] as $key => $descripcion)
       {
         $id_cod = intval($_POST['gastos_codg_id'][$key]);
-        if ($id_cod == 0) {
-          $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
-        }
+        // if ($id_cod == 0) {
+        //   $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
+        // }
 
         $gastos[] = array(
           'id_estado'    => $id_estado,
@@ -437,9 +437,9 @@ class estado_resultado_trans_model extends privilegios_model{
       foreach ($_POST['gastos_proveedor'] as $key => $descripcion)
       {
         $id_cod = intval($_POST['gastos_codg_id'][$key]);
-        if ($id_cod == 0) {
-          $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
-        }
+        // if ($id_cod == 0) {
+        //   $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
+        // }
 
         if ($_POST['gastos_del'][$key] == 'true' && $_POST['gastos_id_gasto'][$key] > 0) {
           $this->db->delete('otros.estado_resultado_trans_gastos', "id = {$_POST['gastos_id_gasto'][$key]}");
@@ -853,14 +853,14 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(5, 15, 15, 65, 69, 18));
-      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'PROVEEDOR', 'DESCRIPCION', 'IMPORTE'), true, true);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
+      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'PROVEEDOR', 'DESCRIPCION', 'SUBTOTAL', 'IVA', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R'));
-      $pdf->SetWidths(array(5, 15, 15, 65, 69, 18));
+      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
       foreach ($caja['gastos'] as $key => $gasto)
       {
         $pdf->SetX(6);
@@ -871,12 +871,14 @@ class estado_resultado_trans_model extends privilegios_model{
           $gasto->folio,
           $gasto->proveedor,
           $gasto->codg,
-          MyString::formatoNumero($gasto->subtotal, 2, '', false)
+          MyString::formatoNumero($gasto->subtotal, 2, '', false),
+          MyString::formatoNumero($gasto->importe_iva, 2, '', false),
+          MyString::formatoNumero($gasto->total, 2, '', false)
         ), false, 'B');
 
         $ttotalGastos += floatval($gasto->subtotal);
         if ($gasto->comprobacion == 't') {
-          $ttotalGastosEf += floatval($gasto->subtotal);
+          $ttotalGastosEf += floatval($gasto->total);
         }
       }
     }
@@ -991,6 +993,7 @@ class estado_resultado_trans_model extends privilegios_model{
       'fecha' => [''],
       'chofer' => [''],
       'ingresos' => ['rows' => []],
+      'sueldos' => ['rows' => []],
       'gastos' => ['rows' => []],
 
       'km_recorridos' => ['KM RECORRIDOS'],
@@ -1048,8 +1051,36 @@ class estado_resultado_trans_model extends privilegios_model{
         }
       }
 
+      // sueldos
+      $sueldos = []; // agrupamos por concepto
+      foreach ($infoFlete['sueldos'] as $key => $rem) {
+        $kkk = MyString::toAscii($rem->descripcion);
+        if (isset($sueldos[$kkk])) {
+          $sueldos[$kkk]->importe += $rem->importe;
+        } else {
+          $sueldos[$kkk] = $rem;
+        }
+      }
+      foreach ($sueldos as $key => $rem) { // agrega los nuevos conceptos de sueldos
+        $kkk = MyString::toAscii($rem->descripcion);
+        if (isset($response['sueldos']['rows'][$kkk])) {
+          $response['sueldos']['rows'][$kkk][] = $rem->importe;
+        } else {
+          $response['sueldos']['rows'][$kkk][] = $rem->descripcion;
+          for ($i=0; $i < $keyf; $i++) {
+            $response['sueldos']['rows'][$kkk][] = 0;
+          }
+          $response['sueldos']['rows'][$kkk][] = $rem->importe;
+        }
+      }
+      foreach ($response['sueldos']['rows'] as $key => $row) { // ajusta todos los conceptos al # de rows
+        if ($keyf+2 > count($row)) {
+          $response['sueldos']['rows'][$key][] = 0;
+        }
+      }
+
       // gastos
-      $quit_conceptos = ['COSTO MENSUAL GENERAL EST', 'COSTO ESTIMADO', 'COSTO MENSUAL GENERAL'];
+      $quit_conceptos = ['COSTO MENSUAL GENERAL EST', 'COSTO ESTIMADO', 'COSTO MENSUAL GENERAL', 'COSTO MENSUAL ESTIMADO'];
       $gastos = []; // agrupamos por concepto repmant
       foreach ($infoFlete['repmant'] as $key => $rem) {
         if (!in_array(mb_strtoupper(trim($rem->concepto), 'UTF-8'), $quit_conceptos)) {
@@ -1101,7 +1132,34 @@ class estado_resultado_trans_model extends privilegios_model{
           $response['gastos']['rows'][$key][] = 0;
         }
       }
+    }
 
+    // Agregamos la columna del total al final
+    foreach (['destino', 'fecha', 'chofer', 'km_recorridos',
+      'lts_diesel', 'rendimiento_lts', 'hrs_trabajadas',
+      'hrs_lts_termo', 'hrs_rendimiento'] as $key => $value) {
+      $response[$value][] = $key == 0? 'TOTALES': '';
+    }
+    foreach ($response['ingresos']['rows'] as $key => $value) {
+      $suma = 0;
+      foreach ($value as $key2 => $val) {
+        $suma += floatval($val);
+      }
+      $response['ingresos']['rows'][$key][] = $suma;
+    }
+    foreach ($response['sueldos']['rows'] as $key => $value) {
+      $suma = 0;
+      foreach ($value as $key2 => $val) {
+        $suma += floatval($val);
+      }
+      $response['sueldos']['rows'][$key][] = $suma;
+    }
+    foreach ($response['gastos']['rows'] as $key => $value) {
+      $suma = 0;
+      foreach ($value as $key2 => $val) {
+        $suma += floatval($val);
+      }
+      $response['gastos']['rows'][$key][] = $suma;
     }
 
     // echo "<pre>";
@@ -1190,6 +1248,33 @@ class estado_resultado_trans_model extends privilegios_model{
     }
     $html .= '<tr style="font-weight:bold">';
     foreach ($res['ingresos']['totales'] as $key => $value) {
+      $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$value.'</td>';
+    }
+    $html .= '</tr>';
+
+    // sueldos
+    $res['sueldos']['totales'] = [];
+    $html .= '<tr style="font-weight:bold">
+      <td colspan="'.$colspan.'" style="width:300px;border:1px solid #000;background-color: #cccccc;text-align:center">SUELDOS</td>
+    </tr>';
+    foreach ($res['sueldos']['rows'] as $key => $row) {
+      $totali = 0;
+      $html .= '<tr style="">';
+      foreach ($row as $keyr => $value) {
+        $html .= '<td style="width:300px;border:1px solid #000;">'.$value.'</td>';
+
+        if (isset($res['sueldos']['totales'][$keyr])) {
+          if (is_numeric($value)) {
+            $res['sueldos']['totales'][$keyr] += floatval($value);
+          }
+        } else {
+          $res['sueldos']['totales'][$keyr] = is_numeric($value)? floatval($value): 'Total Sueldos';
+        }
+      }
+      $html .= '</tr>';
+    }
+    $html .= '<tr style="font-weight:bold">';
+    foreach ($res['sueldos']['totales'] as $key => $value) {
       $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$value.'</td>';
     }
     $html .= '</tr>';
@@ -1283,6 +1368,96 @@ class estado_resultado_trans_model extends privilegios_model{
     </table>';
 
     echo $html;
+  }
+
+
+  public function codsGet($perpage = '40')
+  {
+    $sql = '';
+    //paginacion
+    $params = array(
+        'result_items_per_page' => $perpage,
+        'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
+    );
+
+    if($params['result_page'] % $params['result_items_per_page'] == 0)
+      $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+
+    //Filtros para buscar
+    if ($this->input->get('fnombre') != '')
+    {
+      $sql .= " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%'";
+    }
+
+    if ($this->input->get('fstatus') != '')
+    {
+      $sql .= " AND status = '".$this->input->get('fstatus')."'";
+    }
+
+    $query = BDUtil::pagination(
+        "SELECT id, nombre, status
+        FROM otros.estado_resultado_trans_cods
+        WHERE 1 = 1 {$sql}
+        ORDER BY (nombre) ASC
+        ", $params, true);
+
+    $res = $this->db->query($query['query']);
+
+    $response = array(
+        'conceptos'     => array(),
+        'total_rows'     => $query['total_rows'],
+        'items_per_page' => $params['result_items_per_page'],
+        'result_page'    => $params['result_page']
+    );
+    if($res->num_rows() > 0)
+      $response['conceptos'] = $res->result();
+
+    return $response;
+  }
+
+  public function codsAgregar($data)
+  {
+    $insertData = array(
+      'nombre'       => $data['nombre'],
+    );
+
+    $this->db->insert('otros.estado_resultado_trans_cods', $insertData);
+
+    return true;
+  }
+
+  public function codsInfo($id)
+  {
+    $query = $this->db->query(
+      "SELECT id, nombre, status
+        FROM otros.estado_resultado_trans_cods
+        WHERE id = {$id}");
+
+    $data = array();
+    if ($query->num_rows() > 0)
+    {
+      $data['info'] = $query->result();
+    }
+
+    return $data;
+  }
+
+  public function codsModificar($id, $data)
+  {
+    $updateData = array(
+      'nombre'       => $data['nombre'],
+    );
+
+    $this->db->update('otros.estado_resultado_trans_cods', $updateData, array('id' => $id));
+
+    return true;
+  }
+
+  public function codsElimimnar($id)
+  {
+    $this->db->update('otros.estado_resultado_trans_cods', array('status' => 'f'), array('id' => $id));
+
+    return true;
   }
 
 }

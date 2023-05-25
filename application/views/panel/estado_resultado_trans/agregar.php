@@ -12,6 +12,9 @@
     margin-right: 5px;
     margin-top: 5px;
   }
+  input[type=text], input[type=number] {
+    width: auto;
+  }
 </style>
 
   <div>
@@ -404,7 +407,7 @@
               <table class="table table-striped table-bordered table-hover table-condensed" id="table-repmant">
                 <thead>
                   <tr>
-                    <th colspan="11">REP Y MTTO DE EQUIPO TRASPORTE
+                    <th colspan="9">REP Y MTTO DE EQUIPO TRASPORTE
                       <button type="button" class="btn btn-success" id="btn-add-repmant" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
                       <a href="#" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-repmant" style="padding: 2px 7px 2px; float: right;">Gastos</a>
                     </th>
@@ -412,7 +415,7 @@
                   <tr>
                     <th>FECHA</th>
                     <th>FOLIO</th>
-                    <th colspan="3">PROVEEDOR</th>
+                    <th>PROVEEDOR</th>
                     <th>DESCRIPCION</th>
                     <th>SUBTOTAL</th>
                     <th>IVA</th>
@@ -429,10 +432,10 @@
                         $readonly = $_POST['repmant_id'][$key] > 0? 'readonly': '';
                       ?>
                         <tr>
-                          <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $_POST['repmant_fecha'][$key] ?>" class="repmant_fecha" placeholder="Fecha" <?php echo $readonly ?>></td>
-                          <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $_POST['repmant_numero'][$key] ?>" class="repmant-numero vpositive" placeholder="" <?php echo $readonly ?> style=""></td>
-                          <td colspan="3">
-                            <input type="text" name="repmant_proveedor[]" value="<?php echo $_POST['repmant_proveedor'][$key] ?>" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
+                          <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $_POST['repmant_fecha'][$key] ?>" class="repmant_fecha span12" placeholder="Fecha" <?php echo $readonly ?>></td>
+                          <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $_POST['repmant_numero'][$key] ?>" class="repmant-numero span12 vpositive" placeholder="" <?php echo $readonly ?> style=""></td>
+                          <td>
+                            <input type="text" name="repmant_proveedor[]" value="<?php echo $_POST['repmant_proveedor'][$key] ?>" class="repmant-proveedor" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
                             <input type="hidden" name="repmant_id[]" value="<?php echo $_POST['repmant_id'][$key] ?>" class="repmant-id span12" required>
                             <input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">
                           </td>
@@ -455,10 +458,10 @@
                           $readonly = $repmant->id_compra > 0? 'readonly': '';
                         ?>
                           <tr>
-                            <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $repmant->fecha ?>" class="repmant_fecha" placeholder="Fecha" <?php echo $readonly ?>></td>
-                            <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $repmant->folio ?>" class="repmant-numero vpositive" placeholder="" <?php echo $readonly ?> style=""></td>
-                            <td colspan="3">
-                              <input type="text" name="repmant_proveedor[]" value="<?php echo $repmant->proveedor ?>" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
+                            <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $repmant->fecha ?>" class="repmant_fecha span12" placeholder="Fecha" <?php echo $readonly ?>></td>
+                            <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $repmant->folio ?>" class="repmant-numero span12 vpositive" placeholder="" <?php echo $readonly ?> style=""></td>
+                            <td>
+                              <input type="text" name="repmant_proveedor[]" value="<?php echo $repmant->proveedor ?>" class="repmant-proveedor" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
                               <input type="hidden" name="repmant_id[]" value="<?php echo $repmant->id_compra ?>" class="repmant-id span12" required>
                               <input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">
                             </td>
@@ -492,7 +495,7 @@
                   <?php }} ?>
 
                   <tr class='row-total'>
-                    <td colspan="6"></td>
+                    <td colspan="4"></td>
                     <td><input type="text" name="total_repmantesub" value="<?php echo MyString::float(MyString::formatoNumero($totalRepMantSub, 2, '')) ?>" class="span12" id="total-repmantsub" readonly style="text-align: right;"></td>
                     <td><input type="text" name="total_repmanteiva" value="<?php echo MyString::float(MyString::formatoNumero($totalRepMantIva, 2, '')) ?>" class="span12" id="total-repmantiva" readonly style="text-align: right;"></td>
                     <td><input type="text" name="total_repmantetot" value="<?php echo MyString::float(MyString::formatoNumero($totalRepMantTot, 2, '')) ?>" class="span12" id="total-repmant" readonly style="text-align: right;"></td>
@@ -576,8 +579,8 @@
                                 $totalGastosTot += floatval($gasto->total);
                               ?>
                               <tr>
-                                <td><input type="date" name="gastos_fecha[]" value="<?php echo $gasto->fecha ?>" required></td>
-                                <td><input type="text" name="gastos_folio[]" value="<?php echo $gasto->folio ?>"></td>
+                                <td><input type="date" name="gastos_fecha[]" value="<?php echo $gasto->fecha ?>" class="span12" required></td>
+                                <td><input type="text" name="gastos_folio[]" value="<?php echo $gasto->folio ?>" class="span12"></td>
                                 <td>
                                   <input type="hidden" name="gastos_id_compra[]" value="<?php echo $gasto->id_compra ?>" id="gastos_id_compra">
                                   <input type="hidden" name="gastos_id_gasto[]" value="<?php echo $gasto->id ?>" id="gastos_id_gasto">
