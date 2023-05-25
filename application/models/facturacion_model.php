@@ -6541,7 +6541,7 @@ class facturacion_model extends privilegios_model{
     $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['info']->cfdi_ext->receptor->rfc), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 196));
     $pdf->SetX(0);
-    $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $response['info']->cliente->nombre_fiscal), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['info']->cliente->nombre_fiscal), false, false, null, 2, 1);
     $pdf->SetX(0);
     $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', (isset($factura['info']->cfdi_ext->receptor->calle) ? $factura['info']->cfdi_ext->receptor->calle : '').
               ' No. '.(isset($factura['info']->cfdi_ext->receptor->noExterior) ? $factura['info']->cfdi_ext->receptor->noExterior : '').
