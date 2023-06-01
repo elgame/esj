@@ -201,6 +201,7 @@ class estado_resultado_trans_model extends privilegios_model{
    */
   public function addEstadoResult()
   {
+    $passes = true;
     $this->load->model('clientes_model');
     $this->load->model('clasificaciones_model');
 
@@ -298,35 +299,38 @@ class estado_resultado_trans_model extends privilegios_model{
       foreach ($_POST['gastos_proveedor'] as $key => $descripcion)
       {
         $id_cod = intval($_POST['gastos_codg_id'][$key]);
-        // if ($id_cod == 0) {
-        //   $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
-        // }
+        if ($id_cod == 0) {
+          $passes = false;
+          // $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
+        } else {
+          $gastos[] = array(
+            'id_estado'    => $id_estado,
+            'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
+            'id_cod'       => $id_cod,
+            'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+            'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
+            'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
+            'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
+            'cantidad'     => 0,
+            'precio'       => 0,
+            'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
+            'id_compra'    => $_POST['gastos_id_compra'][$key] !== '' ? $_POST['gastos_id_compra'][$key] : null,
+            'folio'        => $_POST['gastos_folio'][$key] !== '' ? $_POST['gastos_folio'][$key] : '',
+          );
+        }
 
-        $gastos[] = array(
-          'id_estado'    => $id_estado,
-          'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
-          'id_cod'       => $id_cod,
-          'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
-          'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
-          'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
-          'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
-          'cantidad'     => 0,
-          'precio'       => 0,
-          'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
-          'id_compra'    => $_POST['gastos_id_compra'][$key] !== '' ? $_POST['gastos_id_compra'][$key] : null,
-          'folio'        => $_POST['gastos_folio'][$key] !== '' ? $_POST['gastos_folio'][$key] : '',
-        );
       }
 
       if(count($gastos) > 0)
         $this->db->insert_batch('otros.estado_resultado_trans_gastos', $gastos);
     }
 
-    return array('passes' => true, 'id_estado' => $id_estado);
+    return array('passes' => $passes, 'id_estado' => $id_estado);
   }
 
   public function updateEstadoResult($id_estado)
   {
+    $passes = true;
     $lts_precios = [];
     if ($this->input->post('arend_lts')) {
       foreach ($_POST['arend_lts'] as $key => $value) {
@@ -437,40 +441,41 @@ class estado_resultado_trans_model extends privilegios_model{
       foreach ($_POST['gastos_proveedor'] as $key => $descripcion)
       {
         $id_cod = intval($_POST['gastos_codg_id'][$key]);
-        // if ($id_cod == 0) {
-        //   $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
-        // }
-
-        if ($_POST['gastos_del'][$key] == 'true' && $_POST['gastos_id_gasto'][$key] > 0) {
-          $this->db->delete('otros.estado_resultado_trans_gastos', "id = {$_POST['gastos_id_gasto'][$key]}");
-        } elseif ($_POST['gastos_id_gasto'][$key] > 0) {
-          $this->db->update('otros.estado_resultado_trans_gastos', array(
-            'id_estado'    => $id_estado,
-            'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
-            'id_cod'       => $id_cod,
-            'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
-            'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
-            'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
-            'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
-            'cantidad'     => 0,
-            'precio'       => 0,
-            'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
-          ), "id = {$_POST['gastos_id_gasto'][$key]}");
+        if ($id_cod == 0) {
+          $passes = false;
+          // $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
         } else {
-          $gastos[] = array(
-            'id_estado'    => $id_estado,
-            'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
-            'id_cod'       => $id_cod,
-            'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
-            'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
-            'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
-            'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
-            'cantidad'     => 0,
-            'precio'       => 0,
-            'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
-            'id_compra'    => $_POST['gastos_id_compra'][$key] !== '' ? $_POST['gastos_id_compra'][$key] : null,
-            'folio'        => $_POST['gastos_folio'][$key] !== '' ? $_POST['gastos_folio'][$key] : '',
-          );
+          if ($_POST['gastos_del'][$key] == 'true' && $_POST['gastos_id_gasto'][$key] > 0) {
+            $this->db->delete('otros.estado_resultado_trans_gastos', "id = {$_POST['gastos_id_gasto'][$key]}");
+          } elseif ($_POST['gastos_id_gasto'][$key] > 0) {
+            $this->db->update('otros.estado_resultado_trans_gastos', array(
+              'id_estado'    => $id_estado,
+              'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
+              'id_cod'       => $id_cod,
+              'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+              'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
+              'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
+              'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
+              'cantidad'     => 0,
+              'precio'       => 0,
+              'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
+            ), "id = {$_POST['gastos_id_gasto'][$key]}");
+          } else {
+            $gastos[] = array(
+              'id_estado'    => $id_estado,
+              'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
+              'id_cod'       => $id_cod,
+              'fecha'        => $_POST['gastos_fecha'][$key] !== '' ? $_POST['gastos_fecha'][$key] : null,
+              'subtotal'     => $_POST['gastos_subtotal'][$key] !== '' ? $_POST['gastos_subtotal'][$key] : 0,
+              'iva'          => $_POST['gastos_iva'][$key] !== '' ? $_POST['gastos_iva'][$key] : 0,
+              'importe'      => $_POST['gastos_importe'][$key] !== '' ? $_POST['gastos_importe'][$key] : 0,
+              'cantidad'     => 0,
+              'precio'       => 0,
+              'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
+              'id_compra'    => $_POST['gastos_id_compra'][$key] !== '' ? $_POST['gastos_id_compra'][$key] : null,
+              'folio'        => $_POST['gastos_folio'][$key] !== '' ? $_POST['gastos_folio'][$key] : '',
+            );
+          }
         }
       }
       if(count($gastos) > 0) {
@@ -478,7 +483,7 @@ class estado_resultado_trans_model extends privilegios_model{
       }
     }
 
-    return array('passes' => true, 'id_estado' => $id_estado);
+    return array('passes' => $passes, 'id_estado' => $id_estado);
   }
 
   /**

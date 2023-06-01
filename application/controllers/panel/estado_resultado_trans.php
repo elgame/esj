@@ -113,7 +113,7 @@ class estado_resultado_trans extends MY_Controller {
         if (isset($_GET['id_nr']))
           redirect(base_url('panel/estado_resultado_trans/agregar/?msg=3&id_nr='.$_GET['id_nr']));
         else
-          redirect(base_url('panel/estado_resultado_trans/?msg=3'));
+          redirect(base_url('panel/estado_resultado_trans/?msg=33'));
       }
       else
         $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
@@ -295,7 +295,7 @@ class estado_resultado_trans extends MY_Controller {
         ['field' => 'gastos_proveedor[]'      , 'label' => 'gastos_proveedor'      , 'rules' => '']                 ,
         ['field' => 'gastos_proveedor_id[]'   , 'label' => 'gastos_proveedor_id'   , 'rules' => 'numeric']          ,
         ['field' => 'gastos_codg[]'           , 'label' => 'gastos_codg'           , 'rules' => '']                 ,
-        ['field' => 'gastos_codg_id[]'        , 'label' => 'gastos_codg_id'        , 'rules' => 'required|numeric'] ,
+        ['field' => 'gastos_codg_id[]'        , 'label' => 'gastos_codg_id'        , 'rules' => 'numeric'] ,
         ['field' => 'gastos_importe[]'        , 'label' => 'gastos_importe'        , 'rules' => '']                 ,
         ['field' => 'gastos_comprobacion[]'   , 'label' => 'gastos_comprobacion'   , 'rules' => '']                 ,
         ['field' => 'gastos_del[]'            , 'label' => 'gastos_del'            , 'rules' => '']                 ,
@@ -486,6 +486,10 @@ class estado_resultado_trans extends MY_Controller {
       case 3:
         $txt = 'El Estado de Resultados se guardo correctamente.';
         $icono = 'success';
+        break;
+      case 33:
+        $txt = 'El Estado de Resultados se guardo pero algunos gastos no porque que no se selecciono del catalogo.';
+        $icono = 'error';
         break;
       case 4:
         $txt = 'La Nota de remisión se agrego correctamente.';
