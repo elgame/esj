@@ -29,6 +29,18 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="dgrupos">Grupo</label>
+                  <div class="controls">
+                    <select name="dgrupos" id="dgrupos" class="span12">
+                      <option value=""></option>
+                      <?php foreach ($grupos as $key => $value): ?>
+                      <option value="<?php echo $value->grupo_activo ?>"><?php echo $value->grupo_activo ?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="activos">Activos </label>
                   <div class="controls">
                     <div class="input-append span12">

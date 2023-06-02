@@ -309,7 +309,7 @@ class MYpdf extends FPDF {
             $nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
             $h= $h==NULL? (isset($this->fontz[$i]) ? $this->font_size+$this->fontz[$i] : $this->FontSize)*$nb+3: $h;
             if($header)
-                $h += 2;
+              $h += 2;
             $this->CheckPageBreak($h);
             for($i=0;$i<count($data);$i++){
                 $w=$this->widths[$i];

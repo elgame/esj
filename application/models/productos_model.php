@@ -254,6 +254,7 @@ class productos_model extends CI_Model {
         'tipo_apli'     => $this->input->post('ftipo_apli'),
         // Activos
         'tipo_activo'   => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
+        'grupo_activo'  => ($this->input->post('fgrupo_activo')? mb_strtoupper($this->input->post('fgrupo_activo'), 'UTF-8'): ''),
         'monto'         => ($this->input->post('fmonto')? $this->input->post('fmonto'): 0),
         'descripcion'   => ($this->input->post('fdescripcion')? $this->input->post('fdescripcion'): ''),
 			);
@@ -308,6 +309,7 @@ class productos_model extends CI_Model {
         'tipo_apli'     => $this->input->post('ftipo_apli'),
         // Activos
         'tipo_activo'   => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
+        'grupo_activo'  => ($this->input->post('fgrupo_activo')? mb_strtoupper($this->input->post('fgrupo_activo'), 'UTF-8'): ''),
         'monto'         => ($this->input->post('fmonto')? $this->input->post('fmonto'): 0),
         'descripcion'   => ($this->input->post('fdescripcion')? $this->input->post('fdescripcion'): ''),
 			);
@@ -418,7 +420,7 @@ class productos_model extends CI_Model {
 
 		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
 									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo, tipo_activo, monto, tipo_apli,
-                  descripcion, ieps_subtotal" )
+                  descripcion, ieps_subtotal, grupo_activo" )
 							->from("productos")
 							->where("id_producto", $id_producto)
 							->get();
@@ -441,6 +443,27 @@ class productos_model extends CI_Model {
 
 		return $data;
 	}
+
+  public function getGruposActivos($id_empresa=FALSE)
+  {
+    $sql_res = $this->db->select("Distinct(grupo_activo)" )
+              ->from("productos")
+              ->where("grupo_activo IS NOT NULL");
+    if ($id_empresa) {
+      $sql_res->where("id_empresa", $id_empresa);
+    }
+    $sql_res = $sql_res->get();
+
+    $data = array();
+
+    if ($sql_res->num_rows() > 0)
+    {
+      $data = $sql_res->result();
+    }
+    $sql_res->free_result();
+
+    return $data;
+  }
 
 	public function deleteProducto($id_producto, $status = 'e')
 	{
@@ -585,8 +608,8 @@ class productos_model extends CI_Model {
 
 		$result = $this->db->query("SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre,
       	stock_min, ubicacion, precio_promedio, status, cuenta_cpi, impuesto_iva, ieps, tipo_apli, descripcion,
-        ieps_subtotal
-      FROM productos WHERE id_empresa = 2 AND lower(nombre) = '".mb_strtolower($text, 'UTF-8')."'")->row();
+        ieps_subtotal, grupo_activo
+      FROM productos WHERE lower(nombre) = '".mb_strtolower($text, 'UTF-8')."'")->row();
 
 		return $result;
 	}
@@ -597,7 +620,7 @@ class productos_model extends CI_Model {
 
     $sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
                                   ubicacion, precio_promedio, status, cuenta_cpi, impuesto_iva, ieps,
-                                  last_precio, tipo, tipo_apli, descripcion" )
+                                  last_precio, tipo, tipo_apli, descripcion, grupo_activo" )
                         ->from("productos")
                         ->where("id_producto", $id_producto)
                         ->get();

@@ -493,8 +493,11 @@ class productos extends MY_Controller {
             'rules' => ''),
 
       array('field' => 'ftipo_activo',
-            'label' => 'Tipo',
+            'label' => 'Tipo activo',
             'rules' => $val_activo? 'required': ''),
+      array('field' => 'fgrupo_activo',
+            'label' => 'Tipo grupo',
+            'rules' => ''),
       array('field' => 'fmonto',
             'label' => 'Monto',
             'rules' => $val_activo? 'required': ''),

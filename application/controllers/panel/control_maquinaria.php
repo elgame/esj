@@ -80,6 +80,7 @@ class control_maquinaria extends MY_Controller {
     ));
 
     $this->load->model('compras_areas_model');
+    $this->load->model('productos_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
@@ -90,6 +91,7 @@ class control_maquinaria extends MY_Controller {
     // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
     $this->compras_areas_model->class_treeAreas = 'treeviewcustom';
     $params['vehiculos'] = $this->compras_areas_model->getFrmAreas(620);
+    $params['grupos'] = $this->productos_model->getGruposActivos();
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);

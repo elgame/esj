@@ -186,6 +186,15 @@
                     </select>
                   </div>
                 </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fgrupo_activo">Grupo activo</label>
+                  <div class="controls">
+                    <input type="text" name="fgrupo_activo" id="fgrupo_activo" class="span12"
+                      value="<?php echo set_value('fgrupo_activo', (isset($data['info']->grupo_activo)? $data['info']->grupo_activo: '')); ?>" placeholder="GRUPO A, GRUPO B">
+                  </div>
+                </div>
+
                 <div class="control-group">
                   <label class="control-label" for="fmonto">Monto</label>
                   <div class="controls">
