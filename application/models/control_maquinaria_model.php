@@ -157,6 +157,9 @@ class control_maquinaria_model extends CI_Model {
   }
   public function rptcombustible_pdf()
   {
+    $_GET['ffecha1'] = isset($_GET['ffecha1'])? $_GET['ffecha1']: date('Y-m-01');
+    $_GET['ffecha2'] = isset($_GET['ffecha2'])? $_GET['ffecha2']: date('Y-m-d');
+
     $combustible = $this->getDataCombutible();
 
     $empresaId = isset($_GET['did_empresa']{0})? $_GET['did_empresa']: 2;
@@ -189,6 +192,15 @@ class control_maquinaria_model extends CI_Model {
     if ((isset($_GET['dgrupos']) && $_GET['dgrupos'] != '')) {
       $pdf->titulo3 .= "\n{$_GET['dgrupos']}";
     }
+    $semanas = MyString::obtenerSemanasDeRango($_GET['ffecha1'], $_GET['ffecha2'], 0);
+    $semanas = array_keys($semanas);
+    if (!empty($semanas)) {
+      $pdf->titulo3 .= "\nSemanas: ".implode(', ', $semanas);
+
+      if (count($combustible) <= 0) {
+        $pdf->AddPage();
+      }
+    }
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -207,8 +219,8 @@ class control_maquinaria_model extends CI_Model {
     $widths3 = array(14, 18, 14, 18);
     $header3 = array('Rendi lt/Hr', 'Kilómetros', 'Rendi Km/lt', 'Acumulado');
 
-    $alignst = [['R', 'R', 'R', 'R', 'R'], $aligns3];
-    $widthst = [[164, 16, 14, 12, 17], $widths3];
+    $alignst = [['R', 'R', 'R', 'R', 'R', 'R', 'R'], $aligns3];
+    $widthst = [[164, 16, 14, 12, 17, 29, 26], $widths3];
 
     $costoacumulado = 0;
     $auxvehi = '';
@@ -234,6 +246,7 @@ class control_maquinaria_model extends CI_Model {
           $pdf->SetXY(6, $auxy);
           $pdf->SetAligns($alignst[0]);
           $pdf->SetWidths($widthst[0]);
+          $pdf->SetFillColor(180,180,180);
 
           $pdf->SetFont('Arial', 'B',  7.5);
           $pdf->SetTextColor(0, 0, 0);
@@ -241,7 +254,8 @@ class control_maquinaria_model extends CI_Model {
               MyString::formatoNumero($total_hrs, 2, '', false),
               MyString::formatoNumero($total_litros, 2, '', false),
               '',
-              MyString::formatoNumero($total_importe, 2, '', false)
+              MyString::formatoNumero($total_importe, 2, '', false),
+              '', ''
             ),
             true, false
           );
@@ -256,7 +270,7 @@ class control_maquinaria_model extends CI_Model {
             MyString::formatoNumero($total_kms, 2, '', false),
             MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
             ''
-          ], false, false, null, [[100,120,0], [0,0,0], [100,120,0], [0,0,0]]);
+          ], true, false, 4);
           // ------
 
           $pdf->SetY($pdf->GetY()+2);
@@ -306,10 +320,12 @@ class control_maquinaria_model extends CI_Model {
       // ------
       $auxy = $pdf->GetY();
       $pdf->SetFont('Arial','', 7.5);
+      $pdf->SetFillColor(220,220,220);
       $pdf->SetTextColor(0,0,0);
       $pdf->SetX(6);
       $pdf->SetAligns($aligns2);
       $pdf->SetWidths($widths2);
+      $pdf->SetBg([false, false, false, false, false, false, false, false, true]);
       $pdf->Row(array(
         substr($vehiculo->rfc, 0, 3),
         MyString::fechaATexto($vehiculo->fecha, 'inm'),
@@ -335,12 +351,13 @@ class control_maquinaria_model extends CI_Model {
       $pdf->SetAligns($aligns3);
       $pdf->SetWidths($widths3);
       $pdf->SetFounts(null, [], ['B','','B','']);
+      $pdf->SetBg([true, false, true, false]);
       $pdf->Row2(array(
         MyString::formatoNumero(($vehiculo->lts_combustible/($hrs>0? $hrs: 1)), 2, '', false),
         MyString::formatoNumero($kms, 2, '', false),
         MyString::formatoNumero(($kms/($vehiculo->lts_combustible>0? $vehiculo->lts_combustible: 1)), 2, '', false),
         MyString::formatoNumero($costoacumulado, 2, '', false),
-      ), false, false, null, [[100,120,0], [0,0,0], [100,120,0], [0,0,0]]);
+      ), false, false, null);
       // ------
 
 
@@ -410,6 +427,7 @@ class control_maquinaria_model extends CI_Model {
     // ------
     $auxy = $pdf->GetY();
     $pdf->SetX(6);
+    $pdf->SetFillColor(180,180,180);
     $pdf->SetAligns($alignst[0]);
     $pdf->SetWidths($widthst[0]);
 
@@ -419,7 +437,8 @@ class control_maquinaria_model extends CI_Model {
         MyString::formatoNumero($total_hrs, 2, '', false),
         MyString::formatoNumero($total_litros, 2, '', false),
         '',
-        MyString::formatoNumero($total_importe, 2, '', false)
+        MyString::formatoNumero($total_importe, 2, '', false),
+        '', ''
       ),
       true, false
     );
@@ -434,7 +453,7 @@ class control_maquinaria_model extends CI_Model {
       MyString::formatoNumero($total_kms, 2, '', false),
       MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
       ''
-    ], false, false, null, [[100,120,0], [0,0,0], [100,120,0], [0,0,0]]);
+    ], true, false, 4);
     // ------
 
     $pdf->SetY($pdf->GetY()+2);

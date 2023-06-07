@@ -878,6 +878,29 @@ class MyString {
     return false;
   }
 
+  public static function obtenerSemanasDeRango($fechaIni, $fechaFin, $diaEmpieza = 0)
+  {
+    $fechaIni = new DateTime($fechaIni);
+    $fechaFin = new DateTime($fechaFin);
+
+    $response = [];
+    while ($fechaIni <= $fechaFin) {
+      $fecha_split = explode('-', $fechaIni->format("Y-m-d"));
+      $semanas = self::obtenerSemanasDelAnioV2($fecha_split[0], 0, $diaEmpieza);
+      foreach ($semanas as $key => $value) {
+        if ($value['fecha_inicio'] <= $fechaIni->format("Y-m-d") && $value['fecha_final'] >= $fechaIni->format("Y-m-d")) {
+          if (!isset($response[$value['semana']])) {
+            $response[$value['semana']] = $value;
+          }
+        }
+      }
+
+      $fechaIni->modify('+1 day');
+    }
+
+    return $response;
+  }
+
   /**
    * Obtiene las fechas de X cantidad de dias apartir de la fecha
    * especificada.

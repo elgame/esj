@@ -232,6 +232,7 @@ class MYpdf extends FPDF {
     var $font;
     var $fontz;
     public $fontb;
+    public $bg;
     var $font_bold = '';
 
     function SetWidths($w){
@@ -250,6 +251,10 @@ class MYpdf extends FPDF {
         $this->font=$a;
         $this->fontz=$z;
         $this->fontb=$b;
+    }
+
+    function SetBg($bg=[]){
+      $this->bg = $bg;
     }
 
     function Row($data, $header=false, $bordes=true, $colortxt=null, $height=3, $positionY=2){
@@ -285,6 +290,10 @@ class MYpdf extends FPDF {
             $this->SetXY($x,$y+$positionY);
           else
             $this->SetXY($x,$y+$positionY);
+
+          if (count($this->bg) > 0 && isset($this->bg[$i]) && $this->bg[$i]) {
+            $this->Rect($x,$y,$w,$h,'F');
+          }
 
           if (isset($colortxt[$i])) {
               $this->SetTextColor($colortxt[$i][0], $colortxt[$i][1], $colortxt[$i][2]);
@@ -325,6 +334,9 @@ class MYpdf extends FPDF {
                 elseif($bordes===true)
                   $this->Rect($x,$y,$w,$h);
                 else {
+                  if ($header===true) {
+                    $this->Rect($x,$y,$w,$h,'F');
+                  }
                   if ($bordes === 'B') {
                     $this->Line($x,$y+$h,$x+$w,$y+$h);
                   } elseif ($bordes === 'T') {
@@ -336,6 +348,10 @@ class MYpdf extends FPDF {
                   $this->SetXY($x,$y+$positionY);
                 else
                   $this->SetXY($x,$y+$positionY);
+
+                if (count($this->bg) > 0 && isset($this->bg[$i]) && $this->bg[$i]) {
+                  $this->Rect($x,$y,$w,$h,'F');
+                }
 
                 if (isset($colortxt[$i])) {
                     $this->SetTextColor($colortxt[$i][0], $colortxt[$i][1], $colortxt[$i][2]);
