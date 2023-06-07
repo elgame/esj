@@ -470,7 +470,8 @@ class control_maquinaria_model extends CI_Model {
         MyString::formatoNumero($ttotal_hrs, 2, '', false),
         MyString::formatoNumero($ttotal_litros, 2, '', false),
         '',
-        MyString::formatoNumero($ttotal_importe, 2, '', false)
+        MyString::formatoNumero($ttotal_importe, 2, '', false),
+        '', ''
       ),
       true, false
     );
@@ -485,7 +486,7 @@ class control_maquinaria_model extends CI_Model {
       MyString::formatoNumero($ttotal_kms, 2, '', false),
       MyString::formatoNumero($ttotal_kms/($ttotal_litros>0? $ttotal_litros: 1), 2, '', false),
       ''
-    ], false, false);
+    ], true, false);
     // ------
 
     $pdf->Output('reporte_combustible.pdf', 'I');
