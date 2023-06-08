@@ -3909,20 +3909,22 @@ class compras_ordenes_model extends CI_Model {
     // $client_default = $this->empresas_model->getDefaultEmpresa();
     // $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
     // $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-    if($this->input->get('did_empresa') != ''){
+    if($this->input->get('did_empresa') != '') {
       $sql .= " AND co.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
-    if(is_array($this->input->get('ids_productos')))
+    if(is_array($this->input->get('ids_productos'))) {
       $ids_productos = " WHERE p.id_producto IN(".implode(',', $this->input->get('ids_productos')).")";
+    }
 
-    if(is_array($this->input->get('ids_activos'))){
+    if(is_array($this->input->get('ids_activos'))) {
       $ids_activos = " WHERE a.id_producto IN(".implode(',', $this->input->get('ids_activos')).")";
     }
 
     $response = array();
-    $productos = $this->db->query("SELECT co.id_orden, Date(co.fecha_creacion) AS fecha, co.folio, cp.ids_productos, cp.productos, coa.ids_activos, coa.activos,
-        coa.num, coa.num_real, (cp.importe/coa.num*coa.num_real) AS importe, cp.importe, cp.cantidad, co.descripcion
+    $productos = $this->db->query("SELECT co.id_orden, Date(co.fecha_creacion) AS fecha, co.folio, cp.ids_productos,
+        cp.productos, coa.ids_activos, coa.activos, coa.num, coa.num_real, (cp.importe/coa.num*coa.num_real) AS importe,
+        cp.importe, cp.cantidad, co.descripcion
       FROM compras_ordenes co
         INNER JOIN (
           SELECT cp.id_orden, Sum(cp.importe) AS importe, string_agg(Distinct(p.nombre), ', ') productos,
@@ -3931,16 +3933,17 @@ class compras_ordenes_model extends CI_Model {
             INNER JOIN compras_productos cp ON p.id_producto = cp.id_producto
           {$ids_productos}
           GROUP BY cp.id_orden
-          ORDER BY id_orden desc
+          ORDER BY id_orden DESC
         ) cp ON cp.id_orden = co.id_orden
         INNER JOIN (
-          SELECT coa.id_orden, string_agg(Distinct(a.nombre), ', ') activos, string_agg(Distinct(a.id_producto::text), ', ') ids_activos,
+          SELECT coa.id_orden, string_agg(Distinct(a.nombre), ', ') activos,
+            string_agg(Distinct(a.id_producto::text), ', ') ids_activos,
             coa.num, Count(coa.num) AS num_real
           FROM productos a
             INNER JOIN compras_ordenes_activos coa ON a.id_producto = coa.id_activo
           {$ids_activos}
           GROUP BY coa.id_orden, coa.num
-          ORDER BY id_orden desc
+          ORDER BY id_orden DESC
         ) coa ON coa.id_orden = co.id_orden
       WHERE co.status in('a', 'f') {$sql}
       ORDER BY id_orden DESC");

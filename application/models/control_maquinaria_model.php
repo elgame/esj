@@ -638,6 +638,262 @@ class control_maquinaria_model extends CI_Model {
     echo $html;
   }
 
+  public function getDataGastosActivos()
+  {
+    $sql = $sql3 = $sql4 = $sql2 = '';
+
+    //Filtro de fecha.
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql2 .= " AND Date(t.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    elseif($this->input->get('ffecha1') != '')
+      $sql2 .= " AND Date(t.fecha) = '".$this->input->get('ffecha1')."'";
+    elseif($this->input->get('ffecha2') != '')
+      $sql2 .= " AND Date(t.fecha) = '".$this->input->get('ffecha2')."'";
+
+    if (isset($_GET['did_empresa']{0})) {
+      $sql .= " AND e.id_empresa = {$_GET['did_empresa']}";
+    }
+    // vehiculos
+    if (isset($_GET['dactivos']) && count($_GET['dactivos']) > 0) {
+      $sql .= " AND a.id_producto In(".implode(',', $_GET['dactivos']).")";
+    }
+    if (isset($_GET['dgrupos']) && $_GET['dgrupos'] != '') {
+      $sql .= " AND a.grupo_activo = '{$_GET['dgrupos']}'";
+    }
+
+    $response = array();
+
+    // Totales de vehiculos
+    $response = $this->db->query(
+      "SELECT *
+      FROM (
+        SELECT co.id_orden AS id, co.folio::TEXT,
+          Date(co.fecha_creacion) AS fecha, cp.descripcion,
+          (Sum(cp.cantidad)/Sum(na.num)) AS cantidad,
+          (Sum(cp.importe)/Sum(na.num)) AS importe,
+          (Sum(cp.iva)/Sum(na.num)) AS iva,
+          a.id_producto AS id_activo, a.nombre AS activo,
+          e.rfc, 'orden' AS tipo
+        FROM productos a
+          INNER JOIN compras_ordenes_activos coa ON a.id_producto = coa.id_activo
+          INNER JOIN compras_productos cp ON cp.id_orden = coa.id_orden
+          INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
+          INNER JOIN (
+            SELECT id_orden, Sum(num) AS num
+            FROM compras_ordenes_activos
+            GROUP BY id_orden
+          ) na ON na.id_orden = co.id_orden
+          INNER JOIN empresas e ON e.id_empresa = co.id_empresa
+        WHERE 1 = 1 {$sql} {$sql3}
+        GROUP BY co.id_orden, cp.descripcion, a.id_producto, e.rfc
+        UNION ALL
+        SELECT c.id_compra AS id, (c.serie || c.folio::TEXT) AS folio, Date(c.fecha) AS fecha,
+          c.concepto AS descripcion, 1 AS cantidad, c.subtotal AS importe,
+          c.importe_iva AS iva, a.id_producto AS id_activo, a.nombre AS activo,
+          e.rfc, 'gasto' AS tipo
+        FROM compras c
+          INNER JOIN productos a ON a.id_producto = c.id_activo
+          INNER JOIN empresas e ON e.id_empresa = c.id_empresa
+        WHERE 1 = 1 {$sql} {$sql4}
+      ) t
+      WHERE 1 = 1 {$sql2}
+      ORDER BY t.id_activo ASC, t.fecha, t.id ASC, t.folio ASC")->result();
+
+    return $response;
+  }
+  public function rptGastosActivos_pdf()
+  {
+    $_GET['ffecha1'] = isset($_GET['ffecha1'])? $_GET['ffecha1']: date('Y-m-01');
+    $_GET['ffecha2'] = isset($_GET['ffecha2'])? $_GET['ffecha2']: date('Y-m-d');
+
+    $combustible = $this->getDataGastosActivos();
+
+    $empresaId = isset($_GET['did_empresa']{0})? $_GET['did_empresa']: 2;
+    $this->load->model('empresas_model');
+    $this->load->model('compras_ordenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId);
+
+    // echo "<pre>";
+    //   var_dump($combustible);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter'); // Letter
+    $pdf->show_head = true;
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "Reporte de Combustible";
+
+    $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+    if ((isset($_GET['dgrupos']) && $_GET['dgrupos'] != '')) {
+      $pdf->titulo3 .= "\n{$_GET['dgrupos']}";
+    }
+    $semanas = MyString::obtenerSemanasDeRango($_GET['ffecha1'], $_GET['ffecha2'], 0);
+    $semanas = array_keys($semanas);
+    if (!empty($semanas)) {
+      $pdf->titulo3 .= "\nSemanas: ".implode(', ', $semanas);
+
+      if (count($combustible) <= 0) {
+        $pdf->AddPage();
+      }
+    }
+
+    $pdf->AliasNbPages();
+    // $links = array('', '', '', '');
+    $pdf->SetY(30);
+    $aligns = array('L', 'R', 'R', 'R');
+    $widths = array(184, 62);
+    $header = array('Vehiculo');
+    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
+    $widths2 = array(12, 16, 16, 20, 75, 25, 20, 16, 14, 12, 17, 29, 26);
+    $header2 = array('Emp', 'Tipo', 'Fecha', 'Folio', 'Descripcion', 'Importe', 'Iva');
+
+    $aligns3 = array('R', 'R', 'R', 'R');
+    $widths3 = array(14, 18, 14, 18);
+    $header3 = array('Rendi lt/Hr', 'Kilómetros', 'Rendi Km/lt', 'Acumulado');
+
+    $alignst = [['R', 'R', 'R', 'R', 'R', 'R', 'R'], $aligns3];
+    $widthst = [[139, 25, 20, 12, 17, 29, 26], $widths3];
+
+    $costoacumulado = 0;
+    $auxvehi = '';
+    $total_kms = $total_importe = $total_iva = $total_importe = 0;
+    $ttotal_kms = $ttotal_importe = $ttotal_iva = $ttotal_importe = 0;
+
+    $entro = false;
+    foreach($combustible as $key => $vehiculo)
+    {
+      $cantidad = 0;
+      $importe = 0;
+      if($key == 0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+        $pdf->SetY(32);
+      } elseif ($pdf->GetY()+15 >= $pdf->limiteY) {
+        $pdf->AddPage();
+      }
+
+      if ($auxvehi != ($vehiculo->id_activo)) {
+        if ($key != 0) {
+          // ------
+          $auxy = $pdf->GetY()+2;
+          $pdf->SetXY(6, $auxy);
+          $pdf->SetAligns($alignst[0]);
+          $pdf->SetWidths($widthst[0]);
+          $pdf->SetFillColor(180,180,180);
+
+          $pdf->SetFont('Arial', 'B',  7.5);
+          $pdf->SetTextColor(0, 0, 0);
+          $pdf->Row(array('TOTALES',
+              MyString::formatoNumero($total_importe, 2, '', false),
+              MyString::formatoNumero($total_iva, 2, '', false),
+            ),
+            true, false
+          );
+
+          $pdf->SetY($pdf->GetY()+2);
+        }
+        $total_kms = $total_importe = $total_iva = $total_importe = 0;
+
+        $pdf->SetFont('Arial','B', 7.5);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row([$vehiculo->activo], false);
+
+        // ------
+        $auxy = $pdf->GetY();
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(180,180,180);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths2);
+        $pdf->Row($header2, true);
+        // ------
+
+        $auxvehi = $vehiculo->id_activo;
+        $costoacumulado = 0;
+      }
+
+      $total_importe += $vehiculo->importe;
+      $total_iva     += $vehiculo->iva;
+
+      $ttotal_iva     += $vehiculo->iva;
+      $ttotal_importe += $vehiculo->importe;
+
+      // ------
+      $auxy = $pdf->GetY();
+      $pdf->SetFont('Arial','', 7.5);
+      $pdf->SetFillColor(220,220,220);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns2);
+      $pdf->SetWidths($widths2);
+      $pdf->SetBg([false, false, false, false, false, false, false, false, true]);
+      $pdf->Row(array(
+        substr($vehiculo->rfc, 0, 3),
+        ucfirst($vehiculo->tipo),
+        MyString::fechaATexto($vehiculo->fecha, 'inm'),
+        $vehiculo->folio,
+        $vehiculo->descripcion,
+        MyString::formatoNumero($vehiculo->importe, 2, ''),
+        MyString::formatoNumero($vehiculo->iva, 2, ''),
+      ), false, false, null, 5);
+
+      // ------
+
+    }
+
+    // ------
+    $auxy = $pdf->GetY();
+    $pdf->SetX(6);
+    $pdf->SetFillColor(180,180,180);
+    $pdf->SetAligns($alignst[0]);
+    $pdf->SetWidths($widthst[0]);
+
+    $pdf->SetFont('Arial', 'B',  7.5);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Row(array('TOTALES',
+        MyString::formatoNumero($total_importe, 2, '', false),
+        MyString::formatoNumero($total_iva, 2, '', false),
+      ),
+      true, false
+    );
+
+    // ------
+
+    $pdf->SetY($pdf->GetY()+2);
+
+    // ------
+    $auxy = $pdf->GetY();
+    $pdf->SetX(6);
+    $pdf->SetAligns($alignst[0]);
+    $pdf->SetWidths($widthst[0]);
+
+    $pdf->SetFont('Arial','B', 7.5);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->Row(array('TOTALES GENERALES',
+        MyString::formatoNumero($ttotal_importe, 2, '', false),
+        MyString::formatoNumero($ttotal_iva, 2, '', false),
+      ),
+      true, false
+    );
+
+    // ------
+
+    $pdf->Output('reporte_gastos.pdf', 'I');
+  }
+
   public function getDataCombutibleAcumulado()
   {
     $sql = $sql2 = '';

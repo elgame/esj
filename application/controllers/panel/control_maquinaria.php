@@ -15,6 +15,10 @@ class control_maquinaria extends MY_Controller {
     'control_maquinaria/rptcombustibleAcumulado_pdf/',
     'control_maquinaria/rptcombustibleAcumulado_xls/',
     'control_maquinaria/ajax_get_implemento/',
+
+    'control_maquinaria/rptGastosActivos/',
+    'control_maquinaria/rptGastosActivos_pdf/',
+    'control_maquinaria/rptGastosActivos_xls/',
   );
 
   public function _remap($method){
@@ -104,6 +108,47 @@ class control_maquinaria extends MY_Controller {
     $this->control_maquinaria_model->rptcombustible_pdf();
   }
   public function rptcombustible_xls()
+  {
+    $this->load->model('control_maquinaria_model');
+    $this->control_maquinaria_model->rptcombustible_xls();
+  }
+
+  public function rptGastosActivos()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.treeview.css', 'screen')
+    ));
+    $this->carabiner->js(array(
+      array('libs/jquery.treeview.js'),
+      array('panel/facturacion/admin.js'),
+      array('panel/almacen/rpt_combustible.js'),
+    ));
+
+    $this->load->model('compras_areas_model');
+    $this->load->model('productos_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte Gastos');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $this->compras_areas_model->class_treeAreas = 'treeviewcustom';
+    $params['vehiculos'] = $this->compras_areas_model->getFrmAreas(620);
+    $params['grupos'] = $this->productos_model->getGruposActivos();
+
+    $this->load->view('panel/header',$params);
+    // $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/almacen/control_maquinaria/rptGastosActivos', $params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rptGastosActivos_pdf()
+  {
+    $this->load->model('control_maquinaria_model');
+    $this->control_maquinaria_model->rptGastosActivos_pdf();
+  }
+  public function rptGastosActivos_xls()
   {
     $this->load->model('control_maquinaria_model');
     $this->control_maquinaria_model->rptcombustible_xls();
