@@ -151,7 +151,7 @@ class control_maquinaria extends MY_Controller {
   public function rptGastosActivos_xls()
   {
     $this->load->model('control_maquinaria_model');
-    $this->control_maquinaria_model->rptcombustible_xls();
+    $this->control_maquinaria_model->rptGastosActivos_xls();
   }
 
   public function rptcombustibleAcumulado()
