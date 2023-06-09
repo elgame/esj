@@ -496,7 +496,6 @@ class control_maquinaria_model extends CI_Model {
 
     $pdf->Output('reporte_combustible.pdf', 'I');
   }
-
   public function rptcombustible_xls()
   {
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
@@ -544,7 +543,7 @@ class control_maquinaria_model extends CI_Model {
 
     foreach ($combustible as $key => $vehiculo)
     {
-      if ($auxvehi != ($vehiculo->id_activo.$vehiculo->labor)) {
+      if ($auxvehi != ($vehiculo->id_activo)) {
         if ($key != 0) {
           $html .= '<tr style="font-weight:bold">
             <td colspan="7" style="border:1px solid #000;background-color: #cccccc;">TOTALES</td>
@@ -563,7 +562,7 @@ class control_maquinaria_model extends CI_Model {
 
         $html .= '<tr style="font-weight:bold">
             <td colspan="9" style="border:1px solid #000;background-color: #ffffff;">'.$vehiculo->activo.'</td>
-            <td colspan="4" style="border:1px solid #000;background-color: #ffffff;">'.$vehiculo->labor.'</td>
+            <td colspan="4" style="border:1px solid #000;background-color: #ffffff;"></td>
           </tr>';
 
         $html .= '<tr style="font-weight:bold">';
@@ -572,7 +571,7 @@ class control_maquinaria_model extends CI_Model {
         }
         $html .= '</tr>';
 
-        $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
+        $auxvehi = $vehiculo->id_activo;
         $costoacumulado = 0;
       }
 
@@ -731,7 +730,7 @@ class control_maquinaria_model extends CI_Model {
       $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-    $pdf->titulo2 = "Reporte de Combustible";
+    $pdf->titulo2 = "Reporte Gastos de Activos";
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
@@ -897,6 +896,111 @@ class control_maquinaria_model extends CI_Model {
     // ------
 
     $pdf->Output('reporte_gastos.pdf', 'I');
+  }
+  public function rptGastosActivos_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_rptGastosActivos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $combustible = $this->getDataGastosActivos();
+
+    $empresaId = isset($_GET['did_empresa']{0})? $_GET['did_empresa']: 2;
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Reporte Gastos de Activos";
+    $titulo3 = "";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    $costoacumulado = 0;
+    $auxvehi = '';
+    $total_kms = $total_importe = $total_iva = $total_importe = 0;
+    $ttotal_kms = $ttotal_importe = $ttotal_iva = $ttotal_importe = 0;
+
+    $header2 = array('Emp', 'Tipo', 'Fecha', 'Folio', 'Descripcion', 'Importe', 'Iva');
+
+    foreach ($combustible as $key => $vehiculo)
+    {
+      if ($auxvehi != ($vehiculo->id_activo)) {
+        if ($key != 0) {
+          $html .= '<tr style="font-weight:bold">
+            <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTALES</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_importe, 2, '', false).'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_iva, 2, '', false).'</td>
+          </tr>';
+        }
+        $total_kms = $total_importe = $total_iva = $total_importe = 0;
+
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="9" style="border:1px solid #000;background-color: #ffffff;">'.$vehiculo->activo.'</td>
+          </tr>';
+
+        $html .= '<tr style="font-weight:bold">';
+        foreach ($header2 as $keyhh => $head) {
+          $html .= '<td style="border:1px solid #000;background-color: #cccccc;">'.$head.'</td>';
+        }
+        $html .= '</tr>';
+
+        $auxvehi = $vehiculo->id_activo;
+        $costoacumulado = 0;
+      }
+
+      $total_importe += $vehiculo->importe;
+      $total_iva     += $vehiculo->iva;
+
+      $ttotal_importe += $vehiculo->importe;
+      $ttotal_iva     += $vehiculo->iva;
+
+      $html .= '<tr style="">
+          <td style="width:150px;border:1px solid #000;">'.substr($vehiculo->rfc, 0, 3).'</td>
+          <td style="width:150px;border:1px solid #000;">'.ucfirst($vehiculo->tipo).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::fechaATexto($vehiculo->fecha, 'inm').'</td>
+          <td style="width:250px;border:1px solid #000;">'.$vehiculo->folio.'</td>
+          <td style="width:250px;border:1px solid #000;">'.$vehiculo->descripcion.'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->importe, 2, '').'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->iva, 2, '').'</td>
+        </tr>';
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTALES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_importe, 2, '', false).'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_iva, 2, '', false).'</td>
+        </tr>
+
+        <tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTALES GENERALES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_importe, 2, '', false).'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_iva, 2, '', false).'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 
   public function getDataCombutibleAcumulado()
