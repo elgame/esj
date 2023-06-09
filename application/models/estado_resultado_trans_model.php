@@ -1140,7 +1140,11 @@ class estado_resultado_trans_model extends privilegios_model{
     }
 
     // Agregamos la columna del total al final
-    foreach (['destino', 'fecha', 'chofer'] as $key => $value) {
+    foreach (['destino', 'fecha', 'chofer',
+      // 'km_recorridos',
+      // 'lts_diesel', 'rendimiento_lts', 'hrs_trabajadas',
+      // 'hrs_lts_termo', 'hrs_rendimiento'
+    ] as $key => $value) {
       $response[$value][] = $key == 0? 'TOTALES': '';
     }
 
