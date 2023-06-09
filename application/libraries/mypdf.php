@@ -21,6 +21,7 @@ class MYpdf extends FPDF {
   var $noShowDate = true;
   var $noShowPagesPos = null;
   var $heightHeader = 20;
+  var $divheader = 26;
 
   var $onAddPage = 0;
 
@@ -96,7 +97,7 @@ class MYpdf extends FPDF {
       if($this->noShowDate)
         $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
-      // $this->Line(6, 26, 210, 26);
+      // $this->Line(6, $this->divheader, 210, $this->divheader);
 
       $this->limiteY = 235; //limite de alto
     }
@@ -127,7 +128,7 @@ class MYpdf extends FPDF {
       if($this->noShowDate)
         $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
-      $this->Line(6, 26, 273, 26);
+      $this->Line(6, $this->divheader, 273, $this->divheader);
 
       $this->limiteY = 190; //limite de alto
     }
@@ -161,7 +162,7 @@ class MYpdf extends FPDF {
 
       $this->limiteY = 255; //limite de alto
 
-      $this->Line(6, 26, 210, 26);
+      $this->Line(6, $this->divheader, 210, $this->divheader);
     }
     /**
      * Legal horizontal
@@ -193,7 +194,7 @@ class MYpdf extends FPDF {
 
       $this->limiteY = 190; //limite de alto
 
-      $this->Line(6, 26, 349, 26);
+      $this->Line(6, $this->divheader, 349, $this->divheader);
     }
 
 

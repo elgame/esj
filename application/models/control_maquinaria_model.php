@@ -175,6 +175,7 @@ class control_maquinaria_model extends CI_Model {
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('L', 'mm', 'Legal'); // Letter
     $pdf->show_head = true;
+    $pdf->divheader = 30;
 
     if ($empresa['info']->logo !== '')
       $pdf->logo = $empresa['info']->logo;
@@ -192,7 +193,7 @@ class control_maquinaria_model extends CI_Model {
     if ((isset($_GET['dgrupos']) && $_GET['dgrupos'] != '')) {
       $pdf->titulo3 .= "\n{$_GET['dgrupos']}";
     }
-    $semanas = MyString::obtenerSemanasDeRango($_GET['ffecha1'], $_GET['ffecha2'], 0);
+    $semanas = MyString::obtenerSemanasDeRango($_GET['ffecha1'], $_GET['ffecha2'], 6);
     $semanas = array_keys($semanas);
     if (!empty($semanas)) {
       $pdf->titulo3 .= "\nSemanas: ".implode(', ', $semanas);
@@ -206,7 +207,7 @@ class control_maquinaria_model extends CI_Model {
     // $links = array('', '', '', '');
     $pdf->SetY(30);
     $aligns = array('L', 'R', 'R', 'R');
-    $widths = array(150, 62);
+    $widths = array(343, 62);
     $header = array('Vehiculo');
     $aligns2 = array('L', 'L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
     $widths2 = array(12, 13, 11, 16, 40, 40, 16, 16, 16, 14, 12, 17, 29, 26);
@@ -235,6 +236,7 @@ class control_maquinaria_model extends CI_Model {
       if($key == 0) //salta de pagina si exede el max
       {
         $pdf->AddPage();
+        $pdf->SetY(30);
       } elseif ($pdf->GetY()+15 >= $pdf->limiteY) {
         $pdf->AddPage();
       }
@@ -277,11 +279,14 @@ class control_maquinaria_model extends CI_Model {
         }
         $total_kms = $total_hrs = $total_litros = $total_importe = 0;
 
+        $pdf->SetY($pdf->GetY()+2);
         $pdf->SetFont('Arial','B', 7.5);
+        $pdf->SetFillColor(255,255,255);
+        $pdf->SetTextColor(0,0,0);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row([$vehiculo->activo, $vehiculo->labor], false);
+        $pdf->Row([$vehiculo->activo], false);
 
         // ------
         $auxy = $pdf->GetY();
