@@ -742,7 +742,7 @@ class control_maquinaria_model extends CI_Model {
     if ((isset($_GET['dgrupos']) && $_GET['dgrupos'] != '')) {
       $pdf->titulo3 .= "\n{$_GET['dgrupos']}";
     }
-    $semanas = MyString::obtenerSemanasDeRango($_GET['ffecha1'], $_GET['ffecha2'], 0);
+    $semanas = MyString::obtenerSemanasDeRango($_GET['ffecha1'], $_GET['ffecha2'], 6);
     $semanas = array_keys($semanas);
     if (!empty($semanas)) {
       $pdf->titulo3 .= "\nSemanas: ".implode(', ', $semanas);

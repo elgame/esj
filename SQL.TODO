@@ -2,7 +2,7 @@
  ✔ Reporte de combustible agrupar por tractor y agregar labor (quitar observacion), km y rendimiento por km @done (23-05-24 12:18)
    -- lap|san|pcc
    ALTER TABLE IF EXISTS public.productos ADD COLUMN grupo_activo character varying(50) COLLATE pg_catalog."default";
-   -- pcc
+   -- pcc|lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte gastos de activos',341,true,'control_maquinaria/rptGastosActivos/','print',true);
  ☐ Crear Reporte de gastos de tractores, sacar de los gastos y ordenes
  ✔ Estado de resultado transporte, poner como catalogo los conceptos y que solo se puedan selecionar @done (23-05-24 18:18)

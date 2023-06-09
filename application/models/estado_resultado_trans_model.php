@@ -1140,11 +1140,29 @@ class estado_resultado_trans_model extends privilegios_model{
     }
 
     // Agregamos la columna del total al final
-    foreach (['destino', 'fecha', 'chofer', 'km_recorridos',
-      'lts_diesel', 'rendimiento_lts', 'hrs_trabajadas',
-      'hrs_lts_termo', 'hrs_rendimiento'] as $key => $value) {
+    foreach (['destino', 'fecha', 'chofer'] as $key => $value) {
       $response[$value][] = $key == 0? 'TOTALES': '';
     }
+
+    $sumaa = ['km_recorridos' => 0, 'lts_diesel' => 0, 'rendimiento_lts' => 0,
+      'hrs_trabajadas' => 0, 'hrs_lts_termo' => 0, 'hrs_rendimiento' => 0];
+    foreach ($response['km_recorridos'] as $key => $value) {
+      $sumaa['km_recorridos'] += $response['km_recorridos'][$key];
+      $sumaa['lts_diesel'] += $response['lts_diesel'][$key];
+      // $sumaa['rendimiento_lts'] += $response['rendimiento_lts'][$key];
+      $sumaa['hrs_trabajadas'] += $response['hrs_trabajadas'][$key];
+      $sumaa['hrs_lts_termo'] += $response['hrs_lts_termo'][$key];
+      // $sumaa['hrs_rendimiento'] += $response['hrs_rendimiento'][$key];
+    }
+    $sumaa['rendimiento_lts'] = $sumaa['km_recorridos']/($sumaa['lts_diesel']>0? $sumaa['lts_diesel']: 1);
+    $sumaa['hrs_rendimiento'] = $sumaa['hrs_trabajadas']/($sumaa['hrs_lts_termo']>0? $sumaa['hrs_lts_termo']: 1);
+    $response['km_recorridos'][] = $sumaa['km_recorridos'];
+    $response['lts_diesel'][] = $sumaa['lts_diesel'];
+    $response['rendimiento_lts'][] = $sumaa['rendimiento_lts'];
+    $response['hrs_trabajadas'][] = $sumaa['hrs_trabajadas'];
+    $response['hrs_lts_termo'][] = $sumaa['hrs_lts_termo'];
+    $response['hrs_rendimiento'][] = $sumaa['hrs_rendimiento'];
+
     foreach ($response['ingresos']['rows'] as $key => $value) {
       $suma = 0;
       foreach ($value as $key2 => $val) {
