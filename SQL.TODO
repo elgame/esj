@@ -1,4 +1,6 @@
 
+ ☐ Reporte de prestamos y devoluciones
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de prest/dev',373,true,'bodega_guadalajara/rpt_prest_dev/','print',true);
  ✔ Imprimir gastos @done (23-03-20 10:21)
    -- pcc|san|lap|gdl
    ALTER TABLE IF EXISTS public.compras ADD COLUMN no_impresiones integer DEFAULT 0;

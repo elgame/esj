@@ -2972,6 +2972,215 @@ class bodega_guadalajara_model extends CI_Model {
     echo $html;
   }
 
+  /**
+   * Reporte gastos caja chica
+   *
+   * @return
+   */
+  public function getRptPresDevData()
+  {
+    $sql = '';
+      $idsproveedores = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    // $this->load->model('empresas_model');
+    // $client_default = $this->empresas_model->getDefaultEmpresa();
+    // $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    // $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != '') {
+      $sql .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
+    }
+
+    // if ($this->input->get('fnomenclatura') != '')
+    //   $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
+
+    // $response = array();
+    // $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria,
+    //       cn.nombre AS nombre_nomen, cn.nomenclatura, cg.concepto, cg.monto, cg.fecha, cg.folio,
+    //       cn.id AS id_nomenclatura, ca.codigo_fin, ca.id_area
+    //     FROM otros.bodega_gastos cg
+    //       INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+    //       INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+    //       LEFT JOIN bodega_catalogo ca ON ca.id_area = cg.id_area
+    //     WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+    //       {$sql}
+    //     ORDER BY id_categoria ASC, fecha ASC");
+
+    $prestamos = $this->db->query(
+      "SELECT DATE(bp.fecha) as fecha, bp.descripcion, bp.cantidad, bp.precio_unitario, bp.importe, u.nombre AS unidad, cl.id_clasificacion,
+        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*bp.cantidad) AS kilos,
+        bp.concepto, bp.tipo, 0 AS id_factura, 'PP' AS serie, '' AS folio, 'Pago prestamo' AS nombre_fiscal,
+        Coalesce(cc.id_categoria, 0) AS id_categoria, cc.abreviatura as empresa
+      FROM otros.bodega_prestamos bp
+        INNER JOIN unidades u ON u.id_unidad = bp.id_unidad
+        INNER JOIN clasificaciones cl ON cl.id_clasificacion = bp.id_clasificacion
+        LEFT JOIN cajachica_categorias cc ON cc.id_categoria = bp.id_categoria
+      WHERE Date(bp.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        {$sql}
+      ORDER BY (bp.fecha, bp.descripcion) ASC"
+    )->result();
+
+    return $prestamos;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptPresDevPdf(){
+    $res = $this->getRptPresDevData();
+
+    $this->load->model('bodega_catalogo_model');
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Reporte de prestamos y devoluciones';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+    $pdf->AddPage();
+
+    $totalPrestamos = $totalPrestamosRestas = $totalPrestamosBultos = $totalPrestamosKilos = 0;
+    foreach ($res as $key => $prestamo) {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B', 6.5);
+        $pdf->SetX(6);
+        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'L'));
+        $pdf->SetWidths(array(15, 37, 50, 25, 15, 15, 15, 20, 12));
+        $pdf->Row(array('FECHA', 'EMPRESA', 'CONCEPTO', 'CLASIF', 'KILOS', 'BULTOS', 'PRECIO', 'IMPORTE', 'TIPO'), false, 'B');
+        $pdf->SetFont('Arial','', 6);
+      }
+
+      if ($prestamo->tipo=='true' || $prestamo->tipo=='dev')
+        $totalPrestamosRestas += floatval($prestamo->importe);
+      $totalPrestamos += floatval($prestamo->importe);
+      $totalPrestamosBultos += floatval($prestamo->cantidad);
+      $totalPrestamosKilos += floatval($prestamo->kilos);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $prestamo->fecha,
+        $prestamo->empresa,
+        $prestamo->concepto,
+        $prestamo->codigo,
+        MyString::formatoNumero($prestamo->kilos, 2, '', false),
+        MyString::formatoNumero($prestamo->cantidad, 2, '', false),
+        MyString::formatoNumero($prestamo->precio_unitario, 2, '', false),
+        MyString::formatoNumero($prestamo->importe, 2, '', false),
+        ($prestamo->tipo=='true'? 'Prestamo': ($prestamo->tipo=='false'? 'Pago': 'Devolucion'))
+      ), false, 'B');
+    }
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'L'));
+    $pdf->SetWidths(array(30, 15, 15, 15, 20, 20));
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(103);
+    $pdf->Row(array('SUMAS:',
+      MyString::formatoNumero($totalPrestamosKilos, 2, '', false),
+      MyString::formatoNumero($totalPrestamosBultos, 2, '', false),
+      MyString::formatoNumero($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1), 2, '', false),
+      MyString::formatoNumero($totalPrestamos, 2, '', false),
+      MyString::formatoNumero($totalPrestamosRestas, 2, '', false),
+    ), false, false);
+
+    $pdf->Output('compras_pres_dev.pdf', 'I');
+  }
+  public function getRptPresDevXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=compras_pres_dev.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptPresDevData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de prestamos y devoluciones';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="9" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="9" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="9" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="9"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CLASIF</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">KILOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">BULTOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PRECIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TIPO</td>
+        </tr>';
+    $aux_categoria = '';
+    $totalPrestamos = $totalPrestamosRestas = $totalPrestamosBultos = $totalPrestamosKilos = 0;
+    foreach ($res as $key => $prestamo) {
+
+      if ($prestamo->tipo=='true' || $prestamo->tipo=='dev')
+        $totalPrestamosRestas += floatval($prestamo->importe);
+      $totalPrestamos += floatval($prestamo->importe);
+      $totalPrestamosBultos += floatval($prestamo->cantidad);
+      $totalPrestamosKilos += floatval($prestamo->kilos);
+
+      $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$prestamo->fecha.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->empresa.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->concepto.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->codigo.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->kilos.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->cantidad.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->precio_unitario.'</td>
+          <td style="border:1px solid #000;">'.$prestamo->importe.'</td>
+          <td style="border:1px solid #000;">'.($prestamo->tipo=='true'? 'Prestamo': ($prestamo->tipo=='false'? 'Pago': 'Devolucion')).'</td>
+        </tr>';
+    }
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td style="border:1px solid #000;background-color: #cccccc;"></td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SUMA</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.$totalPrestamosKilos.'</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.$totalPrestamosBultos.'</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.$totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1).'</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.$totalPrestamos.'</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.$totalPrestamosRestas.'</td>
+      </tr>';
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
   public function getRptGastosTotales(&$pdf, &$proveedor_total, &$total_nomenclatura, &$aux_categoria, &$producto)
   {
     if($pdf->GetY()+6 >= $pdf->limiteY)

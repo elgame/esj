@@ -987,7 +987,7 @@
                                       <?php echo $deudor->abonos ?>
                                     </td>
                                     <td style="width: 80px;" class="deudor_saldo" data-saldo="<?php echo $deudor->saldo ?>" data-mismo="<?php echo $deudor->mismo_dia ?>">
-                                      <?php if ((!isset($caja['status']) || $caja['status'] === 'f') && $readonly == ''): ?>
+                                      <?php if ((!isset($caja['status']) || $caja['status'] === 't') && $readonly == ''): ?>
                                       <a class="btn_abonos_deudores" href="<?php echo base_url('panel/bodega_guadalajara/agregar_abono_deudor/')."?id={$deudor->id_deudor}&fecha={$fecha}&no_caja={$_GET['fno_caja']}&monto={$deudor->saldo}" ?>" style="" rel="superbox-50x500" title="Abonar">
                                         <?php echo $deudor->saldo ?></a>
                                       <?php else: ?>
