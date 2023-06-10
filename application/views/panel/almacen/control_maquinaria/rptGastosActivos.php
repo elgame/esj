@@ -53,9 +53,9 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="ddesglosado">Desclosado</label>
+                  <label class="control-label" for="dquitCombus">Quitar Diésel/Gasolina</label>
                   <div class="controls">
-                    <input type="checkbox" name="ddesglosado" id="ddesglosado" value="1">
+                    <input type="checkbox" name="dquitCombus" id="dquitCombus" value="1">
                   </div>
                 </div>
 

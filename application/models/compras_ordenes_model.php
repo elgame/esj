@@ -3671,6 +3671,9 @@ class compras_ordenes_model extends CI_Model {
 
     // //Filtros de area
     // $sql .= " AND bm.tipo = '".($this->input->get('ftipo')==='i'? 't': 'f')."'";
+    if (!empty($_GET['did_empresa'])) {
+      $sql .= " AND e.id_empresa = {$_GET['did_empresa']}";
+    }
 
 
     // Obtenemos los rendimientos en los lotes de ese dia

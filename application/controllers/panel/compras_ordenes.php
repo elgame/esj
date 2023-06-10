@@ -672,10 +672,14 @@ class compras_ordenes extends MY_Controller {
       array('panel/banco/rpt_rie.js')
     ));
 
+    $this->load->model('empresas_model');
+
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
       'titulo' => 'REPORTE DE ORDEN DE COMPRA ACUMULADO POR EMPRESA'
     );
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

@@ -665,6 +665,7 @@ class control_maquinaria_model extends CI_Model {
       $sql .= " AND a.grupo_activo = '{$_GET['dgrupos']}'";
     }
 
+
     $response = array();
 
     // Totales de vehiculos
@@ -675,6 +676,7 @@ class control_maquinaria_model extends CI_Model {
           Date(co.fecha_creacion) AS fecha, cp.descripcion,
           (Sum(cp.cantidad)/Sum(na.num)) AS cantidad,
           (Sum(cp.importe)/Sum(na.num)) AS importe,
+          (Sum(cp.total)/Sum(na.num)) AS total,
           (Sum(cp.iva)/Sum(na.num)) AS iva,
           a.id_producto AS id_activo, a.nombre AS activo,
           e.rfc, 'orden' AS tipo
@@ -692,7 +694,7 @@ class control_maquinaria_model extends CI_Model {
         GROUP BY co.id_orden, cp.descripcion, a.id_producto, e.rfc
         UNION ALL
         SELECT c.id_compra AS id, (c.serie || c.folio::TEXT) AS folio, Date(c.fecha) AS fecha,
-          c.concepto AS descripcion, 1 AS cantidad, c.subtotal AS importe,
+          c.concepto AS descripcion, 1 AS cantidad, c.subtotal AS importe, c.total,
           c.importe_iva AS iva, a.id_producto AS id_activo, a.nombre AS activo,
           e.rfc, 'gasto' AS tipo
         FROM compras c
@@ -702,6 +704,16 @@ class control_maquinaria_model extends CI_Model {
       ) t
       WHERE 1 = 1 {$sql2}
       ORDER BY t.id_activo ASC, t.fecha, t.id ASC, t.folio ASC")->result();
+
+    if (isset($_GET['dquitCombus']) && $_GET['dquitCombus'] == '1') {
+      $quit_conceptos = [MyString::toAscii('gasolina'), MyString::toAscii('diesel')];
+      foreach ($response as $key => $gasto) {
+        $txt_gasto = MyString::toAscii($gasto->descripcion);
+        if (in_array($txt_gasto, $quit_conceptos)) {
+          unset($response[$key]);
+        }
+      }
+    }
 
     return $response;
   }
@@ -756,23 +768,23 @@ class control_maquinaria_model extends CI_Model {
     // $links = array('', '', '', '');
     $pdf->SetY(30);
     $aligns = array('L', 'R', 'R', 'R');
-    $widths = array(184, 62);
+    $widths = array(204, 62);
     $header = array('Vehiculo');
     $aligns2 = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
-    $widths2 = array(12, 16, 16, 20, 75, 25, 20, 16, 14, 12, 17, 29, 26);
-    $header2 = array('Emp', 'Tipo', 'Fecha', 'Folio', 'Descripcion', 'Importe', 'Iva');
+    $widths2 = array(12, 16, 16, 20, 70, 25, 20, 25, 14, 12, 17, 29, 26);
+    $header2 = array('Emp', 'Tipo', 'Fecha', 'Folio', 'Descripcion', 'Importe', 'Iva', 'Total');
 
     $aligns3 = array('R', 'R', 'R', 'R');
     $widths3 = array(14, 18, 14, 18);
     $header3 = array('Rendi lt/Hr', 'Kilómetros', 'Rendi Km/lt', 'Acumulado');
 
     $alignst = [['R', 'R', 'R', 'R', 'R', 'R', 'R'], $aligns3];
-    $widthst = [[139, 25, 20, 12, 17, 29, 26], $widths3];
+    $widthst = [[134, 25, 20, 25, 17, 29, 26], $widths3];
 
     $costoacumulado = 0;
     $auxvehi = '';
-    $total_kms = $total_importe = $total_iva = $total_importe = 0;
-    $ttotal_kms = $ttotal_importe = $ttotal_iva = $ttotal_importe = 0;
+    $total_kms = $total_importe = $total_iva = $total_total = 0;
+    $ttotal_kms = $ttotal_importe = $ttotal_iva = $ttotal_total = 0;
 
     $entro = false;
     foreach($combustible as $key => $vehiculo)
@@ -801,13 +813,14 @@ class control_maquinaria_model extends CI_Model {
           $pdf->Row(array('TOTALES',
               MyString::formatoNumero($total_importe, 2, '', false),
               MyString::formatoNumero($total_iva, 2, '', false),
+              MyString::formatoNumero($total_total, 2, '', false),
             ),
             true, false
           );
 
           $pdf->SetY($pdf->GetY()+2);
         }
-        $total_kms = $total_importe = $total_iva = $total_importe = 0;
+        $total_kms = $total_importe = $total_iva = $total_total = 0;
 
         $pdf->SetFont('Arial','B', 7.5);
         $pdf->SetX(6);
@@ -831,9 +844,11 @@ class control_maquinaria_model extends CI_Model {
 
       $total_importe += $vehiculo->importe;
       $total_iva     += $vehiculo->iva;
+      $total_total   += $vehiculo->total;
 
-      $ttotal_iva     += $vehiculo->iva;
       $ttotal_importe += $vehiculo->importe;
+      $ttotal_iva     += $vehiculo->iva;
+      $ttotal_total   += $vehiculo->total;
 
       // ------
       $auxy = $pdf->GetY();
@@ -850,8 +865,9 @@ class control_maquinaria_model extends CI_Model {
         MyString::fechaATexto($vehiculo->fecha, 'inm'),
         $vehiculo->folio,
         $vehiculo->descripcion,
-        MyString::formatoNumero($vehiculo->importe, 2, ''),
-        MyString::formatoNumero($vehiculo->iva, 2, ''),
+        MyString::formatoNumero($vehiculo->importe, 2, '', false),
+        MyString::formatoNumero($vehiculo->iva, 2, '', false),
+        MyString::formatoNumero($vehiculo->total, 2, '', false),
       ), false, false, null, 5);
 
       // ------
@@ -870,6 +886,7 @@ class control_maquinaria_model extends CI_Model {
     $pdf->Row(array('TOTALES',
         MyString::formatoNumero($total_importe, 2, '', false),
         MyString::formatoNumero($total_iva, 2, '', false),
+        MyString::formatoNumero($total_total, 2, '', false),
       ),
       true, false
     );
@@ -889,6 +906,7 @@ class control_maquinaria_model extends CI_Model {
     $pdf->Row(array('TOTALES GENERALES',
         MyString::formatoNumero($ttotal_importe, 2, '', false),
         MyString::formatoNumero($ttotal_iva, 2, '', false),
+        MyString::formatoNumero($ttotal_total, 2, '', false),
       ),
       true, false
     );
@@ -937,10 +955,10 @@ class control_maquinaria_model extends CI_Model {
 
     $costoacumulado = 0;
     $auxvehi = '';
-    $total_kms = $total_importe = $total_iva = $total_importe = 0;
-    $ttotal_kms = $ttotal_importe = $ttotal_iva = $ttotal_importe = 0;
+    $total_kms = $total_importe = $total_iva = $total_total = 0;
+    $ttotal_kms = $ttotal_importe = $ttotal_iva = $ttotal_total = 0;
 
-    $header2 = array('Emp', 'Tipo', 'Fecha', 'Folio', 'Descripcion', 'Importe', 'Iva');
+    $header2 = array('Emp', 'Tipo', 'Fecha', 'Folio', 'Descripcion', 'Importe', 'Iva', 'Total');
 
     foreach ($combustible as $key => $vehiculo)
     {
@@ -950,12 +968,13 @@ class control_maquinaria_model extends CI_Model {
             <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTALES</td>
             <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_importe, 2, '', false).'</td>
             <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_iva, 2, '', false).'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_total, 2, '', false).'</td>
           </tr>';
         }
-        $total_kms = $total_importe = $total_iva = $total_importe = 0;
+        $total_kms = $total_importe = $total_iva = $total_total = 0;
 
         $html .= '<tr style="font-weight:bold">
-            <td colspan="9" style="border:1px solid #000;background-color: #ffffff;">'.$vehiculo->activo.'</td>
+            <td colspan="8" style="border:1px solid #000;background-color: #ffffff;">'.$vehiculo->activo.'</td>
           </tr>';
 
         $html .= '<tr style="font-weight:bold">';
@@ -970,9 +989,11 @@ class control_maquinaria_model extends CI_Model {
 
       $total_importe += $vehiculo->importe;
       $total_iva     += $vehiculo->iva;
+      $total_total   += $vehiculo->total;
 
       $ttotal_importe += $vehiculo->importe;
       $ttotal_iva     += $vehiculo->iva;
+      $ttotal_total   += $vehiculo->total;
 
       $html .= '<tr style="">
           <td style="width:150px;border:1px solid #000;">'.substr($vehiculo->rfc, 0, 3).'</td>
@@ -982,6 +1003,7 @@ class control_maquinaria_model extends CI_Model {
           <td style="width:250px;border:1px solid #000;">'.$vehiculo->descripcion.'</td>
           <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->importe, 2, '').'</td>
           <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->iva, 2, '').'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->total, 2, '').'</td>
         </tr>';
     }
 
@@ -990,12 +1012,14 @@ class control_maquinaria_model extends CI_Model {
           <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTALES</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_importe, 2, '', false).'</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_iva, 2, '', false).'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_total, 2, '', false).'</td>
         </tr>
 
         <tr style="font-weight:bold">
           <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTALES GENERALES</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_importe, 2, '', false).'</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_iva, 2, '', false).'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_total, 2, '', false).'</td>
         </tr>
       </tbody>
     </table>';
