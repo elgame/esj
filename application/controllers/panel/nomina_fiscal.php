@@ -73,6 +73,9 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/nominas_empleados_xls/',
     'nomina_fiscal/rpt_asistencias_pdf/',
     'nomina_fiscal/rpt_asistencias_xls/',
+    'nomina_fiscal/rpt_lugar_nacimiento_pdf/',
+    'nomina_fiscal/rpt_lugar_nacimiento_xls/',
+
   );
 
   public function _remap($method)
@@ -1437,6 +1440,38 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_otros_model');
     $this->nomina_fiscal_otros_model->getRptAsistenciasDetallXls();
     // $this->nomina_fiscal_otros_model->getRptAsistenciasXls();
+  }
+
+  public function rpt_lugar_nacimiento()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_inventarios.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de Asistencias');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_lugar_nacimiento',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_lugar_nacimiento_pdf(){
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->getRptLugarNacimientoPdf();
+  }
+  public function rpt_lugar_nacimiento_xls(){
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->getRptLugarNacimientoXls();
   }
 
   public function recibo_nomina_ptu_pdf()

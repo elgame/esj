@@ -104,7 +104,8 @@ class Usuarios_model extends privilegios_model {
 						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
             'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
 						'fecha_imss'       => ($this->input->post('ffecha_imss')!=''? $this->input->post('ffecha_imss'): NULL),
-						'nacionalidad'     => $this->input->post('fnacionalidad'),
+            'nacionalidad'     => $this->input->post('fnacionalidad'),
+						'lugar_nacimiento' => $this->input->post('flugar_nacimiento'),
 						'estado_civil'     => $this->input->post('festado_civil'),
 						'sexo'             => $this->input->post('fsexo'),
 						'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
@@ -196,6 +197,7 @@ class Usuarios_model extends privilegios_model {
 						'fecha_imss'       => ($this->input->post('ffecha_imss')!=''? $this->input->post('ffecha_imss'): NULL),
 						'fecha_salida'     => ($this->input->post('ffecha_salida')!=''? $this->input->post('ffecha_salida'): NULL),
 						'nacionalidad'     => $this->input->post('fnacionalidad'),
+            'lugar_nacimiento' => $this->input->post('flugar_nacimiento'),
 						'estado_civil'     => $this->input->post('festado_civil'),
 						'sexo'             => $this->input->post('fsexo'),
 						'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
@@ -308,7 +310,7 @@ class Usuarios_model extends privilegios_model {
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
 						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto,
             u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono, u.fecha_contrato,
-            u.no_proveedor_banorte, u.p_alimenticia, u.fonacot, u.registro_patronal" )
+            u.no_proveedor_banorte, u.p_alimenticia, u.fonacot, u.registro_patronal, u.lugar_nacimiento" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")

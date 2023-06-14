@@ -1,10 +1,14 @@
 
+ ☐ reporte de lugar nacimiento empleados
+   -- lap
+   ALTER TABLE IF EXISTS public.usuarios ADD COLUMN lugar_nacimiento character varying(30) COLLATE pg_catalog."default";
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Lugar Nacimiento',364,true,'nomina_fiscal/rpt_lugar_nacimiento/','list-ol',true);
  ✔ Reporte de combustible agrupar por tractor y agregar labor (quitar observacion), km y rendimiento por km @done (23-05-24 12:18)
    -- lap|san|pcc
    ALTER TABLE IF EXISTS public.productos ADD COLUMN grupo_activo character varying(50) COLLATE pg_catalog."default";
    -- pcc|lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte gastos de activos',341,true,'control_maquinaria/rptGastosActivos/','print',true);
- ☐ Crear Reporte de gastos de tractores, sacar de los gastos y ordenes
+ ✔ Crear Reporte de gastos de tractores, sacar de los gastos y ordenes @done (23-06-14 13:30)
  ✔ Estado de resultado transporte, poner como catalogo los conceptos y que solo se puedan selecionar @done (23-05-24 18:18)
    -- lap|san|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Conceptos Gastos',572,true,'estado_resultado_trans/cods/','th-list',false);
@@ -13,29 +17,29 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',589,false,'estado_resultado_trans/codsEliminar/','remove',false);
  ☐ Descuentos bodega gdl
    CREATE TABLE otros.bodega_deudores
-      (
-        id_deudor bigserial NOT NULL,
-        fecha date NOT NULL,
-        nombre character varying(150) NOT NULL,
-        concepto character varying(250) NOT NULL,
-        monto double precision NOT NULL DEFAULT (0)::double precision,
-        no_caja integer NOT NULL DEFAULT 1,
-        no_impresiones integer NOT NULL DEFAULT 0,
-        id_usuario bigint,
-        fecha_creacion timestamp without time zone DEFAULT now(),
-        tipo character varying(30) NOT NULL DEFAULT 'prestamo'::character varying, -- prestamo: prestamos a pagar, otros: compras a empresas efectivo
-        folio bigint,
-        CONSTRAINT bodega_deudores_pkey PRIMARY KEY (id_deudor),
-        CONSTRAINT bodega_deudores_id_usuario_fkey FOREIGN KEY (id_usuario)
-            REFERENCES usuarios (id) MATCH SIMPLE
-            ON UPDATE CASCADE ON DELETE CASCADE
-      )
-      WITH (
-        OIDS=FALSE
-      );
-      ALTER TABLE otros.bodega_deudores
-        OWNER TO programa;
-      COMMENT ON COLUMN otros.bodega_deudores.tipo IS 'prestamo: prestamos a pagar, otros: compras a empresas efectivo';
+    (
+      id_deudor bigserial NOT NULL,
+      fecha date NOT NULL,
+      nombre character varying(150) NOT NULL,
+      concepto character varying(250) NOT NULL,
+      monto double precision NOT NULL DEFAULT (0)::double precision,
+      no_caja integer NOT NULL DEFAULT 1,
+      no_impresiones integer NOT NULL DEFAULT 0,
+      id_usuario bigint,
+      fecha_creacion timestamp without time zone DEFAULT now(),
+      tipo character varying(30) NOT NULL DEFAULT 'prestamo'::character varying, -- prestamo: prestamos a pagar, otros: compras a empresas efectivo
+      folio bigint,
+      CONSTRAINT bodega_deudores_pkey PRIMARY KEY (id_deudor),
+      CONSTRAINT bodega_deudores_id_usuario_fkey FOREIGN KEY (id_usuario)
+          REFERENCES usuarios (id) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE otros.bodega_deudores
+      OWNER TO programa;
+    COMMENT ON COLUMN otros.bodega_deudores.tipo IS 'prestamo: prestamos a pagar, otros: compras a empresas efectivo';
    CREATE TABLE otros.bodega_deudores_pagos
       (
         id_deudor bigint NOT NULL,
@@ -56,6 +60,28 @@
         OIDS=FALSE
       );
       ALTER TABLE otros.bodega_deudores_pagos
+        OWNER TO programa;
+   CREATE TABLE otros.bodega_rastreo_efectivo
+      (
+        id_rastreo bigserial NOT NULL,
+        no_caja integer NOT NULL DEFAULT 1,
+        fecha date NOT NULL,
+        nombre character varying(500) NOT NULL,
+        nota character varying(500) NOT NULL,
+        monto double precision NOT NULL DEFAULT (0)::double precision,
+        fecha_rastreo timestamp without time zone DEFAULT now(),
+        id_usuario bigint,
+        fecha_creacion timestamp without time zone DEFAULT now(),
+        no_impresiones integer NOT NULL DEFAULT 0,
+        CONSTRAINT bodega_rastreo_efectivo_pkey PRIMARY KEY (id_rastreo),
+        CONSTRAINT bodega_rastreo_efectivo_id_usuario_fkey FOREIGN KEY (id_usuario)
+            REFERENCES usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE otros.bodega_rastreo_efectivo
         OWNER TO programa;
 
  ✔ Imprimir gastos @done (23-03-20 10:21)

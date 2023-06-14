@@ -1676,6 +1676,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
           'semana'    => $sem,
           'empresaId' => $empresa['info']->id_empresa,
           'puestoId'  => '',
+          'empleadoId' => (empty($_GET['dempleadoId'])? '': $_GET['dempleadoId']),
           'dia_inicia_semana' => $empresa['info']->dia_inicia_semana
         );
         $empleados = $this->listadoEmpleadosAsistencias($filtros);
@@ -1859,6 +1860,186 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
         }
         $html .= '</tr>';
       }
+    }
+
+    // $html .= '
+    //         <tr>
+    //           <td colspan="6"></td>
+    //         </tr>
+    //         <tr style="font-weight:bold">
+    //           <td></td>
+    //           <td style="border:1px solid #000;">Totales</td>
+    //           <td style="border:1px solid #000;">'.$totales[0].'</td>
+    //           <td style="border:1px solid #000;">'.$totales[1].'</td>
+    //           <td style="border:1px solid #000;">'.$totales[2].'</td>
+    //         </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  public function getRptLugarNacimientoData()
+  {
+    $sql_com = $sql_sal = $sql_req = $sql = '';
+
+    //Filtros para buscar
+    // $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    // $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    // $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    $empresa = $this->empresas_model->getInfoEmpresa($_GET['did_empresa']);
+
+    if (isset($_GET['did_empresa'])) {
+      $sql .= " AND id_empresa = {$_GET['did_empresa']}";
+    }
+
+    $query = $this->db->query(
+      "SELECT id, (nombre || ' ' || apellido_paterno || ' ' || apellido_materno) AS nombre,
+        Date(fecha_entrada) AS fecha_entrada, nacionalidad, Date(fecha_imss) AS fecha_imss,
+        no_empleado, lugar_nacimiento
+      FROM public.usuarios
+      WHERE status = 't' AND esta_asegurado = 't'
+        AND user_nomina = 't' {$sql}
+    ");
+
+    $response = [];
+    // Si hubo al menos una falta o incapacidad en la semana.
+    if ($query->num_rows() > 0)
+    {
+      $response = $query->result();
+    }
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptLugarNacimientoPdf(){
+    $res = $this->getRptLugarNacimientoData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte de lugar de nacimiento';
+    // $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','', 8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+    $widths = array(80, 20, 30, 40, 12, 12, 12, 12, 12, 12, 12, 12);
+    $header = array('Trabajador', 'Fecha IMSS', 'Nacionalidad', 'Lugar Nacimiento');
+
+    $familia = '';
+    $totales = array(0,0,0);
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $empleado) {
+      $band_head = false;
+      if($pdf->GetY()+15 >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetY($pdf->GetY()+5);
+        $pdf->SetX(5);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetX(5);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row([
+        $empleado->nombre,
+        $empleado->fecha_imss,
+        $empleado->nacionalidad,
+        $empleado->lugar_nacimiento
+      ], false);
+    }
+
+    // $pdf->SetFont('Arial','B',8);
+    // $pdf->SetX(6);
+    // $pdf->SetAligns($aligns);
+    // $pdf->SetWidths($widths);
+    // $pdf->Row(array('','',
+    //   MyString::formatoNumero($totales[0], 2, '', false),
+    //   MyString::formatoNumero($totales[1], 2, '', false),
+    //   MyString::formatoNumero($totales[2], 2, '', false),
+    //   ), true, false);
+
+    $pdf->Output('rpt_lugar_nacimiento.pdf', 'I');
+  }
+  public function getRptLugarNacimientoXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=rpt_lugar_nacimiento.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptLugarNacimientoData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de lugar de nacimiento';
+    $titulo3 = ''; // 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr>
+          <td colspan="10">&nbsp;</td>
+        </tr>
+        <tr style="font-weight:bold">
+            <td colspan="2" style="width:200px;border:1px solid #000;background-color: #cccccc;">Trabajador</td>
+            <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Fecha IMSS</td>
+            <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Nacionalidad</td>
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Lugar Nacimiento</td>
+        </tr>';
+
+    $totales = array(0,0,0);
+    foreach($res as $key => $empleado){
+      $html .= '<tr>
+        <td colspan="2" style="width:200px;border:1px solid #000;">'.$empleado->nombre.'</td>
+        <td style="width:100px;border:1px solid #000;">'.$empleado->fecha_imss.'</td>
+        <td style="width:100px;border:1px solid #000;">'.$empleado->nacionalidad.'</td>
+        <td style="width:100px;border:1px solid #000;">'.$empleado->lugar_nacimiento.'</td>
+      </tr>';
     }
 
     // $html .= '

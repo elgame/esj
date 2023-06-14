@@ -1,4 +1,6 @@
 $(function(){
+  autocompleteEmpleados();
+
 	// Autocomplete Empresas
   $("#dempresa").autocomplete({
     source: base_url + 'panel/empresas/ajax_get_empresas/',
@@ -139,6 +141,38 @@ $(function(){
   });
 
 });
+
+var autocompleteEmpleados = function () {
+  $("#dempleado").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+
+      if ($('#did_empresa').val() != '') {
+        params.did_empresa = $('#did_empresa').val();
+      }
+
+      $.ajax({
+          url: base_url + 'panel/usuarios/ajax_get_usuarios/?empleados=true',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
+    minLength: 1,
+    autoFocus: true,
+    select: function( event, ui ) {
+      $("#dempleadoId").val(ui.item.id);
+      $(this).css("background-color", "#B0FFB0");
+    }
+  }).on("keydown", function(event){
+    if(event.which == 8 || event == 46){
+      $(this).css("background-color", "#FFD9B3");
+      $("#dempleadoId").val("");
+    }
+  });
+};
 
 function cargaListaFamlias ($empresaId) {
   $.getJSON(base_url+'panel/inventario/ajax_get_familias/', {'fid_empresa': $empresaId},

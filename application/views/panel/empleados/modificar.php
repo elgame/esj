@@ -176,6 +176,47 @@
                     </div>
 
                     <div class="control-group">
+                      <label class="control-label" for="flugar_nacimiento">Lugar de nacimiento </label>
+                      <div class="controls">
+                        <select name="flugar_nacimiento" id="flugar_nacimiento">
+                          <option value=""></option>
+                          <option value="Aguascalientes" <?php echo set_select('flugar_nacimiento', 'Aguascalientes', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Aguascalientes</option>
+                          <option value="Baja California" <?php echo set_select('flugar_nacimiento', 'Baja California', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Baja California</option>
+                          <option value="Baja California Sur" <?php echo set_select('flugar_nacimiento', 'Baja California Sur', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Baja California Sur</option>
+                          <option value="Campeche" <?php echo set_select('flugar_nacimiento', 'Campeche', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Campeche</option>
+                          <option value="Chiapas" <?php echo set_select('flugar_nacimiento', 'Chiapas', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Chiapas</option>
+                          <option value="Chihuahua" <?php echo set_select('flugar_nacimiento', 'Chihuahua', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Chihuahua</option>
+                          <option value="Ciudad de México" <?php echo set_select('flugar_nacimiento', 'Ciudad de México', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Ciudad de México</option>
+                          <option value="Coahuila" <?php echo set_select('flugar_nacimiento', 'Coahuila', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Coahuila</option>
+                          <option value="Colima" <?php echo set_select('flugar_nacimiento', 'Colima', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Colima</option>
+                          <option value="Durango" <?php echo set_select('flugar_nacimiento', 'Durango', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Durango</option>
+                          <option value="Estado de México" <?php echo set_select('flugar_nacimiento', 'Estado de México', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Estado de México</option>
+                          <option value="Guanajuato" <?php echo set_select('flugar_nacimiento', 'Guanajuato', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Guanajuato</option>
+                          <option value="Guerrero" <?php echo set_select('flugar_nacimiento', 'Guerrero', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Guerrero</option>
+                          <option value="Hidalgo" <?php echo set_select('flugar_nacimiento', 'Hidalgo', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Hidalgo</option>
+                          <option value="Jalisco" <?php echo set_select('flugar_nacimiento', 'Jalisco', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Jalisco</option>
+                          <option value="Michoacán" <?php echo set_select('flugar_nacimiento', 'Michoacán', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Michoacán</option>
+                          <option value="Morelos" <?php echo set_select('flugar_nacimiento', 'Morelos', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Morelos</option>
+                          <option value="Nayarit" <?php echo set_select('flugar_nacimiento', 'Nayarit', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Nayarit</option>
+                          <option value="Nuevo León" <?php echo set_select('flugar_nacimiento', 'Nuevo León', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Nuevo León</option>
+                          <option value="Oaxaca" <?php echo set_select('flugar_nacimiento', 'Oaxaca', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Oaxaca</option>
+                          <option value="Puebla" <?php echo set_select('flugar_nacimiento', 'Puebla', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Puebla</option>
+                          <option value="Querétaro" <?php echo set_select('flugar_nacimiento', 'Querétaro', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Querétaro</option>
+                          <option value="Quintana Roo" <?php echo set_select('flugar_nacimiento', 'Quintana Roo', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Quintana Roo</option>
+                          <option value="San Luis Potosí" <?php echo set_select('flugar_nacimiento', 'San Luis Potosí', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>San Luis Potosí</option>
+                          <option value="Sinaloa" <?php echo set_select('flugar_nacimiento', 'Sinaloa', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Sinaloa</option>
+                          <option value="Sonora" <?php echo set_select('flugar_nacimiento', 'Sonora', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Sonora</option>
+                          <option value="Tabasco" <?php echo set_select('flugar_nacimiento', 'Tabasco', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Tabasco</option>
+                          <option value="Tamaulipas" <?php echo set_select('flugar_nacimiento', 'Tamaulipas', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Tamaulipas</option>
+                          <option value="Tlaxcala" <?php echo set_select('flugar_nacimiento', 'Tlaxcala', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Tlaxcala</option>
+                          <option value="Veracruz" <?php echo set_select('flugar_nacimiento', 'Veracruz', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Veracruz</option>
+                          <option value="Yucatán" <?php echo set_select('flugar_nacimiento', 'Yucatán', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Yucatán</option>
+                          <option value="Zacatecas" <?php echo set_select('flugar_nacimiento', 'Zacatecas', false, (isset($data['info'][0]->lugar_nacimiento)? $data['info'][0]->lugar_nacimiento: '')); ?>>Zacatecas</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="control-group">
                       <label class="control-label" for="festado_civil">Estado civil </label>
                       <div class="controls">
                         <select name="festado_civil" id="festado_civil">

@@ -160,6 +160,47 @@
 										  </div>
 										</div>
 
+                    <div class="control-group">
+                      <label class="control-label" for="flugar_nacimiento">Lugar de nacimiento </label>
+                      <div class="controls">
+                        <select name="flugar_nacimiento" id="flugar_nacimiento">
+                          <option value=""></option>
+                          <option value="Aguascalientes" <?php echo set_select('flugar_nacimiento', 'Aguascalientes', false, $this->input->post('flugar_nacimiento')); ?>>Aguascalientes</option>
+                          <option value="Baja California" <?php echo set_select('flugar_nacimiento', 'Baja California', false, $this->input->post('flugar_nacimiento')); ?>>Baja California</option>
+                          <option value="Baja California Sur" <?php echo set_select('flugar_nacimiento', 'Baja California Sur', false, $this->input->post('flugar_nacimiento')); ?>>Baja California Sur</option>
+                          <option value="Campeche" <?php echo set_select('flugar_nacimiento', 'Campeche', false, $this->input->post('flugar_nacimiento')); ?>>Campeche</option>
+                          <option value="Chiapas" <?php echo set_select('flugar_nacimiento', 'Chiapas', false, $this->input->post('flugar_nacimiento')); ?>>Chiapas</option>
+                          <option value="Chihuahua" <?php echo set_select('flugar_nacimiento', 'Chihuahua', false, $this->input->post('flugar_nacimiento')); ?>>Chihuahua</option>
+                          <option value="Ciudad de México" <?php echo set_select('flugar_nacimiento', 'Ciudad de México', false, $this->input->post('flugar_nacimiento')); ?>>Ciudad de México</option>
+                          <option value="Coahuila" <?php echo set_select('flugar_nacimiento', 'Coahuila', false, $this->input->post('flugar_nacimiento')); ?>>Coahuila</option>
+                          <option value="Colima" <?php echo set_select('flugar_nacimiento', 'Colima', false, $this->input->post('flugar_nacimiento')); ?>>Colima</option>
+                          <option value="Durango" <?php echo set_select('flugar_nacimiento', 'Durango', false, $this->input->post('flugar_nacimiento')); ?>>Durango</option>
+                          <option value="Estado de México" <?php echo set_select('flugar_nacimiento', 'Estado de México', false, $this->input->post('flugar_nacimiento')); ?>>Estado de México</option>
+                          <option value="Guanajuato" <?php echo set_select('flugar_nacimiento', 'Guanajuato', false, $this->input->post('flugar_nacimiento')); ?>>Guanajuato</option>
+                          <option value="Guerrero" <?php echo set_select('flugar_nacimiento', 'Guerrero', false, $this->input->post('flugar_nacimiento')); ?>>Guerrero</option>
+                          <option value="Hidalgo" <?php echo set_select('flugar_nacimiento', 'Hidalgo', false, $this->input->post('flugar_nacimiento')); ?>>Hidalgo</option>
+                          <option value="Jalisco" <?php echo set_select('flugar_nacimiento', 'Jalisco', false, $this->input->post('flugar_nacimiento')); ?>>Jalisco</option>
+                          <option value="Michoacán" <?php echo set_select('flugar_nacimiento', 'Michoacán', false, $this->input->post('flugar_nacimiento')); ?>>Michoacán</option>
+                          <option value="Morelos" <?php echo set_select('flugar_nacimiento', 'Morelos', false, $this->input->post('flugar_nacimiento')); ?>>Morelos</option>
+                          <option value="Nayarit" <?php echo set_select('flugar_nacimiento', 'Nayarit', false, $this->input->post('flugar_nacimiento')); ?>>Nayarit</option>
+                          <option value="Nuevo León" <?php echo set_select('flugar_nacimiento', 'Nuevo León', false, $this->input->post('flugar_nacimiento')); ?>>Nuevo León</option>
+                          <option value="Oaxaca" <?php echo set_select('flugar_nacimiento', 'Oaxaca', false, $this->input->post('flugar_nacimiento')); ?>>Oaxaca</option>
+                          <option value="Puebla" <?php echo set_select('flugar_nacimiento', 'Puebla', false, $this->input->post('flugar_nacimiento')); ?>>Puebla</option>
+                          <option value="Querétaro" <?php echo set_select('flugar_nacimiento', 'Querétaro', false, $this->input->post('flugar_nacimiento')); ?>>Querétaro</option>
+                          <option value="Quintana Roo" <?php echo set_select('flugar_nacimiento', 'Quintana Roo', false, $this->input->post('flugar_nacimiento')); ?>>Quintana Roo</option>
+                          <option value="San Luis Potosí" <?php echo set_select('flugar_nacimiento', 'San Luis Potosí', false, $this->input->post('flugar_nacimiento')); ?>>San Luis Potosí</option>
+                          <option value="Sinaloa" <?php echo set_select('flugar_nacimiento', 'Sinaloa', false, $this->input->post('flugar_nacimiento')); ?>>Sinaloa</option>
+                          <option value="Sonora" <?php echo set_select('flugar_nacimiento', 'Sonora', false, $this->input->post('flugar_nacimiento')); ?>>Sonora</option>
+                          <option value="Tabasco" <?php echo set_select('flugar_nacimiento', 'Tabasco', false, $this->input->post('flugar_nacimiento')); ?>>Tabasco</option>
+                          <option value="Tamaulipas" <?php echo set_select('flugar_nacimiento', 'Tamaulipas', false, $this->input->post('flugar_nacimiento')); ?>>Tamaulipas</option>
+                          <option value="Tlaxcala" <?php echo set_select('flugar_nacimiento', 'Tlaxcala', false, $this->input->post('flugar_nacimiento')); ?>>Tlaxcala</option>
+                          <option value="Veracruz" <?php echo set_select('flugar_nacimiento', 'Veracruz', false, $this->input->post('flugar_nacimiento')); ?>>Veracruz</option>
+                          <option value="Yucatán" <?php echo set_select('flugar_nacimiento', 'Yucatán', false, $this->input->post('flugar_nacimiento')); ?>>Yucatán</option>
+                          <option value="Zacatecas" <?php echo set_select('flugar_nacimiento', 'Zacatecas', false, $this->input->post('flugar_nacimiento')); ?>>Zacatecas</option>
+                        </select>
+                      </div>
+                    </div>
+
 										<div class="control-group">
 										  <label class="control-label" for="festado_civil">Estado civil </label>
 										  <div class="controls">
