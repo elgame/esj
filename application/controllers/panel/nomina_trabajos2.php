@@ -21,6 +21,8 @@ class nomina_trabajos2 extends MY_Controller {
     'nomina_trabajos2/rpt_auditoria_costos/',
     'nomina_trabajos2/rpt_auditoria_costos_pdf/',
     'nomina_trabajos2/rpt_auditoria_costos_xls/',
+    'nomina_trabajos2/rpt_costo_rancho_pdf/',
+    'nomina_trabajos2/rpt_costo_rancho_xls/',
 
   );
 
@@ -183,6 +185,44 @@ class nomina_trabajos2 extends MY_Controller {
   public function rpt_costo_labores_desg_xls(){
     $this->load->model('nomina_trabajos2_model');
     $this->nomina_trabajos2_model->rptCostoLaboresDesglosadoXls();
+  }
+
+  public function rpt_costo_rancho()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_costo_labores.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Costos por Rancho');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_costo_ranchos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_costo_rancho_pdf() {
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoRanchosPdf();
+  }
+  public function rpt_costo_rancho_xls() {
+    $this->load->model('nomina_trabajos2_model');
+    $this->nomina_trabajos2_model->rptCostoRanchosXls();
   }
 
   public function rpt_auditoria_costos()

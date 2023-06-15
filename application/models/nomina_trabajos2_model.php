@@ -853,6 +853,248 @@ class nomina_trabajos2_model extends CI_Model {
     echo $html;
   }
 
+  public function rptCostoRanchosData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $sql .= " AND Date(t2.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+
+    if($this->input->get('dlaborId') != ''){
+      $dlaborId = $this->input->get('dlaborId');
+      $sql .= " AND t2.id_labor = ".$dlaborId;
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND t2.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('areaId') > 0) {
+      $sql .= " AND t2.id_area = ".$this->input->get('areaId');
+    }
+
+    if ($this->input->get('dempleadoId') > 0) {
+      $sql .= " AND t2.id_usuario = ".$this->input->get('dempleadoId');
+    }
+
+    if(is_array($this->input->get('ranchoId'))){
+      $sql .= " AND dr.id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
+    }
+
+    // if(is_array($this->input->get('centroCostoId'))){
+    //   $sql .= " AND cc.id_centro_costo IN (".implode(',', $this->input->get('centroCostoId')).")";
+    // }
+
+    $res = $this->db->query(
+      "SELECT r.id_rancho, r.nombre AS rancho, t2.id_usuario,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
+        t2.fecha, l.nombre AS labor,
+        (t2.avance/dr.num) AS avance,
+        (t2.avance_real/dr.num) AS avance_real,
+        (t2.importe/dr.num) AS importe
+      FROM nomina_trabajos_dia2 t2
+        INNER JOIN nomina_trabajos_dia2_rancho dr ON (t2.id_empresa = dr.id_empresa AND
+            t2.id_usuario = dr.id_usuario AND t2.fecha = dr.fecha AND t2.rows = dr.rows)
+        INNER JOIN otros.ranchos r ON r.id_rancho = dr.id_rancho
+        INNER JOIN compras_salidas_labores l ON l.id_labor = t2.id_labor
+        INNER JOIN usuarios u ON u.id = t2.id_usuario
+      WHERE 1 = 1 {$sql}
+      ORDER BY rancho ASC, trabajador ASC, labor ASC, fecha ASC
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+  public function rptCostoRanchosPdf(){
+    $res = $this->rptCostoRanchosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte Costos por Rancho';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    // $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'R', 'R');
+    $widths = array(85, 45, 25, 30, 30);
+    $header = array('Trabajador', 'Labor', 'Fecha', 'Importe');
+
+    $auxrancho = 0;
+    $total_avance = $total_avancerr = $total_importe = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY()+15 >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      if ($auxrancho != $item->id_rancho) {
+        if ($key != 0) {
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(['R', 'R', 'R', 'R']);
+          $pdf->SetWidths([155, 30, 30]);
+          $pdf->Row(array('TOTAL',
+            MyString::formatoNumero($total_importe, 2, '', false),
+          ), false, true);
+        }
+
+        $total_avance = $total_avancerr = $total_importe = 0;
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetXY(6, $pdf->GetY()+3);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths([185]);
+        $pdf->Row([$item->rancho], false, false);
+
+        $pdf->SetFillColor(200,200,200);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+
+        $auxrancho = $item->id_rancho;
+      }
+
+      $datos = array(
+        $item->trabajador,
+        $item->labor,
+        $item->fecha,
+        MyString::formatoNumero($item->importe, 2, '', false),
+      );
+      $total_avance += $item->avance;
+      $total_avancerr += $item->avance_real;
+      $total_importe += $item->importe;
+
+      $pdf->SetFont('Arial', '', 8);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(['R', 'R', 'R', 'R']);
+    $pdf->SetWidths([155, 30, 30]);
+    $pdf->Row(array('TOTAL',
+      MyString::formatoNumero($total_importe, 2, '', false),
+      ), false, true);
+
+    $pdf->Output('costos_rancho.pdf', 'I');
+  }
+  public function rptCostoRanchosXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=costos_ranchos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->rptCostoRanchosData();
+
+    $this->load->model('empresas_model');
+
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte Costos por Rancho';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    // $titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    $header = '<tr style="font-weight:bold">
+          <td colspan="3" style="width:200px;border:1px solid #000;background-color: #cccccc;">Trabajador</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Labor</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+
+    $auxrancho = 0;
+    $total_avance = $total_avancerr = $total_importe = 0;
+    foreach($res as $key => $item){
+      if ($auxrancho != $item->id_rancho) {
+        if ($key != 0) {
+          $html .= '<tr style="font-weight:bold">
+            <td colspan="5" style="border:1px solid #000;">TOTALES</td>
+            <td style="border:1px solid #000;">'.$total_importe.'</td>
+          </tr>';
+        }
+
+        $total_avance = $total_avancerr = $total_importe = 0;
+
+        $html .= '<tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="6" style="width:200px;">'.$item->rancho.'</td>
+        </tr>';
+
+        $html .= $header;
+
+        $auxrancho = $item->id_rancho;
+      }
+
+      $html .= '<tr>
+          <td colspan="3" style="width:200px;border:1px solid #000;">'.$item->trabajador.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->labor.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->fecha.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
+        </tr>';
+      $total_avance += $item->avance;
+      $total_avancerr += $item->avance_real;
+      $total_importe += $item->importe;
+    }
+
+    $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="5" style="border:1px solid #000;">TOTALES</td>
+              <td style="border:1px solid #000;">'.$total_importe.'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
 
   public function rptAuditoriaCostosData()
   {
