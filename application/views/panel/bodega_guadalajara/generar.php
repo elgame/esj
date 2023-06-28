@@ -1030,7 +1030,7 @@
               <div class="row-fluid">
                 <div class="span12">
                   <div class="span12" style="font-weight: bold; min-height: 25px;">
-                    <?php $total_saldo_corte = $totalCont+$abonoshVentas+$totalIngresosExt-$totalGastos; ?>
+                    <?php $total_saldo_corte = $totalCont+$abonoshVentas+$totalIngresosExt-$totalGastos-$caja['deudores_prest_dia']+$caja['deudores_abonos_dia']; ?>
                     SALDO AL CORTE: <span id="ttotal-corte1"><?php echo MyString::formatoNumero($total_saldo_corte, 2, '$') ?></span>
                     <input type="hidden" name="ttotal-corte" value="<?php echo $total_saldo_corte ?>" id="ttotal-corte">
                   </div>
