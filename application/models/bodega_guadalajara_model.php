@@ -2037,12 +2037,12 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->Row(array('SALDO DE CLIENTES', MyString::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), false, false);
 
     $pdf->SetXY(80, $pdf->GetY()+10);
-    $pdf->Row(array('SALDO AL CORTE', MyString::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos) , 2, '$', false)), false, false);
-    $caja['saldoAlCorte'] = ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos);
+    $caja['saldoAlCorte'] = ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos-$caja['deudores_prest_dia']+$caja['deudores_abonos_dia']);
+    $pdf->Row(array('SALDO AL CORTE', MyString::formatoNumero( $caja['saldoAlCorte'], 2, '$', false)), false, false);
 
     $pdf->SetX(80);
-    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo , 2, '$', false)), false, false);
-    $caja['diferenciaCorte'] = ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo;
+    $caja['diferenciaCorte'] = $caja['saldoAlCorte']-$totalEfectivo;
+    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero( $caja['diferenciaCorte'] , 2, '$', false)), false, false);
 
     $estadoResult = [
       'fecha'            => $fecha,
