@@ -18,9 +18,7 @@
     autocompleteCentroCosto();
     autocompleteActivos();
 
-    if ($('.editando').length == 0) {
-      getProyectos();
-    }
+    getProyectos();
     getSucursales();
 
     eventOtros();
@@ -191,7 +189,7 @@
             $("#serComprasProvee").hide();
           }
 
-          if(tipoOrderActual == 'oc' || tipoOrderActual == 'd') {
+          if(tipoOrderActual == 'oc' || tipoOrderActual == 'd' || tipoOrderActual == 'p') {
             $('.classProyecto').show();
           } else {
             $('.classProyecto').hide();
@@ -1824,8 +1822,9 @@
           dataType: "json",
           data: params,
           success: function(data) {
+            const idproyecto = $("#proyecto").attr('data-proyecto');
             for (var i = 0; i < data.length; i++) {
-              hhtml += '<option value="'+data[i].id+'">'+data[i].value+'</option>';
+              hhtml += '<option value="'+data[i].id+'" '+ (idproyecto > 0 ? 'selected' : '') +'>'+data[i].value+'</option>';
             }
 
             $('#proyecto').html(hhtml);

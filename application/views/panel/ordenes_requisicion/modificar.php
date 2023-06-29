@@ -152,10 +152,10 @@
                 </div>
               </div>
 
-              <div class="control-group classProyecto" <?php echo ((isset($orden['info'][0]->tipo_orden) && ($orden['info'][0]->tipo_orden == 'd' || $orden['info'][0]->tipo_orden == 'oc'))? '': 'style="display:none;"'); ?>>
+              <div class="control-group classProyecto" <?php echo ((isset($orden['info'][0]->tipo_orden) && ($orden['info'][0]->tipo_orden == 'd' || $orden['info'][0]->tipo_orden == 'oc' || $orden['info'][0]->tipo_orden == 'p'))? '': 'style="display:none;"'); ?>>
                 <label class="control-label" for="proyecto">Asignar a un Proyecto</label>
                 <div class="controls">
-                  <select name="proyecto" id="proyecto" class="span9" style="float: left;">
+                  <select name="proyecto" id="proyecto" class="span9" style="float: left;" data-proyecto="<?php echo $orden['info'][0]->id_proyecto ?>">
                       <option value=""></option>
                     <?php foreach ($proyectos as $key => $value): ?>
                       <option value="<?php echo $value['id']; ?>" <?php echo set_select('proyecto', $value['id'], (isset($orden['info'][0]->proyecto['info']) && $value['id']==$orden['info'][0]->proyecto['info']->id_proyecto) ); ?>><?php echo $value['value']; ?></option>

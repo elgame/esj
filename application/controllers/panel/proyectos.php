@@ -230,7 +230,7 @@ class proyectos extends MY_Controller {
     $rules = array(
       array('field' => 'nombre',
             'label' => 'Nombre',
-            'rules' => 'required|max_length[90]'),
+            'rules' => 'required|max_length[250]'),
       array('field' => 'presupuesto',
             'label' => 'Presupuesto',
             'rules' => 'required|numeric'),

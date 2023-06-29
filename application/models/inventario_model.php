@@ -865,7 +865,7 @@ class inventario_model extends privilegios_model{
                   Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
                   AND c.status <> 'ca'
               ) AS cp ON p.id_producto = cp.id_producto
-                INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
+              INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
               {$idsproveedores} AND p.id_producto = {$product}
             ORDER BY cp.fecha DESC, cp.folio ASC");
           $response[] = $productos->result();

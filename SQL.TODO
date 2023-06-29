@@ -1,4 +1,7 @@
 
+ ☐ Ordenes proyectos cambios
+   -- lap|san
+   ALTER TABLE IF EXISTS otros.proyectos ALTER COLUMN nombre TYPE character varying(250);
  ✔ Reporte de nomina costo por rancho @done (23-06-14 18:47)
    -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Costo x Ramcho',364,true,'nomina_trabajos2/rpt_costo_rancho/','print',true);

@@ -148,26 +148,25 @@ class proyectos_model extends CI_Model {
     $response = [];
     $response['salidas'] = $this->db->query("SELECT cs.id_salida, cs.folio, Date(cs.fecha_creacion) AS fecha,
         (cs.concepto || ' ' || cs.observaciones) AS concepto,
-        Sum(csp.cantidad*csp.precio_unitario) AS costo
+        (csp.cantidad*csp.precio_unitario) AS costo, csp.cantidad, csp.cantidad AS piezas
       FROM compras_salidas cs
         INNER JOIN compras_salidas_productos csp ON cs.id_salida = csp.id_salida
       WHERE cs.status <> 'ca' AND cs.id_proyecto = {$id_proyecto}
-      GROUP BY cs.id_salida
       ORDER BY fecha ASC")->result();
 
     $response['compras'] = $this->db->query("SELECT id_compra, serie, folio, Date(fecha) AS fecha,
-        (concepto || ' ' || observaciones) AS concepto, subtotal AS costo
+        (concepto || ' ' || observaciones) AS concepto, subtotal AS costo,
+        1 AS cantidad, 1 AS piezas
       FROM compras
       WHERE isgasto = 't' AND status <> 'ca' AND id_proyecto = {$id_proyecto}
       ORDER BY fecha ASC")->result();
 
     $response['ordenes'] = $this->db->query("SELECT cs.id_orden, cs.folio, Date(cs.fecha_creacion) AS fecha,
-        (cs.descripcion) AS concepto,
-        Sum(csp.importe) AS costo
+        csp.descripcion AS concepto,
+        csp.importe AS costo, csp.cantidad, csp.piezas
       FROM compras_ordenes cs
         INNER JOIN compras_productos csp ON cs.id_orden = csp.id_orden
       WHERE cs.status in('a','f','n') AND cs.id_proyecto = {$id_proyecto}
-      GROUP BY cs.id_orden
       ORDER BY fecha ASC")->result();
 
     return $response;
@@ -270,15 +269,16 @@ class proyectos_model extends CI_Model {
     ), false, false);
 
     $salidas = $compras = $ordenes = 0;
+    $cantidad = $piezas = 0;
 
     $pdf->SetFont('helvetica', 'B', 9);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(200));
     $pdf->Row(array("SALIDAS DE ALMACEN"), false, false);
 
-    $aligns = array('C', 'C', 'L', 'R');
-    $widths = array(20, 30, 120, 35);
-    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
+    $aligns = array('C', 'C', 'L', 'R', 'R', 'R');
+    $widths = array(18, 25, 87, 25, 25, 25);
+    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO', 'CANTIDAD', 'PIEZAS');
 
     if (count($presupuesto['salidas']) > 0) {
       foreach ($presupuesto['salidas'] as $key => $prod)
@@ -302,11 +302,15 @@ class proyectos_model extends CI_Model {
           $prod->folio,
           $prod->concepto,
           MyString::formatoNumero($prod->costo, 2, '$', false),
+          MyString::formatoNumero($prod->cantidad, 2, '', false),
+          MyString::formatoNumero($prod->piezas, 2, '', false),
         );
 
         $pdf->SetX(6);
         $pdf->Row($datos, false);
 
+        $cantidad += floatval($prod->cantidad);
+        $piezas += floatval($prod->piezas);
         $salidas += floatval($prod->costo);
       }
     }
@@ -316,7 +320,11 @@ class proyectos_model extends CI_Model {
     $pdf->SetWidths($widths);
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
-    $pdf->Row(['', '', '', MyString::formatoNumero($salidas, 2, '$', false)], true);
+    $pdf->Row(['', '', '',
+      MyString::formatoNumero($salidas, 2, '$', false),
+      MyString::formatoNumero($cantidad, 2, '', false),
+      MyString::formatoNumero($piezas, 2, '', false),
+    ], true);
 
     $pdf->SetY($pdf->GetY()+2);
     $pdf->SetFont('helvetica', 'B', 9);
@@ -324,9 +332,9 @@ class proyectos_model extends CI_Model {
     $pdf->SetWidths(array(200));
     $pdf->Row(array("GASTOS DIRECTOS (COMPRAS)"), false, false);
 
-    $aligns = array('C', 'C', 'L', 'R');
-    $widths = array(20, 30, 120, 35);
-    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
+    $aligns = array('C', 'C', 'L', 'R', 'R', 'R');
+    $widths = array(18, 25, 87, 25, 25, 25);
+    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO', 'CANTIDAD', 'PIEZAS');
 
     if (count($presupuesto['compras']) > 0) {
       foreach ($presupuesto['compras'] as $key => $prod)
@@ -350,11 +358,15 @@ class proyectos_model extends CI_Model {
           $prod->serie.$prod->folio,
           $prod->concepto,
           MyString::formatoNumero($prod->costo, 2, '$', false),
+          MyString::formatoNumero($prod->cantidad, 2, '', false),
+          MyString::formatoNumero($prod->piezas, 2, '', false),
         );
 
         $pdf->SetX(6);
         $pdf->Row($datos, false);
 
+        $cantidad += floatval($prod->cantidad);
+        $piezas += floatval($prod->piezas);
         $compras += floatval($prod->costo);
       }
     }
@@ -364,7 +376,11 @@ class proyectos_model extends CI_Model {
     $pdf->SetWidths($widths);
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
-    $pdf->Row(['','','', MyString::formatoNumero($compras, 2, '$', false)], true);
+    $pdf->Row(['','','',
+      MyString::formatoNumero($compras, 2, '$', false),
+      MyString::formatoNumero($cantidad, 2, '', false),
+      MyString::formatoNumero($piezas, 2, '', false),
+    ], true);
 
     $pdf->SetY($pdf->GetY()+2);
     $pdf->SetFont('helvetica', 'B', 9);
@@ -372,9 +388,9 @@ class proyectos_model extends CI_Model {
     $pdf->SetWidths(array(200));
     $pdf->Row(array("ORDENES DE COMPRAS (COMPRAS)"), false, false);
 
-    $aligns = array('C', 'C', 'L', 'R');
-    $widths = array(20, 30, 120, 35);
-    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
+    $aligns = array('C', 'C', 'L', 'R', 'R', 'R');
+    $widths = array(18, 25, 87, 25, 25, 25);
+    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO', 'CANTIDAD', 'PIEZAS');
 
     if (count($presupuesto['ordenes']) > 0) {
       foreach ($presupuesto['ordenes'] as $key => $prod)
@@ -398,11 +414,15 @@ class proyectos_model extends CI_Model {
           $prod->folio,
           $prod->concepto,
           MyString::formatoNumero($prod->costo, 2, '$', false),
+          MyString::formatoNumero($prod->cantidad, 2, '', false),
+          MyString::formatoNumero($prod->piezas, 2, '', false),
         );
 
         $pdf->SetX(6);
         $pdf->Row($datos, false);
 
+        $cantidad += floatval($prod->cantidad);
+        $piezas += floatval($prod->piezas);
         $ordenes += floatval($prod->costo);
       }
     }
@@ -412,7 +432,11 @@ class proyectos_model extends CI_Model {
     $pdf->SetWidths($widths);
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
-    $pdf->Row(['','','', MyString::formatoNumero($ordenes, 2, '$', false)], true);
+    $pdf->Row(['','','',
+      MyString::formatoNumero($ordenes, 2, '$', false),
+      MyString::formatoNumero($cantidad, 2, '', false),
+      MyString::formatoNumero($piezas, 2, '', false),
+    ], true);
 
     $pdf->SetXY(6, $pdf->GetY()+2);
     $pdf->SetFont('helvetica','B', 11);

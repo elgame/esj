@@ -146,7 +146,7 @@
                 </div>
               </div>
 
-              <div class="control-group classProyecto" style="display: none;">
+              <div class="control-group classProyecto" style="display: show;">
                 <label class="control-label" for="proyecto">Asignar a un Proyecto</label>
                 <div class="controls">
                   <select name="proyecto" id="proyecto" class="span9" style="float: left;">

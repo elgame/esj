@@ -41,7 +41,7 @@
                   <div class="control-group">
                     <label class="control-label" for="nombre">Nombre </label>
                     <div class="controls">
-                      <input type="text" name="nombre" id="nombre" class="span10" maxlength="90"
+                      <input type="text" name="nombre" id="nombre" class="span10" maxlength="250"
                       value="<?php echo set_value('nombre'); ?>" required placeholder="Nombre proyecto">
                     </div>
                   </div>
