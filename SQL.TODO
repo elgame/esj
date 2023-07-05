@@ -1,12 +1,12 @@
 
  ☐ Ordenes proyectos cambios
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE IF EXISTS otros.proyectos ALTER COLUMN nombre TYPE character varying(250);
  ✔ Reporte de nomina costo por rancho @done (23-06-14 18:47)
-   -- lap|san
+   -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Costo x Ramcho',364,true,'nomina_trabajos2/rpt_costo_rancho/','print',true);
  ✔ reporte de lugar nacimiento empleados @done (23-06-14 16:51)
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE IF EXISTS public.usuarios ADD COLUMN lugar_nacimiento character varying(30) COLLATE pg_catalog."default";
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Lugar Nacimiento',364,true,'nomina_fiscal/rpt_lugar_nacimiento/','list-ol',true);
  ✔ Reporte de combustible agrupar por tractor y agregar labor (quitar observacion), km y rendimiento por km @done (23-05-24 12:18)

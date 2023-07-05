@@ -1567,6 +1567,7 @@ class cfdi{
       'tipoCambio'        => $pago_tipo_cambio,
       'doctoRelacionado'  => []
     ];
+
     // $firstCfdiRel = (isset($cfdiRel['cfdiRelacionado']) && count($cfdiRel['cfdiRelacionado']) == 0);
     $monto = 0;
     foreach ($data as $key => $pago) {
@@ -1608,12 +1609,13 @@ class cfdi{
           ];
         }
 
+        $equivalencia = $pago_tipo_cambio > 1? 1/$pago_tipo_cambio: $pago_tipo_cambio;
         $comPago['doctoRelacionado'][] = array(
           "idDocumento"    => $pago->uuid,
           "serie"          => $pago->serie,
           "folio"          => $pago->folio,
           "moneda"         => (floatval($pago->version) > 3.2? $pago->moneda: 'MXN'),
-          "equivalencia"   => ($pago_moneda != $pago->moneda? number_format($pago->tipo_cambio, 2, '.', ''): 1),
+          "equivalencia"   => $equivalencia, // ($pago_moneda != $pago->moneda? number_format($pago->tipo_cambio, 2, '.', ''): 1),
           "metodoDePago"   => (floatval($pago->version) > 3.2? $metodoDePago: 'PUE'),
           "numParcialidad" => $pago->parcialidades,
           "saldoAnterior"  => number_format($saldoAnt/$pago->tipo_cambio, 2, '.', ''),

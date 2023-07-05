@@ -29,7 +29,7 @@
                     <option value="MXN" selected="selected">Peso mexicano (MXN)</option>
                     <option value="USD">Dólar estadounidense (USD)</option>
                   </select>
-                  <input type="text" name="tipoCambio" class="span3 pull-left vpositive" id="tipoCambio" value="" style="display: none;" placeholder="Tipo de Cambio">
+                  <input type="text" name="tipoCambio" class="span3 pull-left vpositive" id="tipoCambio" value="" placeholder="Tipo de Cambio">
                 </div>
               </div>
 

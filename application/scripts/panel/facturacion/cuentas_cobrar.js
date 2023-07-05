@@ -165,11 +165,12 @@ var comPagos = (function($){
       });
 
       $('#moneda').on('change', function(event) {
-        if ($(this).val() == 'MXN') {
-          $('#tipoCambio').val('').hide();
-        } else {
           $('#tipoCambio').val('').show();
-        }
+        // if ($(this).val() == 'MXN') {
+        //   $('#tipoCambio').val('').hide();
+        // } else {
+        //   $('#tipoCambio').val('').show();
+        // }
       });
     }
   }
