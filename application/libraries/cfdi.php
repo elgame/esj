@@ -1564,7 +1564,7 @@ class cfdi{
       'rfcEmisorCtaOrd'   => $cuentaCliente? $cuentaCliente->rfc : '',
       'selloPago'         => "",
       'tipoCadPago'       => "",
-      'tipoCambio'        => $pago_tipo_cambio,
+      'tipoCambio'        => ($pago_tipo_cambio > 1 && $pago_moneda == 'MXN'? 1: $pago_tipo_cambio),
       'doctoRelacionado'  => []
     ];
 
@@ -1624,7 +1624,8 @@ class cfdi{
           "objetoImp"      => "02",
           "impuestos"      => $impuestos
         );
-        $monto += $pagado;
+        // $monto += $pagado;
+        $monto += $pago->pago_factura;
       }
     }
 
