@@ -82,6 +82,11 @@ $(function(){
 
         $('#dno_certificado').val(ui.item.item.no_certificado);
 
+        $('label.prod_kilos').addClass('hide')
+        if(ui.item.id == 24) { // si es logistic
+          $('label.prod_kilos').removeClass('hide');
+        }
+
         loadSerieFolio(ui.item.id, true, ui.item);
 
         // si es bodega boton imprimir
@@ -692,6 +697,8 @@ function addProducto(unidades, prod) {
       cantidad = prod_cajas;
     }
 
+    let showkgs = $("#did_empresa").val() === '24'? '': 'hide';
+
     trHtml = '<tr data-pallets="'+pallet+'">' +
                 '<td style="width:31px;">' +
                   '<div class="btn-group">' +
@@ -743,8 +750,8 @@ function addProducto(unidades, prod) {
                 '</td>' +
                 '<td>' +
                     '<input type="text" name="prod_dcantidad[]" value="'+cantidad+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                    '<input type="hidden" name="prod_dkilos[]" value="'+prod_kilos+'" id="prod_dkilos" class="span12 vpositive">' +
                     '<input type="hidden" name="prod_dcajas[]" value="'+prod_cajas+'" id="prod_dcajas" class="span12 vpositive">' +
+                    '<label class="prod_kilos '+showkgs+'">Kg <input type="text" name="prod_dkilos[]" value="'+prod_kilos+'" id="prod_dkilos" class="span10 vpositive" style="float: right;"></label>'+
                 '</td>' +
                 '<td>' +
                   '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +

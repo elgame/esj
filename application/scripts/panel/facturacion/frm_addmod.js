@@ -981,6 +981,8 @@ function addProducto(unidades, prod) {
                         '</td>';
     }
 
+    let showkgs = $("#did_empresa").val() === '24'? '': 'hide';
+
     trHtml = '<tr data-pallets="'+pallet+'" data-remisiones="'+remision+'">' +
                 '<td style="width:31px;">' +
                   '<div class="btn-group">' +
@@ -1038,8 +1040,8 @@ function addProducto(unidades, prod) {
                 '</td>' +
                 '<td>' +
                     '<input type="text" name="prod_dcantidad[]" value="'+cantidad+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                    '<input type="hidden" name="prod_dkilos[]" value="'+prod_kilos+'" id="prod_dkilos" class="span12 vpositive">' +
                     '<input type="hidden" name="prod_dcajas[]" value="'+prod_cajas+'" id="prod_dcajas" class="span12 vpositive">' +
+                    '<label class="prod_kilos '+showkgs+'">Kg <input type="text" name="prod_dkilos[]" value="'+prod_kilos+'" id="prod_dkilos" class="span10 vpositive" style="float: right;"></label>'+
                 '</td>' +
                 '<td>' +
                   '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vnumeric jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +

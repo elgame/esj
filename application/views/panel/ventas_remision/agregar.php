@@ -39,7 +39,9 @@
               <div class="control-group">
                 <label class="control-label" for="dempresa">Empresa</label>
                 <div class="controls">
-
+                  <?php
+                  $showkgs = ((isset($borrador) ? $borrador['info']->empresa->id_empresa : $empresa_default->id_empresa) == 24? '': 'hide');
+                  ?>
                   <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', isset($borrador) ? $borrador['info']->empresa->nombre_fiscal : $empresa_default->nombre_fiscal); ?>" size="73" autofocus>
                   <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', isset($borrador) ? $borrador['info']->empresa->id_empresa : $empresa_default->id_empresa); ?>">
                   <input type="hidden" name="dversion" id="dversion" value="<?php echo set_value('dversion', isset($borrador) ? $borrador['info']->version :$empresa_default->cfdi_version); ?>">
@@ -436,7 +438,7 @@
                                 <td>
                                     <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]; ?>" id="prod_dcantidad">
                                     <input type="hidden" name="prod_dcajas[]" value="<?php echo $_POST['prod_dcajas'][$k] ?>" id="prod_dcajas" class="span12 vpositive">
-                                    <input type="hidden" name="prod_dkilos[]" value="<?php echo $_POST['prod_dkilos'][$k] ?>" id="prod_dkilos" class="span12 vpositive">
+                                    <label class="prod_kilos <?php echo $showkgs ?>">Kg <input type="text" name="prod_dkilos[]" value="<?php echo $_POST['prod_dkilos'][$k] ?>" id="prod_dkilos" class="span10 vpositive" style="float: right;"></label>
                                 </td>
                                 <td>
                                   <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo $_POST['prod_dpreciou'][$k]; ?>" id="prod_dpreciou">
@@ -546,7 +548,7 @@
                     <td>
                         <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
                         <input type="hidden" name="prod_dcajas[]" value="0" id="prod_dcajas" class="span12 vpositive">
-                        <input type="hidden" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span12 vpositive">
+                        <label class="prod_kilos <?php echo $showkgs ?>">Kg <input type="text" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span10 vpositive" style="float: right;"></label>
                     </td>
                     <td>
                       <input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive">

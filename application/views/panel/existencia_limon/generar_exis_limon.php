@@ -818,10 +818,11 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-costo-ventas-fletes">
                           <thead>
                             <tr>
-                              <th colspan="4">FLETES</th>
+                              <th colspan="5">FLETES</th>
                             </tr>
                             <tr>
                               <th>FOLIO</th>
+                              <th>REM/FAC</th>
                               <th>PROVEEDOR</th>
                               <th>CANTIDAD</th>
                               <th>IMPORTE</th>
@@ -836,6 +837,7 @@
                             ?>
                               <tr>
                                 <td><?php echo $desc->folio ?></td>
+                                <td><?php echo $desc->facturas ?></td>
                                 <td><?php echo $desc->proveedor ?></td>
                                 <td><?php echo $desc->cantidad ?></td>
                                 <td><?php echo $desc->importe ?></td>
@@ -843,6 +845,7 @@
                             <?php } ?>
 
                             <tr class="footer">
+                              <th></th>
                               <th></th>
                               <th></th>
                               <th><?php echo $descuentoVentasFletes_cantidad ?></th>
