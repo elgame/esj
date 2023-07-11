@@ -52,7 +52,11 @@
                     <label class="control-label" for="dempresa">Empresa</label>
                     <div class="controls">
                       <?php
-                      $showkgs = ((isset($borrador) ? $borrador['info']->empresa->id_empresa : $empresa_default->id_empresa) == 24? '': 'hide');
+                      if (!empty($_POST['did_empresa']) && $_POST['did_empresa'] == 24) {
+                        $showkgs = '';
+                      } else {
+                        $showkgs = ((isset($borrador) ? $borrador['info']->empresa->id_empresa : $empresa_default->id_empresa) == 24? '': 'hide');
+                      }
                       ?>
                       <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', isset($borrador) ? $borrador['info']->empresa->nombre_fiscal : $empresa_default->nombre_fiscal); ?>" size="73" autofocus>
                       <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', isset($borrador) ? $borrador['info']->empresa->id_empresa : $empresa_default->id_empresa); ?>">

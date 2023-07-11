@@ -575,7 +575,8 @@ class estado_resultado_trans_model extends privilegios_model{
         $res = $this->db
           ->select('v.id_remision, Date(f.fecha) AS fecha, (f.serie || f.folio) AS folio,
             c.id_cliente, c.nombre_fiscal AS cliente, f.subtotal, f.total, v.comprobacion,
-            fp.id_clasificacion, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva, fp.unidad')
+            fp.id_clasificacion, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe,
+            fp.iva, fp.unidad, fp.kilos')
           ->from('otros.estado_resultado_trans_ventas v')
             ->join('facturacion f', 'v.id_remision = f.id_factura', 'inner')
             ->join('clientes c', 'c.id_cliente = f.id_cliente', 'inner')
@@ -728,11 +729,11 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
       $pdf->SetWidths(array(5, 15, 18, 43, 42, 15, 15, 15, 18));
-      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'CLIENTE', 'CONCEPTO', 'UNIDAD', 'CANTIDAD', 'PRECIO', 'IMPORTE'), true, true);
+      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'CLIENTE', 'CONCEPTO', 'KG', 'CANTIDAD', 'PRECIO', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R'));
       $pdf->SetWidths(array(5, 15, 18, 43, 42, 15, 15, 15, 18));
       $auxrem = 0;
       foreach ($caja['remisiones'] as $key => $rem)
@@ -745,7 +746,8 @@ class estado_resultado_trans_model extends privilegios_model{
           ($auxrem != $rem->id_remision? $rem->folio: ''),
           ($auxrem != $rem->id_remision? $rem->cliente: ''),
           $rem->descripcion,
-          $rem->unidad,
+          // $rem->unidad,
+          MyString::formatoNumero($rem->kilos, 2, '', false),
           MyString::formatoNumero($rem->cantidad, 2, '', false),
           MyString::formatoNumero($rem->precio_unitario, 2, '', false),
           MyString::formatoNumero($rem->importe, 2, '', false)
