@@ -1,4 +1,7 @@
 
+ ☐ Reporte de inventario nuevo
+   -- lap
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Costo x Ramcho',364,true,'nomina_trabajos2/rpt_costo_rancho/','print',true);
  ☐ Ordenes proyectos cambios
    -- lap|san|pcc
    ALTER TABLE IF EXISTS otros.proyectos ALTER COLUMN nombre TYPE character varying(250);
