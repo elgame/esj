@@ -29,7 +29,7 @@
                   </div>
                 </div>
 
-                <div class="control-group">
+                <!-- <div class="control-group">
                   <label class="control-label" for="did_almacen">Almacen</label>
                   <div class="controls">
                     <div class="input-append span12">
@@ -42,7 +42,7 @@
                       </select>
                     </div>
                   </div>
-                </div>
+                </div> -->
 
                 <div class="control-group">
                   <label class="control-label" for="fproducto">Familias</label>
@@ -69,7 +69,6 @@
 
                 <div>
                   <label for="con_existencia">Con Existencia <input type="checkbox" name="con_existencia" id="con_existencia" value="si"> </label> |
-                  <label for="con_movimiento">Con Movimientos <input type="checkbox" name="con_movimiento" id="con_movimiento" value="si"> </label>
                 </div>
 
                 <div class="form-actions">

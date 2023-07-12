@@ -2535,8 +2535,8 @@ class inventario_model extends privilegios_model{
 
     $res = $this->db->query(
       "SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura,
-        COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
-        (COALESCE(sal_co.cantidad, 0) - COALESCE(sal_sa.cantidad, 0)) AS saldo_anterior, p.stock_min
+        (COALESCE(co.cantidad, 0) - COALESCE(sa.cantidad, 0)) AS existenciam,
+        (COALESCE(cosp.cantidad, 0) - COALESCE(sasp.cantidad, 0)) AS existenciasp
         {$sql_con_req_f}
       FROM productos AS p
       INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
@@ -2548,6 +2548,7 @@ class inventario_model extends privilegios_model{
           INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
         WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
           AND Date(cp.fecha_aceptacion) <= '{$_GET['ffecha2']}'
+          AND co.id_almacen = 1
           {$sql_com} AND co.id_orden_aplico IS NULL
         GROUP BY cp.id_producto
       ) AS co ON co.id_producto = p.id_producto
@@ -2558,29 +2559,32 @@ class inventario_model extends privilegios_model{
         INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
         WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
           AND Date(sa.fecha_registro) <= '{$_GET['ffecha2']}'
+          AND sa.id_almacen = 1
           {$sql_sal}
         GROUP BY sp.id_producto
       ) AS sa ON sa.id_producto = p.id_producto
-      -- LEFT JOIN
-      -- (
-      --   SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
-      --   FROM compras_ordenes AS co
-      --     INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
-      --   WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
-      --     AND Date(cp.fecha_aceptacion) < '{$fecha}'
-      --     {$sql_com} AND co.id_orden_aplico IS NULL
-      --   GROUP BY cp.id_producto
-      -- ) AS sal_co ON sal_co.id_producto = p.id_producto
-      -- LEFT JOIN
-      -- (
-      --   SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
-      --   FROM compras_salidas AS sa
-      --   INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-      --   WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
-      --     AND Date(sa.fecha_registro) < '{$fecha}'
-      --     {$sql_sal}
-      --   GROUP BY sp.id_producto
-      -- ) AS sal_sa ON sal_sa.id_producto = p.id_producto
+      LEFT JOIN
+      (
+        SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
+        FROM compras_ordenes AS co
+          INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+        WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
+          AND Date(cp.fecha_aceptacion) <= '{$_GET['ffecha2']}'
+          AND co.id_almacen = 2
+          {$sql_com} AND co.id_orden_aplico IS NULL
+        GROUP BY cp.id_producto
+      ) AS cosp ON cosp.id_producto = p.id_producto
+      LEFT JOIN
+      (
+        SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
+        FROM compras_salidas AS sa
+        INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+        WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
+          AND Date(sa.fecha_registro) <= '{$_GET['ffecha2']}'
+          AND sa.id_almacen = 2
+          {$sql_sal}
+        GROUP BY sp.id_producto
+      ) AS sasp ON sasp.id_producto = p.id_producto
       {$sql_con_req}
       WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
       ORDER BY nombre, nombre_producto ASC
@@ -2612,7 +2616,7 @@ class inventario_model extends privilegios_model{
         $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-    $pdf->titulo2 = 'Existencia por unidades';
+    $pdf->titulo2 = 'Existencia por unidades en Almacenes';
     $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();
@@ -2620,8 +2624,8 @@ class inventario_model extends privilegios_model{
     $pdf->SetFont('Arial','',8);
 
     $aligns = array('L', 'R', 'R', 'R', 'R');
-    $widths = array(80, 25, 25, 25, 25, 25);
-    $header = array('Producto', 'Saldo', 'Entradas', 'Salidas', 'E. Teórica', 'E. Real');
+    $widths = array(80, 30, 30, 30, 30, 25);
+    $header = array('Producto', 'E. MATRIZ', 'E. Fisica', 'E. Prod SANJO', 'E. Fisica');
 
     $familia = '';
     $totales = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
@@ -2652,18 +2656,18 @@ class inventario_model extends privilegios_model{
 
       if ($familia <> $item->nombre)
       {
-        if($key > 0){
-          $pdf->SetFont('Arial','B',8);
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row(array('',
-            MyString::formatoNumero($totales['familia'][0], 2, '', false),
-            MyString::formatoNumero($totales['familia'][1], 2, '', false),
-            MyString::formatoNumero($totales['familia'][2], 2, '', false),
-            MyString::formatoNumero($totales['familia'][3], 2, '', false),
-            ), true, false);
-        }
+        // if($key > 0){
+        //   $pdf->SetFont('Arial','B',8);
+        //   $pdf->SetX(6);
+        //   $pdf->SetAligns($aligns);
+        //   $pdf->SetWidths($widths);
+        //   $pdf->Row(array('',
+        //     MyString::formatoNumero($totales['familia'][0], 2, '', false),
+        //     MyString::formatoNumero($totales['familia'][1], 2, '', false),
+        //     MyString::formatoNumero($totales['familia'][2], 2, '', false),
+        //     MyString::formatoNumero($totales['familia'][3], 2, '', false),
+        //     ), true, false);
+        // }
         $totales['familia'] = array(0,0,0,0);
 
         $pdf->SetFont('Arial','B',11);
@@ -2678,34 +2682,31 @@ class inventario_model extends privilegios_model{
       $pdf->SetTextColor(0,0,0);
 
       $imprimir = true;
-      $existencia = $item->saldo_anterior+$item->entradas-$item->salidas;
+      $existencia = $item->existenciam+$item->existenciasp;
       if($this->input->get('con_existencia') == 'si')
         if($existencia <= 0)
-          $imprimir = false;
-      if($this->input->get('con_movimiento') == 'si')
-        if($item->entradas <= 0 && $item->salidas <= 0)
           $imprimir = false;
 
 
       if($imprimir)
       {
-        $totales['familia'][0] += $item->saldo_anterior;
-        $totales['familia'][1] += $item->entradas;
-        $totales['familia'][2] += $item->salidas;
-        $totales['familia'][3] += $existencia;
+        // $totales['familia'][0] += $item->saldo_anterior;
+        // $totales['familia'][1] += $item->entradas;
+        // $totales['familia'][2] += $item->salidas;
+        // $totales['familia'][3] += $existencia;
 
-        $totales['general'][0] += $item->saldo_anterior;
-        $totales['general'][1] += $item->entradas;
-        $totales['general'][2] += $item->salidas;
-        $totales['general'][3] += $existencia;
+        // $totales['general'][0] += $item->saldo_anterior;
+        // $totales['general'][1] += $item->entradas;
+        // $totales['general'][2] += $item->salidas;
+        // $totales['general'][3] += $existencia;
 
-        $datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
-          MyString::formatoNumero($item->saldo_anterior, 2, '', false),
-          MyString::formatoNumero($item->entradas, 2, '', false),
-          MyString::formatoNumero($item->salidas, 2, '', false),
-          MyString::formatoNumero($existencia, 2, '', false),
+        $datos = array(
+          $item->nombre_producto.' ('.$item->abreviatura.')',
+          MyString::formatoNumero($item->existenciam, 2, '', false),
           '',
-          );
+          MyString::formatoNumero($item->existenciasp, 2, '', false),
+          ''
+        );
 
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
@@ -2714,26 +2715,169 @@ class inventario_model extends privilegios_model{
       }
     }
 
-    $pdf->SetFont('Arial','B',8);
-    $pdf->SetX(6);
-    $pdf->SetAligns($aligns);
-    $pdf->SetWidths($widths);
-    $pdf->Row(array('',
-      MyString::formatoNumero($totales['familia'][0], 2, '', false),
-      MyString::formatoNumero($totales['familia'][1], 2, '', false),
-      MyString::formatoNumero($totales['familia'][2], 2, '', false),
-      MyString::formatoNumero($totales['familia'][3], 2, '', false),
-      ), true, false);
+    // $pdf->SetFont('Arial','B',8);
+    // $pdf->SetX(6);
+    // $pdf->SetAligns($aligns);
+    // $pdf->SetWidths($widths);
+    // $pdf->Row(array('',
+    //   MyString::formatoNumero($totales['familia'][0], 2, '', false),
+    //   MyString::formatoNumero($totales['familia'][1], 2, '', false),
+    //   MyString::formatoNumero($totales['familia'][2], 2, '', false),
+    //   MyString::formatoNumero($totales['familia'][3], 2, '', false),
+    //   ), true, false);
 
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->Row(array('GENERAL',
-      MyString::formatoNumero($totales['general'][0], 2, '', false),
-      MyString::formatoNumero($totales['general'][1], 2, '', false),
-      MyString::formatoNumero($totales['general'][2], 2, '', false),
-      MyString::formatoNumero($totales['general'][3], 2, '', false),
-      ), false, true);
+    // $pdf->SetXY(6, $pdf->GetY()+5);
+    // $pdf->Row(array('GENERAL',
+    //   MyString::formatoNumero($totales['general'][0], 2, '', false),
+    //   MyString::formatoNumero($totales['general'][1], 2, '', false),
+    //   MyString::formatoNumero($totales['general'][2], 2, '', false),
+    //   MyString::formatoNumero($totales['general'][3], 2, '', false),
+    //   ), false, true);
 
-    $pdf->Output('epu.pdf', 'I');
+    $pdf->Output('formato_inventario.pdf', 'I');
+  }
+  public function getFormatoInvXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=formato_inventario.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getFormatoInvData();
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Existencia por unidades en Almacenes';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">E. MATRIZ</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">E. Fisica</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">E. Prod SANJO</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">E. Fisica</td>
+        </tr>';
+
+    $familia = '';
+    $totales = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($key==0){
+
+        if ($key == 0)
+        {
+          $familia = $item->nombre;
+          $html .= '<tr>
+              <td colspan="6" style="font-size:16px;border:1px solid #000;">'.$familia.'</td>
+            </tr>';
+        }
+      }
+
+      if ($familia <> $item->nombre)
+      {
+        if($key > 0){
+          // $html .= '
+          //   <tr style="font-weight:bold">
+          //     <td></td>
+          //     <td style="border:1px solid #000;">TOTALES</td>
+          //     <td style="border:1px solid #000;">'.$totales['familia'][0].'</td>
+          //     <td style="border:1px solid #000;">'.$totales['familia'][1].'</td>
+          //     <td style="border:1px solid #000;">'.$totales['familia'][2].'</td>
+          //     <td style="border:1px solid #000;">'.$totales['familia'][3].'</td>
+          //   </tr>';
+          $html .= '<tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>';
+        }
+        $totales['familia'] = array(0,0,0,0);
+
+        $familia = $item->nombre;
+        $html .= '<tr>
+              <td colspan="6" style="font-size:16px;border:1px solid #000;">'.$familia.'</td>
+            </tr>';
+      }
+
+      $imprimir = true;
+      $existencia = $item->existenciam+$item->existenciasp;
+      if($this->input->get('con_existencia') == 'si')
+        if($existencia <= 0)
+          $imprimir = false;
+
+
+      if($imprimir)
+      {
+        // $totales['familia'][0] += $item->saldo_anterior;
+        // $totales['familia'][1] += $item->entradas;
+        // $totales['familia'][2] += $item->salidas;
+        // $totales['familia'][3] += $existencia;
+
+        // $totales['general'][0] += $item->saldo_anterior;
+        // $totales['general'][1] += $item->entradas;
+        // $totales['general'][2] += $item->salidas;
+        // $totales['general'][3] += $existencia;
+
+        $html .= '<tr>
+              <td style="width:30px;border:1px solid #000;"></td>
+              <td style="width:300px;border:1px solid #000;">'.$item->nombre_producto.' ('.$item->abreviatura.')'.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->existenciam.'</td>
+              <td style="width:200px;border:1px solid #000;"> </td>
+              <td style="width:200px;border:1px solid #000;">'.$item->existenciasp.'</td>
+              <td style="width:200px;border:1px solid #000;"> </td>
+            </tr>';
+      }
+    }
+
+    // $html .= '
+    //         <tr style="font-weight:bold">
+    //           <td></td>
+    //           <td style="border:1px solid #000;">TOTALES</td>
+    //           <td style="border:1px solid #000;">'.$totales['familia'][0].'</td>
+    //           <td style="border:1px solid #000;">'.$totales['familia'][1].'</td>
+    //           <td style="border:1px solid #000;">'.$totales['familia'][2].'</td>
+    //           <td style="border:1px solid #000;">'.$totales['familia'][3].'</td>
+    //         </tr>
+    //         <tr>
+    //           <td colspan="6"></td>
+    //         </tr>
+    //         <tr>
+    //           <td colspan="6"></td>
+    //         </tr>
+    //         <tr style="font-weight:bold">
+    //           <td></td>
+    //           <td style="border:1px solid #000;">GENERAL</td>
+    //           <td style="border:1px solid #000;">'.$totales['general'][0].'</td>
+    //           <td style="border:1px solid #000;">'.$totales['general'][1].'</td>
+    //           <td style="border:1px solid #000;">'.$totales['general'][2].'</td>
+    //           <td style="border:1px solid #000;">'.$totales['general'][3].'</td>
+    //         </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
   }
 
   /**
