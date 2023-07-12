@@ -857,6 +857,7 @@ class facturacion_model extends privilegios_model{
           'objetoImp' => "02"
         ];
 
+        $kgs_unidad = ($_POST['prod_dcantidad'][$key] * $dunidad_c);
         $productosFactura[] = array(
           'id_factura'            => $idFactura,
           'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -877,7 +878,7 @@ class facturacion_model extends privilegios_model{
           'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
           'ids_pallets'           => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'ids_remisiones'        => isset($_POST['remisiones_id'][$key]) && $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
-          'kilos'                 => ($this->input->post('did_empresa') == 24? $_POST['prod_dkilos'][$key]: ($_POST['prod_dcantidad'][$key] * $dunidad_c)), //$_POST['prod_dkilos'][$key],
+          'kilos'                 => ($this->input->post('did_empresa') == 24? (isset($_POST['prod_dkilos'][$key])? $_POST['prod_dkilos'][$key]: $kgs_unidad) : $kgs_unidad), //$_POST['prod_dkilos'][$key],
           'cajas'                 => isset($_POST['prod_dcajas'][$key]) ? $_POST['prod_dcajas'][$key] : 0,
           'id_unidad_rendimiento' => isset($_POST['id_unidad_rendimiento'][$key]) && $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
@@ -886,9 +887,9 @@ class facturacion_model extends privilegios_model{
           'certificado'           => (isset($_POST['isCert'][$key])? ($_POST['isCert'][$key]=== '1' ? 't' : 'f'): 'f'),
           'id_unidad'             => $did_unidad,
           'unidad_c'              => $dunidad_c,
-          'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
-          'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
-          'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
+          'id_calidad'            => (isset($_POST['prod_did_calidad'][$key]) && $_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
+          'id_tamanio'            => (isset($_POST['prod_did_tamanio'][$key]) && $_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
+          'id_calibres'           => (isset($_POST['prod_did_tamanio_prod'][$key]) && $_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'no_identificacion'     => $_POST['no_identificacion'][$key],
           'cfdi_ext'              => json_encode($cfdi_extpp),
