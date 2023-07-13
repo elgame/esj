@@ -224,9 +224,10 @@
 
   // Evento change para el select retencion.
   var eventChangeRetIva = function () {
+    console.log('eventChangeRetIva');
     $('#table_prod').on('change', '#dreten_iva', function(event) {
       var $this = $(this),
-          $tr = $this.parent('tr');
+          $tr = $this.parents('tr');
 
       $tr.find('#prod_dreten_iva_porcent').val($this.find('option:selected').val());
 
