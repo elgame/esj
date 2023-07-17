@@ -16,8 +16,7 @@
 */
 
 $config['jsv']  = '1.771';
-$config['snapshot_cam1']  = 'http://Bascula:Basc.2021$.@192.168.1.243/Streaming/channels/1/picture';
-$config['snapshot_cam11'] = 'http://192.168.1.243/Streaming/channels/1/picture';
+$config['snapshot_cam1'] = 'http://192.168.1.243/Streaming/channels/1/picture';
 $config['userpass_cam1']  = 'Bascula:Basc.2021$.';
 $config['snapshot_cam2']  = 'http://192.168.1.244/ISAPI/Streaming/channels/1/picture';
 $config['userpass_cam2']  = 'admin:Aegis100';
