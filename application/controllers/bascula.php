@@ -25,7 +25,9 @@ class Bascula extends MY_Controller {
 
   public function cam1()
   {
-    // $this->getPicture();
+    $url = $this->config->item('snapshot_cam11');
+    $userpass = $this->config->item('userpass_cam1');
+    $this->getPicture($url, $userpass);
   }
 
   public function cam2()
