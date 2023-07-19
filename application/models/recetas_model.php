@@ -54,11 +54,16 @@ class recetas_model extends CI_Model {
 
     $query = BDUtil::pagination(
         "SELECT r.id_recetas, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
-          f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
+          r.folio, f.ranchos, r.tipo, r.status, r.fecha,
           r.total_importe, r.paso, r.fecha_aplicacion, r.folio_hoja
         FROM otros.recetas r
           INNER JOIN areas a ON a.id_area = r.id_area
-          LEFT JOIN otros.formulas f ON r.id_formula = f.id_formula
+          LEFT JOIN (
+            SELECT rr.id_receta, String_agg(r.nombre, ', ') AS ranchos
+            FROM otros.recetas_rancho rr
+              INNER JOIN otros.ranchos r ON r.id_rancho = rr.id_rancho
+            GROUP BY rr.id_receta
+          ) f ON r.id_recetas = f.id_receta
         WHERE 1 = 1 {$sql}
         ORDER BY r.folio DESC
         ", $params, true);

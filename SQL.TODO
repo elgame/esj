@@ -1,4 +1,12 @@
 
+ ☐ Cambios estado res transporte
+    -- lap|san
+    ALTER TABLE IF EXISTS otros.estado_resultado_trans_cods ADD COLUMN tipo character varying(10) COLLATE pg_catalog."default" DEFAULT 'g'::character varying;
+    COMMENT ON COLUMN otros.estado_resultado_trans_cods.tipo IS 'g: gastos, rm: repara manteni';
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Conceptos REP Y MTTO',572,true,'estado_resultado_trans/codsRepMant/','th-list',false);
+    ALTER TABLE IF EXISTS otros.estado_resultado_trans_rep_mtto ADD COLUMN id_cod bigint;
+    ALTER TABLE IF EXISTS otros.estado_resultado_trans_rep_mtto ADD CONSTRAINT estado_resultado_trans_rep_mtto_id_cod_fkey FOREIGN KEY (id_cod) REFERENCES otros.estado_resultado_trans_cods (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+
  ☐ Reporte de inventario nuevo
    -- lap|pcc|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Formato Inventario',369,true,'inventario/formatoInventario/','print',true);

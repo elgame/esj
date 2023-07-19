@@ -156,10 +156,15 @@ class estado_resultado_trans_model extends privilegios_model{
   public function ajaxCodsGastos()
   {
     $sql = '';
+    if (!empty($_GET['tipo'])) {
+      $sql .= " AND tipo = '{$_GET['tipo']}'";
+    }
+
     $res = $this->db->query("
         SELECT *
         FROM otros.estado_resultado_trans_cods
         WHERE status = 't' AND lower(nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%'
+          {$sql}
         ORDER BY nombre ASC
         LIMIT 25");
 
@@ -201,6 +206,7 @@ class estado_resultado_trans_model extends privilegios_model{
    */
   public function addEstadoResult()
   {
+    $msg = '1';
     $passes = true;
     $this->load->model('clientes_model');
     $this->load->model('clasificaciones_model');
@@ -277,18 +283,26 @@ class estado_resultado_trans_model extends privilegios_model{
     if (!empty($_POST['repmant_proveedor'])) {
       foreach ($_POST['repmant_proveedor'] as $key => $descripcion)
       {
-        $repmant[] = array(
-          'id_estado'    => $id_estado,
-          'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
-          'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
-          'fecha'        => $_POST['repmant_fecha'][$key] !== '' ? $_POST['repmant_fecha'][$key] : null,
-          'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
-          'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
-          'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
-          'subtotal'     => $_POST['repmant_subtotal'][$key] !== '' ? $_POST['repmant_subtotal'][$key] : null,
-          'iva'          => $_POST['repmant_iva'][$key] !== '' ? $_POST['repmant_iva'][$key] : null,
-          'importe'      => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
-        );
+        $id_cod = intval($_POST['repmant_codg_id'][$key]);
+        if ($id_cod == 0) {
+          $passes = false;
+          $msg = '34';
+          // $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
+        } else {
+          $repmant[] = array(
+            'id_estado'    => $id_estado,
+            'id_cod'       => $id_cod,
+            'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
+            'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
+            'fecha'        => $_POST['repmant_fecha'][$key] !== '' ? $_POST['repmant_fecha'][$key] : null,
+            'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
+            'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
+            'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
+            'subtotal'     => $_POST['repmant_subtotal'][$key] !== '' ? $_POST['repmant_subtotal'][$key] : null,
+            'iva'          => $_POST['repmant_iva'][$key] !== '' ? $_POST['repmant_iva'][$key] : null,
+            'importe'      => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
+          );
+        }
       }
       if(count($repmant) > 0)
         $this->db->insert_batch('otros.estado_resultado_trans_rep_mtto', $repmant);
@@ -301,6 +315,7 @@ class estado_resultado_trans_model extends privilegios_model{
         $id_cod = intval($_POST['gastos_codg_id'][$key]);
         if ($id_cod == 0) {
           $passes = false;
+          $msg = '33';
           // $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
         } else {
           $gastos[] = array(
@@ -325,11 +340,12 @@ class estado_resultado_trans_model extends privilegios_model{
         $this->db->insert_batch('otros.estado_resultado_trans_gastos', $gastos);
     }
 
-    return array('passes' => $passes, 'id_estado' => $id_estado);
+    return array('passes' => $passes, 'id_estado' => $id_estado, 'msg' => $msg);
   }
 
   public function updateEstadoResult($id_estado)
   {
+    $msg = '1';
     $passes = true;
     $lts_precios = [];
     if ($this->input->post('arend_lts')) {
@@ -413,22 +429,52 @@ class estado_resultado_trans_model extends privilegios_model{
     }
 
     $repmant = array();
-    $this->db->delete('otros.estado_resultado_trans_rep_mtto', "id_estado = {$id_estado}");
+    // $this->db->delete('otros.estado_resultado_trans_rep_mtto', "id_estado = {$id_estado}");
     if (!empty($_POST['repmant_proveedor'])) {
       foreach ($_POST['repmant_proveedor'] as $key => $descripcion)
       {
-        $repmant[] = array(
-          'id_estado'    => $id_estado,
-          'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
-          'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
-          'fecha'        => $_POST['repmant_fecha'][$key] !== '' ? $_POST['repmant_fecha'][$key] : null,
-          'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
-          'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
-          'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
-          'subtotal'     => $_POST['repmant_subtotal'][$key] !== '' ? $_POST['repmant_subtotal'][$key] : null,
-          'iva'          => $_POST['repmant_iva'][$key] !== '' ? $_POST['repmant_iva'][$key] : null,
-          'importe'      => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
-        );
+        $id_cod = intval($_POST['repmant_codg_id'][$key]);
+        if ($id_cod == 0) {
+          if ($_POST['repmant_del'][$key] == 'true' && $_POST['repmant_idrm'][$key] != '') {
+            $this->db->delete('otros.estado_resultado_trans_rep_mtto', "id = '{$_POST['repmant_idrm'][$key]}'");
+          } else {
+            $passes = false;
+            $msg = '34';
+            // $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
+          }
+        } else {
+          if ($_POST['repmant_del'][$key] == 'true' && $_POST['repmant_idrm'][$key] != '') {
+            $this->db->delete('otros.estado_resultado_trans_rep_mtto', "id = '{$_POST['repmant_idrm'][$key]}'");
+          } elseif ($_POST['repmant_idrm'][$key] != '') {
+            $this->db->update('otros.estado_resultado_trans_rep_mtto', array(
+              'id_estado'    => $id_estado,
+              'id_cod'       => $id_cod,
+              'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
+              'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
+              'fecha'        => $_POST['repmant_fecha'][$key] !== '' ? $_POST['repmant_fecha'][$key] : null,
+              'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
+              'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
+              'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
+              'subtotal'     => $_POST['repmant_subtotal'][$key] !== '' ? $_POST['repmant_subtotal'][$key] : null,
+              'iva'          => $_POST['repmant_iva'][$key] !== '' ? $_POST['repmant_iva'][$key] : null,
+              'importe'      => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
+            ), "id = '{$_POST['repmant_idrm'][$key]}'");
+          } else {
+            $repmant[] = array(
+              'id_estado'    => $id_estado,
+              'id_cod'       => $id_cod,
+              'id_compra'    => $_POST['repmant_id'][$key] !== '' ? $_POST['repmant_id'][$key] : null,
+              'comprobacion' => $_POST['repmant_comprobacion'][$key] == 'true' ? 't' : 'f',
+              'fecha'        => $_POST['repmant_fecha'][$key] !== '' ? $_POST['repmant_fecha'][$key] : null,
+              'folio'        => $_POST['repmant_numero'][$key] !== '' ? $_POST['repmant_numero'][$key] : null,
+              'proveedor'    => $_POST['repmant_proveedor'][$key] !== '' ? $_POST['repmant_proveedor'][$key] : null,
+              'concepto'     => $_POST['repmant_concepto'][$key] !== '' ? $_POST['repmant_concepto'][$key] : null,
+              'subtotal'     => $_POST['repmant_subtotal'][$key] !== '' ? $_POST['repmant_subtotal'][$key] : null,
+              'iva'          => $_POST['repmant_iva'][$key] !== '' ? $_POST['repmant_iva'][$key] : null,
+              'importe'      => $_POST['repmant_importe'][$key] !== '' ? $_POST['repmant_importe'][$key] : null,
+            );
+          }
+        }
       }
 
       if(count($repmant) > 0){
@@ -443,6 +489,7 @@ class estado_resultado_trans_model extends privilegios_model{
         $id_cod = intval($_POST['gastos_codg_id'][$key]);
         if ($id_cod == 0) {
           $passes = false;
+          $msg = '33';
           // $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
         } else {
           if ($_POST['gastos_del'][$key] == 'true' && $_POST['gastos_id_gasto'][$key] > 0) {
@@ -483,7 +530,7 @@ class estado_resultado_trans_model extends privilegios_model{
       }
     }
 
-    return array('passes' => $passes, 'id_estado' => $id_estado);
+    return array('passes' => $passes, 'id_estado' => $id_estado, 'msg' => $msg);
   }
 
   /**
@@ -608,8 +655,8 @@ class estado_resultado_trans_model extends privilegios_model{
           Coalesce((f.serie || f.folio), v.folio ) AS folio, p.id_proveedor,
           Coalesce(p.nombre_fiscal, v.proveedor ) AS proveedor,
           Coalesce(f.subtotal, v.subtotal ) AS subtotal, Coalesce(f.total, v.importe ) AS total,
-          Coalesce(f.importe_iva, v.iva ) AS importe_iva,
-          Coalesce(f.concepto, v.concepto ) AS concepto, v.comprobacion
+          Coalesce(f.importe_iva, v.iva ) AS importe_iva, Coalesce(v.id_cod, 0) AS id_cod,
+          Coalesce(v.concepto, f.concepto ) AS concepto, v.comprobacion, v.id
         FROM otros.estado_resultado_trans_rep_mtto v
           LEFT JOIN compras f ON v.id_compra = f.id_compra
           LEFT JOIN proveedores p ON p.id_proveedor = f.id_proveedor
@@ -718,6 +765,7 @@ class estado_resultado_trans_model extends privilegios_model{
 
     $ttotalRemisiones = 0;
     $ttotalRemisionesEf = 0;
+    $totalKgs = $totalCantidad = 0;
     $pdf->SetXY(6, $pdf->GetY()+5);
     if (count($caja['remisiones']) > 0) {
       $pdf->SetFont('Arial','B', 6);
@@ -758,6 +806,9 @@ class estado_resultado_trans_model extends privilegios_model{
         if ($rem->comprobacion == 't') {
           $ttotalRemisionesEf += floatval($rem->importe);
         }
+
+        $totalKgs += $rem->kilos;
+        $totalCantidad += $rem->cantidad;
       }
     }
     if ($ttotalRemisiones > 0) {
@@ -770,6 +821,15 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->Row(array('Ventas'), false, 'B');
       $pdf->SetX(192);
       $pdf->Row(array(MyString::formatoNumero($ttotalRemisiones, 2, '$', false)), false, 'B');
+
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(15, 15));
+      $pdf->SetFont('Arial', 'B', 6);
+      $pdf->SetXY(129, $pdf->GetY()-1);
+      $pdf->Row(array(
+        MyString::formatoNumero($totalKgs, 2, '$', false),
+        MyString::formatoNumero($totalCantidad, 2, '$', false),
+      ), false, 'B');
     }
 
     $ttotalGastos = 0;
@@ -1001,6 +1061,7 @@ class estado_resultado_trans_model extends privilegios_model{
       'chofer' => [''],
       'ingresos' => ['rows' => []],
       'sueldos' => ['rows' => []],
+      'repmtto' => ['rows' => []],
       'gastos' => ['rows' => []],
 
       'km_recorridos' => ['KM RECORRIDOS'],
@@ -1086,18 +1147,18 @@ class estado_resultado_trans_model extends privilegios_model{
         }
       }
 
-      // gastos
+      // rep mtto
       $quit_conceptos = ['COSTO MENSUAL GENERAL EST', 'COSTO ESTIMADO', 'COSTO MENSUAL GENERAL', 'COSTO MENSUAL ESTIMADO'];
-      $gastos = []; // agrupamos por concepto repmant
+      $repmtto = []; // agrupamos por concepto repmant
       foreach ($infoFlete['repmant'] as $key => $rem) {
         if (!in_array(mb_strtoupper(trim($rem->concepto), 'UTF-8'), $quit_conceptos)) {
           $kkk = MyString::toAscii($rem->concepto);
-          if (isset($gastos[$kkk])) {
-            $gastos[$kkk]['subtotal'] += $rem->subtotal;
-            $gastos[$kkk]['total'] += $rem->total;
-            $gastos[$kkk]['importe_iva'] += $rem->importe_iva;
+          if (isset($repmtto[$kkk])) {
+            $repmtto[$kkk]['subtotal'] += $rem->subtotal;
+            $repmtto[$kkk]['total'] += $rem->total;
+            $repmtto[$kkk]['importe_iva'] += $rem->importe_iva;
           } else {
-            $gastos[$kkk] = [
+            $repmtto[$kkk] = [
               'descripcion' => $rem->concepto,
               'subtotal' => $rem->subtotal,
               'total' => $rem->total,
@@ -1106,6 +1167,25 @@ class estado_resultado_trans_model extends privilegios_model{
           }
         }
       }
+      foreach ($repmtto as $key => $rem) { // agrega los nuevos conceptos de repmtto
+        if (isset($response['repmtto']['rows'][$key])) {
+          $response['repmtto']['rows'][$key][] = $rem['subtotal'];
+        } else {
+          $response['repmtto']['rows'][$key][] = $rem['descripcion'];
+          for ($i=0; $i < $keyf; $i++) {
+            $response['repmtto']['rows'][$key][] = 0;
+          }
+          $response['repmtto']['rows'][$key][] = $rem['subtotal'];
+        }
+      }
+      foreach ($response['repmtto']['rows'] as $key => $row) { // ajusta todos los conceptos al # de rows
+        if ($keyf+2 > count($row)) {
+          $response['repmtto']['rows'][$key][] = 0;
+        }
+      }
+
+      // gastos
+      $gastos = []; // agrupamos por concepto repmant
       foreach ($infoFlete['gastos'] as $key => $rem) { // agrupamos por concepto gastos
         if (!in_array(mb_strtoupper(trim($rem->codg), 'UTF-8'), $quit_conceptos)) {
           $kkk = MyString::toAscii($rem->codg);
@@ -1182,6 +1262,13 @@ class estado_resultado_trans_model extends privilegios_model{
         $suma += floatval($val);
       }
       $response['sueldos']['rows'][$key][] = $suma;
+    }
+    foreach ($response['repmtto']['rows'] as $key => $value) {
+      $suma = 0;
+      foreach ($value as $key2 => $val) {
+        $suma += floatval($val);
+      }
+      $response['repmtto']['rows'][$key][] = $suma;
     }
     foreach ($response['gastos']['rows'] as $key => $value) {
       $suma = 0;
@@ -1308,6 +1395,33 @@ class estado_resultado_trans_model extends privilegios_model{
     }
     $html .= '</tr>';
 
+    // repmtto
+    $res['repmtto']['totales'] = [];
+    $html .= '<tr style="font-weight:bold">
+      <td colspan="'.$colspan.'" style="width:300px;border:1px solid #000;background-color: #cccccc;text-align:center">Rep/Mtto</td>
+    </tr>';
+    foreach ($res['repmtto']['rows'] as $key => $row) {
+      $totali = 0;
+      $html .= '<tr style="">';
+      foreach ($row as $keyr => $value) {
+        $html .= '<td style="width:300px;border:1px solid #000;">'.$value.'</td>';
+
+        if (isset($res['repmtto']['totales'][$keyr])) {
+          if (is_numeric($value)) {
+            $res['repmtto']['totales'][$keyr] += floatval($value);
+          }
+        } else {
+          $res['repmtto']['totales'][$keyr] = is_numeric($value)? floatval($value): 'Total Rep/Mtto';
+        }
+      }
+      $html .= '</tr>';
+    }
+    $html .= '<tr style="font-weight:bold">';
+    foreach ($res['repmtto']['totales'] as $key => $value) {
+      $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$value.'</td>';
+    }
+    $html .= '</tr>';
+
     // Gastos
     $res['gastos']['totales'] = [];
     $html .= '<tr style="font-weight:bold">
@@ -1340,7 +1454,10 @@ class estado_resultado_trans_model extends privilegios_model{
       if ($key == 0) {
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Perdida/Ganancia</td>';
       } else {
-        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.($res['ingresos']['totales'][$key] - $value).'</td>';
+        $totalll = $res['ingresos']['totales'][$key] - $res['sueldos']['totales'][$key] -
+          $res['repmtto']['totales'][$key] - $res['gastos']['totales'][$key];
+
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$totalll.'</td>';
       }
     }
     $html .= '</tr>';
@@ -1400,7 +1517,7 @@ class estado_resultado_trans_model extends privilegios_model{
   }
 
 
-  public function codsGet($perpage = '40')
+  public function codsGet($perpage = '40', $tipo = 'g')
   {
     $sql = '';
     //paginacion
@@ -1426,7 +1543,7 @@ class estado_resultado_trans_model extends privilegios_model{
     $query = BDUtil::pagination(
         "SELECT id, nombre, status
         FROM otros.estado_resultado_trans_cods
-        WHERE 1 = 1 {$sql}
+        WHERE tipo = '{$tipo}' {$sql}
         ORDER BY (nombre) ASC
         ", $params, true);
 
@@ -1447,7 +1564,8 @@ class estado_resultado_trans_model extends privilegios_model{
   public function codsAgregar($data)
   {
     $insertData = array(
-      'nombre'       => $data['nombre'],
+      'nombre' => $data['nombre'],
+      'tipo' => $data['tipo']
     );
 
     $this->db->insert('otros.estado_resultado_trans_cods', $insertData);

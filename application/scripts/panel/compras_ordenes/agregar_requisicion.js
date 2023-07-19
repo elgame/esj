@@ -1824,7 +1824,7 @@
           success: function(data) {
             const idproyecto = $("#proyecto").attr('data-proyecto');
             for (var i = 0; i < data.length; i++) {
-              hhtml += '<option value="'+data[i].id+'" '+ (idproyecto > 0 ? 'selected' : '') +'>'+data[i].value+'</option>';
+              hhtml += '<option value="'+data[i].id+'" '+ (idproyecto == data[i].id ? 'selected' : '') +'>'+data[i].value+'</option>';
             }
 
             $('#proyecto').html(hhtml);

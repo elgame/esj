@@ -435,11 +435,15 @@
                           <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $_POST['repmant_fecha'][$key] ?>" class="repmant_fecha span12" placeholder="Fecha" <?php echo $readonly ?>></td>
                           <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $_POST['repmant_numero'][$key] ?>" class="repmant-numero span12 vpositive" placeholder="" <?php echo $readonly ?> style=""></td>
                           <td>
-                            <input type="text" name="repmant_proveedor[]" value="<?php echo $_POST['repmant_proveedor'][$key] ?>" class="repmant-proveedor" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
+                            <input type="text" name="repmant_proveedor[]" value="<?php echo $_POST['repmant_proveedor'][$key] ?>" class="repmant-proveedor autproveedor" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
                             <input type="hidden" name="repmant_id[]" value="<?php echo $_POST['repmant_id'][$key] ?>" class="repmant-id span12" required>
                             <input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">
+                            <input type="hidden" name="repmant_idrm[]" value="<?php echo $_POST['repmant_idrm'][$key] ?>" id="repmant_idrm">
                           </td>
-                          <td style=""><input type="text" name="repmant_concepto[]" value="<?php echo $_POST['repmant_concepto'][$key] ?>" class="repmant-concepto" placeholder="Concepto" <?php echo $readonly ?>></td>
+                          <td style="">
+                            <input type="text" name="repmant_concepto[]" value="<?php echo $_POST['repmant_concepto'][$key] ?>" class="repmant-concepto codsgastos" placeholder="Concepto" <?php echo $readonly ?>>
+                            <input type="hidden" name="repmant_codg_id[]" value="<?php echo $_POST['repmant_codg_id'][$key] ?>" class="repmant-codg_id codsgastos-id" data-tipo="rm">
+                          </td>
                           <td style=""><input type="number" step="any" name="repmant_subtotal[]" value="<?php echo $_POST['repmant_subtotal'][$key] ?>" class="repmant-subtotal vpositive" placeholder="Subtotal" required <?php echo $readonly ?>></td>
                           <td style=""><input type="number" step="any" name="repmant_iva[]" value="<?php echo $_POST['repmant_iva'][$key] ?>" class="repmant-iva vpositive" placeholder="Iva" required <?php echo $readonly ?>></td>
                           <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $_POST['repmant_importe'][$key] ?>" class="repmant-importe vpositive" placeholder="Importe" required <?php echo $readonly ?>></td>
@@ -461,11 +465,15 @@
                             <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $repmant->fecha ?>" class="repmant_fecha span12" placeholder="Fecha" <?php echo $readonly ?>></td>
                             <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $repmant->folio ?>" class="repmant-numero span12 vpositive" placeholder="" <?php echo $readonly ?> style=""></td>
                             <td>
-                              <input type="text" name="repmant_proveedor[]" value="<?php echo $repmant->proveedor ?>" class="repmant-proveedor" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
+                              <input type="text" name="repmant_proveedor[]" value="<?php echo $repmant->proveedor ?>" class="repmant-proveedor autproveedor" maxlength="500" placeholder="Nombre" required <?php echo $readonly ?>>
                               <input type="hidden" name="repmant_id[]" value="<?php echo $repmant->id_compra ?>" class="repmant-id span12" required>
                               <input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">
+                              <input type="hidden" name="repmant_idrm[]" value="<?php echo $repmant->id ?>" id="repmant_idrm">
                             </td>
-                            <td style=""><input type="text" name="repmant_concepto[]" value="<?php echo $repmant->concepto ?>" class="repmant-concepto" placeholder="Concepto" <?php echo $readonly ?>></td>
+                            <td style="">
+                              <input type="text" name="repmant_concepto[]" value="<?php echo $repmant->concepto ?>" class="repmant-concepto codsgastos" placeholder="Concepto" <?php echo $readonly ?>>
+                              <input type="hidden" name="repmant_codg_id[]" value="<?php echo $repmant->id_cod ?>" class="repmant-codg_id codsgastos-id" data-tipo="rm">
+                            </td>
                             <td style=""><input type="number" step="any" name="repmant_subtotal[]" value="<?php echo $repmant->subtotal ?>" class="repmant-subtotal vpositive" placeholder="Subtotal" required <?php echo $readonly ?>></td>
                             <td style=""><input type="number" step="any" name="repmant_iva[]" value="<?php echo $repmant->importe_iva ?>" class="repmant-iva vpositive" placeholder="Iva" required <?php echo $readonly ?>></td>
                             <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $repmant->total ?>" class="repmant-importe vpositive" placeholder="Importe" required <?php echo $readonly ?>></td>

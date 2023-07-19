@@ -15,7 +15,7 @@
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
-        <h2><i class="icon-plus"></i> Agregar Concepto Gasto</h2>
+        <h2><i class="icon-plus"></i> Agregar Concepto</h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
         </div>
@@ -32,6 +32,7 @@
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="text" name="nombre" class="span11" id="nombre" value="<?php echo set_value('nombre') ?>" maxlength="150" autofocus required>
+                    <input type="hidden" name="tipo" id="tipo" value="<?php echo $tipo ?>">
                   </div>
                 </div>
               </div><!--/control-group -->

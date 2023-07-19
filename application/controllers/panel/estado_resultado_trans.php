@@ -113,10 +113,10 @@ class estado_resultado_trans extends MY_Controller {
         if (isset($_GET['id_nr']))
           redirect(base_url('panel/estado_resultado_trans/agregar/?msg=3&id_nr='.$_GET['id_nr']));
         else
-          redirect(base_url('panel/estado_resultado_trans/?msg=33'));
+          redirect(base_url('panel/estado_resultado_trans/?msg='.$respons['msg']));
+      } else {
+        $params['frm_errors'] = $this->showMsgs($respons['msg']);
       }
-      else
-        $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
     }
 
     // Parametros por default.
@@ -286,6 +286,7 @@ class estado_resultado_trans extends MY_Controller {
         ['field' => 'repmant_id[]'            , 'label' => 'repmant_id'            , 'rules' => '']                 ,
         ['field' => 'repmant_row[]'           , 'label' => 'repmant_row'           , 'rules' => '']                 ,
         ['field' => 'repmant_concepto[]'      , 'label' => 'repmant_concepto'      , 'rules' => '']                 ,
+        ['field' => 'repmant_codg_id[]'       , 'label' => 'repmant_codg_id'       , 'rules' => 'numeric'] ,
         ['field' => 'repmant_importe[]'       , 'label' => 'repmant_importe'       , 'rules' => '']                 ,
         ['field' => 'repmant_comprobacion[]'  , 'label' => 'repmant_comprobacion'  , 'rules' => '']                 ,
         ['field' => 'repmant_del[]'           , 'label' => 'repmant_del'           , 'rules' => '']                 ,
@@ -353,6 +354,33 @@ class estado_resultado_trans extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function codsRepMant()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Conceptos REP Y MTTO'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('estado_resultado_trans_model');
+
+    $params['conceptos'] = $this->estado_resultado_trans_model->codsGet(40, 'rm');
+    // echo "<pre>";
+    //   var_dump($params['categorias']);
+    // echo "</pre>";exit;
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/estado_resultado_trans/codsRMAdmin', $params);
+    $this->load->view('panel/footer');
+  }
+
   public function codsAgregar()
   {
     $this->carabiner->css(array(
@@ -385,6 +413,8 @@ class estado_resultado_trans extends MY_Controller {
         redirect(base_url('panel/estado_resultado_trans/codsAgregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
       }
     }
+
+    $params['tipo'] = isset($_GET['tipo'])? $_GET['tipo']: 'g';
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -489,6 +519,10 @@ class estado_resultado_trans extends MY_Controller {
         break;
       case 33:
         $txt = 'El Estado de Resultados se guardo pero algunos gastos no porque que no se selecciono del catalogo.';
+        $icono = 'error';
+        break;
+      case 34:
+        $txt = 'El Estado de Resultados se guardo pero algunos rep/matto no porque que no se selecciono del catalogo.';
         $icono = 'error';
         break;
       case 4:

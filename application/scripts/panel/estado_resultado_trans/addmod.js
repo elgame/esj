@@ -323,7 +323,8 @@
               iva: $this.attr('data-iva'),
               total: $this.attr('data-total'),
               proveedor: $this.attr('data-proveedor'),
-              concepto: $this.attr('data-concepto'),
+              concepto: '',
+              idcod: 0,
               fecha: $this.attr('data-fecha')
             });
           } else { //gastos
@@ -352,11 +353,12 @@
   var btnDelRepMant = function () {
     $('#table-repmant').on('click', '.btn-del-repmant', function(event) {
       let $tr = $(this).parents('tr')
-      // if($tr.find('.repmant-id').val() !== '') {
-        // $tr.find('#repmant_del').val('true')
-      // } else {
+      if($tr.find('#repmant_idrm').val() !== '') {
+        $tr.find('#repmant_del').val('true');
+        $tr.css('display', 'none');
+      } else {
         $tr.remove();
-      // }
+      }
       calculaTotalRepMant();
     });
   };
@@ -375,6 +377,7 @@
         total: '',
         proveedor: '',
         concepto: '',
+        idcod: 0,
         fecha: ''
       });
     });
@@ -404,11 +407,15 @@
               '<td style=""><input type="date" name="repmant_fecha[]" value="'+fecha+'" class="span12 repmant_fecha" placeholder="Fecha" '+readonly+'></td>' +
               '<td style=""><input type="text" name="repmant_numero[]" value="'+folio+'" class="span12 repmant-numero vpositive" placeholder="" '+readonly+' style=""></td>' +
               '<td>' +
-                '<input type="text" name="repmant_proveedor[]" value="'+proveedor+'" class="repmant-proveedor span12" maxlength="500" placeholder="Nombre" required '+readonly+'>' +
+                '<input type="text" name="repmant_proveedor[]" value="'+proveedor+'" class="repmant-proveedor autproveedor span12" maxlength="500" placeholder="Nombre" required '+readonly+'>' +
                 '<input type="hidden" name="repmant_id[]" value="'+id+'" class="repmant-id span12">' +
                 '<input type="hidden" name="repmant_row[]" value="" class="input-small vpositive repmant_row">' +
+                '<input type="hidden" name="repmant_idrm[]" value="" id="repmant_idrm">' +
               '</td>' +
-              '<td style=""><input type="text" name="repmant_concepto[]" value="'+concepto+'" class="repmant-concepto" placeholder="Concepto" '+readonly+'></td>' +
+              '<td style="">' +
+                '<input type="text" name="repmant_concepto[]" value="'+concepto+'" class="repmant-concepto codsgastos" placeholder="Concepto">' +
+                '<input type="hidden" name="repmant_codg_id[]" value="'+compra.idcod+'" class="repmant-codg_id codsgastos-id" data-tipo="rm">' +
+              '</td>' +
               '<td style=""><input type="number" step="any" name="repmant_subtotal[]" value="'+subtotal+'" class="repmant-subtotal vpositive" placeholder="Subtotal" required '+readonly+'></td>' +
               '<td style=""><input type="number" step="any" name="repmant_iva[]" value="'+iva+'" class="repmant-iva vpositive" placeholder="Iva" required '+readonly+'></td>' +
               '<td style=""><input type="number" step="any" name="repmant_importe[]" value="'+total+'" class="repmant-importe vpositive" placeholder="Importe" required '+readonly+'></td>' +
@@ -438,12 +445,21 @@
     $('#total-repmant').val(util.darFormatoNum(total.toFixed(2)));
   };
   var onChangeTotalRepMant = function () {
-    $('#table-repmant').on('keyup', '.repmant-importe', function(e) {
-      var key = e.which,
+    $('#table-repmant').on('keyup', '.repmant-importe, .repmant-subtotal, .repmant-iva', function(e) {
+      let key = e.which,
           $this = $(this),
-          $tr = $this.parent().parent();
+          $tr = $this.parent().parent(),
+          $importe = $tr.find('.repmant-importe'),
+          $subtotal = $tr.find('.repmant-subtotal'),
+          $iva = $tr.find('.repmant-iva')
+          importe = 0;
 
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        if($this.hasClass('repmant-subtotal') || $this.hasClass('repmant-iva')) {
+          importe = (parseFloat($subtotal.val())||0) + (parseFloat($iva.val())||0);
+          $importe.val(importe);
+        }
+
         calculaTotalRepMant();
       }
     });
@@ -529,13 +545,21 @@
     $('input#ttotal-gastos').val(total.toFixed(2));
   };
   var onChanceImporteGastos = function () {
-    $('#table-gastos').on('keyup', '.gastos-importe', function(e) {
+    $('#table-gastos').on('keyup', '.gastos-importe, .gastos-subtotal, .gastos-iva', function(e) {
       var key = e.which,
           $this = $(this),
-          $t = $('#table-gastos'),
-          total = 0;
+          $tr = $this.parent().parent(),
+          $importe = $tr.find('.gastos-importe'),
+          $subtotal = $tr.find('.gastos-subtotal'),
+          $iva = $tr.find('.gastos-iva'),
+          importe = 0;
 
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        if($this.hasClass('gastos-subtotal') || $this.hasClass('gastos-iva')) {
+          importe = (parseFloat($subtotal.val())||0) + (parseFloat($iva.val())||0);
+          $importe.val(importe);
+        }
+
         calculaTotalGastos();
         // calculaCorte();
       }
@@ -724,8 +748,23 @@
     console.log('autocompleteCodGastosLive');
     $('body').on('focus', '.codsgastos:not(.ui-autocomplete-input)', function(event) {
       console.log('autocompleteCodGastosLive Focus');
+      const $this = $(this);
       $(this).autocomplete({
-        source: base_url+'panel/estado_resultado_trans/ajax_get_cods/',
+        source: function(request, response) {
+          var params = {term : request.term};
+          // if(parseInt($("#empresaApId").val()) > 0)
+          //   params.did_empresa = $("#empresaApId").val();
+          const tipo = $this.parents('tr').find(".codsgastos-id").attr('data-tipo');
+          params.tipo = tipo !== undefined? tipo: 'g';
+          $.ajax({
+              url: base_url+'panel/estado_resultado_trans/ajax_get_cods/',
+              dataType: "json",
+              data: params,
+              success: function(data) {
+                response(data);
+              }
+          });
+        },
         minLength: 1,
         selectFirst: true,
         select: function( event, ui ) {
