@@ -488,6 +488,11 @@ class productos_salidas_model extends CI_Model {
     if (isset($orden->id_orden)) {
       $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
     }
+
+    $receta = $this->db->query("SELECT id_recetas FROM otros.recetas_salidas WHERE id_salida = {$idOrden} LIMIT 1")->row();
+    if (isset($receta->id_recetas)) {
+      $this->db->update('otros.recetas', array('paso' => 'p'), array('id_recetas' => $receta->id_recetas));
+    }
     $this->db->delete('otros.recetas_salidas', "id_salida = {$idOrden}");
 
     // Bitacora
