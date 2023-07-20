@@ -27,7 +27,7 @@ class recetas_model extends CI_Model {
 
     if($this->input->get('fbuscar') != '')
     {
-      $sqlfolio = is_numeric($this->input->get('fbuscar'))? "f.folio = '".$this->input->get('fbuscar')."' OR r.folio = '".$this->input->get('fbuscar')."' OR ": '';
+      $sqlfolio = is_numeric($this->input->get('fbuscar'))? "r.folio = '".$this->input->get('fbuscar')."' OR ": '';
       $sql .= " AND ({$sqlfolio} f.ranchos LIKE '%".$this->input->get('fbuscar')."%' OR
          r.folio_hoja LIKE '".$this->input->get('fbuscar')."')";
     }
