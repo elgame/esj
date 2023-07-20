@@ -89,6 +89,15 @@
                 </div>
               </div>
 
+              <?php if ($mov->tipo == 'f' && $this->usuarios_model->tienePrivilegioDe('', 'banco/modificar_movimiento_monto/')): ?>
+                <div class="control-group">
+                  <label class="control-label" for="dmonto">Monto</label>
+                  <div class="controls">
+                    <input type="number" step="any" name="dmonto" class="span12" id="dmonto" value="<?php echo isset($mov->monto)? $mov->monto: ''; ?>">
+                  </div>
+                </div>
+              <?php endif ?>
+
               <input type="hidden" name="es_ligado" value="<?php echo $mov->es_ligado; ?>">
           <?php if ($mov->es_ligado == 0)
           { ?>

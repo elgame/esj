@@ -6,11 +6,12 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Conceptos REP Y MTTO',572,true,'estado_resultado_trans/codsRepMant/','th-list',false);
     ALTER TABLE IF EXISTS otros.estado_resultado_trans_rep_mtto ADD COLUMN id_cod bigint;
     ALTER TABLE IF EXISTS otros.estado_resultado_trans_rep_mtto ADD CONSTRAINT estado_resultado_trans_rep_mtto_id_cod_fkey FOREIGN KEY (id_cod) REFERENCES otros.estado_resultado_trans_cods (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar Monto',257,false,'banco/modificar_movimiento_monto/','edit',false);
 
- ☐ Reporte de inventario nuevo
+ ✔ Reporte de inventario nuevo @done (23-07-19 18:40)
    -- lap|pcc|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Formato Inventario',369,true,'inventario/formatoInventario/','print',true);
- ☐ Ordenes proyectos cambios
+ ✔ Ordenes proyectos cambios @done (23-07-19 18:40)
    -- lap|san|pcc
    ALTER TABLE IF EXISTS otros.proyectos ALTER COLUMN nombre TYPE character varying(250);
  ✔ Reporte de nomina costo por rancho @done (23-06-14 18:47)

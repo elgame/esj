@@ -1103,6 +1103,11 @@ class banco_cuentas_model extends banco_model {
       $data['a_nombre_de'] = $datosP['dcliente'];
       $data['id_cliente'] = $datosP['did_cliente'];
     }
+    if (isset($datosP['dmonto']) && $datosP['dmonto'] > 0)
+    {
+      $data['monto'] = $datosP['dmonto'];
+    }
+
     $this->db->update('banco_movimientos', $data, "id_movimiento = {$datosG['id_movimiento']}");
 
     if ($datosP['es_ligado'] > 0)
