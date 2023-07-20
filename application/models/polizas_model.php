@@ -3135,7 +3135,7 @@ class polizas_model extends CI_Model {
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid,
             tieps.ieps, tieps.porcentaje_ieps, String_agg(UPPER(f.concepto), ', ') AS observaciones,
-            tisr125.porcentaje_isr125, tisr125.retencion_isr125
+            tisr125.porcentaje_isr125, tisr125.retencion_isr125, bm.monto AS total_mov
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -3171,7 +3171,7 @@ class polizas_model extends CI_Model {
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
             bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha),
             bm.tcambio, bm.uuid, tieps.ieps, tieps.porcentaje_ieps,
-            tisr125.porcentaje_isr125, tisr125.retencion_isr125
+            tisr125.porcentaje_isr125, tisr125.retencion_isr125, bm.monto
           ORDER BY bmc.id_movimiento ASC
         )
         UNION
@@ -3184,7 +3184,7 @@ class polizas_model extends CI_Model {
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
             bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
             '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones,
-            0 AS porcentaje_isr125, 0 AS retencion_isr125
+            0 AS porcentaje_isr125, 0 AS retencion_isr125, bm.monto AS total_mov
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -3388,6 +3388,8 @@ class polizas_model extends CI_Model {
               $impuestos['iva_acreditar']['importe']  = ($value->total_abono*100/$new_total)*$new_iva/100;
               $subtotal2 = $productoss[0]->monto;
             }
+          } elseif ($value->total_abono != $value->total_mov) {
+            $subtotal2 = $value->total_mov;
           }
 
           //Colocamos el Cargo al Proveedor que realizo el pago

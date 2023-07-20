@@ -10464,7 +10464,7 @@ class nomina_fiscal_model extends CI_Model {
           else
           {
             $errorTimbrar = true;
-            $msg = isset($result['result']->mensaje)? $result['result']->mensaje: 'Otro error';
+            $msg = isset($result['result']->mensaje)? $result['result']->mensaje: 'Otro error: '.var_export($result, true);
           }
 
           // echo "<pre>";

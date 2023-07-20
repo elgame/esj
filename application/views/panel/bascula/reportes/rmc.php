@@ -5,7 +5,7 @@
 	<title></title>
 	<style type="text/css" media="print,screen">
 		@import "<?php echo base_url('application/css/bootstrap/normalize.css'); ?>";
-		@import "<?php echo base_url('application/css/bootstrap/boilerplate.css'); ?>";
+/*		@import "<?php echo base_url('application/css/bootstrap/boilerplate.css'); ?>";*/
 
 		.row{
 			width: 100%;
