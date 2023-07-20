@@ -61,7 +61,7 @@
                 <div class="control-group">
                   <label class="control-label" for="dmonto">Monto</label>
                   <div class="controls">
-                    <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', (isset($monto)? $monto: '')); ?>" min="1">
+                    <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', (isset($monto)? $monto: '')); ?>">
                   </div>
                 </div>
 
