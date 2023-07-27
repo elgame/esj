@@ -2456,6 +2456,15 @@ class compras_ordenes_model extends CI_Model {
           $pdf->Row(array("ORDEN GENERADA AUTOMATICAMENTE DE LA EMPRESA {$orden['info'][0]->ordenAplico->empresa} CON FOLIO {$orden['info'][0]->ordenAplico->folio} EL DIA {$orden['info'][0]->ordenAplico->fecha}"), false, false);
         }
 
+        if (isset($orden['info'][0]->proyecto['info'])) {
+          $pdf->SetWidths(array(120));
+          $pdf->SetXY(5, $pdf->GetY());
+          $pdf->Row(array("PROYECTO {$orden['info'][0]->proyecto['info']->id_proyecto}: ".
+              "{$orden['info'][0]->proyecto['info']->nombre} / P:".intval($orden['info'][0]->proyecto['info']->presupuesto)." / A:".intval($orden['info'][0]->proyecto['info']->aplicado)
+            ), false, true);
+          $pdf->SetY($pdf->GetY()+2);
+        }
+
         $pdf->SetFont('Arial', 'B', 8);
 
         $y_auxx = $pdf->GetY();
@@ -2534,13 +2543,6 @@ class compras_ordenes_model extends CI_Model {
         $pdf->page = $pag_auxx;
         $pdf->SetY($y_auxx);
 
-        if (isset($orden['info'][0]->proyecto['info'])) {
-          $pdf->SetWidths(array(120));
-          $pdf->SetXY(90, $pdf->GetY()-1);
-          $pdf->Row(array("PROYECTO {$orden['info'][0]->proyecto['info']->id_proyecto}: ".
-              "{$orden['info'][0]->proyecto['info']->nombre} / P:".intval($orden['info'][0]->proyecto['info']->presupuesto)." / A:".intval($orden['info'][0]->proyecto['info']->aplicado)
-            ), false, true);
-        }
 
         if (!empty($orden['info'][0]->folio_hoja)) {
           $pdf->SetWidths(array(110));
@@ -2732,7 +2734,8 @@ class compras_ordenes_model extends CI_Model {
 
       //a si es vehiculo
       if($orden['info'][0]->tipo_orden == 'd' && $orden['info'][0]->tipo_vehiculo != 'ot' && $orden['info'][0]->id_vehiculo > 0){
-        $pdf->SetY($y_compras);
+        $pdf->page = $pag_auxx;
+        $pdf->SetY($y_auxx);
 
         $pdf->SetFont('Arial', '', 7);
         $pdf->SetAligns(array('C', 'L'));
@@ -2757,7 +2760,8 @@ class compras_ordenes_model extends CI_Model {
           $pdf->Row(array('Precio', MyString::formatoNumero($orden['info'][0]->gasolina_ant->precio, 2, '', false)), false, true);
         }
 
-        $pdf->SetY($y_compras);
+        $pdf->page = $pag_auxx;
+        $pdf->SetY($y_auxx);
         $pdf->SetAligns(array('C', 'L'));
         $pdf->SetWidths(array(55));
         $pdf->SetX(155);
