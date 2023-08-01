@@ -2263,7 +2263,7 @@ class inventario_model extends privilegios_model{
 			$pdf->SetTextColor(0,0,0);
 
 			$imprimir = true;
-			$existencia = (float)MyString::formatoNumero($item->saldo_anterior+$item->entradas-$item->salidas, 2, '', false);
+			$existencia = (float)MyString::float($item->saldo_anterior+$item->entradas-$item->salidas);
 			if($this->input->get('con_existencia') == 'si')
 				if($existencia <= 0)
 					$imprimir = false;
@@ -2682,7 +2682,7 @@ class inventario_model extends privilegios_model{
       $pdf->SetTextColor(0,0,0);
 
       $imprimir = true;
-      $existencia = (float)MyString::formatoNumero($item->existenciam+$item->existenciasp, 2, '', false);
+      $existencia = (float)MyString::float($item->existenciam+$item->existenciasp);
       if($this->input->get('con_existencia') == 'si')
         if($existencia <= 0)
           $imprimir = false;

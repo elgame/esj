@@ -3056,7 +3056,7 @@ class polizas_model extends CI_Model {
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
             '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones,
-            0 AS porcentaje_isr125, 0 AS retencion_isr125
+            0 AS porcentaje_isr125, 0 AS retencion_isr125, fa.monto AS total_mov
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -3078,7 +3078,7 @@ class polizas_model extends CI_Model {
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
             '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones,
-            0 AS porcentaje_isr125, 0 AS retencion_isr125
+            0 AS porcentaje_isr125, 0 AS retencion_isr125, fa.monto AS total_mov
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -3101,7 +3101,7 @@ class polizas_model extends CI_Model {
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco-chc'::character varying AS tipoo,
             bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
             '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones,
-            0 AS porcentaje_isr125, 0 AS retencion_isr125
+            0 AS porcentaje_isr125, 0 AS retencion_isr125, bm.monto AS total_mov
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
