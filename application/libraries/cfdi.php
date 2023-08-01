@@ -1624,8 +1624,8 @@ class cfdi{
           "objetoImp"      => "02",
           "impuestos"      => $impuestos
         );
-        // $monto += $pagado;
-        $monto += $pago->pago_factura;
+        $monto += $pagado;
+        // $monto += $pago->pago_factura;
       }
     }
 
