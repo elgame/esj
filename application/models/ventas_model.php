@@ -84,7 +84,7 @@ class ventas_model extends privilegios_model{
 	public function getInfoVenta($id, $info_basic=false, $moneda=false)
   {
 		$res = $this->db
-      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida, fo.no_salida_fruta")
+      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida, fo.no_salida_fruta, fo.extras")
       ->from('facturacion as f')
       ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
       ->where("f.id_factura = {$id}")
@@ -648,6 +648,7 @@ class ventas_model extends privilegios_model{
   {
     $this->load->model('clientes_model');
     $this->load->model('clasificaciones_model');
+    $infoVenta = $this->getInfoVenta($id_venta);
 
     $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
 
@@ -724,12 +725,15 @@ class ventas_model extends privilegios_model{
 
     // Si tiene el # de trazabilidad
     if ($this->input->post('dno_trazabilidad') !== false || $this->input->post('dno_salida_fruta') !== false) {
+      $extras = $infoVenta['info']->extras;
+
       $this->db->delete('facturacion_otrosdatos', "id_factura = {$id_venta}");
       $this->db->insert('facturacion_otrosdatos', [
         'id_factura'       => $id_venta,
         'no_trazabilidad'  => $this->input->post('dno_trazabilidad'),
         'id_paleta_salida' => ($this->input->post('id_paleta_salida')? $this->input->post('id_paleta_salida'): NULL),
         'no_salida_fruta'  => $this->input->post('dno_salida_fruta'),
+        'extras'           => $extras,
       ]);
     }
 
@@ -1644,7 +1648,7 @@ class ventas_model extends privilegios_model{
     $pdf->setY($pdf->GetY() + 1);
     $hay_prod_certificados = false;
     $gastos = array();
-    $bultoss = 0;
+    $tkiloss = $bultoss = 0;
     foreach($conceptos as $key => $item)
     {
       $band_head = false;
@@ -1698,8 +1702,10 @@ class ventas_model extends privilegios_model{
             $descripcion_ext .= " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
           elseif($item->id_clasificacion == '53' && isset($factura['supcarga']))
             $descripcion_ext .= " (No {$factura['supcarga']->certificado})";
-        }else
+        }else {
           $bultoss += $item->cantidad;
+          $tkiloss += ($item->und_kg*$item->cantidad);
+        }
 
         $pdf->Row(array(
           $item->cantidad,
@@ -1718,8 +1724,8 @@ class ventas_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetX(0);
     $pdf->SetAligns($aligns);
-    $pdf->SetWidths(array(25));
-    $pdf->Row(array($bultoss), true, true, null, 2, 1);
+    $pdf->SetWidths(array(25, 106, 25));
+    $pdf->Row(array($bultoss, '', $tkiloss), true, true, null, 2, 1);
     $pdf->SetY($pdf->GetY()+2);
 
     foreach($gastos as $key => $item)
@@ -1910,8 +1916,40 @@ class ventas_model extends privilegios_model{
         $pdf->Row(array($factura['info']->observaciones), true, 1);
     }
 
-      if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
-          $pdf->AddPage();
+    if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+
+    if ($factura['info']->id_paleta_salida > 0) {
+      $this->load->model('rastreabilidad_paletas_model');
+      $paleta = $this->rastreabilidad_paletas_model->getInfoPaleta($factura['info']->id_paleta_salida);
+      $paleta_extra = json_decode($factura['info']->extras);
+      $proporcion_bultos = $bultoss * $paleta['paleta']->kilos_neto / (isset($paleta_extra->cajas_totales) && $paleta_extra->cajas_totales > 0? $paleta_extra->cajas_totales: 1);
+      // echo "<pre>";
+      // var_dump($bultoss, $proporcion_bultos, $paleta_extra);
+      // echo "</pre>";exit;
+
+      $pdf->SetXY(0, $pdf->GetY() + 2);
+      $pdf->SetFont('Arial', 'B', 9);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetX(0);
+      $pdf->SetAligns(['L', 'L', 'L', 'L', 'L', 'L']);
+      $pdf->SetWidths(array(21, 25, 21, 25, 21, 25));
+      $pdf->Row([
+        'Boleta', $paleta['paleta']->folio,
+        'Kgs Boleta', MyString::formatoNumero($paleta['paleta']->kilos_neto, 2, '', true),
+        'Proporción', MyString::formatoNumero($proporcion_bultos, 2, '', true),
+      ], true, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row([
+        'Kg Tarimas', MyString::formatoNumero($paleta_extra->tarimas_kg, 2, '', true),
+        'Kg Cajas', MyString::formatoNumero($paleta_extra->cajas_kg, 2, '', true),
+        'Total kg', MyString::formatoNumero(($proporcion_bultos - $paleta_extra->tarimas_kg - $paleta_extra->cajas_kg), 2, '', true),
+      ], true, true, null, 2, 1);
+    }
+
+    if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
 
     $pdf->SetFont('helvetica', 'B', 8);
     $pdf->SetXY(10, $pdf->GetY());

@@ -369,8 +369,28 @@ class rastreabilidad_paletas_model extends privilegios_model {
         psp.clasificacion, psp.id_unidad, psp.unidad, c.nombre_fiscal
       ORDER BY id_cliente ASC");
 
+    // descuento de las cajas y tarimas
+    $result_desc = $this->db->query("SELECT rp.id_cliente, Sum(rp.tarimas_kg) AS tarimas_kg,
+        Sum(ss.kgs_desc) AS cajas_kg
+      FROM rastria_pallets rp
+        INNER JOIN (
+          SELECT id_pallet, Sum(cajas * kg_desc) AS kgs_desc
+          FROM rastria_pallets_rendimiento
+          GROUP BY id_pallet
+          HAVING Sum(cajas * kg_desc) > 0
+        ) AS ss ON rp.id_pallet = ss.id_pallet
+        INNER JOIN otros.paletas_salidas_pallets AS psp ON psp.id_pallet = ss.id_pallet
+      WHERE psp.id_paleta_salida = {$id_paleta}
+      GROUP BY rp.id_cliente");
+    $result_desc = $result_desc->result();
+    $datos_desc = [];
+    foreach ($result_desc as $key => $value) {
+      $datos_desc[$value->id_cliente] = $value;
+    }
+
     $datos = $result->result();
     $remisiones = [];
+    $cajas_totales = 0;
     $no_remisionar = false;
     foreach ($datos as $key => $value) {
       if (($value->id_empresa == 2 || $value->id_empresa == 3 || $value->id_empresa == 7 || $value->id_empresa == 15 || $value->id_empresa == 13)) {
@@ -421,10 +441,16 @@ class rastreabilidad_paletas_model extends privilegios_model {
           'tipo_cambio'         => '1',
         ];
 
+        $datajson = [
+          'tarimas_kg' => (isset($datos_desc[$value->id_cliente])? $datos_desc[$value->id_cliente]->tarimas_kg: 0),
+          'cajas_kg' => (isset($datos_desc[$value->id_cliente])? $datos_desc[$value->id_cliente]->cajas_kg: 0),
+          'cajas_totales' => 0,
+        ];
         $remisiones[$value->id_cliente]['otrosdatos'] = [
           'id_factura'       => '',
           'no_trazabilidad'  => '',
           'id_paleta_salida' => $id_paleta,
+          'extras' => $datajson,
         ];
 
         $cliente = $this->clientes_model->getClienteInfo($value->id_cliente, true);
@@ -477,6 +503,12 @@ class rastreabilidad_paletas_model extends privilegios_model {
         'descripcion2'          => '',
         'cfdi_ext'              => json_encode($cfdi_ext),
       ];
+      $cajas_totales += $value->cantidad;
+    }
+
+    foreach ($remisiones as $key => $value) {
+      $value['otrosdatos']['extras']['cajas_totales'] = $cajas_totales;
+      $remisiones[$key]['otrosdatos']['extras'] = json_encode($value['otrosdatos']['extras']);
     }
 
     if (!$no_remisionar) {

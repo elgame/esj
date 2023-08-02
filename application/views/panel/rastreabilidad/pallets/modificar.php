@@ -367,6 +367,40 @@
                   </div>
 
                 </div>
+
+                <div class="row-fluid">
+                  <div class="span8">
+                    <label class="span1" for="fterimas">Tarimas </label>
+                    <input type="number" name="fterimas" id="fterimas" class="span2" value="<?php echo (isset($data->tarimas)? $data->tarimas: ''); ?>"
+                      placeholder="No tarimas" data-next="fclasificacion" style="float: left;">
+
+                    <select name="unidadtarimas" id="unidadtarimas" class="span3 unidadtarimas" style="float: left;">
+                      <option value="" data-id="" data-kg="0">Unidad tarimas</option>
+                      <?php foreach ($unidades as $key => $u): ?>
+                      <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>" data-kg="<?php echo $u->cantidad ?>"><?php echo $u->nombre ?></option>
+                      <?php endforeach ?>
+                    </select>
+                    <button type="button" class="btn" id="btnAddTarimas">+</button>
+                    <div class="clearfix"></div>
+
+                    <ul id="listTarimas">
+                      <?php if (!empty($data->tarimas)):
+                        $tarimas = explode('|', $data->tarimas);
+                      ?>
+                        <?php foreach ($tarimas as $key => $value):
+                          $tarima = explode(',', $value);
+                        ?>
+                          <li><?php echo $tarima[0] ?> Tarimas | <span><?php echo $tarima[1] ?>kg</span>
+                            <input type="hidden" name="no_tarimas[]" value="<?php echo $tarima[0] ?>" data-kg="<?php echo $tarima[1] ?>" class="no_tarimas">
+                            <input type="hidden" name="kg_tarimas[]" value="<?php echo $tarima[1] ?>" class="kg_tarimas">
+                          </li>
+                        <?php endforeach ?>
+                      <?php endif ?>
+                    </ul>
+
+                    <input type="text" name="fterimaskg" id="fterimaskg" value="<?php echo (isset($data->tarimas_kg)? $data->tarimas_kg: ''); ?>" readonly>
+                  </div>
+                </div>
                 <div class="clearfix"></div>
 
 								<div class="row-fluid">
@@ -424,7 +458,8 @@
 												<th>Lote</th>
 												<th>Clasif</th>
 												<th>Más Inf.</th>
-												<th>Cajas</th>
+                        <th>Cajas</th>
+												<th>Unidad</th>
 												<th>Opciones</th>
 											  </tr>
 										  </thead>
@@ -442,6 +477,17 @@
 												<td class="clsif"><?php echo $value->nombre; ?></td>
 												<td class="mas"><?php echo $value->unidad.'|'.$value->calibre.'|'.$value->etiqueta; ?></td>
 												<td><input type="number" class="span12 cajasel" name="rendimientos[]" value="<?php echo $value->cajas; ?>" min="1" max="<?php echo $value->cajas; ?>"></td>
+                        <td>
+                          <select name="idmedida[]" id="idmedida" class="span12 idmedida">
+                            <option value="" data-id="" data-kg="0"></option>
+                            <?php foreach ($unidades as $key => $u): ?>
+                            <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>" data-kg="<?php echo $u->cantidad ?>"
+                              <?php echo ($value->id_unidad_desc == $u->id_unidad? ' selected': ''); ?>><?php echo $u->nombre ?></option>
+                            <?php endforeach ?>
+                          </select>
+                          <input type="hidden" name="ididmedida[]" value="<?php echo $value->id_unidad_desc; ?>" id="ididmedida" class="span12 vpositive">
+                          <input type="hidden" name="idmedidakg[]" value="<?php echo $value->kg_desc; ?>" id="idmedidakg" class="span12 vpositive">
+                        </td>
 												<td><input type="hidden" name="idrendimientos[]" value="<?php echo $value->id_rendimiento; ?>">
 													<input type="hidden" name="idclasificacion[]" value="<?php echo $value->id_clasificacion; ?>">
 													<input type="hidden" name="idunidad[]" value="<?php echo $value->id_unidad; ?>">

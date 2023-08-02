@@ -15,6 +15,7 @@ var addpallets = (function($){
   funidad, fidunidad,
   fcalibre, fidcalibre,
   fetiqueta, fidetiqueta, contadorInputs;
+  unidadesHtml = '';
 
   function init(){
     contadorInputs = 0;
@@ -42,6 +43,13 @@ var addpallets = (function($){
     changePapel();
 
     addNewProductsSalida();
+
+    $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+      unidadesHtml = '';
+      for (var i in unidades) {
+        unidadesHtml += '<option value="'+unidades[i].nombre+'" data-id="'+unidades[i].id_unidad+'" data-kg="'+unidades[i].cantidad+'">'+unidades[i].nombre+'</option>';
+      }
+    }, 'json');
   }
 
   function addNewProductsSalida () {
@@ -300,6 +308,12 @@ var addpallets = (function($){
     //Recalcula el total de cajas al editarce
     $(document).on("change", ".cajasel", calculaCajasSel);
 
+    // selecciona la unidad
+    $(document).on("change", ".idmedida", seleccionaUnidad);
+    $(document).on("click", "#btnAddTarimas", btnAddTarimas);
+    $(document).on("click", "#listTarimas li", btnDelTarima);
+
+
     //Clientes
     $("#fcliente").autocomplete({
       source: function(request, response) {
@@ -350,6 +364,14 @@ var addpallets = (function($){
             '<td class="clsif">'+fclasificacion.val()+'</td>'+
             '<td class="mas">'+$(idrow+" .unidad").text()+'|'+$(idrow+" .calibre").text()+'|'+$(idrow+" .etiqueta").text()+'</td>'+
             '<td><input type="number" class="span12 cajasel" name="rendimientos[]" value="'+calcRestaCajasSel($(idrow+" .libres").text())+'" min="1" max="'+calcRestaCajasSel($(idrow+" .libres").text())+'"></td>'+
+            '<td>' +
+              '<select name="idmedida[]" id="idmedida" class="span12 idmedida">' +
+                '<option value="" data-id="" data-kg="0"></option>' +
+                unidadesHtml +
+              '</select>' +
+              '<input type="hidden" name="ididmedida[]" value="" id="ididmedida" class="span12 vpositive">' +
+              '<input type="hidden" name="idmedidakg[]" value="" id="idmedidakg" class="span12 vpositive">' +
+            '</td>' +
             '<td><input type="hidden" name="idrendimientos[]" value="'+ids[0]+'">'+
             '   <input type="hidden" name="idclasificacion[]" value="'+fid_clasificacion.val()+'">'+
             '   <input type="hidden" name="idunidad[]" value="'+ids[1]+'">'+
@@ -391,6 +413,40 @@ var addpallets = (function($){
       return num_cajas;
     else
       total_cajas_sel.text(num_cajas);
+  }
+
+  function seleccionaUnidad(res){
+    $select = $(this),
+    $parent = $select.parents('tr');
+
+    $parent.find('#ididmedida').val($select.find('option:selected').attr('data-id'));
+    $parent.find('#idmedidakg').val($select.find('option:selected').attr('data-kg'));
+  }
+
+  function btnAddTarimas(res){
+    kgs = $('#unidadtarimas').find('option:selected').attr('data-kg');
+    notarimas = $('#fterimas').val();
+    html = '<li>'+notarimas+' Tarimas | <span>'+kgs+'kg</span>'+
+        '<input type="hidden" name="no_tarimas[]" value="'+notarimas+'" data-kg="'+kgs+'" class="no_tarimas">'+
+        '<input type="hidden" name="kg_tarimas[]" value="'+kgs+'" class="kg_tarimas">'+
+      '</li>';
+    $('#listTarimas').append(html);
+
+    calcTotalTarimas();
+  }
+  function btnDelTarima(){
+    $(this).remove();
+
+    calcTotalTarimas();
+  }
+  function calcTotalTarimas(){
+    totalkg = 0;
+    $('.no_tarimas').each(function(index, el) {
+      no = parseFloat($(el).val())||0;
+      kg = parseFloat($(el).attr('data-kg'))||0;
+      totalkg += no*kg;
+    });
+    $("#fterimaskg").val(totalkg);
   }
 
   function getRendimientosLibres(){

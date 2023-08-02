@@ -268,12 +268,45 @@
 
                   <div class="span2">
                     <label class="span4" for="fcertificado">Certificado </label>
-                    <select name="fcertificado" id="fcertificado" class="span8" data-next="fclasificacion">
+                    <select name="fcertificado" id="fcertificado" class="span8" data-next="fterimas">
                       <option value="N" <?php echo set_select('fcertificado', 'N'); ?>>No Certificado</option>
                       <option value="C" <?php echo set_select('fcertificado', 'C'); ?>>Certificado</option>
                     </select>
                   </div>
+                </div>
 
+                <div class="row-fluid">
+                  <div class="span8">
+                    <label class="span1" for="fterimas">Tarimas </label>
+                    <input type="number" name="fterimas" id="fterimas" class="span2" value="<?php echo (isset($data->tarimas)? $data->tarimas: ''); ?>"
+                      placeholder="No tarimas" data-next="fclasificacion" style="float: left;">
+
+                    <select name="unidadtarimas" id="unidadtarimas" class="span3 unidadtarimas" style="float: left;">
+                      <option value="" data-id="" data-kg="0">Unidad tarimas</option>
+                      <?php foreach ($unidades as $key => $u): ?>
+                      <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>" data-kg="<?php echo $u->cantidad ?>"><?php echo $u->nombre ?></option>
+                      <?php endforeach ?>
+                    </select>
+                    <button type="button" class="btn" id="btnAddTarimas">+</button>
+                    <div class="clearfix"></div>
+
+                    <ul id="listTarimas">
+                      <?php if (!empty($data->tarimas)):
+                        $tarimas = explode('|', $data->tarimas);
+                      ?>
+                        <?php foreach ($tarimas as $key => $value):
+                          $tarima = explode(',', $value);
+                        ?>
+                          <li><?php echo $tarima[0] ?> Tarimas | <span><?php echo $tarima[1] ?>kg</span>
+                            <input type="hidden" name="no_tarimas[]" value="<?php echo $tarima[0] ?>" data-kg="<?php echo $tarima[1] ?>" class="no_tarimas">
+                            <input type="hidden" name="kg_tarimas[]" value="<?php echo $tarima[1] ?>" class="kg_tarimas">
+                          </li>
+                        <?php endforeach ?>
+                      <?php endif ?>
+                    </ul>
+
+                    <input type="text" name="fterimaskg" id="fterimaskg" value="<?php echo (isset($data->tarimas_kg)? $data->tarimas_kg: ''); ?>" readonly>
+                  </div>
                 </div>
                 <div class="clearfix"></div>
 
@@ -328,12 +361,13 @@
 										<table class="table table-striped table-bordered bootstrap-datatable">
 										  <thead>
 											  <tr>
-												<th>Fecha</th>
-												<th>Lote</th>
-												<th>Clasif</th>
-												<th>Más Inf.</th>
-												<th>Cajas</th>
-												<th>Opciones</th>
+  												<th>Fecha</th>
+  												<th>Lote</th>
+  												<th>Clasif</th>
+  												<th>Más Inf.</th>
+                          <th style="width: 70px;">Cajas</th>
+  												<th>Unidad</th>
+  												<th style="width: 40px;">Opciones</th>
 											  </tr>
 										  </thead>
 										  <tbody id="tblrendimientossel">

@@ -93,7 +93,8 @@ class rastreabilidad_pallets_model extends privilegios_model {
             to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rr.fecha_lote, rpr.cajas,
 						u.id_unidad, u.nombre AS unidad, u.cantidad AS unidad_cantidad, cal.id_calibre, cal.nombre AS calibre,
             e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size,
-						rpr.kilos, c.iva as iva_clasificacion, c.id_unidad as id_unidad_clasificacion, rr.certificado, c.codigo AS cls_codigo
+						rpr.kilos, c.iva as iva_clasificacion, c.id_unidad as id_unidad_clasificacion, rr.certificado, c.codigo AS cls_codigo,
+            rpr.kg_desc, rpr.id_unidad_desc
 					FROM rastria_pallets_rendimiento AS rpr
 						INNER JOIN rastria_rendimiento AS rr ON rpr.id_rendimiento = rr.id_rendimiento
 						INNER JOIN clasificaciones AS c ON c.id_clasificacion = rpr.id_clasificacion
@@ -239,6 +240,13 @@ class rastreabilidad_pallets_model extends privilegios_model {
  	{
  		if ($data==NULL)
 		{
+      $tarimas = [];
+      if (isset($_POST['no_tarimas'])) {
+        foreach ($_POST['no_tarimas'] as $key => $value) {
+          $tarimas[] = "{$value},{$_POST['kg_tarimas'][$key]}";
+        }
+      }
+
 			$data = array(
 						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
             'folio'        => $this->input->post('ffolio'),
@@ -248,7 +256,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
             'id_area'      => $this->input->post('parea'),
             'folio_int'    => $this->input->post('ffolio_int'),
             'certificado'  => $this->input->post('fcertificado'),
-						);
+            'tarimas'      => implode('|', $tarimas),
+            'tarimas_kg'   => $this->input->post('fterimaskg'),
+					);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');
 		}
@@ -287,6 +297,13 @@ class rastreabilidad_pallets_model extends privilegios_model {
  	public function updatePallet($id_pallet, $data=NULL){
  		if ($data==NULL)
 		{
+      $tarimas = [];
+      if (isset($_POST['no_tarimas'])) {
+        foreach ($_POST['no_tarimas'] as $key => $value) {
+          $tarimas[] = "{$value},{$_POST['kg_tarimas'][$key]}";
+        }
+      }
+
 			$data = array(
 						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
 						'folio'        => $this->input->post('ffolio'),
@@ -296,7 +313,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
             'calibre_fijo' => $this->input->post('fcalibre_fijo'),
             'folio_int'    => $this->input->post('ffolio_int'),
             'certificado'  => $this->input->post('fcertificado'),
-						);
+            'tarimas'      => implode('|', $tarimas),
+            'tarimas_kg'   => $this->input->post('fterimaskg'),
+					);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');
 		}
@@ -343,8 +362,10 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						'id_etiqueta'      => $_POST['idetiqueta'][$key],
 						'id_size'          => $_POST['idsize'][$key],
 						'cajas'            => $cajas,
-						'kilos'            => $_POST['dkilos'][$key],
-						);
+            'kilos'            => $_POST['dkilos'][$key],
+            'kg_desc'          => (!empty($_POST['idmedidakg'][$key])? $_POST['idmedidakg'][$key]: 0),
+						'id_unidad_desc'   => (!empty($_POST['ididmedida'][$key])? $_POST['ididmedida'][$key]: NULL),
+					);
 				}
 			}
 		}

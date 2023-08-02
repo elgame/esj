@@ -117,7 +117,8 @@ class rastreabilidad_pallets extends MY_Controller {
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
 
     // $params['calibres'] = $this->calibres_model->getCalibres();
-
+    $params['unidades'] = $this->db->select('*')->from('unidades')
+      ->where('status', 't')->order_by('nombre')->get()->result();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -186,6 +187,9 @@ class rastreabilidad_pallets extends MY_Controller {
           break;
         }
       }
+
+      $params['unidades'] = $this->db->select('*')->from('unidades')
+      ->where('status', 't')->order_by('nombre')->get()->result();
 
       // Obtiene los datos de la empresa predeterminada.
       $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();

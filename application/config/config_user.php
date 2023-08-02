@@ -15,7 +15,7 @@
 |http://localhost/sanjorge/   http://sanjorge.dev/
 */
 
-$config['jsv']  = '1.813';
+$config['jsv']  = '1.975';
 $config['snapshot_cam1'] = 'http://192.168.1.243/Streaming/channels/1/picture';
 $config['userpass_cam1']  = 'Bascula:Basc.2021$.';
 $config['snapshot_cam2']  = 'http://192.168.1.244/ISAPI/Streaming/channels/1/picture';

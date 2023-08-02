@@ -1,4 +1,36 @@
 
+ ☐ Reporte por codigo de area, empresa, folio orden, folio compra, concepto, importe
+ ☐ Cambios en remisiones, papeletas y pallets para sacar los kg y ponerlos en l remisión
+   -- lap
+   ALTER TABLE IF EXISTS public.rastria_pallets_rendimiento ADD COLUMN kg_desc real DEFAULT 0;
+   ALTER TABLE IF EXISTS public.rastria_pallets_rendimiento ADD COLUMN id_unidad_desc integer DEFAULT NULL;
+   ALTER TABLE IF EXISTS public.rastria_pallets ADD COLUMN tarimas text DEFAULT '';
+   ALTER TABLE IF EXISTS public.rastria_pallets ADD COLUMN tarimas_kg double precision DEFAULT 0;
+   CREATE OR REPLACE VIEW public.rastria_pallets_lista AS
+     SELECT rp.id_pallet,
+        rp.folio,
+        date(rp.fecha) AS fecha,
+        rp.no_cajas,
+        rp.status,
+        COALESCE(sum(rpr.cajas), 0::bigint) AS cajas,
+        rp.no_cajas - COALESCE(sum(rpr.cajas), 0::bigint) AS cajas_faltantes,
+        rp.id_cliente,
+        rp.no_hojas,
+        rp.kilos_pallet,
+        rp.calibre_fijo,
+        a.id_area,
+        a.nombre AS nombre_area,
+        rp.folio_int,
+        rp.certificado,
+      rp.tarimas,
+      rp.tarimas_kg
+       FROM rastria_pallets rp
+         LEFT JOIN rastria_pallets_rendimiento rpr ON rp.id_pallet = rpr.id_pallet
+         LEFT JOIN areas a ON a.id_area = rp.id_area
+      GROUP BY rp.id_pallet, rp.folio, rp.fecha, rp.no_cajas, rp.status, rp.id_cliente, rp.no_hojas, rp.kilos_pallet, a.id_area
+      ORDER BY rp.folio;
+   ALTER TABLE IF EXISTS public.facturacion_otrosdatos ADD COLUMN extras jsonb;
+
  ☐ Cambios estado res transporte
     -- lap|san
     ALTER TABLE IF EXISTS otros.estado_resultado_trans_cods ADD COLUMN tipo character varying(10) COLLATE pg_catalog."default" DEFAULT 'g'::character varying;
