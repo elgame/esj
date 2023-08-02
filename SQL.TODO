@@ -1,7 +1,7 @@
 
  ☐ Reporte por codigo de area, empresa, folio orden, folio compra, concepto, importe
- ☐ Cambios en remisiones, papeletas y pallets para sacar los kg y ponerlos en l remisión
-   -- lap
+ ✔ Cambios en remisiones, papeletas y pallets para sacar los kg y ponerlos en l remisión @done (23-08-02 17:53)
+   -- lap|san
    ALTER TABLE IF EXISTS public.rastria_pallets_rendimiento ADD COLUMN kg_desc real DEFAULT 0;
    ALTER TABLE IF EXISTS public.rastria_pallets_rendimiento ADD COLUMN id_unidad_desc integer DEFAULT NULL;
    ALTER TABLE IF EXISTS public.rastria_pallets ADD COLUMN tarimas text DEFAULT '';
