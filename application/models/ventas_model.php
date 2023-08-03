@@ -1942,9 +1942,13 @@ class ventas_model extends privilegios_model{
       ], true, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row([
-        'Kg Tarimas', MyString::formatoNumero($paleta_extra->tarimas_kg, 2, '', true),
-        'Kg Cajas', MyString::formatoNumero($paleta_extra->cajas_kg, 2, '', true),
-        'Total kg', MyString::formatoNumero(($proporcion_bultos - $paleta_extra->tarimas_kg - $paleta_extra->cajas_kg), 2, '', true),
+        'Kg Tarimas', MyString::formatoNumero((isset($paleta_extra->tarimas_kg)? $paleta_extra->tarimas_kg: ''), 2, '', true),
+        'Kg Cajas', MyString::formatoNumero((isset($paleta_extra->cajas_kg)? $paleta_extra->cajas_kg: ''), 2, '', true),
+        'Total kg', MyString::formatoNumero((
+          $proporcion_bultos -
+          (isset($paleta_extra->tarimas_kg)? $paleta_extra->tarimas_kg: 0) -
+          (isset($paleta_extra->cajas_kg)? $paleta_extra->cajas_kg: 0)
+        ), 2, '', true),
       ], true, true, null, 2, 1);
     }
 
