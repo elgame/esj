@@ -257,7 +257,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
             'folio_int'    => $this->input->post('ffolio_int'),
             'certificado'  => $this->input->post('fcertificado'),
             'tarimas'      => implode('|', $tarimas),
-            'tarimas_kg'   => $this->input->post('fterimaskg'),
+            'tarimas_kg'   => floatval($this->input->post('fterimaskg')),
 					);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');
@@ -313,7 +313,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
             'calibre_fijo' => $this->input->post('fcalibre_fijo'),
             'folio_int'    => $this->input->post('ffolio_int'),
             'certificado'  => $this->input->post('fcertificado'),
-            'tarimas'      => implode('|', $tarimas),
+            'tarimas'      => (count($tarimas) > 0? implode('|', $tarimas): ''),
             'tarimas_kg'   => $this->input->post('fterimaskg'),
 					);
 			if($this->input->post('fid_cliente') > 0)
