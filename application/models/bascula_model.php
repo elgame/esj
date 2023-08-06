@@ -325,6 +325,8 @@ class bascula_model extends CI_Model {
                 'porcentaje_retencion' => 0,
                 'certificado'          => (isset($_POST['isCert'][$key])? ($_POST['isCert'][$key]=== '1' ? 't' : 'f'): 'f'),
                 'id_unidad'            => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
+                'kilos'                => (isset($_POST['pkilos'][$key])? $_POST['pkilos'][$key]: 0),
+                'promedio'             => (isset($_POST['ppromedio'][$key])? $_POST['ppromedio'][$key]: 0),
               );
             }
           }
@@ -575,7 +577,8 @@ class bascula_model extends CI_Model {
         $sql_res = $this->db
           ->select('fp.id_bascula, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                   fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, cl.cuenta_cpi2, fp.porcentaje_iva, fp.porcentaje_retencion,
-                  u.id_unidad, u.codigo AS ucodigo, fp.certificado, cl.codigo AS ccodigo')
+                  u.id_unidad, u.codigo AS ucodigo, fp.certificado, cl.codigo AS ccodigo,
+                  fp.kilos, fp.promedio')
           ->from('bascula_productos as fp')
           ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
           ->join('unidades as u', 'u.nombre = fp.unidad', 'left')

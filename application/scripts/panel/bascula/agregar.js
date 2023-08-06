@@ -685,13 +685,16 @@ $(function(){
   }
 
   // Evento chango para los promedio de la tabla de cajas.
-  $('#tableCajas').on('change', 'input#ppromedio', function(event) {
+  $('#tableCajas, #table_prod').on('change', 'input#ppromedio', function(event) {
     var $this = $(this),
         $tr = $this.parent().parent(),
-        trIndex = $('#tableCajas tr').index($tr), // Obtiene el index q le corresponde de los tr
+        $ptipo     = $('#ptipo'),
+        tableCajas = ($ptipo.val() == 'en'? 'tableCajas': 'table_prod'),
+        pcajas     = ($ptipo.val() == 'en'? 'pcajas': 'prod_dcantidad'),
+        trIndex = $('#'+tableCajas+' tr').index($tr), // Obtiene el index q le corresponde de los tr
 
         promedio = parseFloat($this.val()),
-        cajas    = parseFloat($tr.find('#pcajas').val()),
+        cajas    = parseFloat($tr.find('#'+pcajas).val()),
         kilos    = (promedio * cajas).toFixed(2),
         precio   = 0;
 
@@ -1068,8 +1071,9 @@ var validaCalidad = function (calidad) {
 
 var calculaTotales = function (trIndex, kilosNeto) {
   console.log('calculaTotales', kilosNeto);
-  var $ptotal_cajas = $('#ptotal_cajas'),
-      $tableCajas   = $('#tableCajas'),
+  var $ptipo        = $('#ptipo'),
+      $ptotal_cajas = $('#ptotal_cajas'),
+      $tableCajas   = ($ptipo.val() == 'en'? $('#tableCajas'): $('#table_prod')),
       $ptotal       = $('#ptotal'),
       $pisr         = $('#pisr'),
       $pisrPorcent  = $('#pisrPorcent'),
@@ -1080,24 +1084,25 @@ var calculaTotales = function (trIndex, kilosNeto) {
       totalCajasP = 0,
       isrTotal    = 0,
       total       = 0,
+      pcajas      = ($ptipo.val() == 'en'? 'pcajas': 'prod_dcantidad');
 
       trIndex = trIndex || 0;
 
-  console.log('calculaTotales', kilosNeto);
+  console.log('calculaTotales 2', kilosNeto);
   // Recorre todas las cajas/calidades para obtener el total de cajas.
-  $('input#pcajas').each(function(e, i) {
+  $('input#'+pcajas).each(function(e, i) {
     totalCajas += parseFloat($(this).val());
   });
 
   // Recorre las cajas/calidades para obtener unicamente la suma de las cajas
   // que se editaran en caso de que el promedio cambie.
-  $('input#pcajas').slice(trIndex).each(function(e, i) {
+  $('input#'+pcajas).slice(trIndex).each(function(e, i) {
     totalCajasP += parseFloat($(this).val());
   });
 
   $tableCajas.find('tbody tr').slice(trIndex).each(function(e, i) {
     var $tr      = $(this),
-        cajas    = parseFloat($tr.find('#pcajas').val()),
+        cajas    = parseFloat($tr.find('#'+pcajas).val()),
         kilos    = 0,
         promedio = 0,
         importe  = 0,
@@ -1114,7 +1119,7 @@ var calculaTotales = function (trIndex, kilosNeto) {
       $tr.find('#pkilos').get(0).type = 'text';
     }
 
-    promedio = (kilos / cajas).toFixed(2);
+    promedio = parseFloat((kilos / cajas)||0).toFixed(2);
     $tr.find('#ppromedio').val(promedio);
     // $tr.find('#tdpromedio').html(promedio)
 

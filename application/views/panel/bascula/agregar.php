@@ -593,6 +593,8 @@
                       <th>Descripción</th>
                       <th>Medida</th>
                       <th>Cant.</th>
+                      <th>Kilos</th>
+                      <th>Promedio</th>
                       <th>P Unitario</th>
                       <th>IVA%</th>
                       <th>IVA</th>
@@ -656,6 +658,13 @@
                                       <!-- <input type="hidden" name="prod_dcajas[]" value="<?php echo $_POST['prod_dcajas'][$k] ?>" id="prod_dcajas" class="span12 vpositive">
                                       <input type="hidden" name="prod_dkilos[]" value="<?php echo $_POST['prod_dkilos'][$k] ?>" id="prod_dkilos" class="span12 vpositive"> -->
                                   </td>
+                                  <td id="tdkilos">
+                                    <span></span>
+                                    <input type="text" name="pkilos[]" value="<?php echo $_POST['pkilos'][$k] ?>" id="pkilos" style="width: 100px;">
+                                  </td>
+                                  <td id="tdpromedio">
+                                    <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$k] ?>" id="ppromedio" style="width: 80px;">
+                                  </td>
                                   <td>
                                     <input type="text" name="prod_dpreciou[]" class="span12 vnumeric" value="<?php echo $_POST['prod_dpreciou'][$k]; ?>" id="prod_dpreciou">
                                   </td>
@@ -708,6 +717,13 @@
                                 <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
                                 <!-- <input type="hidden" name="prod_dcajas[]" value="0" id="prod_dcajas" class="span12 vpositive">
                                 <input type="hidden" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span12 vpositive"> -->
+                            </td>
+                            <td id="tdkilos">
+                              <span></span>
+                              <input type="text" name="pkilos[]" value="" id="pkilos" style="width: 100px;">
+                            </td>
+                            <td id="tdpromedio">
+                              <input type="text" name="ppromedio[]" value="" id="ppromedio" style="width: 80px;">
                             </td>
                             <td>
                               <input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vnumeric">

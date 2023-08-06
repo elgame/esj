@@ -868,6 +868,13 @@ function addProducto(unidades, prod) {
                     // '<input type="hidden" name="prod_dkilos[]" value="'+prod_kilos+'" id="prod_dkilos" class="span12 vpositive">' +
                     // '<input type="hidden" name="prod_dcajas[]" value="'+prod_cajas+'" id="prod_dcajas" class="span12 vpositive">' +
                 '</td>' +
+                '<td id="tdkilos">'+
+                  '<span></span>'+
+                  '<input type="text" name="pkilos[]" value="" id="pkilos" style="width: 100px;">'+
+                '</td>'+
+                '<td id="tdpromedio">'+
+                  '<input type="text" name="ppromedio[]" value="" id="ppromedio" style="width: 80px;">'+
+                '</td>'+
                 '<td>' +
                   '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vnumeric jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                 '</td>' +

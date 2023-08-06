@@ -1,7 +1,12 @@
 
+ ☐ Cambios en bascula salidas, kg promedio
+   -- pcc
+   ALTER TABLE IF EXISTS public.bascula_productos ADD COLUMN kilos double precision NOT NULL DEFAULT 0;
+   ALTER TABLE IF EXISTS public.bascula_productos ADD COLUMN promedio double precision NOT NULL DEFAULT 0;
+
  ☐ Reporte por codigo de area, empresa, folio orden, folio compra, concepto, importe
  ✔ Cambios en remisiones, papeletas y pallets para sacar los kg y ponerlos en l remisión @done (23-08-02 17:53)
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE IF EXISTS public.rastria_pallets_rendimiento ADD COLUMN kg_desc real DEFAULT 0;
    ALTER TABLE IF EXISTS public.rastria_pallets_rendimiento ADD COLUMN id_unidad_desc integer DEFAULT NULL;
    ALTER TABLE IF EXISTS public.rastria_pallets ADD COLUMN tarimas text DEFAULT '';
@@ -32,7 +37,7 @@
    ALTER TABLE IF EXISTS public.facturacion_otrosdatos ADD COLUMN extras jsonb;
 
  ☐ Cambios estado res transporte
-    -- lap|san
+    -- lap|san|pcc
     ALTER TABLE IF EXISTS otros.estado_resultado_trans_cods ADD COLUMN tipo character varying(10) COLLATE pg_catalog."default" DEFAULT 'g'::character varying;
     COMMENT ON COLUMN otros.estado_resultado_trans_cods.tipo IS 'g: gastos, rm: repara manteni';
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Conceptos REP Y MTTO',572,true,'estado_resultado_trans/codsRepMant/','th-list',false);

@@ -346,6 +346,8 @@ class bascula extends MY_Controller {
             $_POST['prod_diva_total'][$key]         = $p->iva;
             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
+            $_POST['pkilos'][$key]                  = $p->kilos;
+            $_POST['ppromedio'][$key]               = $p->promedio;
 
 
             $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
@@ -1815,10 +1817,10 @@ class bascula extends MY_Controller {
                 'rules' => 'required');
           $rules[] = array('field' => 'pkilos[]',
                 'label' => 'Calidad kilos',
-                'rules' => 'required');
+                'rules' => '');
           $rules[] = array('field' => 'ppromedio[]',
                 'label' => 'Calidad promedio',
-                'rules' => 'required');
+                'rules' => '');
           $rules[] = array('field' => 'pprecio[]',
                 'label' => 'Calidad precio',
                 'rules' => 'required');
