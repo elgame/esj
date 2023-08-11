@@ -1,6 +1,6 @@
 
  ☐ Cambios en bascula salidas, kg promedio
-   -- pcc
+   -- pcc|lap
    ALTER TABLE IF EXISTS public.bascula_productos ADD COLUMN kilos double precision NOT NULL DEFAULT 0;
    ALTER TABLE IF EXISTS public.bascula_productos ADD COLUMN promedio double precision NOT NULL DEFAULT 0;
 

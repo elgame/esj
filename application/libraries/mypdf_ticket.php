@@ -218,15 +218,30 @@ class mypdf_ticket extends FPDF {
               // $this->SetFont($this->fount_txt, '', $this->font_size);
               // $this->SetWidths(array(8, 12, 12, 10, 10, 18));
               // $this->SetAligns(array('L'));
+            foreach ($data_info as $prod){
+              $this->SetWidths(array(9, 16, 16.5, 8.5, 16));
+              $this->SetAligns(array('L','L','L','R','L'));
               $this->SetFounts(array($this->fount_num,$this->fount_txt,$this->fount_txt,$this->fount_num,$this->fount_num),
                          array(.5,-1,-1,.5,.5));
-            foreach ($data_info as $prod){
               $this->SetY($this->GetY()-3);
               $this->Row(array($prod->cantidad,
                                $prod->ucodigo,
                                $prod->ccodigo,
                                MyString::formatoNumero($prod->precio_unitario, 2, ''),
                                MyString::formatoNumero($prod->importe, 2, '', false)), false, false);
+
+              $this->SetWidths(array(9, 16, 16.5, 16, 8.5));
+              $this->SetAligns(array('R','L','L','L','L'));
+              $this->SetFounts(array($this->fount_txt,$this->fount_num,$this->fount_txt,$this->fount_num,$this->fount_num),
+                         array(.5,-1,-1,.5,.5));
+              $this->SetY($this->GetY()-3);
+              $this->Row(array('Kg:',
+                                MyString::formatoNumero($prod->kilos, 2, ''),
+                                'Promedio:',
+                                MyString::formatoNumero($prod->promedio, 2, ''),
+                                ''
+                              ), false, false);
+              $this->SetY($this->GetY()+2);
               $subtotal += $prod->importe;
               $iva += $prod->iva;
             }

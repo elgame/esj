@@ -635,7 +635,7 @@
                             foreach ($_POST['prod_did_prod'] as $k => $v) {
                               if ($_POST['prod_importe'][$k] >= 0 && isset($_POST['prod_ddescripcion'][$k]{0}) && isset($_POST['prod_importe'][$k])) {
                               ?>
-                                <tr>
+                                <tr data-kneto="<?php echo $this->input->post('pkilos_neto') ?>">
                                   <td>
                                     <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
                                     <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
@@ -693,7 +693,7 @@
                                   </td>
                                 </tr>
                           <?php }}} ?>
-                          <tr data-pallets="" data-remisiones="">
+                          <tr data-pallets="" data-remisiones="" data-kneto="">
                             <td>
                               <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dmedida">
                               <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">

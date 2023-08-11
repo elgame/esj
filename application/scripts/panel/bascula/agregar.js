@@ -724,6 +724,47 @@ $(function(){
     console.log('ppromedio', promedio, cajas, kilos, precio, kilosNeto, parseFloat(kilos));
     calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
   });
+  $('#table_prod').on('change', 'input#prod_dcantidad', function(event) {
+    calculaKilosNeto();
+    calculaTotales();
+    // var $this = $(this),
+    //     $tr = $this.parent().parent(),
+    //     $ptipo     = $('#ptipo'),
+    //     tableCajas = ($ptipo.val() == 'en'? 'tableCajas': 'table_prod'),
+    //     pcajas     = ($ptipo.val() == 'en'? 'pcajas': 'prod_dcantidad'),
+    //     trIndex = $('#'+tableCajas+' tr').index($tr), // Obtiene el index q le corresponde de los tr
+
+    //     promedio = parseFloat($this.val()),
+    //     cajas    = parseFloat($tr.find('#'+pcajas).val()),
+    //     kilos    = (promedio * cajas).toFixed(2),
+    //     precio   = 0;
+
+    //     kilosNeto  = parseFloat($tr.attr('data-kneto')),
+
+    //     $kilos     = $tr.find('#pkilos'),
+    //     $tdkilos   = $tr.find('#tdkilos'),
+    //     $precio    = $tr.find('#pprecio'),
+    //     $importe   = $tr.find('#pimporte'),
+    //     $tdimporte = $tr.find('#tdimporte');
+
+    // event.preventDefault();
+
+    // $kilos.val(kilos);
+    // if (parseFloat($('#pkilos_neto').val()) > 300) {
+    //   $tr.find('#tdkilos').find('span').html(kilos);
+    //   $tr.find('#pkilos').get(0).type = 'hidden';
+    // } else {
+    //   $tr.find('#tdkilos').find('span').html('');
+    //   $tr.find('#pkilos').get(0).type = 'text';
+    // }
+
+    // precio = (parseFloat(kilos) * parseFloat($precio.val())).toFixed(2);
+    // $importe.val(precio);
+    // $tdimporte.html(precio);
+
+    // console.log('ppromedio', promedio, cajas, kilos, precio, kilosNeto, parseFloat(kilos));
+    // calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
+  });
 
   $('a#btnPrint').on('click', function(event) {
     event.preventDefault();
