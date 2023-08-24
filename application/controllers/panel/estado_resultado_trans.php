@@ -137,6 +137,9 @@ class estado_resultado_trans extends MY_Controller {
       // echo "</pre>";exit;
     }
 
+    $params['tipos'] = $this->estado_resultado_trans_model->getTipos();
+
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 

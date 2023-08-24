@@ -1711,7 +1711,7 @@ class ventas_model extends privilegios_model{
           $item->cantidad,
           $item->unidad,
           $item->descripcion.$descripcion_ext,
-          ($item->und_kg*$item->cantidad),
+          ($item->kilos>0? $item->kilos: ($item->und_kg*$item->cantidad)),
           // $item->certificado === 't' ? 'Certificado' : '',
           MyString::formatoNumero( $item->precio_unitario, 2, '$', false),
           MyString::formatoNumero( $item->importe, 2, '$', false),
@@ -1788,7 +1788,8 @@ class ventas_model extends privilegios_model{
         $item->cantidad,
         $item->unidad,
         $item->descripcion.$descripcion_ext,
-        $item->certificado === 't' ? 'Certificado' : '',
+        ($item->kilos>0? $item->kilos: ($item->und_kg*$item->cantidad)),
+        // $item->certificado === 't' ? 'Certificado' : '',
         MyString::formatoNumero( $item->precio_unitario, 2, '$', false),
         MyString::formatoNumero( $item->importe, 2, '$', false),
       ), false, true, null, 2, 1);

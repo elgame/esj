@@ -516,6 +516,7 @@
             </div>
           </div>
 
+          <textarea id="jsontipos" style="display:none"><?php echo json_encode($tipos) ?></textarea>
           <!-- GASTOS -->
           <?php $totalGastosSubt = $totalGastosIva = $totalGastosTot = 0; ?>
           <div class="row-fluid" style="margin-top: 5px;">
@@ -529,12 +530,13 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                           <thead>
                             <tr>
-                              <th colspan="9">GASTOS
+                              <th colspan="10">GASTOS
                                 <button type="button" class="btn btn-success" id="btn-add-gastos" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
                                 <a href="#" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-gastos" style="padding: 2px 7px 2px; float: right;">Gastos</a>
                               </th>
                             </tr>
                             <tr>
+                              <th style="width: 12%;">TIPO</th>
                               <th style="width: 12%;">FECHA</th>
                               <th style="width: 12%;">FOLIO</th>
                               <th style="width: 25%;">PROVEEDOR</th>
@@ -554,6 +556,14 @@
                                   $totalGastosIva += floatval($_POST['gastos_iva'][$key]);
                                   $totalGastosTot += floatval($_POST['gastos_importe'][$key]);
                             ?>
+                                <td style="">
+                                  <select name="gastos_tipo[]" class="span12 tipogastos" required>
+                                    <option value=""></option>
+                                    <?php foreach ($tipos as $key => $value): ?>
+                                    <option value="<?php echo $value->id_tipo ?>" <?php echo $_POST['gastos_tipo'][$key]==$value->id_tipo? 'selected': '' ?>><?php echo $value->nombre ?></option>
+                                    <?php endforeach ?>
+                                  </select>
+                                </td>
                                 <tr>
                                   <td><input type="date" name="gastos_fecha[]" value="<?php echo $_POST['gastos_fecha'][$key] ?>" required></td>
                                   <td><input type="text" name="gastos_folio[]" value="<?php echo $_POST['gastos_folio'][$key] ?>"></td>
@@ -587,6 +597,14 @@
                                 $totalGastosTot += floatval($gasto->total);
                               ?>
                               <tr>
+                                <td style="">
+                                  <select name="gastos_tipo[]" class="span12 tipogastos" required>
+                                    <option value=""></option>
+                                    <?php foreach ($tipos as $keytt => $value): ?>
+                                    <option value="<?php echo $value->id_tipo ?>" <?php echo $gasto->id_tipo==$value->id_tipo? 'selected': '' ?>><?php echo $value->nombre ?></option>
+                                    <?php endforeach ?>
+                                  </select>
+                                </td>
                                 <td><input type="date" name="gastos_fecha[]" value="<?php echo $gasto->fecha ?>" class="span12" required></td>
                                 <td><input type="text" name="gastos_folio[]" value="<?php echo $gasto->folio ?>" class="span12"></td>
                                 <td>
