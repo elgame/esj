@@ -1,6 +1,6 @@
 
  ☐ Cambios estados de resultado
-   -- lap|san
+   -- lap|san|pcc
    CREATE TABLE IF NOT EXISTS otros.estado_resultado_trans_tiposg
     (
         id_tipo bigserial NOT NULL,
@@ -25,7 +25,8 @@
     ('Lavada', 9),
     ('Servicios', 10),
     ('Pasajes y/o Taxis', 11),
-    ('Telefono', 12);
+    ('Telefono', 12),
+    ('Estimaciones', 13);
 
  ☐ Cambios en bascula salidas, kg promedio
    -- pcc|lap|san
