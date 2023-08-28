@@ -1,4 +1,32 @@
 
+ ☐ Cambios estados de resultado
+   -- lap|san
+   CREATE TABLE IF NOT EXISTS otros.estado_resultado_trans_tiposg
+    (
+        id_tipo bigserial NOT NULL,
+        nombre character varying(100) COLLATE pg_catalog."default" NOT NULL,
+        orden integer,
+        CONSTRAINT estado_resultado_trans_tiposg_pkey PRIMARY KEY (id_tipo)
+    ) TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS otros.estado_resultado_trans_tiposg OWNER to programa;
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN id_tipo bigint;
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos
+    ADD CONSTRAINT estado_resultado_trans_gastos_id_tipo_fkey FOREIGN KEY (id_tipo)
+    REFERENCES otros.estado_resultado_trans_tiposg (id_tipo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   INSERT INTO otros.estado_resultado_trans_tiposg(nombre, orden) VALUES
+    ('Combustibles', 1),
+    ('Pase Serv Electronico', 2),
+    ('Casetas Autopistas', 3),
+    ('Certificados y/o Guias', 4),
+    ('Bascula', 5),
+    ('Comisiones', 6),
+    ('Cuotas', 7),
+    ('Pension y/o Estacionamientos', 8),
+    ('Lavada', 9),
+    ('Servicios', 10),
+    ('Pasajes y/o Taxis', 11),
+    ('Telefono', 12);
+
  ☐ Cambios en bascula salidas, kg promedio
    -- pcc|lap|san
    ALTER TABLE IF EXISTS public.bascula_productos ADD COLUMN kilos double precision NOT NULL DEFAULT 0;

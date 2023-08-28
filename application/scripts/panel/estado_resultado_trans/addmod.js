@@ -487,8 +487,20 @@
     });
   };
   var agregarGastos = function (compra) {
+    const $tiposs = jQuery.parseJSON($("#jsontipos").val());
+    let $htmltipos = '';
+    $tiposs.forEach(function(el) {
+      $htmltipos += `<option value="${el.id_tipo}">${el.nombre}</option>`;
+    });
+
     var $table = $('#table-gastos').find('tbody .row-total'),
       tr = '<tr>'+
+              '<td style="">'+
+                '<select name="gastos_tipo[]" class="span12 tipogastos" required>'+
+                  '<option value=""></option>'+
+                  $htmltipos+
+                '</select>'+
+              '</td>'+
               '<td><input type="date" name="gastos_fecha[]" value="' + compra.fecha + '" class="span12" required></td>'+
               '<td><input type="text" name="gastos_folio[]" value="' + compra.folio + '" class="span12"></td>'+
               '<td>'+
