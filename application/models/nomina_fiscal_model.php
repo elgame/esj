@@ -4727,8 +4727,11 @@ class nomina_fiscal_model extends CI_Model {
     $y = $pdf->GetY();
     foreach ($finiquitos as $key => $empleado)
     {
-      $finiquito_prestamo = $this->db->query("SELECT Sum(monto) AS monto FROM nomina_fiscal_prestamos
-        WHERE id_empresa = {$empleado->id_empresa} AND id_empleado = {$empleado->id_empleado} AND fecha = '{$empleado->fecha_salida}'")->row();
+      $finiquito_prestamo = $this->db->query("SELECT Sum(np.monto) AS monto
+        FROM nomina_fiscal_prestamos AS np
+          INNER JOIN nomina_prestamos n ON n.id_prestamo = np.id_prestamo
+        WHERE np.id_empresa = {$empleado->id_empresa} AND np.id_empleado = {$empleado->id_empleado}
+          AND np.fecha = '{$empleado->fecha_salida}' AND n.tipo = 'fi'")->row();
 
 
       if($dep_tiene_empleados)
