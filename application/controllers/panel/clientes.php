@@ -359,7 +359,7 @@ class clientes extends MY_Controller {
 						'rules' => 'max_length[60]'),
 			array('field' => 'fno_exterior',
 						'label' => 'No. exterior',
-						'rules' => 'max_length[20]'),
+						'rules' => 'max_length[50]'),
 			array('field' => 'fno_interior',
 						'label' => 'No. interior',
 						'rules' => 'max_length[50]'),

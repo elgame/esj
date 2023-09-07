@@ -51,7 +51,7 @@
                     <label class="control-label" for="fno_exterior">No. exterior </label>
                     <div class="controls">
                       <input type="text" name="fno_exterior" id="fno_exterior" class="span10" value="<?php echo isset($data->no_exterior)?$data->no_exterior:''; ?>"
-                        maxlength="20" placeholder="102, S/N">
+                        maxlength="50" placeholder="102, S/N">
                     </div>
                   </div>
 
