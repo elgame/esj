@@ -1934,12 +1934,13 @@ class ventas_model extends privilegios_model{
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetX(0);
-      $pdf->SetAligns(['L', 'L', 'L', 'L', 'L', 'L']);
-      $pdf->SetWidths(array(21, 25, 21, 25, 21, 25));
+      $pdf->SetAligns(['L', 'L', 'L', 'L', 'L', 'L', 'L', 'L']);
+      $pdf->SetWidths(array(21, 25, 21, 25, 21, 25, 21, 25));
       $pdf->Row([
         'Boleta', $paleta['paleta']->folio,
         'Kgs Boleta', MyString::formatoNumero($paleta['paleta']->kilos_neto, 2, '', true),
         'Proporción', MyString::formatoNumero($proporcion_bultos, 2, '', true),
+        'Cajas papeleta', MyString::formatoNumero((isset($paleta_extra->cajas_totales) && $paleta_extra->cajas_totales > 0? $paleta_extra->cajas_totales: 0), 2, '', true),
       ], true, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row([
@@ -1950,6 +1951,7 @@ class ventas_model extends privilegios_model{
           (isset($paleta_extra->tarimas_kg)? $paleta_extra->tarimas_kg: 0) -
           (isset($paleta_extra->cajas_kg)? $paleta_extra->cajas_kg: 0)
         ), 2, '', true),
+        '', ''
       ], true, true, null, 2, 1);
     }
 
