@@ -5172,7 +5172,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $ingreso->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', MyString::fechaAT($ingreso->fecha_creacion)), false, false);
+    $pdf->Row(array('Creado:', MyString::fechaATexto($ingreso->fecha_creacion, 'in', true)), false, false);
 
     $this->db->update('cajachica_ingresos', ['no_impresiones' => $ingreso->no_impresiones+1],
         "id_ingresos = '{$id_ingresos}' AND no_caja = {$noCaja}");
