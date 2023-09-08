@@ -853,6 +853,7 @@ class estado_resultado_trans_model extends privilegios_model{
 
     $ttotalGastos = 0;
     $ttotalSueldos = 0;
+    $ttotalSueldoslocal = 0;
     $pdf->SetXY(6, $pdf->GetY()+5);
     if (count($caja['sueldos']) > 0) {
       $pdf->SetFont('Arial','B', 6);
@@ -883,14 +884,22 @@ class estado_resultado_trans_model extends privilegios_model{
         ), false, 'B');
 
         $ttotalGastos += floatval($sueldo->importe);
+        $ttotalSueldoslocal += floatval($sueldo->importe);
         if ($sueldo->comprobacion == 't') {
           $ttotalSueldos += floatval($sueldo->importe);
         }
       }
+
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(18));
+      $pdf->SetFont('Arial', 'B', 6);
+      $pdf->SetX(175);
+      $pdf->Row(array(MyString::formatoNumero($ttotalSueldoslocal, 2, '$', false)), false, 'B');
     }
 
     $pdf->SetXY(6, $pdf->GetY()+5);
-    $ttotalRepMantEf = $ttotalRepMant = 0;
+    $ttotalRepMantEf = $ttotalRepMant = $ttotalRepMantLocal = 0;
     if (count($caja['repmant']) > 0) {
       $pdf->SetFont('Arial','B', 6);
       $pdf->SetAligns(array('L', 'C'));
@@ -923,10 +932,18 @@ class estado_resultado_trans_model extends privilegios_model{
 
         $ttotalGastos += floatval($rem->subtotal);
         $ttotalRepMant += floatval($rem->total);
+        $ttotalRepMantLocal += floatval($rem->subtotal);
         if ($rem->comprobacion == 't') {
           $ttotalRepMantEf += floatval($rem->total);
         }
       }
+
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(18));
+      $pdf->SetFont('Arial', 'B', 6);
+      $pdf->SetX(175);
+      $pdf->Row(array(MyString::formatoNumero($ttotalRepMantLocal, 2, '$', false)), false, 'B');
     }
 
     $ttotalGastosEf = 0;
