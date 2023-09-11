@@ -500,6 +500,9 @@ class empleados extends MY_Controller {
               array('field' => 'dinfonacot',
                     'label' => 'Infonacot',
                     'rules' => ''),
+              array('field' => 'dhrs_turno',
+                    'label' => 'Hrs del turno',
+                    'rules' => ''),
 
 							array('field' => 'dcuenta_banco',
 										'label' => 'Banco',

@@ -1351,23 +1351,26 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       $resumen = [];
 
       $arrayAsistencias = $excelHelper->excelToArray($file['full_path']);
+      // echo "<pre>";
+      // var_dump($arrayAsistencias);
+      // echo "</pre>";exit;
 
-      if (count($arrayAsistencias) > 0 && !empty($arrayAsistencias[0]['Clave Empleado'])) {
+      if (count($arrayAsistencias) > 0 && (!empty($arrayAsistencias[0]['Clave Empleado']) || !empty($arrayAsistencias[1]['Clave Empleado']))) {
         $this->load->model('usuarios_model');
 
         foreach ($arrayAsistencias as $key => $datos) {
 
           if (isset($datos['Clave Empleado']) && is_numeric($datos['Clave Empleado'])) { // si es un # de trabajador
-            $fecha = $excelHelper->formatFechaAsis($datos['Calendario']);
+            $fecha = $excelHelper->formatFechaAsis($datos['']); // la fecha del archivo
             $fechaSem = MyString::obtenerSemanaDeFecha($fecha, $_POST['dia_inicia_semana']);
 
             // si esta dentro del rango de la semana
             if (strtotime($fecha) >= strtotime($semana['fecha_inicio']) && strtotime($fecha) <= strtotime($semana['fecha_final'])) {
-              $empleado = $this->db->select("u.id, u.no_checador" )->from("usuarios u")
+              $empleado = $this->db->select("u.id, u.no_checador, u.hrs_turno")->from("usuarios u")
                 ->where("u.id_empresa", $_POST['id_empresa'])->where("u.id", $datos['Clave Empleado'])->get()->row();
               if (isset($empleado->id)) { // si existe el trabajador en la empresa
                 $tipo = 'f';
-                if ($datos['Status'] == 'Asistencia') {
+                if ($datos['Tipo'] == 'Abierto') { // $datos['Status'] == 'Asistencia'
                   $tipo = 'a';
                 }
 
@@ -1403,13 +1406,35 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                     $hrs = floatval($hhrr[0]);
                     $hrs += floatval($hhrr[1])/60;
                   }
+                  $hrs = round($hrs, 2);
+
+                  $hrs_dif = round($hrs - floatval($empleado->hrs_turno), 2);
+                  if (empty(trim($datos['Entrada'])) || empty(trim($datos['Salida']))) {
+                    $hrs_dif = 0;
+                  }
+
+                  if (!empty(trim($datos['Tiempo Extra Autorizado']))) {
+                    $hhrr = explode(':', $datos['Tiempo Extra Autorizado']);
+                    $datos['Tiempo Extra Autorizado'] = floatval($hhrr[0]);
+                    if (count($hhrr) > 1) {
+                      $datos['Tiempo Extra Autorizado'] += floatval($hhrr[1])/60;
+                    }
+                    $datos['Tiempo Extra Autorizado'] = round($datos['Tiempo Extra Autorizado'], 2);
+                  }
+
                   $this->db->insert('nomina_asistencia_hrs', [
                     'id_empresa'  => $_POST['id_empresa'],
                     'anio'        => $semana['anio'],
                     'semana'      => $semana['semana'],
                     'id_empleado' => $empleado->id,
                     'fecha'       => $fecha,
-                    'hrs'         => $hrs,
+                    'hr_entrada'  => (!empty(trim($datos['Entrada']))? trim($datos['Entrada']): NULL),
+                    'hr_salida'   => (!empty(trim($datos['Salida']))? trim($datos['Salida']): NULL),
+                    'hrs'         => $hrs, // tiempo trabajado
+                    'hrs_turno'   => floatval($empleado->hrs_turno), // hrs del turno
+                    'hrs_dif'     => $hrs_dif, // hrs diferencia
+                    'hrs_aut'     => (!empty(trim($datos['Tiempo Extra Autorizado']))? trim($datos['Tiempo Extra Autorizado']): 0), // hrs extras autorizadas
+                    'observaciones' => (!empty(trim($datos['Observaciones']))? trim($datos['Observaciones']): ''), // hrs observaciones
                   ]);
                 }
 
@@ -1422,6 +1447,9 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
           }
         }
 
+        // echo "<pre>";
+        // var_dump($nominaAsistencia);
+        // echo "</pre>";exit;
         // Si existen faltas o incapacidades las agrega.
         if (count($nominaAsistencia) > 0)
         {

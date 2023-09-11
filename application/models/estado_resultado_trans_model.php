@@ -263,6 +263,7 @@ class estado_resultado_trans_model extends privilegios_model{
           'id_estado' => $id_estado,
           'id_remision' => $_POST['remision_id'][$key] !== '' ? $_POST['remision_id'][$key] : null,
           'comprobacion' => $_POST['remision_comprobacion'][$key] == 'true' ? 't' : 'f',
+          'imp_comprobacion' => floatval($_POST['remision_comprobacionimpt'][$key]),
         );
       }
       if(count($ventas) > 0)
@@ -399,6 +400,7 @@ class estado_resultado_trans_model extends privilegios_model{
           'id_estado' => $id_estado,
           'id_remision' => $_POST['remision_id'][$key] !== '' ? $_POST['remision_id'][$key] : null,
           'comprobacion' => $_POST['remision_comprobacion'][$key] == 'true' ? 't' : 'f',
+          'imp_comprobacion' => floatval($_POST['remision_comprobacionimpt'][$key]),
         );
       }
       if(count($ventas) > 0)
@@ -632,7 +634,7 @@ class estado_resultado_trans_model extends privilegios_model{
           ->select('v.id_remision, Date(f.fecha) AS fecha, (f.serie || f.folio) AS folio,
             c.id_cliente, c.nombre_fiscal AS cliente, f.subtotal, f.total, v.comprobacion,
             fp.id_clasificacion, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe,
-            fp.iva, fp.unidad, fp.kilos')
+            fp.iva, fp.unidad, fp.kilos, v.imp_comprobacion')
           ->from('otros.estado_resultado_trans_ventas v')
             ->join('facturacion f', 'v.id_remision = f.id_factura', 'inner')
             ->join('clientes c', 'c.id_cliente = f.id_cliente', 'inner')
@@ -642,7 +644,8 @@ class estado_resultado_trans_model extends privilegios_model{
       } else {
         $res = $this->db
           ->select('v.id_remision, Date(f.fecha) AS fecha, (f.serie || f.folio) AS folio,
-            c.id_cliente, c.nombre_fiscal AS cliente, f.subtotal, f.total, v.comprobacion')
+            c.id_cliente, c.nombre_fiscal AS cliente, f.subtotal, f.total, v.comprobacion,
+            v.imp_comprobacion')
           ->from('otros.estado_resultado_trans_ventas v')
           ->join('facturacion f', 'v.id_remision = f.id_factura', 'inner')
           ->join('clientes c', 'c.id_cliente = f.id_cliente', 'inner')
@@ -823,7 +826,7 @@ class estado_resultado_trans_model extends privilegios_model{
         $auxrem = $rem->id_remision;
         $ttotalRemisiones += floatval($rem->importe);
         if ($rem->comprobacion == 't') {
-          $ttotalRemisionesEf += floatval($rem->importe);
+          $ttotalRemisionesEf += floatval($rem->imp_comprobacion > 0? $rem->imp_comprobacion: $rem->importe);
         }
 
         $totalKgs += $rem->kilos;

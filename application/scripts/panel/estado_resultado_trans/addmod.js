@@ -77,8 +77,10 @@
     $('body').on('change', '.chkcomprobacion', function() {
       if($(this).is(':checked')) {
         $(this).parent().find('.valcomprobacion').val('true');
+        $(this).parent().find('.remision-comprobacionimpt').removeAttr('readonly').attr('required', 'required').focus();
       } else {
         $(this).parent().find('.valcomprobacion').val('');
+        $(this).parent().find('.remision-comprobacionimpt').removeAttr('required').attr('readonly', 'readonly');
       }
     });
   }
@@ -170,6 +172,7 @@
               '<td style=""><input type="number" step="any" name="remision_importe[]" value="'+total+'" class="remision-importe vpositive" placeholder="Importe" required readonly></td>' +
               '<td style="">' +
                 '<input type="checkbox" value="true" class="chkcomprobacion">' +
+                '<input type="number" step="any" name="remision_comprobacionimpt[]" value="" max="'+total+'" class="remision-comprobacionimpt span10 vpositive pull-right" placeholder="Imp Comprobar" readonly>' +
                 '<input type="hidden" name="remision_comprobacion[]" value="" class="valcomprobacion">' +
               '</td>' +
               '<td style="width: 30px;">'+

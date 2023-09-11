@@ -472,6 +472,13 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dhrs_turno">Hrs del turno</label>
+                    <div class="controls">
+                      <input type="text" name="dhrs_turno" id="dhrs_turno" class="span12 vpositive" value="<?php echo set_value('dhrs_turno'); ?>" max="100" placeholder="">
+                    </div>
+                  </div>
+
 									<input type="hidden" name="duser_nomina" value="t">
 
 								</div> <!--/span-->

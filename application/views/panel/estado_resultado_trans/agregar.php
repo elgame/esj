@@ -252,6 +252,9 @@
                           <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $_POST['remision_importe'][$key] ?>" class="remision-importe vpositive " placeholder="Importe" required readonly></td>
                           <td style="">
                             <input type="checkbox" value="true" class="chkcomprobacion" <?php echo ($_POST['remision_comprobacion'][$key] == 'true'? 'checked': '') ?>>
+                            <input type="number" step="any" name="remision_comprobacionimpt[]" value="<?php echo $_POST['remision_comprobacionimpt'][$key] ?>"
+                                <?php echo ($_POST['remision_comprobacion'][$key] == 'true'? 'required': 'readonly') ?>
+                                max="<?php echo $_POST['remision_importe'][$key] ?>" class="remision-comprobacionimpt span10 vpositive pull-right" placeholder="Imp Comprobar">
                             <input type="hidden" name="remision_comprobacion[]" value="<?php echo $_POST['remision_comprobacion'][$key] ?>" class="valcomprobacion">
                           </td>
                           <td style="width: 30px;">
@@ -273,8 +276,12 @@
                             </td>
                             <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $remision->subtotal ?>" class="remision-importe vpositive " placeholder="Importe" required readonly></td>
                             <td style="">
+                              <?php $comprobacion = (isset($remision->comprobacion) && $remision->comprobacion == 't'? 'true': ''); ?>
                               <input type="checkbox" value="true" class="chkcomprobacion" <?php echo (isset($remision->comprobacion) && $remision->comprobacion == 't'? 'checked': '') ?>>
-                              <input type="hidden" name="remision_comprobacion[]" value="<?php echo (isset($remision->comprobacion) && $remision->comprobacion == 't'? 'true': '') ?>" class="valcomprobacion">
+                              <input type="number" step="any" name="remision_comprobacionimpt[]" value="<?php echo $remision->imp_comprobacion ?>"
+                                <?php echo ($comprobacion == 'true'? 'required': 'readonly') ?> max="<?php echo $remision->subtotal ?>"
+                                class="remision-comprobacionimpt span10 vpositive pull-right" placeholder="Imp Comprobar">
+                              <input type="hidden" name="remision_comprobacion[]" value="<?php echo $comprobacion ?>" class="valcomprobacion">
                             </td>
                             <td style="width: 30px;">
                               <button type="button" class="btn btn-danger btn-del-remision" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>

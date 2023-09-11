@@ -1,5 +1,25 @@
 
+ ☐ Cambios nominas reporte de la señora
+   -- lap|san
+    ALTER TABLE IF EXISTS public.usuarios ADD COLUMN hrs_turno double precision DEFAULT 8;
+    ALTER TABLE IF EXISTS public.nomina_asistencia_hrs ADD COLUMN hr_entrada time without time zone;
+    ALTER TABLE IF EXISTS public.nomina_asistencia_hrs ADD COLUMN hr_salida time without time zone;
+    ALTER TABLE IF EXISTS public.nomina_asistencia_hrs ADD COLUMN hrs_turno double precision DEFAULT 0;
+    ALTER TABLE IF EXISTS public.nomina_asistencia_hrs ADD COLUMN hrs_dif double precision DEFAULT 0;
+    ALTER TABLE IF EXISTS public.nomina_asistencia_hrs ADD COLUMN hrs_aut double precision DEFAULT 0;
+    ALTER TABLE IF EXISTS public.nomina_asistencia_hrs ADD COLUMN observaciones character varying(256) COLLATE pg_catalog."default";
+    COMMENT ON COLUMN public.nomina_asistencia_hrs.hrs
+        IS 'tiempo trabajado o Hrs Laboradas, del sistena de checador';
+    COMMENT ON COLUMN public.nomina_asistencia_hrs.hrs_turno
+        IS 'Horas del tueno que tiene que cubrir el trabajador';
+    COMMENT ON COLUMN public.nomina_asistencia_hrs.hrs_dif
+        IS 'Diferencia de las hrs trabajadas y hrs del turno';
+    COMMENT ON COLUMN public.nomina_asistencia_hrs.hrs_aut
+        IS 'Hrs extras autorizadas para bono o descuento';
+
  ☐ Cambios estados de resultado
+   -- lap|san
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_ventas ADD COLUMN imp_comprobacion double precision DEFAULT 0;
    -- lap|san|pcc
    CREATE TABLE IF NOT EXISTS otros.estado_resultado_trans_tiposg
     (

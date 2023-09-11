@@ -24,6 +24,9 @@ class ExcelHelpersLib {
         $highestColumn = $objWorksheet->getHighestColumn();
         $headingsArray = $objWorksheet->rangeToArray('A1:'.$highestColumn.'1',null, true, true, true);
         $headingsArray = $headingsArray[1];
+        foreach ($headingsArray as $key => $value) {
+          $headingsArray[$key] = trim($value);
+        }
 
         $r = -1;
         $namedDataArray = array();
