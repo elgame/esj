@@ -199,12 +199,14 @@ class vehiculos extends MY_Controller {
 		));
 
 		$this->load->library('pagination');
-		$this->load->model('productos_model');
+    $this->load->model('productos_model');
+		$this->load->model('vehiculos_model');
 
 		$params['info_empleado']  = $this->info_empleado['info'];
 		$params['seo']        = array('titulo' => 'Rendimiento de combustible');
 
 		// $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['grupos'] = $this->vehiculos_model->getGrupos();
 
 		if(isset($_GET['msg']{0}))
 		  $params['frm_errors'] = $this->showMsgs($_GET['msg']);

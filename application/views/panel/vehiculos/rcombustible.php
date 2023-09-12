@@ -38,6 +38,18 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="dgrupos">Grupo</label>
+                  <div class="controls">
+                    <select name="dgrupos" id="dgrupos" class="span12">
+                      <option value=""></option>
+                      <?php foreach ($grupos as $key => $value): ?>
+                      <option value="<?php echo $value->grupo ?>"><?php echo $value->grupo ?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

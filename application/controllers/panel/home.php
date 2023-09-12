@@ -155,13 +155,13 @@ class home extends MY_Controller {
     foreach ($empresas['empresas'] as $keye => $empresa)
     {
       $_GET['did_empresa'] = $empresa->id_empresa;
-      $productos = $this->inventario_model->getEPUData();
+      // $productos = $this->inventario_model->getEPUData();
       $empresa->productos = array();
-      foreach ($productos as $key => $value)
-      {
-        if($value->stock_min > ($value->saldo_anterior + $value->entradas - $value->salidas) )
-          $empresa->productos[] = $value;
-      }
+      // foreach ($productos as $key => $value)
+      // {
+      //   if($value->stock_min > ($value->saldo_anterior + $value->entradas - $value->salidas) )
+      //     $empresa->productos[] = $value;
+      // }
       if(count($empresa->productos) == 0)
         unset($empresas['empresas'][$keye]);
     }

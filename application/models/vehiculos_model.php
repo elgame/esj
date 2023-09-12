@@ -68,6 +68,7 @@ class vehiculos_model extends CI_Model {
           'marca'  => $this->input->post('fmarca'),
           'color'  => $this->input->post('fcolor'),
           'unidad' => $this->input->post('funidad'),
+          'grupo' => mb_strtoupper($this->input->post('fgrupo')),
 				);
 		}
 
@@ -94,6 +95,7 @@ class vehiculos_model extends CI_Model {
         'marca'  => $this->input->post('fmarca'),
         'color'  => $this->input->post('fcolor'),
         'unidad' => $this->input->post('funidad'),
+        'grupo' => mb_strtoupper($this->input->post('fgrupo')),
       );
 		}
 
@@ -112,10 +114,11 @@ class vehiculos_model extends CI_Model {
 	{
 		$id_vehiculo = ($id_vehiculo!==FALSE)? $id_vehiculo: $_GET['id'];
 
-		$sql_res = $this->db->select("id_vehiculo, placa, modelo, marca, status, color, unidad, (placa || ' ' || modelo || ' ' || marca) AS nombre" )
-												->from("compras_vehiculos")
-												->where("id_vehiculo", $id_vehiculo)
-												->get();
+		$sql_res = $this->db->select("id_vehiculo, placa, modelo, marca, status, color,
+        unidad, (placa || ' ' || modelo || ' ' || marca) AS nombre, grupo" )
+			->from("compras_vehiculos")
+			->where("id_vehiculo", $id_vehiculo)
+			->get();
 		$data['info'] = array();
 
 		if ($sql_res->num_rows() > 0)
@@ -162,6 +165,24 @@ class vehiculos_model extends CI_Model {
 		return $response;
 	}
 
+  public function getGrupos()
+  {
+    $sql_res = $this->db->select("Distinct(grupo)" )
+              ->from("compras_vehiculos")
+              ->where("grupo IS NOT NULL");
+    $sql_res = $sql_res->get();
+
+    $data = array();
+
+    if ($sql_res->num_rows() > 0)
+    {
+      $data = $sql_res->result();
+    }
+    $sql_res->free_result();
+
+    return $data;
+  }
+
 
   /**
    * Reporte de existencias por costo
@@ -179,8 +200,13 @@ class vehiculos_model extends CI_Model {
     $sqlf2 = " AND Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
     if($this->input->get('fid_vehiculo') == '') $_GET['fid_vehiculo'] = 0;
-    if ($_GET['fid_vehiculo'] > 0)
+    if ($_GET['fid_vehiculo'] > 0) {
       $sql .= " AND id_vehiculo = ".$this->input->get('fid_vehiculo');
+    }
+
+    if ($_GET['dgrupos'] != '') {
+      $sql .= " AND grupo = '{$this->input->get('dgrupos')}'";
+    }
 
     // $this->load->model('empresas_model');
     // $client_default = $this->empresas_model->getDefaultEmpresa();
@@ -190,7 +216,9 @@ class vehiculos_model extends CI_Model {
       //   $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
       // }
 
-    $vehiculos = $this->db->query("SELECT * FROM compras_vehiculos WHERE status = 't' {$sql} ORDER BY (placa || ' ' || modelo || ' ' || marca) ASC")->result();
+    $vehiculos = $this->db->query("SELECT * FROM compras_vehiculos
+      WHERE status = 't' {$sql}
+      ORDER BY (placa || ' ' || modelo || ' ' || marca) ASC")->result();
 
     $res_vehiculo = array();
     foreach ($vehiculos as $key => $vehiculo) {

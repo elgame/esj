@@ -72,6 +72,14 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="fgrupo">Agrupación </label>
+                  <div class="controls">
+                    <input type="text" name="fgrupo" id="fgrupo" class="span6" value="<?php echo isset($data->grupo)? $data->grupo:''; ?>"
+                      maxlength="15" placeholder="ESJ, GDL, GRUPO 1, ETC">
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Guardar</button>
                   <a href="<?php echo base_url('panel/vehiculos/'); ?>" class="btn">Cancelar</a>
