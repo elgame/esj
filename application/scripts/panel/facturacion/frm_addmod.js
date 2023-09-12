@@ -1164,7 +1164,7 @@ function calculaTotal ($calculaT) {
       }
     }
   });
-  total_importes = trunc2Dec(total_importes);
+  total_importes = round2Dec(total_importes);
 
   $('input#prod_ddescuento').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -1178,9 +1178,9 @@ function calculaTotal ($calculaT) {
       }
     }
   });
-  total_descuentos = trunc2Dec(total_descuentos);
+  total_descuentos = round2Dec(total_descuentos);
 
-  var total_subtotal = trunc2Dec(parseFloat(total_importes) - parseFloat(total_descuentos));
+  var total_subtotal = round2Dec(parseFloat(total_importes) - parseFloat(total_descuentos));
 
   $('input#prod_diva_total').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -1194,7 +1194,7 @@ function calculaTotal ($calculaT) {
       }
     }
   });
-  total_ivas = trunc2Dec(total_ivas);
+  total_ivas = round2Dec(total_ivas);
 
   $('input#dieps_total').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -1208,7 +1208,7 @@ function calculaTotal ($calculaT) {
       }
     }
   });
-  total_ieps = trunc2Dec((total_ieps||0));
+  total_ieps = round2Dec((total_ieps||0));
 
   $('input#disr_total').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -1222,7 +1222,7 @@ function calculaTotal ($calculaT) {
       }
     }
   });
-  total_isr = trunc2Dec((total_isr||0));
+  total_isr = round2Dec((total_isr||0));
 
   $('input#prod_dreten_iva_total').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -1236,9 +1236,9 @@ function calculaTotal ($calculaT) {
       }
     }
   });
-  total_retenciones = trunc2Dec(total_retenciones);
+  total_retenciones = round2Dec(total_retenciones);
 
-  total_factura = trunc2Dec(parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_retenciones) - parseFloat(total_isr));
+  total_factura = round2Dec(parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_retenciones) - parseFloat(total_isr));
 
   $('#importe-format').html(util.darFormatoNum(total_importes));
   $('#total_importe').val(total_importes);

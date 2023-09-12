@@ -1,6 +1,6 @@
 
  ☐ Reporte de gastos compras, poner grupo
-   -- lap
+   -- lap|san
    ALTER TABLE IF EXISTS public.compras_vehiculos ADD COLUMN grupo character varying(100) COLLATE pg_catalog."default";
 
  ☐ Cambios nominas reporte de la señora
