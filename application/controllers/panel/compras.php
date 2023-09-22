@@ -146,7 +146,7 @@ class compras extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->compras_model->agregarNotaCredito($_GET['id'], $_POST, $_FILES['xml']);
+      $res_mdl = $this->compras_model->agregarNotaCredito($_GET['id'], $_POST, (isset($_FILES['xml'])? $_FILES['xml']: null));
 
       if ($res_mdl['passes'])
       {

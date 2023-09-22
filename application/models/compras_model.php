@@ -615,6 +615,12 @@ class compras_model extends privilegios_model{
     //Actualiza la compra si es que se paga
     $this->actualizaCompra($compraId, $datos['total']);
 
+    $orden = $this->db->query("SELECT cf.id_compra, co.id_orden, co.id_almacen
+      FROM compras_facturas cf
+        INNER JOIN compras_ordenes co ON co.id_orden = cf.id_orden
+      WHERE cf.id_compra = {$compraId}")->row();
+    $datos['id_almacen'] = $orden->id_almacen;
+
     // Se registra la salida de almacén si es que hay productos
     $this->addSalidaAutNC($datos, $productos);
 
@@ -759,7 +765,7 @@ class compras_model extends privilegios_model{
       // Se registra la salida de almacen con la materia prima
       $res = $this->productos_salidas_model->agregar(array(
         'id_empresa'     => $nc['id_empresa'],
-        'id_almacen'     => 1,
+        'id_almacen'     => isset($nc['id_almacen'])? $nc['id_almacen']: 1,
         'id_empleado'    => $nc['id_empleado'],
         'folio'          => $this->productos_salidas_model->folio(),
         'concepto'       => "Salida generada automáticamente por la Nota de Crédito {$nc['serie']}{$nc['folio']}",
