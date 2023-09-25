@@ -1939,7 +1939,8 @@ class ventas_model extends privilegios_model{
       $pdf->Row([
         'Boleta', $paleta['paleta']->folio,
         'Kgs Boleta', MyString::formatoNumero($paleta['paleta']->kilos_neto, 2, '', true),
-        'Proporción', MyString::formatoNumero($proporcion_bultos, 2, '', true),
+        // 'Proporción', MyString::formatoNumero($proporcion_bultos, 2, '', true),
+        'Peso Promedio', MyString::formatoNumero($paleta['paleta']->kilos_neto/(isset($paleta_extra->cajas_totales) && $paleta_extra->cajas_totales > 0? $paleta_extra->cajas_totales: 1), 2, '', true),
         'Cajas papeleta', MyString::formatoNumero((isset($paleta_extra->cajas_totales) && $paleta_extra->cajas_totales > 0? $paleta_extra->cajas_totales: 0), 2, '', true),
       ], true, true, null, 2, 1);
       $pdf->SetX(0);
