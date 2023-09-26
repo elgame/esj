@@ -21,6 +21,9 @@
 
     eventClickBtnAddIncapacidad();
     eventClickBtnDelItemIncapacidad();
+
+    eventClickBtnAddPermiso();
+    eventClickBtnDelItemPermiso();
   });
 
   var eventClickBtnAddBono = function () {
@@ -316,6 +319,98 @@
     $('#table-incapacidades').on('click', '.btn-del-item-incapacidad', function(event) {
       var $parent = $(this).parents('tr');
       $parent.remove();
+    });
+  };
+
+
+  /*
+   |------------------------------------------------------------------------
+   | Incapacidades
+   |------------------------------------------------------------------------
+   */
+  var eventClickBtnAddPermiso = function () {
+    $('#btn-add-permiso').on('click', function(event) {
+       addItemPermiso();
+    });
+
+    $('#table-permisos').on('change', '.perFechaIni, .perFechaFin', function(event){
+      const $parent = $(this).parents('tr');
+      let fecha1 = moment($parent.find('.perFechaIni').val());
+      let fecha2 = moment($parent.find('.perFechaFin').val());
+      let dias = 0, hrs = 0;
+
+      if(fecha1.isValid() && fecha2.isValid()){
+        dias = moment(fecha2.format("YYYY-MM-DD")).diff(fecha1.format("YYYY-MM-DD"), 'days');
+        hrs = fecha2.diff(fecha1, 'hours') - (dias*24);
+
+        $parent.find('.perDias').val(dias);
+        $parent.find('.perHrs').val(hrs);
+      }
+    });
+  };
+
+  var addItemPermiso = function () {
+    var htmlTr = '',
+        $tableIncapacidad = $('#table-permisos'),
+        $fecha = $('#fecha-prestamos');
+
+    htmlTr = `<tr>
+                <td>
+                  <table>
+                    <tr>
+                      <td>Fecha Ini
+                        <input type="hidden" name="perIdPermiso[]" value="" class="perIdPermiso">
+                      </td>
+                      <td><input type="datetime-local" name="perFechaIni[]" value="" class="span12 perFechaIni"></td>
+                      <td>Fecha Fin</td>
+                      <td><input type="datetime-local" name="perFechaFin[]" value="" class="span12 perFechaFin"></td>
+                      <td>
+                        Dias: <input type="number" name="perDias[]" value="" class="span9 perDias" style="display: inline;"> <br>
+                        Hrs: <input type="number" name="perHrs[]" value="" class="span9 perHrs" style="display: inline;">
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Uso Dirección</td>
+                      <td>
+                        <select name="perUsoDir[]" class="span12 perUsoDir">
+                          <option>SIN GOCE DE SUELDO</option>
+                          <option>PERMISO PAGADO AL</option>
+                          <option>REPOSICION DE TIEMPO</option>
+                          <option>A CUENTA DE VACACIONES</option>
+                        </select>
+                        <input type="text" name="perUsoDirValue[]" placeholder="50%" class="span12 hide perUsoDirValue">
+                      </td>
+                      <td>Uso RH</td>
+                      <td>
+                        <select name="perUsoRH[]" class="span12 perUsoRH">
+                          <option>ACADEMICO</option>
+                          <option>ADMINISTRATIVO</option>
+                          <option>ASUNTOS PERSONALES</option>
+                        </select>
+                        <input type="text" name="perUsoRHValue[]" placeholder="50%" class="span12 hide perUsoRHValue">
+                      </td>
+                      <td>
+                        <button type="button" class="btn btn-danger btn-del-item-permisos"><i class="icon-trash"></i></button>
+                        <input type="hidden" name="perDelete[]" value="" data class="perDelete">
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>`;
+
+    $(htmlTr).appendTo($tableIncapacidad.find('tbody'));
+
+    // $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+
+  var eventClickBtnDelItemPermiso = function () {
+    $('#table-permisos').on('click', '.btn-del-item-permisos', function(event) {
+      var $parent = $(this).parents('tr');
+      if($parent.find('.perIdPermiso').val() == ''){
+        $parent.remove();
+      } else {
+        $parent.find('.perDelete').val('true');
+      }
     });
   };
 

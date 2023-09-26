@@ -42,6 +42,7 @@
         <?php } ?>
         <li><a href="#tab-vacaciones">Vacaciones</a></li>
         <li><a href="#tab-incapacidades">Incapacidades</a></li>
+        <li><a href="#tab-permisos">Permisos</a></li>
       </ul>
       <div class="tab-content">
           <div class="tab-pane active" id="tab-bonos-otros">
@@ -310,6 +311,74 @@
                           </td>
                           <td style="width: 100px;">
                             <input type="checkbox" name="eliminar_incapacidad[]" value="<?php echo $incapacidad->id_asistencia; ?>"> Eliminar
+                          </td>
+                        </tr>
+                      <?php } ?>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-success" id="btn-guardar-prestamos">Guardar</button>
+                </div><!--/modal-footer -->
+            </form><!--/form-horizontal -->
+          </div><!--/tab-pane -->
+          <div class="tab-pane" id="tab-permisos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_incapacidades/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+                <div class="row-fluid">
+                  <div class="span12">
+                    <button type="button" class="btn btn-success" id="btn-add-permiso">Agregar Permiso</button>
+
+                    <table class="table table-striped table-bordered table-hover table-condensed" id="table-permisos">
+                      <thead>
+                        <tr>
+                          <th>Datos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                      <?php foreach ($incapacidades as $key => $incapacidad){ ?>
+                        <tr>
+                          <td>
+                            <table>
+                              <tr>
+                                <td>Fecha Ini
+                                  <input type="hidden" name="perIdPermiso[]" value="" class="perIdPermiso">
+                                </td>
+                                <td><input type="datetime-local" name="perFechaIni[]" value="" class="span12 perFechaIni"></td>
+                                <td>Fecha Fin</td>
+                                <td><input type="datetime-local" name="perFechaFin[]" value="" class="span12 perFechaFin"></td>
+                                <td>
+                                  Dias: <input type="number" name="perDias[]" value="" class="span9 perDias" style="display: inline;"> <br>
+                                  Hrs: <input type="number" name="perHrs[]" value="" class="span9 perHrs" style="display: inline;">
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>Uso Dirección</td>
+                                <td>
+                                  <select name="perUsoDir[]" class="span12 perUsoDir">
+                                    <option>SIN GOCE DE SUELDO</option>
+                                    <option>PERMISO PAGADO AL</option>
+                                    <option>REPOSICION DE TIEMPO</option>
+                                    <option>A CUENTA DE VACACIONES</option>
+                                  </select>
+                                  <input type="text" name="perUsoDirValue[]" placeholder="50%" class="span12 hide perUsoDirValue">
+                                </td>
+                                <td>Uso RH</td>
+                                <td>
+                                  <select name="perUsoRH[]" class="span12 perUsoRH">
+                                    <option>ACADEMICO</option>
+                                    <option>ADMINISTRATIVO</option>
+                                    <option>ASUNTOS PERSONALES</option>
+                                  </select>
+                                  <input type="text" name="perUsoRHValue[]" placeholder="50%" class="span12 hide perUsoRHValue">
+                                </td>
+                                <td>
+                                  <button type="button" class="btn btn-danger btn-del-item-permisos"><i class="icon-trash"></i></button>
+                                  <input type="hidden" name="perDelete[]" value="" data class="perDelete">
+                                </td>
+                              </tr>
+                            </table>
                           </td>
                         </tr>
                       <?php } ?>

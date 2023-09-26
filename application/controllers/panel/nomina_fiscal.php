@@ -649,6 +649,7 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->carabiner->js(array(
       array('libs/jquery.numeric.js'),
+      array('libs/moment.js'),
       array('panel/nomina_fiscal/bonos_otros.js'),
     ));
 
