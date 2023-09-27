@@ -354,7 +354,7 @@
         $tableIncapacidad = $('#table-permisos'),
         $fecha = $('#fecha-prestamos');
 
-    htmlTr = `<tr>
+    htmlTr = `<tr class="rowpermisos">
                 <td>
                   <table>
                     <tr>
@@ -387,7 +387,7 @@
                           <option>ADMINISTRATIVO</option>
                           <option>ASUNTOS PERSONALES</option>
                         </select>
-                        <input type="text" name="perUsoRHValue[]" placeholder="50%" class="span12 hide perUsoRHValue">
+                        <input type="hidden" name="perUsoRHValue[]" placeholder="50%" class="span12 hide perUsoRHValue">
                       </td>
                       <td>
                         <button type="button" class="btn btn-danger btn-del-item-permisos"><i class="icon-trash"></i></button>
@@ -398,18 +398,19 @@
                 </td>
               </tr>`;
 
-    $(htmlTr).appendTo($tableIncapacidad.find('tbody'));
+    $(htmlTr).appendTo($tableIncapacidad.find('tbody.body-permisos'));
 
     // $(".vpositive").numeric({ negative: false }); //Numero positivo
   };
 
   var eventClickBtnDelItemPermiso = function () {
     $('#table-permisos').on('click', '.btn-del-item-permisos', function(event) {
-      var $parent = $(this).parents('tr');
+      var $parent = $(this).parents('tr.rowpermisos');
       if($parent.find('.perIdPermiso').val() == ''){
         $parent.remove();
       } else {
         $parent.find('.perDelete').val('true');
+        $parent.hide();
       }
     });
   };

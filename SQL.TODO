@@ -1,4 +1,40 @@
 
+ ☐ Registro de permisos en nomina
+   -- lap
+   CREATE TABLE IF NOT EXISTS public.nomina_permisos
+    (
+        id_permiso bigserial NOT NULL,
+        id_empresa bigint NOT NULL,
+        id_creo bigint,
+        id_trabajador bigint NOT NULL,
+        folio bigint NOT NULL,
+        fecha_ini timestamp without time zone NOT NULL,
+        fecha_fin timestamp without time zone NOT NULL,
+        dias integer DEFAULT 0,
+        hrs integer DEFAULT 0,
+        uso_dir character varying(150) COLLATE pg_catalog."default",
+        uso_dir_value character varying(150) COLLATE pg_catalog."default",
+        uso_rh character varying(150) COLLATE pg_catalog."default",
+        uso_rh_value character varying(150) COLLATE pg_catalog."default",
+        fecha_creo date DEFAULT now(),
+        no_impresiones integer DEFAULT 0,
+        CONSTRAINT nomina_permisos_pkey PRIMARY KEY (id_permiso),
+        CONSTRAINT nomina_permisos_id_creo_fkey FOREIGN KEY (id_creo)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT nomina_permisos_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT nomina_permisos_id_trabajador_fkey FOREIGN KEY (id_trabajador)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS public.nomina_permisos OWNER to programa;
+    COMMENT ON COLUMN public.nomina_permisos.id_creo IS 'usuario que creeo el registro';
+
  ☐ Reporte de gastos compras, poner grupo
    -- lap|san
    ALTER TABLE IF EXISTS public.compras_vehiculos ADD COLUMN grupo character varying(100) COLLATE pg_catalog."default";

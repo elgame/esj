@@ -324,7 +324,7 @@
             </form><!--/form-horizontal -->
           </div><!--/tab-pane -->
           <div class="tab-pane" id="tab-permisos">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_incapacidades/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_permisos/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-permisos">
                 <div class="row-fluid">
                   <div class="span12">
                     <button type="button" class="btn btn-success" id="btn-add-permiso">Agregar Permiso</button>
@@ -335,43 +335,43 @@
                           <th>Datos</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody class="body-permisos">
 
-                      <?php foreach ($incapacidades as $key => $incapacidad){ ?>
-                        <tr>
+                      <?php foreach ($permisos as $key => $permiso){ ?>
+                        <tr class="rowpermisos">
                           <td>
                             <table>
                               <tr>
                                 <td>Fecha Ini
-                                  <input type="hidden" name="perIdPermiso[]" value="" class="perIdPermiso">
+                                  <input type="hidden" name="perIdPermiso[]" value="<?php echo (isset($permiso->id_permiso)? $permiso->id_permiso:'') ?>" class="perIdPermiso">
                                 </td>
-                                <td><input type="datetime-local" name="perFechaIni[]" value="" class="span12 perFechaIni"></td>
+                                <td><input type="datetime-local" name="perFechaIni[]" value="<?php echo (isset($permiso->fecha_ini)? $permiso->fecha_ini:'') ?>" class="span12 perFechaIni"></td>
                                 <td>Fecha Fin</td>
-                                <td><input type="datetime-local" name="perFechaFin[]" value="" class="span12 perFechaFin"></td>
+                                <td><input type="datetime-local" name="perFechaFin[]" value="<?php echo (isset($permiso->fecha_fin)? $permiso->fecha_fin:'') ?>" class="span12 perFechaFin"></td>
                                 <td>
-                                  Dias: <input type="number" name="perDias[]" value="" class="span9 perDias" style="display: inline;"> <br>
-                                  Hrs: <input type="number" name="perHrs[]" value="" class="span9 perHrs" style="display: inline;">
+                                  Dias: <input type="number" name="perDias[]" value="<?php echo (isset($permiso->dias)? $permiso->dias:'') ?>" class="span9 perDias" style="display: inline;"> <br>
+                                  Hrs: <input type="number" name="perHrs[]" value="<?php echo (isset($permiso->hrs)? $permiso->hrs:'') ?>" class="span9 perHrs" style="display: inline;">
                                 </td>
                               </tr>
                               <tr>
                                 <td>Uso Dirección</td>
                                 <td>
                                   <select name="perUsoDir[]" class="span12 perUsoDir">
-                                    <option>SIN GOCE DE SUELDO</option>
-                                    <option>PERMISO PAGADO AL</option>
-                                    <option>REPOSICION DE TIEMPO</option>
-                                    <option>A CUENTA DE VACACIONES</option>
+                                    <option <?php echo set_select('perUsoDir', 'SIN GOCE DE SUELDO', false, (isset($permiso->uso_dir)?$permiso->uso_dir:'0')); ?>>SIN GOCE DE SUELDO</option>
+                                    <option <?php echo set_select('perUsoDir', 'PERMISO PAGADO AL', false, (isset($permiso->uso_dir)?$permiso->uso_dir:'0')); ?>>PERMISO PAGADO AL</option>
+                                    <option <?php echo set_select('perUsoDir', 'REPOSICION DE TIEMPO', false, (isset($permiso->uso_dir)?$permiso->uso_dir:'0')); ?>>REPOSICION DE TIEMPO</option>
+                                    <option <?php echo set_select('perUsoDir', 'A CUENTA DE VACACIONES', false, (isset($permiso->uso_dir)?$permiso->uso_dir:'0')); ?>>A CUENTA DE VACACIONES</option>
                                   </select>
-                                  <input type="text" name="perUsoDirValue[]" placeholder="50%" class="span12 hide perUsoDirValue">
+                                  <input type="text" name="perUsoDirValue[]" value="<?php echo (isset($permiso->uso_dir_value)? $permiso->uso_dir_value:'') ?>" placeholder="50%" class="span12 hide perUsoDirValue">
                                 </td>
                                 <td>Uso RH</td>
                                 <td>
                                   <select name="perUsoRH[]" class="span12 perUsoRH">
-                                    <option>ACADEMICO</option>
-                                    <option>ADMINISTRATIVO</option>
-                                    <option>ASUNTOS PERSONALES</option>
+                                    <option <?php echo set_select('perUsoRH', 'Unica', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ACADEMICO</option>
+                                    <option <?php echo set_select('perUsoRH', 'Unica', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ADMINISTRATIVO</option>
+                                    <option <?php echo set_select('perUsoRH', 'Unica', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ASUNTOS PERSONALES</option>
                                   </select>
-                                  <input type="text" name="perUsoRHValue[]" placeholder="50%" class="span12 hide perUsoRHValue">
+                                  <input type="hidden" name="perUsoRHValue[]" value="<?php echo (isset($permiso->uso_rh_value)? $permiso->uso_rh_value:'') ?>" placeholder="50%" class="span12 hide perUsoRHValue">
                                 </td>
                                 <td>
                                   <button type="button" class="btn btn-danger btn-del-item-permisos"><i class="icon-trash"></i></button>

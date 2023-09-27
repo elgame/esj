@@ -12,6 +12,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/bonos_otros/',
     'nomina_fiscal/add_vacaciones/',
     'nomina_fiscal/add_incapacidades/',
+    'nomina_fiscal/add_permisos/',
 
     'nomina_fiscal/add_nomina/',
     'nomina_fiscal/ajax_add_nomina_empleado/',
@@ -658,6 +659,7 @@ class nomina_fiscal extends MY_Controller {
     $params['seo'] = array('titulo' => 'Nomina Fiscal - Abonos y Otros');
 
     $this->load->model('nomina_fiscal_model');
+    $this->load->model('nomina_fiscal_otros_model');
     $this->load->model('usuarios_model');
 
     // Obtiene la informacion del empleado.
@@ -683,6 +685,8 @@ class nomina_fiscal extends MY_Controller {
     //Incapacidades
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
     $params['incapacidades'] = $this->nomina_fiscal_model->getIncapacidadesEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
+
+    $params['permisos'] = $this->nomina_fiscal_otros_model->getPermisosEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
 
     $params['metods_pago']  = array(
       array('nombre' => 'Transferencia', 'value' => 'transferencia'),
@@ -906,6 +910,14 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addIncapaciades($_GET['eid'], $_POST, $_GET['sem']);
+
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
+  }
+
+  public function add_permisos()
+  {
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->addPermisos($_GET['eid'], $_POST, $_GET['sem'], $_GET['anio']);
 
     redirect(base_url('panel/nomina_fiscal/show_otros/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }

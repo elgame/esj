@@ -1,11 +1,118 @@
 <?php
-class nomina_fiscal_otros_model extends nomina_fiscal_model{
+class nomina_fiscal_otros_model extends nomina_fiscal_model {
 
 	function __construct(){
 		parent::__construct();
 	}
 
   private $rptPrestamosSaldos = 0;
+
+
+  /**
+   * Agrega los permisos.
+   *
+   * @param string $empleadoId
+   * @param array  $datos
+   * @param string $numSemana
+   * @return array
+   */
+  public function addPermisos($empleadoId, array $datos, $numSemana, $anio=null)
+  {
+    $anio = $anio==null? date("Y"): $anio;
+    $this->load->model('usuarios_model');
+    $this->load->model('banco_cuentas_model');
+
+    $infoPermiso = [];
+    $empled = $this->usuarios_model->get_usuario_info($empleadoId, true);
+
+    $insertData = array();
+    foreach ($datos['perFechaIni'] as $key => $fechaini)
+    {
+      if($datos['perIdPermiso'][$key] > 0)
+      {
+        if ($datos['perDelete'][$key] === 'true') {
+          $this->db->delete('nomina_permisos', "id_permiso = {$datos['perIdPermiso'][$key]}");
+        } else {
+          $this->db->update('nomina_permisos', array(
+            'id_trabajador' => $empleadoId,
+            'fecha_ini' => $datos['perFechaIni'][$key],
+            'fecha_fin' => $datos['perFechaFin'][$key],
+            'dias' => $datos['perDias'][$key],
+            'hrs' => $datos['perHrs'][$key],
+            'uso_dir' => $datos['perUsoDir'][$key],
+            'uso_dir_value' => $datos['perUsoDirValue'][$key],
+            'uso_rh' => $datos['perUsoRH'][$key],
+            'uso_rh_value' => $datos['perUsoRHValue'][$key],
+          ), "id_permiso = {$datos['perIdPermiso'][$key]}");
+        }
+
+      }else{ // insertar el prestamo
+        $folio = $this->getPermisosFolio($empled['info'][0]->id_empresa);
+        $insertData = array(
+          'id_empresa' => $empled['info'][0]->id_empresa,
+          'id_creo' => $this->session->userdata('id_usuario'),
+          'id_trabajador' => $empleadoId,
+          'folio' => $folio,
+          'fecha_ini' => $datos['perFechaIni'][$key],
+          'fecha_fin' => $datos['perFechaFin'][$key],
+          'dias' => $datos['perDias'][$key],
+          'hrs' => $datos['perHrs'][$key],
+          'uso_dir' => $datos['perUsoDir'][$key],
+          'uso_dir_value' => $datos['perUsoDirValue'][$key],
+          'uso_rh' => $datos['perUsoRH'][$key],
+          'uso_rh_value' => $datos['perUsoRHValue'][$key],
+        );
+        $this->db->insert('nomina_permisos', $insertData);
+      }
+    }
+
+    return array('passes' => true);
+  }
+
+  /**
+   * Obtiene los permisos de un empleado en dicha semana.
+   *
+   * @param  string $empleadoId
+   * @param  string $numSemana
+   * @return array
+   */
+  public function getPermisosEmpleado($empleadoId, $numSemana, $anio=null, $diaComienza=4, $idPermiso = null)
+  {
+    $anio = $anio==null?date("Y"):$anio;
+    $semana = $this->fechasDeUnaSemana($numSemana, $anio, $diaComienza);
+    $sql = $idPermiso? " AND id_permiso = {$idPermiso}": '';
+    $query = $this->db->query("SELECT id_permiso, id_empresa, id_creo, id_trabajador, folio, fecha_ini,
+        fecha_fin, dias, hrs, uso_dir, uso_dir_value, uso_rh, uso_rh_value, fecha_creo, no_impresiones
+      FROM nomina_permisos
+      WHERE id_trabajador = {$empleadoId} {$sql}
+        AND DATE(fecha_creo) >= '{$semana['fecha_inicio']}' AND DATE(fecha_creo) <= '{$semana['fecha_final']}'
+      ORDER BY DATE(fecha_creo) ASC");
+
+    $prestamos = array();
+    if ($query->num_rows() > 0)
+    {
+      $prestamos = $query->result();
+    }
+
+    return $prestamos;
+  }
+
+  public function getPermisosFolio($id_empresa)
+  {
+    $query = $this->db->query("SELECT folio
+      FROM nomina_permisos
+      WHERE id_empresa = {$id_empresa}
+      ORDER BY folio DESC LIMIT 1");
+
+    $folio = 1;
+    if ($query->num_rows() > 0)
+    {
+      $prestamos = $query->result();
+      $folio = $prestamos[0]->folio+1;
+    }
+
+    return $folio;
+  }
 
   public function getPrestamoTrabajador(&$pdf, $usuarioId, $fecha1, $fecha2, $todos = false)
   {

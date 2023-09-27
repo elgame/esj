@@ -1914,6 +1914,23 @@ class compras_ordenes_model extends CI_Model {
     return $response;
   }
 
+  public function getProductosFaltantesHist($prev_orden_faltantes)
+  {
+    $orden = $this->info($prev_orden_faltantes->id_orden, true);
+    $response = [];
+
+    $response[$orden['info'][0]->folio] = $orden['info'][0]->productos;
+
+    if (isset($orden['info'][0]->otros_datos->prev_orden_faltantes)) {
+      $productosFaltantesH = $this->getProductosFaltantesHist($orden['info'][0]->otros_datos->prev_orden_faltantes);
+      foreach ($productosFaltantesH as $key => $productos) {
+        $response[$key] = $productos;
+      }
+    }
+
+    return $response;
+  }
+
   /*
    |------------------------------------------------------------------------
    | PDF's
@@ -1940,6 +1957,9 @@ class compras_ordenes_model extends CI_Model {
       $almacen = $this->almacenes_model->getAlmacenInfo($orden['info'][0]->id_almacen);
       $proveedor = $this->proveedores_model->getProveedorInfo($orden['info'][0]->id_proveedor);
       $proveedor_cuentas = $this->proveedores_model->getCuentas($orden['info'][0]->id_proveedor);
+      if (isset($orden['info'][0]->otros_datos->prev_orden_faltantes)) {
+        $productosFaltantesH = $this->getProductosFaltantesHist($orden['info'][0]->otros_datos->prev_orden_faltantes);
+      }
       // echo "<pre>";
       //   var_dump($orden);
       // echo "</pre>";exit;
@@ -2474,7 +2494,8 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetXY(5, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetWidths(array(25, 70));
-        $pdf->Row(array('EMPRESA', "{$orden['info'][0]->id_empresa} - {$orden['info'][0]->empresa}"), false, true);
+        $empresaa = (isset($orden['info'][0]->empresaAp->id_empresa)? $orden['info'][0]->empresaAp->id_empresa: '') ." - ". (isset($orden['info'][0]->empresaAp->nombre_fiscal)? $orden['info'][0]->empresaAp->nombre_fiscal: '');
+        $pdf->Row(array('EMPRESA', $empresaa), false, true);
 
         // El dato de la requisicion
         if (!empty($orden['info'][0]->requisiciones)) {
@@ -2540,9 +2561,11 @@ class compras_ordenes_model extends CI_Model {
           $pdf->Row(array('Activo', implode(' | ', $activos)), false, true);
         }
 
+        $y_auxx2 = $pdf->GetY();
+        $pag_auxx2 = $pdf->page;
+
         $pdf->page = $pag_auxx;
         $pdf->SetY($y_auxx);
-
 
         if (!empty($orden['info'][0]->folio_hoja)) {
           $pdf->SetWidths(array(110));
@@ -2814,6 +2837,67 @@ class compras_ordenes_model extends CI_Model {
 
       $pdf->SetWidths(array(154));
 
+      // Historial de entradas
+      if (isset($productosFaltantesH)) {
+        if ($pdf->GetY() < $y_auxx2 || $pdf->page > $pag_auxx2) {
+          $pdf->page = $pag_auxx2;
+          $pdf->SetY($y_auxx2);
+        }
+        $pdf->SetY($pdf->GetY()+3);
+        $pdf->SetAligns(array('C'));
+        $pdf->SetWidths(array(205));
+        $pdf->SetFont('Arial','B',7);
+        $pdf->Row(array('DETALLE DE ENTRADAS'), true);
+        foreach ($productosFaltantesH as $folio => $productos)
+        {
+          foreach ($productos as $key => $prod) {
+            $tipoCambio = 1;
+            $decimales = 2;
+            if ($prod->tipo_cambio != 0)
+            {
+              $tipoCambio = $prod->tipo_cambio;
+              $decimales = 4;
+            }
+
+            $band_head = false;
+            if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+              if($pdf->GetY()+5 >= $pdf->limiteY)
+                $pdf->AddPage();
+
+              $pdf->SetFont('Arial','B',7);
+              $pdf->SetFillColor(200,200,200);
+
+              $pdf->SetX(5);
+
+              $pdf->SetAligns(array('C', 'C', 'R', 'R', 'R', 'R', 'R', 'C'));
+              $pdf->SetWidths(array(16, 78, 18, 18, 18, 20, 20, 17));
+              $pdf->Row(array('ORDEN', 'DESCRIPCION', 'P. INICIAL', 'ENTRADA', 'FALTANTES', 'PRECIO', 'IMPORTE', 'RECEPCION'), true);
+              // $pdf->Output('dd.pdf', 'I');
+            }
+
+            $pdf->SetFont('Arial','',7);
+            $pdf->SetTextColor(0,0,0);
+
+            $ultcompra = null;
+            $datos = array();
+
+            $pdf->SetX(5);
+            $datos[] = $folio;
+            $datos[] = "{$prod->id_producto} - ".$prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": '');
+            $datos[] = $prod->cantidad+$prod->faltantes;
+            $datos[] = $prod->cantidad;
+            $datos[] = $prod->faltantes;
+            $datos[] = MyString::formatoNumero($prod->precio_unitario/$tipoCambio, $decimales, '$', false);
+            $datos[] = MyString::formatoNumero($prod->importe/$tipoCambio, 2, '$', false);
+            $datos[] = $prod->fecha_aceptacion;
+
+            $pdf->SetAligns(array('C', 'C', 'R', 'R', 'R', 'R', 'R', 'C'));
+            $pdf->SetWidths(array(16, 78, 18, 18, 18, 20, 20, 17));
+            $pdf->Row($datos, false);
+          }
+        }
+      }
+
       // if($orden['info'][0]->status == 'f'){
       //   $pdf->SetAligns(array('C'));
       //   $pdf->SetY($y_compras);
@@ -2899,15 +2983,16 @@ class compras_ordenes_model extends CI_Model {
     $pdf->Row(array($entrada_almacen), false, false);
 
     $pdf->SetFont('helvetica','', 8);
-    $pdf->SetWidths(array(30, 33));
+    $pdf->SetFounts(array($pdf->fount_num, $pdf->fount_txt), [4, 0], ['', '']);
+    $pdf->SetWidths(array(43, 20));
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetX(0);
-    $pdf->Row(array('No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''), MyString::fechaATexto($orden['info'][0]->fecha, '/c') ), false, false);
+    $pdf->Row2(array('No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''), MyString::fechaATexto($orden['info'][0]->fecha, '/c') ), false, false);
 
     $pdf->SetFont('helvetica','', 7);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
-    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetXY(0, $pdf->GetY());
     $pdf->Row(array('Proveedor: ' . $orden['info'][0]->proveedor), false, false);
 
     $pdf->SetAligns(array('C'));
@@ -2970,10 +3055,12 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetWidths(array(20, 20, 23));
       $pdf->SetAligns(array('R', 'R', 'R'));
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row(array($prod->cantidad.' '.$prod->abreviatura,
+      $pdf->SetFounts(array($pdf->fount_num, $pdf->fount_num, $pdf->fount_num), [1, 1, 1], ['', '', '']);
+      $pdf->Row2(array($prod->cantidad.' '.$prod->abreviatura,
                     MyString::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false),
                     MyString::formatoNumero($prod->importe/$tipoCambio, 2, '$', false)), false, false);
 
+      $pdf->SetFont('Arial','',7);
       $pdf->SetWidths(array(63));
       $pdf->SetAligns(array('C'));
       $pdf->SetXY(0, $pdf->GetY()-3);
@@ -2995,33 +3082,37 @@ class compras_ordenes_model extends CI_Model {
       }
     }
 
-    $pdf->SetWidths(array(20, 20, 23));
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetFounts(array($pdf->fount_num, $pdf->fount_txt, $pdf->fount_num), [0, 0, 1], ['', '', '']);
+    $pdf->SetWidths(array(18, 20, 25));
     $pdf->SetAligns(array('L', 'R', 'R'));
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array(($tipoCambio>1 ? "TC: " . $tipoCambio : ''), 'SUB-TOTAL', MyString::formatoNumero($subtotal, 2, '$', false)), false, false);
-    $pdf->SetWidths(array(20, 23));
+    $pdf->Row2(array(($tipoCambio>1 ? "TC: " . $tipoCambio : ''), 'SUB-TOTAL', MyString::formatoNumero($subtotal, 2, '$', false)), false, false);
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), [0, 1], ['', '']);
+    $pdf->SetWidths(array(20, 25));
     $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetXY(20, $pdf->GetY()-2);
-    $pdf->Row(array('IVA', MyString::formatoNumero($iva, 2, '$', false)), false, false);
+    $pdf->SetXY(18, $pdf->GetY()-2);
+    $pdf->Row2(array('IVA', MyString::formatoNumero($iva, 2, '$', false)), false, false);
     if ($ieps > 0)
     {
-      $pdf->SetXY(20, $pdf->GetY()-2);
-      $pdf->Row(array('IEPS', MyString::formatoNumero($ieps, 2, '$', false)), false, false);
+      $pdf->SetXY(18, $pdf->GetY()-2);
+      $pdf->Row2(array('IEPS', MyString::formatoNumero($ieps, 2, '$', false)), false, false);
     }
     if ($retencion > 0)
     {
-      $pdf->SetXY(20, $pdf->GetY()-2);
-      $pdf->Row(array('Ret. IVA', MyString::formatoNumero($retencion, 2, '$', false)), false, false);
+      $pdf->SetXY(18, $pdf->GetY()-2);
+      $pdf->Row2(array('Ret. IVA', MyString::formatoNumero($retencion, 2, '$', false)), false, false);
     }
     if ($retIsr > 0)
     {
-      $pdf->SetXY(20, $pdf->GetY()-2);
-      $pdf->Row(array('Ret. ISR', MyString::formatoNumero($retIsr, 2, '$', false)), false, false);
+      $pdf->SetXY(18, $pdf->GetY()-2);
+      $pdf->Row2(array('Ret. ISR', MyString::formatoNumero($retIsr, 2, '$', false)), false, false);
     }
-    $pdf->SetXY(20, $pdf->GetY()-2);
-    $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, false);
+    $pdf->SetXY(18, $pdf->GetY()-2);
+    $pdf->Row2(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, false);
 
     //Otros datos
+    $pdf->SetFont('Arial','', 7);
     $pdf->SetX(0);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
