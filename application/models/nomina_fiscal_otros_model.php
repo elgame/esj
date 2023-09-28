@@ -209,57 +209,10 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
       " (".date('Y-m-d H:i').")"
     ), false, false);
 
+    $this->db->update('nomina_permisos', ['no_impresiones' => $permiso->no_impresiones+1],
+        "id_permiso = '{$id_permiso}'");
 
     $pdf->Output('permiso.pdf', 'I');
-
-
-    $pdf->SetWidths(array(63));
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetX(0);
-    $pdf->Row(array('De: '.$deudor->caja), false, false);
-    $pdf->SetX(0);
-    $pdf->Row(array('A: '.(isset($caja_destino->nombre)? $caja_destino->nombre: $caja_destino)), false, false);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array('     '.$deudor->nombre), false, false);
-
-    $pdf->SetX(0);
-    $pdf->Row(array('Monto: '.MyString::formatoNumero($deudor->monto, 2, '$', false)), false, false);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(63));
-    $pdf->SetX(0);
-    $pdf->Row(array(MyString::num2letras($deudor->monto)), false, false);
-    $pdf->SetX(0);
-    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
-
-    $pdf->SetX(0);
-    $pdf->Row(array($deudor->concepto), false, false);
-
-    $pdf->SetX(0);
-    $pdf->Row(array( 'Impresión '.($deudor->no_impresiones==0? 'ORIGINAL': 'COPIA '.$deudor->no_impresiones)), false, false);
-    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
-
-    $pdf->SetX(0);
-    $pdf->SetAligns(array('C', 'C', 'C'));
-    $pdf->SetWidths(array(21, 21, 21));
-    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', MyString::fechaAT($deudor->fecha)), false, false);
-    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
-    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
-    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
-
-    $pdf->SetXY(0, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L', 'L'));
-    $pdf->SetWidths(array(21, 42));
-    $pdf->Row(array('Creado por:', $deudor->usuario_creo), false, false);
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', MyString::fechaAT($deudor->fecha_creacion)), false, false);
-
-    $this->db->update('cajachica_deudores', ['no_impresiones' => $deudor->no_impresiones+1],
-        "id_deudor = '{$id_deudor}' AND no_caja = {$noCaja}");
-
-    // $pdf->AutoPrint(true);
-    $pdf->Output('vale_deudor.pdf', 'I');
   }
 
   public function getPermisosFolio($id_empresa)

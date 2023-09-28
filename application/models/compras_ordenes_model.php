@@ -2839,6 +2839,15 @@ class compras_ordenes_model extends CI_Model {
 
       // Historial de entradas
       if (isset($productosFaltantesH)) {
+        if ($pdf->page >= $pag_auxx2) {
+          if ($pdf->page === $pag_auxx2 && $pdf->GetY() < $y_auxx2) {
+            $pdf->SetY($y_auxx2);
+          }
+        } else {
+          $pdf->page = $pag_auxx2;
+          $pdf->SetY($y_auxx2);
+        }
+
         if ($pdf->GetY() < $y_auxx2 || $pdf->page > $pag_auxx2) {
           $pdf->page = $pag_auxx2;
           $pdf->SetY($y_auxx2);
