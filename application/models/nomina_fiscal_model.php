@@ -2691,6 +2691,7 @@ class nomina_fiscal_model extends CI_Model {
     return $prestamos;
   }
 
+
   /**
    * Obtiene la vacaciones que se agrego en la semana.
    *

@@ -13,6 +13,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/add_vacaciones/',
     'nomina_fiscal/add_incapacidades/',
     'nomina_fiscal/add_permisos/',
+    'nomina_fiscal/print_permiso/',
 
     'nomina_fiscal/add_nomina/',
     'nomina_fiscal/ajax_add_nomina_empleado/',
@@ -920,6 +921,12 @@ class nomina_fiscal extends MY_Controller {
     $this->nomina_fiscal_otros_model->addPermisos($_GET['eid'], $_POST, $_GET['sem'], $_GET['anio']);
 
     redirect(base_url('panel/nomina_fiscal/show_otros/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
+  }
+
+  public function print_permiso()
+  {
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->printPermiso($_GET['id_permiso']);
   }
 
   /**

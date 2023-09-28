@@ -1,6 +1,6 @@
 
  ☐ Registro de permisos en nomina
-   -- lap
+   -- lap|san
    CREATE TABLE IF NOT EXISTS public.nomina_permisos
     (
         id_permiso bigserial NOT NULL,

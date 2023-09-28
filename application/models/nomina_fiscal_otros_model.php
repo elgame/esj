@@ -80,13 +80,23 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
   {
     $anio = $anio==null?date("Y"):$anio;
     $semana = $this->fechasDeUnaSemana($numSemana, $anio, $diaComienza);
-    $sql = $idPermiso? " AND id_permiso = {$idPermiso}": '';
-    $query = $this->db->query("SELECT id_permiso, id_empresa, id_creo, id_trabajador, folio, fecha_ini,
-        fecha_fin, dias, hrs, uso_dir, uso_dir_value, uso_rh, uso_rh_value, fecha_creo, no_impresiones
-      FROM nomina_permisos
-      WHERE id_trabajador = {$empleadoId} {$sql}
-        AND DATE(fecha_creo) >= '{$semana['fecha_inicio']}' AND DATE(fecha_creo) <= '{$semana['fecha_final']}'
-      ORDER BY DATE(fecha_creo) ASC");
+    $sql = $idPermiso?
+      " np.id_permiso = {$idPermiso}":
+      " np.id_trabajador = {$empleadoId} AND DATE(np.fecha_creo) >= '{$semana['fecha_inicio']}' AND DATE(np.fecha_creo) <= '{$semana['fecha_final']}'";
+
+    $query = $this->db->query("SELECT np.id_permiso, np.id_empresa, np.id_creo, np.id_trabajador, np.folio, np.fecha_ini,
+        np.fecha_fin, np.dias, np.hrs, np.uso_dir, np.uso_dir_value, np.uso_rh, np.uso_rh_value,
+        Date(np.fecha_creo) AS fecha_creo, np.no_impresiones,
+        e.nombre_fiscal AS empresa, uc.nombre AS creo,
+        (ut.nombre || ' ' || ut.apellido_paterno || ' ' || ut.apellido_materno) AS trabajador,
+        udt.nombre AS departamento
+      FROM nomina_permisos np
+        INNER JOIN empresas e ON e.id_empresa = np.id_empresa
+        INNER JOIN usuarios uc ON uc.id = np.id_creo
+        INNER JOIN usuarios ut ON ut.id = np.id_trabajador
+        LEFT JOIN usuarios_departamento udt ON udt.id_departamento = ut.id_departamente
+      WHERE {$sql}
+      ORDER BY DATE(np.fecha_creo) ASC");
 
     $prestamos = array();
     if ($query->num_rows() > 0)
@@ -95,6 +105,161 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
     }
 
     return $prestamos;
+  }
+
+  public function printPermiso($id_permiso)
+  {
+    $permiso = $this->getPermisosEmpleado(0, 0, 0, 0, $id_permiso);
+    $permiso = $permiso[0];
+
+    // echo "<pre>";
+    //   var_dump($permiso);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('SOLICITUD DE PERMISO'), false, false);
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array($permiso->empresa), false, false);
+
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Folio: '.$permiso->folio), false, false);
+
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('NOMBRE DEL EMPLEADO:'), false, false);
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array($permiso->trabajador), false, false);
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('DEPARTAMENTO:'), false, false);
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array($permiso->departamento), false, false);
+
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('C'));
+    $pdf->SetX(0);
+    $pdf->Row(array('DATOS DEL PERMISO'), false, true);
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L'));
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array('F. Inicio: '.$permiso->fecha_ini), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array('F. Fin: '.$permiso->fecha_fin), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array('Dias: '.$permiso->dias), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array('Hrs: '.$permiso->hrs), false, false);
+
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('C'));
+    $pdf->SetX(0);
+    $pdf->Row(array('USO DIRECCIÓN'), false, true);
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L'));
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array("{$permiso->uso_dir} {$permiso->uso_dir_value}"), false, false);
+
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('C'));
+    $pdf->SetX(0);
+    $pdf->Row(array('USO RECURSOS HUMANOS'), false, true);
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L'));
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array("{$permiso->uso_rh} {$permiso->uso_rh_value}"), false, false);
+
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('C'));
+    $pdf->SetX(0);
+    $pdf->Row(array('FIRMA DE AUTORIZACION'), false, true);
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L'));
+    $pdf->SetXY(0, $pdf->GetY()+8);
+    $pdf->Row(array("Creado por: {$permiso->creo}"), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array("Creado: {$permiso->fecha_creo}"), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array("Impresión: ".
+      ($permiso->no_impresiones > 0 ? "Copia {$permiso->no_impresiones}": 'Original').
+      " (".date('Y-m-d H:i').")"
+    ), false, false);
+
+
+    $pdf->Output('permiso.pdf', 'I');
+
+
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('De: '.$deudor->caja), false, false);
+    $pdf->SetX(0);
+    $pdf->Row(array('A: '.(isset($caja_destino->nombre)? $caja_destino->nombre: $caja_destino)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('     '.$deudor->nombre), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('Monto: '.MyString::formatoNumero($deudor->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(MyString::num2letras($deudor->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($deudor->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($deudor->no_impresiones==0? 'ORIGINAL': 'COPIA '.$deudor->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', MyString::fechaAT($deudor->fecha)), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $deudor->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', MyString::fechaAT($deudor->fecha_creacion)), false, false);
+
+    $this->db->update('cajachica_deudores', ['no_impresiones' => $deudor->no_impresiones+1],
+        "id_deudor = '{$id_deudor}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_deudor.pdf', 'I');
   }
 
   public function getPermisosFolio($id_empresa)

@@ -376,6 +376,8 @@
                                 <td>
                                   <button type="button" class="btn btn-danger btn-del-item-permisos"><i class="icon-trash"></i></button>
                                   <input type="hidden" name="perDelete[]" value="" data class="perDelete">
+                                  <a href="<?php echo base_url('panel/nomina_fiscal/print_permiso/?id_permiso='.$permiso->id_permiso) ?>" target="_blank" title="Imprimir permiso">
+                                    <i class="ico icon-print" style="cursor:pointer"></i></a>
                                 </td>
                               </tr>
                             </table>
