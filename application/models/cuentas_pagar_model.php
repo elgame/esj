@@ -44,9 +44,9 @@ class cuentas_pagar_model extends privilegios_model{
 		$client_default = $this->empresas_model->getDefaultEmpresa();
 		$_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
 		$_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-	    if($this->input->get('did_empresa') != '' && $this->input->get('did_empresa') != 'all'){
-	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-	    }
+    if($this->input->get('did_empresa') != '' && $this->input->get('did_empresa') != 'all'){
+      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
 
 		$query = BDUtil::pagination(
 			"SELECT
@@ -153,7 +153,7 @@ class cuentas_pagar_model extends privilegios_model{
 
 		$total_cargos = $total_abonos = $total_saldo = 0;
 		foreach($res['cuentas'] as $key => $item){
-      if ($item->saldo > 0)
+      if ($item->saldo > 0 || $_GET['ftipo'] == 'to')
       {
   			$band_head = false;
   			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
