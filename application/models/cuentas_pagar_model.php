@@ -1942,12 +1942,13 @@ class cuentas_pagar_model extends privilegios_model{
       $all_clientes = true;
       $all_facturas = true;
       if($this->input->get('fid_cliente') != '')
-        $sql_clientes .= " AND id_proveedor = ".$this->input->get('fid_cliente');
+        $sql_clientes .= " AND c.id_proveedor = ".$this->input->get('fid_cliente');
     }
 
       if($this->input->get('did_empresa') != ''){
         $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
         $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+        $sql_clientes .= " AND c.id_empresa = ".$this->input->get('did_empresa');
       }
 
       if($this->input->get('fid_cliente') != ''){
@@ -1955,14 +1956,138 @@ class cuentas_pagar_model extends privilegios_model{
         $sqlt .= " AND f.id_proveedor = '".$this->input->get('fid_cliente')."'";
       }
 
-      $proveedores = $this->db->query("SELECT id_proveedor, nombre_fiscal, cuenta_cpi FROM proveedores WHERE status = 'ac' {$sql_clientes} ORDER BY cuenta_cpi ASC ");
+      /*** Saldo anterior ***/
+      $saldo_anterior = $this->db->query(
+        "SELECT
+          id_proveedor,
+          Sum(total) AS total,
+          Sum(iva) AS iva,
+          Sum(abonos) AS abonos,
+          Sum(saldo)::numeric(12, 2) AS saldo
+        FROM
+          (
+            SELECT
+              c.id_proveedor,
+              c.nombre_fiscal,
+              Sum(f.total) AS total,
+              Sum(f.importe_iva) AS iva,
+              COALESCE(Sum(faa.abonos),0) as abonos,
+              COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+              'f'::text as tipo
+            FROM
+              proveedores AS c
+              INNER JOIN compras AS f ON c.id_proveedor = f.id_proveedor
+              LEFT JOIN (
+                (
+                  SELECT
+                    f.id_proveedor,
+                    f.id_compra,
+                    Sum(fa.total) AS abonos
+                  FROM
+                    compras AS f
+                      INNER JOIN compras_abonos AS fa ON f.id_compra = fa.id_compra
+                  WHERE f.status <> 'ca' AND f.status <> 'b'
+                    AND Date(fa.fecha) <= '{$fecha2}'{$sql}
+                  GROUP BY f.id_proveedor, f.id_compra
+                )
+                UNION
+                (
+                  SELECT
+                    f.id_proveedor,
+                    f.id_compra,
+                    Sum(f.total) AS abonos
+                  FROM
+                    compras AS f
+                  WHERE f.status <> 'ca' AND f.status <> 'b'
+                    AND f.id_nc IS NOT NULL AND f.tipo = 'nc'
+                    AND Date(f.fecha) <= '{$fecha2}'{$sql}
+                  GROUP BY f.id_proveedor, f.id_compra
+                )
+              ) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
+            WHERE c.status = 'ac' {$sql_clientes} AND f.status <> 'ca' AND f.status <> 'b'
+              AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
+            GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos, tipo
+          ) AS sal
+        {$sql2}
+        GROUP BY id_proveedor
+      ");
+      $saldo_anterior_data = $saldo_anterior->result();
+      $saldo_anterior = [];
+      foreach ($saldo_anterior_data as $key => $value) {
+        $saldo_anterior[$value->id_proveedor] = $value;
+      }
+
+      $saldo_anterior_vencido = $this->db->query(
+        "SELECT
+          id_proveedor,
+          Sum(total) AS total,
+          Sum(iva) AS iva,
+          Sum(abonos) AS abonos,
+          Sum(saldo)::numeric(12, 2) AS saldo
+        FROM
+          (
+            SELECT
+              c.id_proveedor,
+              c.nombre_fiscal,
+              Sum(f.total) AS total,
+              Sum(f.importe_iva) AS iva,
+              COALESCE(Sum(faa.abonos),0) as abonos,
+              COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+              'f'::text as tipo
+            FROM
+              proveedores AS c
+              INNER JOIN compras AS f ON c.id_proveedor = f.id_proveedor
+              LEFT JOIN (
+                (
+                  SELECT
+                    f.id_proveedor,
+                    f.id_compra,
+                    Sum(fa.total) AS abonos
+                  FROM
+                    compras AS f
+                      INNER JOIN compras_abonos AS fa ON f.id_compra = fa.id_compra
+                  WHERE f.status <> 'ca' AND f.status <> 'b'
+                    AND Date(fa.fecha) <= '{$fecha2}'{$sql}
+                  GROUP BY f.id_proveedor, f.id_compra
+                )
+                UNION
+                (
+                  SELECT
+                    f.id_proveedor,
+                    f.id_compra,
+                    Sum(f.total) AS abonos
+                  FROM
+                    compras AS f
+                  WHERE f.status <> 'ca' AND f.status <> 'b'
+                    AND f.id_nc IS NOT NULL AND f.tipo = 'nc'
+                    AND Date(f.fecha) <= '{$fecha2}'{$sql}
+                  GROUP BY f.id_proveedor, f.id_compra
+                )
+              ) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
+            WHERE c.status = 'ac' {$sql_clientes} AND f.status <> 'ca' AND f.status <> 'b'
+              AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]} AND
+              Date(f.fecha + (f.plazo_credito || ' days')::interval) < '{$fecha2}'
+            GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos, tipo
+          ) AS sal
+        {$sql2}
+        GROUP BY id_proveedor
+      ");
+      $saldo_anterior_vencido_data = $saldo_anterior_vencido->result();
+      $saldo_anterior_vencido = [];
+      foreach ($saldo_anterior_vencido_data as $key => $value) {
+        $saldo_anterior_vencido[$value->id_proveedor] = $value;
+      }
+
+      $proveedores = $this->db->query("SELECT id_proveedor, nombre_fiscal, cuenta_cpi
+        FROM proveedores AS c WHERE c.status = 'ac' {$sql_clientes} ORDER BY cuenta_cpi ASC ");
       $response = array();
       foreach ($proveedores->result() as $keyc => $proveedor)
       {
         $proveedor->saldo = 0;
+        $proveedor->saldo_anterior_vencido = [];
 
         /*** Saldo anterior ***/
-        $saldo_anterior = $this->db->query(
+        /*$saldo_anterior = $this->db->query(
           "SELECT
             id_proveedor,
             Sum(total) AS total,
@@ -2075,13 +2200,15 @@ class cuentas_pagar_model extends privilegios_model{
             ) AS sal
           {$sql2}
           GROUP BY id_proveedor
-        ");
+        ");*/
 
         // Asigna el saldo anterior vencido del cliente.
-        $proveedor->saldo_anterior_vencido = $saldo_anterior_vencido->row();
+        // $proveedor->saldo_anterior_vencido = $saldo_anterior_vencido->row();
+        $proveedor->saldo_anterior_vencido = isset($saldo_anterior_vencido[$proveedor->id_proveedor])? $saldo_anterior_vencido[$proveedor->id_proveedor]: [];
 
-        $proveedor->saldo_anterior = $saldo_anterior->row();
-        $saldo_anterior->free_result();
+        $proveedor->saldo_anterior = isset($saldo_anterior[$proveedor->id_proveedor])? $saldo_anterior[$proveedor->id_proveedor]: [];
+        // $proveedor->saldo_anterior = $saldo_anterior->row();
+        // $saldo_anterior->free_result();
         if( isset($proveedor->saldo_anterior->saldo) )
           $proveedor->saldo = $proveedor->saldo_anterior->saldo;
 
