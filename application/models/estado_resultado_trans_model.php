@@ -1530,8 +1530,10 @@ class estado_resultado_trans_model extends privilegios_model{
       if ($key == 0) {
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Perdida/Ganancia</td>';
       } else {
-        $totalll = $res['ingresos']['totales'][$key] - $res['sueldos']['totales'][$key] -
-          $res['repmtto']['totales'][$key] - $res['gastos']['totales'][$key];
+        $totalll = (isset($res['ingresos']['totales'][$key])? $res['ingresos']['totales'][$key]: 0) -
+          (isset($res['sueldos']['totales'][$key])? $res['sueldos']['totales'][$key]: 0) -
+          (isset($res['repmtto']['totales'][$key])? $res['repmtto']['totales'][$key]: 0) -
+          (isset($res['gastos']['totales'][$key])? $res['gastos']['totales'][$key]: 0);
 
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$totalll.'</td>';
       }
