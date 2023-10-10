@@ -258,6 +258,12 @@ class compras_model extends privilegios_model{
       $tit_notac = 'nota de credito de la ';
     }
 
+    $this->load->model('productos_salidas_model');
+    $salida = $this->db->query("SELECT id_salida FROM compras_salidas WHERE id_compra = {$compraId} LIMIT 1")->row();
+    if (isset($salida->id_salida)) {
+      $this->productos_salidas_model->cancelar($salida->id_salida);
+    }
+
     // Bitacora
     $datoscompra = $this->getInfoCompra($compraId);
     $this->bitacora_model->_cancel('compras', $compraId,
@@ -760,6 +766,7 @@ class compras_model extends privilegios_model{
   {
     if (count($productos) > 0) {
       $this->load->model('productos_salidas_model');
+      $id_compra = $productos[0]['id_compra'];
 
       // ============================================================
       // Se registra la salida de almacen con la materia prima
@@ -776,6 +783,7 @@ class compras_model extends privilegios_model{
         'id_empresa_ap'  => $nc['id_empresa'],
 
         'id_area'        => NULL,
+        'id_compra'      => $id_compra,
       ));
       $id_salida = $res['id_salida'];
 

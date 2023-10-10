@@ -1,6 +1,13 @@
 
+ ☐ Ligar las compras/nc compras con salidas de almacen y cancelar
+    -- pcc
+    ALTER TABLE IF EXISTS public.compras_salidas ADD COLUMN id_compra bigint;
+    COMMENT ON COLUMN public.compras_salidas.id_compra IS 'id del compras y nc compras, para cancelar automatico';
+    ALTER TABLE IF EXISTS public.compras_salidas ADD CONSTRAINT compras_salidas_id_compra_fkey FOREIGN KEY (id_compra)
+      REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL NOT VALID;
+
  ☐ Registro de permisos en nomina
-   -- lap|san
+   -- lap|san|pcc
    CREATE TABLE IF NOT EXISTS public.nomina_permisos
     (
         id_permiso bigserial NOT NULL,
@@ -36,11 +43,11 @@
     COMMENT ON COLUMN public.nomina_permisos.id_creo IS 'usuario que creeo el registro';
 
  ☐ Reporte de gastos compras, poner grupo
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE IF EXISTS public.compras_vehiculos ADD COLUMN grupo character varying(100) COLLATE pg_catalog."default";
 
  ☐ Cambios nominas reporte de la señora
-   -- lap|san
+   -- lap|san|pcc
     ALTER TABLE IF EXISTS public.usuarios ADD COLUMN hrs_turno double precision DEFAULT 8;
     ALTER TABLE IF EXISTS public.nomina_asistencia_hrs ADD COLUMN hr_entrada time without time zone;
     ALTER TABLE IF EXISTS public.nomina_asistencia_hrs ADD COLUMN hr_salida time without time zone;
@@ -58,9 +65,8 @@
         IS 'Hrs extras autorizadas para bono o descuento';
 
  ☐ Cambios estados de resultado
-   -- lap|san
-   ALTER TABLE IF EXISTS otros.estado_resultado_trans_ventas ADD COLUMN imp_comprobacion double precision DEFAULT 0;
    -- lap|san|pcc
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_ventas ADD COLUMN imp_comprobacion double precision DEFAULT 0;
    CREATE TABLE IF NOT EXISTS otros.estado_resultado_trans_tiposg
     (
         id_tipo bigserial NOT NULL,
