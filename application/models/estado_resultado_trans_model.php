@@ -882,6 +882,8 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(104));
     $fllegada = explode('T', $this->getOtrosDatos('od_hrllegada'));
+    $fllegada[0] = isset($fllegada[0])? $fllegada[0]: '';
+    $fllegada[1] = isset($fllegada[1])? $fllegada[1]: '';
     $pdf->Row(array("Llegada: {$fllegada[1]} Hrs                         Fecha: ".MyString::fechaAT($fllegada[0])), false, false);
     $pdf->SetXY(129, $pdf->GetY() );
     $pdf->SetAligns(array('L'));
