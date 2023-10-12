@@ -658,11 +658,9 @@ class estado_resultado_trans_model extends privilegios_model{
       }
 
       if (!empty($response['info']->id_gasto)) {
-        $response['info']->gasto = $this->db
-          ->select("g.folio_sig")
-          ->from('cajachica_gastos AS g')
-          ->where("g.id_gasto = {$response['info']->id_gasto}")
-          ->get()->row();
+        $response['info']->gasto = $this->db->query("SELECT String_agg(g.folio_sig::text, ', ') AS folio_sig
+          FROM cajachica_gastos AS g
+          WHERE g.id_gasto in({$response['info']->id_gasto})")->row();
       }
 
       if($info_basic)
