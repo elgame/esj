@@ -263,6 +263,86 @@ class Usuario_historial_model extends CI_Model {
     )->result();
   }
 
+
+  private function getPermisos($empleadoId)
+  {
+    return $this->db->query(
+      "SELECT np.id_permiso, np.folio, Date(np.fecha_ini) AS fecha,
+        np.dias, np.hrs, np.uso_dir, np.uso_rh,
+        (u.nombre || ' ' || u.apellido_paterno) AS empleado
+       FROM nomina_permisos np
+        INNER JOIN usuarios u ON u.id = np.id_trabajador
+       WHERE u.id = {$empleadoId} AND Date(np.fecha_creo) BETWEEN Date(u.fecha_entrada) AND Date(now())
+       ORDER BY np.fecha_creo DESC"
+    )->result();
+  }
+
+  public function printPermisosDeEmpleado($usuarioId)
+  {
+    $historial = $this->getPermisos($usuarioId);
+
+    $this->load->library('mypdf');
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_model');
+
+    $usuario = $this->usuarios_model->get_usuario_info($usuarioId, true);
+    $empresa = $this->empresas_model->getInfoEmpresa($usuario['info'][0]->id_empresa);
+
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+    {
+      $pdf->logo = $empresa['info']->logo;
+    }
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "PERMISOS A {$usuario['info'][0]->nombre} {$usuario['info'][0]->apellido_paterno} {$usuario['info'][0]->apellido_materno}";
+    // $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
+
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'L', 'R');
+    $widths = array(20, 20, 35, 55, 55, 30);
+    $header = array('FOLIO', 'FECHA', 'TIEMPO AUSENCIA', 'USO DIRECCION', 'USO RH');
+
+    foreach($historial as $key => $log)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(240,240,240);
+        $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, 1, 1);
+      }
+
+      $pdf->SetFont('helvetica', '', 8);
+
+      // se colocaria la info de la bascula
+      $pdf->SetY($pdf->GetY());
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+        $log->folio,
+        $log->fecha,
+        "{$log->dias} Dias y/o {$log->hrs} Hrs",
+        $log->uso_dir,
+        $log->uso_rh,
+      ), false, false);
+    }
+
+    $pdf->Output('prestamos.pdf', 'I');
+  }
+
 }
 
 /* End of file usuario_historial_model.php */

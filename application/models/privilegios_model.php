@@ -131,8 +131,9 @@ class privilegios_model extends CI_Model{
 				'icon_type' => 'icon-white',
 				'attrs'     => array(),
 				'text_link' => 'hidden-tablet',
-        		'html'      => '',
-				);
+        'html'      => '',
+        'ul'       => false,
+			);
 			$conf = array_merge($conf, $config);
 
 			$attrs = '';
@@ -140,8 +141,15 @@ class privilegios_model extends CI_Model{
 				$attrs .= $key.'="'.$value.'" ';
 			}
 
-			$txt = '<a class="btn '.$conf['btn_type'].'" href="'.base_url('panel/'.$priv->url_accion.'?'.$conf['params']).'" '.$attrs.' title="'.$priv->nombre.'">
-							<i class="icon-'.$priv->url_icono.' '.$conf['icon_type'].'"></i> <span class="'.$conf['text_link'].'">'.$conf['nombre'].'</span>'.$conf['html'].'</a>';
+      if ($conf['ul']) {
+        $txt = '<li>
+              <a class="'.$conf['btn_type'].'" href="'.base_url('panel/'.$priv->url_accion.'?'.$conf['params']).'" '.$attrs.' title="'.$priv->nombre.'">
+              <i class="icon-'.$priv->url_icono.' '.$conf['icon_type'].'"></i> <span class="'.$conf['text_link'].'">'.$conf['nombre'].'</span>'.$conf['html'].'</a>
+            </li>';
+      } else {
+        $txt = '<a class="btn '.$conf['btn_type'].'" href="'.base_url('panel/'.$priv->url_accion.'?'.$conf['params']).'" '.$attrs.' title="'.$priv->nombre.'">
+              <i class="icon-'.$priv->url_icono.' '.$conf['icon_type'].'"></i> <span class="'.$conf['text_link'].'">'.$conf['nombre'].'</span>'.$conf['html'].'</a>';
+      }
 		}
 		return $txt;
 	}

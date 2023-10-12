@@ -242,6 +242,13 @@ class empleados extends MY_Controller {
     $this->usuario_historial_model->printPrestamosDeEmpleado($_GET['id']);
   }
 
+  public function permisos()
+  {
+    $this->load->model('usuario_historial_model');
+
+    $this->usuario_historial_model->printPermisosDeEmpleado($_GET['id']);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax

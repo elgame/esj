@@ -2,6 +2,7 @@
   closure(jQuery, window);
 })(function ($, window) {
   $(function () {
+    $('.mtime').mask('00:00');
 
     obtenRemisionesAjax();
     cargaRemisiones();
@@ -227,8 +228,9 @@
                 '<td style="">'+
                   '<input type="text" name="sueldos_concepto[]" value="" class="span12 sueldos-concepto" required>'+
                 '</td>'+
-                '<td style="width: 60px;"><input type="text" name="sueldos_importe[]" value="" class="span12 vpositive sueldos-importe" required></td>'+
-                '<td style="">' +
+                '<td><input type="text" name="sueldos_cantidad[]" value="" class="span12 vpositive sueldos-cantidad" required></td>'+
+                '<td><input type="text" name="sueldos_importe[]" value="" class="span12 vpositive sueldos-importe" required></td>'+
+                '<td style="">'+
                   '<input type="checkbox" value="true" class="chkcomprobacion">' +
                   '<input type="hidden" name="sueldos_comprobacion[]" value="" class="valcomprobacion">' +
                 '</td>' +
@@ -690,6 +692,37 @@
       if(event.which == 8 || event.which == 46) {
         $("#dactivo").css("background-color", "#FFD071");
         $("#did_activo").val('');
+      }
+    });
+
+    $("#od_termo").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        // if(parseInt($("#empresaApId").val()) > 0)
+        //   params.did_empresa = $("#empresaApId").val();
+        params.tipo = 'a'; // activos
+        $.ajax({
+            url: base_url + 'panel/productos/ajax_aut_productos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var dempresa =  $(this);
+
+        dempresa.val(ui.item.id);
+        $("#od_termoId").val(ui.item.id);
+        dempresa.css("background-color", "#A1F57A");
+      }
+    }).css('z-index', 1011).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#od_termo").css("background-color", "#FFD071");
+        $("#od_termoId").val('');
       }
     });
   };

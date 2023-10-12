@@ -1,5 +1,6 @@
 <?php
 class estado_resultado_trans_model extends privilegios_model{
+  private $otrosDatoss = null;
 
 	function __construct(){
 		parent::__construct();
@@ -228,6 +229,23 @@ class estado_resultado_trans_model extends privilegios_model{
       }
     }
 
+    $otrosDatos = [
+      'od_termo' => $this->input->post('od_termo'),
+      'od_termoId' => $this->input->post('od_termoId'),
+      'od_camionCapTanq' => $this->input->post('od_camionCapTanq'),
+      'od_camionRendHist' => $this->input->post('od_camionRendHist'),
+      'od_camionTEncendido' => $this->input->post('od_camionTEncendido'),
+      'od_termoCapTanq' => $this->input->post('od_termoCapTanq'),
+      'od_hrsalida' => $this->input->post('od_hrsalida'),
+      'od_hrllegada' => $this->input->post('od_hrllegada'),
+      'od_gobernado' => $this->input->post('od_gobernado'),
+      'od_maxdiesel' => $this->input->post('od_maxdiesel'),
+      'od_1captanque' => $this->input->post('od_1captanque'),
+      'od_2captanque' => $this->input->post('od_2captanque'),
+      'od_costoEstimado' => $this->input->post('od_costoEstimado'),
+      'od_costoGeneral' => $this->input->post('od_costoGeneral'),
+    ];
+
     $datosFactura = array(
       'id_chofer'      => $this->input->post('did_chofer'),
       'id_activo'      => $this->input->post('did_activo'),
@@ -250,6 +268,7 @@ class estado_resultado_trans_model extends privilegios_model{
       'id_gasto'       => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
       'gasto_monto'    => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
       'lts_precios'    => json_encode($lts_precios),
+      'otros_datos'    => json_encode($otrosDatos),
     );
 
     $this->db->insert('otros.estado_resultado_trans', $datosFactura);
@@ -279,6 +298,7 @@ class estado_resultado_trans_model extends privilegios_model{
           'id_proveedor' => $_POST['sueldos_proveedor_id'][$key] !== '' ? $_POST['sueldos_proveedor_id'][$key] : null,
           'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
           'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
+          'cantidad'     => $_POST['sueldos_cantidad'][$key] !== '' ? $_POST['sueldos_cantidad'][$key] : 0,
           'importe'      => $_POST['sueldos_importe'][$key] !== '' ? $_POST['sueldos_importe'][$key] : 0,
           // 'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
         );
@@ -365,6 +385,23 @@ class estado_resultado_trans_model extends privilegios_model{
       }
     }
 
+    $otrosDatos = [
+      'od_termo' => $this->input->post('od_termo'),
+      'od_termoId' => $this->input->post('od_termoId'),
+      'od_camionCapTanq' => $this->input->post('od_camionCapTanq'),
+      'od_camionRendHist' => $this->input->post('od_camionRendHist'),
+      'od_camionTEncendido' => $this->input->post('od_camionTEncendido'),
+      'od_termoCapTanq' => $this->input->post('od_termoCapTanq'),
+      'od_hrsalida' => $this->input->post('od_hrsalida'),
+      'od_hrllegada' => $this->input->post('od_hrllegada'),
+      'od_gobernado' => $this->input->post('od_gobernado'),
+      'od_maxdiesel' => $this->input->post('od_maxdiesel'),
+      'od_1captanque' => $this->input->post('od_1captanque'),
+      'od_2captanque' => $this->input->post('od_2captanque'),
+      'od_costoEstimado' => $this->input->post('od_costoEstimado'),
+      'od_costoGeneral' => $this->input->post('od_costoGeneral'),
+    ];
+
     $datosFactura = array(
       'id_chofer'      => $this->input->post('did_chofer'),
       'id_activo'      => $this->input->post('did_activo'),
@@ -387,6 +424,7 @@ class estado_resultado_trans_model extends privilegios_model{
       'id_gasto'       => $this->input->post('did_gasto') > 0? $this->input->post('did_gasto'): null,
       'gasto_monto'    => $this->input->post('gasto_monto') > 0? $this->input->post('gasto_monto'): 0,
       'lts_precios'    => json_encode($lts_precios),
+      'otros_datos'    => json_encode($otrosDatos),
     );
 
     $this->db->update('otros.estado_resultado_trans', $datosFactura, "id = {$id_estado}");
@@ -419,6 +457,7 @@ class estado_resultado_trans_model extends privilegios_model{
             'id_proveedor' => $_POST['sueldos_proveedor_id'][$key] !== '' ? $_POST['sueldos_proveedor_id'][$key] : null,
             'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
             'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
+            'cantidad'     => $_POST['sueldos_cantidad'][$key] !== '' ? $_POST['sueldos_cantidad'][$key] : 0,
             'importe'      => $_POST['sueldos_importe'][$key] !== '' ? $_POST['sueldos_importe'][$key] : 0,
             'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
           ), "id = {$_POST['sueldos_id_sueldo'][$key]}");
@@ -428,6 +467,7 @@ class estado_resultado_trans_model extends privilegios_model{
             'id_proveedor' => $_POST['sueldos_proveedor_id'][$key] !== '' ? $_POST['sueldos_proveedor_id'][$key] : null,
             'fecha'        => $_POST['sueldos_fecha'][$key] !== '' ? $_POST['sueldos_fecha'][$key] : null,
             'descripcion'  => $_POST['sueldos_concepto'][$key] !== '' ? $_POST['sueldos_concepto'][$key] : '',
+            'cantidad'     => $_POST['sueldos_cantidad'][$key] !== '' ? $_POST['sueldos_cantidad'][$key] : 0,
             'importe'      => $_POST['sueldos_importe'][$key] !== '' ? $_POST['sueldos_importe'][$key] : 0,
             'comprobacion' => $_POST['sueldos_comprobacion'][$key] == 'true' ? 't' : 'f',
           );
@@ -594,7 +634,7 @@ class estado_resultado_trans_model extends privilegios_model{
 		$res = $this->db
       ->select("f.*")
       ->from('otros.estado_resultado_trans as f')
-      // ->join('cajachica_gastos g', "g.id_gasto = f.id_gasto", 'left')
+      // ->join('cajachica_gastos AS g', "g.id_gasto = f.id_gasto", 'left')
       ->where("f.id = {$id}")
       ->get();
 
@@ -611,6 +651,18 @@ class estado_resultado_trans_model extends privilegios_model{
           $response['info']->rend_precio += ($value->rend_lts * $value->rend_precio);
         }
         $response['info']->rend_precio = number_format($response['info']->rend_precio/($response['info']->rend_lts>0? $response['info']->rend_lts: 1), 2, '.', '');
+      }
+
+      if (!empty($response['info']->otros_datos)) {
+        $response['info']->otros_datos = json_decode($response['info']->otros_datos);
+      }
+
+      if (!empty($response['info']->id_gasto)) {
+        $response['info']->gasto = $this->db
+          ->select("g.folio_sig")
+          ->from('cajachica_gastos AS g')
+          ->where("g.id_gasto = {$response['info']->id_gasto}")
+          ->get()->row();
       }
 
       if($info_basic)
@@ -656,7 +708,7 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $res = $this->db
         ->select('s.id, p.id_proveedor, Date(s.fecha) AS fecha, s.comprobacion,
-          s.descripcion, s.importe, p.nombre_fiscal AS proveedor')
+          s.descripcion, s.importe, s.cantidad, p.nombre_fiscal AS proveedor')
         ->from('otros.estado_resultado_trans_sueldos s')
         ->join('proveedores p', 'p.id_proveedor = s.id_proveedor', 'inner')
         ->where('s.id_estado = ' . $id)->order_by('s.id', 'asc')
@@ -707,9 +759,15 @@ class estado_resultado_trans_model extends privilegios_model{
     return array(true, '');
   }
 
+  private function getOtrosDatos($key)
+  {
+    return (isset($this->otrosDatoss->{$key})? $this->otrosDatoss->{$key}: '');
+  }
+
   public function print($id)
   {
     $caja = $this->getInfoVenta($id, false, true);
+    $this->otrosDatoss = $caja['info']->otros_datos;
 
     $subtitulo = '';
     $logo = 'images/logistic.png';
@@ -739,7 +797,7 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->Image(APPPATH.(str_replace(APPPATH, '', $logo)), 65, 15, 50);
     $pdf->Ln(20);
 
-    $pdf->SetFont('Arial','B', 8);
+    $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
 
@@ -763,30 +821,85 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetXY(129, $pdf->GetY()-15 );
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(80));
-    $pdf->Row(array($caja['info']->activo->nombre), false, false);
+    $pdf->Row(array(
+      substr($caja['info']->activo->nombre, 0, 18)
+    ), false, false);
 
     $pdf->SetXY(129, $pdf->GetY() );
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(104));
     $pdf->Row(array('CHOFER: '.$caja['info']->chofer->nombre), false, false);
 
-    $pdf->SetXY(6, $pdf->GetY()+7 );
+    $pdf->SetXY(129, $pdf->GetY()+14 );
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(104));
     $pdf->Row(array('DESTINO: '.$caja['info']->destino), false, false);
 
-    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(20, 20, 20, 20));
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(15, 15, 15, 15, 15));
     $pdf->SetFont('Arial', 'B', 6);
-    $pdf->SetXY(129, $pdf->GetY()-12);
-    $pdf->Row(array('Rend Actual', 'Km Recorrido', 'Velocidad Max', 'Reposición Lt/Hist'), true, true);
+    $pdf->SetXY(129, $pdf->GetY()-19);
+    $pdf->Row(array('Rend Actual', 'Tiempo Encendido', 'Km Recorrido', 'Velocidad Max', 'Reposición Lt/Hist'), true, true);
     $pdf->SetXY(129, $pdf->GetY());
-    $pdf->Row(array($caja['info']->rend_actual, $caja['info']->km_rec, $caja['info']->vel_max, $caja['info']->rep_lt_hist), false, true);
+    $pdf->Row(array($caja['info']->rend_actual, "{$this->getOtrosDatos('od_camionTEncendido')} Hrs",
+      $caja['info']->km_rec, $caja['info']->vel_max, $caja['info']->rep_lt_hist), false, true);
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()-8 );
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array($caja['info']->activo->nombre), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()-1 );
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array("Cap Diesel: {$this->getOtrosDatos('od_camionCapTanq')} | R Hist: {$this->getOtrosDatos('od_camionRendHist')} | T Encendido: {$this->getOtrosDatos('od_camionTEncendido')}"), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY() );
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array($this->getOtrosDatos('od_termo')), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()-1 );
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array("Cap Diesel: {$this->getOtrosDatos('od_termoCapTanq')}"), false, false);
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetXY(16, $pdf->GetY() );
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 40));
+    $pdf->Row(array(
+      "{$this->getOtrosDatos('od_gobernado')} Km Gobernado",
+      "#1/Cap Tanque {$this->getOtrosDatos('od_1captanque')} Km",
+    ), false, true);
+    $pdf->SetXY(16, $pdf->GetY() );
+    $pdf->Row(array(
+      "{$this->getOtrosDatos('od_maxdiesel')} Lts Max Diesel",
+      "#2/Cap Tanque {$this->getOtrosDatos('od_2captanque')} Km",
+    ), false, true);
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(129, $pdf->GetY()-14 );
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $fllegada = explode('T', $this->getOtrosDatos('od_hrllegada'));
+    $pdf->Row(array("Llegada: {$fllegada[1]} Hrs                         Fecha: ".MyString::fechaAT($fllegada[0])), false, false);
+    $pdf->SetXY(129, $pdf->GetY() );
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array("Desde el Dia: ".MyString::fechaATexto($this->getOtrosDatos('od_hrsalida'), 'in', true)." Hrs"), false, false);
+    $pdf->SetXY(129, $pdf->GetY() );
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array("Hasta el Dia: ".MyString::fechaATexto($this->getOtrosDatos('od_hrllegada'), 'in', true)." Hrs"), false, false);
+
 
     $comprobacion = ['t' => 'Si', 'f' => 'No'];
 
     $ttotalRemisiones = 0;
     $ttotalRemisionesEf = 0;
+    $folioRemisionesEf = '';
     $totalKgs = $totalCantidad = 0;
     $pdf->SetXY(6, $pdf->GetY()+5);
     if (count($caja['remisiones']) > 0) {
@@ -823,11 +936,12 @@ class estado_resultado_trans_model extends privilegios_model{
           MyString::formatoNumero($rem->importe, 2, '', false)
         ), false, 'B');
 
-        $auxrem = $rem->id_remision;
         $ttotalRemisiones += floatval($rem->importe);
         if ($rem->comprobacion == 't') {
+          $folioRemisionesEf .= ($auxrem != $rem->id_remision? $rem->folio: '').", ";
           $ttotalRemisionesEf += floatval($rem->imp_comprobacion > 0? $rem->imp_comprobacion: $rem->importe);
         }
+        $auxrem = $rem->id_remision;
 
         $totalKgs += $rem->kilos;
         $totalCantidad += $rem->cantidad;
@@ -849,12 +963,13 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->SetFont('Arial', 'B', 6);
       $pdf->SetXY(129, $pdf->GetY()-1);
       $pdf->Row(array(
-        MyString::formatoNumero($totalKgs, 2, '$', false),
-        MyString::formatoNumero($totalCantidad, 2, '$', false),
+        MyString::formatoNumero($totalKgs, 2, '', false)." Kg",
+        MyString::formatoNumero($totalCantidad, 2, '', false),
       ), false, 'B');
     }
 
     $ttotalGastos = 0;
+    $ttotalGastosVentas = 0;
     $ttotalSueldos = 0;
     $ttotalSueldoslocal = 0;
     $pdf->SetXY(6, $pdf->GetY()+5);
@@ -866,14 +981,14 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(5, 15, 75, 74, 18));
-      $pdf->Row(array('C', 'FECHA', 'PROVEEDOR', 'DESCRIPCION', 'IMPORTE'), true, true);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(5, 15, 75, 44, 15, 15, 18));
+      $pdf->Row(array('C', 'FECHA', 'PROVEEDOR', 'DESCRIPCION', 'CANTIDAD', 'PRECIO', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'R'));
-      $pdf->SetWidths(array(5, 15, 75, 74, 18));
+      $pdf->SetAligns(array('C', 'C', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(5, 15, 75, 44, 15, 15, 18));
       foreach ($caja['sueldos'] as $key => $sueldo)
       {
         $pdf->SetX(6);
@@ -883,10 +998,12 @@ class estado_resultado_trans_model extends privilegios_model{
           $sueldo->fecha,
           $sueldo->proveedor,
           $sueldo->descripcion,
+          MyString::formatoNumero($sueldo->cantidad, 2, '', false),
+          MyString::formatoNumero(($sueldo->importe/($sueldo->cantidad>0? $sueldo->cantidad: 1)), 2, '', false),
           MyString::formatoNumero($sueldo->importe, 2, '', false)
         ), false, 'B');
 
-        $ttotalGastos += floatval($sueldo->importe);
+        $ttotalGastosVentas += floatval($sueldo->importe);
         $ttotalSueldoslocal += floatval($sueldo->importe);
         if ($sueldo->comprobacion == 't') {
           $ttotalSueldos += floatval($sueldo->importe);
@@ -901,8 +1018,102 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->Row(array(MyString::formatoNumero($ttotalSueldoslocal, 2, '$', false)), false, 'B');
     }
 
+    $ttotalGastosEf = 0;
+    $foliosGastosEf = '';
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    if (count($caja['gastos']) > 0) {
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(206));
+      $pdf->Row(array('COMISIONES'), false, false);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
+      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'PROVEEDOR', 'DESCRIPCION', 'SUBTOTAL', 'IVA', 'IMPORTE'), true, true);
+
+
+      $auxTipo = 0;
+      $totalesTipo = [0, 0, 0];
+      foreach ($caja['gastos'] as $key => $gasto)
+      {
+        if ($gasto->id_tipo == 6) { // solo las comisiones
+          // if ($auxTipo != $gasto->id_tipo) {
+          //   if ($key != 0) {
+          //     $pdf->SetFont('Arial', 'B', 6);
+          //     $pdf->SetXY(6, $pdf->GetY());
+          //     $pdf->SetAligns(array('L', 'R', 'R', 'R'));
+          //     $pdf->SetWidths(array(142, 15, 15, 15));
+          //     $pdf->Row(array('',
+          //       MyString::formatoNumero($totalesTipo[0], 2, '', false),
+          //       MyString::formatoNumero($totalesTipo[1], 2, '', false),
+          //       MyString::formatoNumero($totalesTipo[2], 2, '', false)
+          //     ), false, false);
+          //   }
+
+          //   $pdf->SetFont('Arial', 'B', 6);
+          //   $pdf->SetXY(6, $pdf->GetY());
+          //   $pdf->SetAligns(array('L'));
+          //   $pdf->SetWidths(array(187));
+          //   $pdf->Row(array($gasto->tiposg), false, 'B');
+
+          //   $totalesTipo = [0, 0, 0];
+          //   $auxTipo = $gasto->id_tipo;
+          // }
+
+          $pdf->SetFont('Arial','', 6);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
+          $pdf->Row(array(
+            $comprobacion[$gasto->comprobacion],
+            $gasto->fecha,
+            $gasto->folio,
+            $gasto->proveedor,
+            $gasto->codg,
+            MyString::formatoNumero($gasto->subtotal, 2, '', false),
+            MyString::formatoNumero($gasto->importe_iva, 2, '', false),
+            MyString::formatoNumero($gasto->total, 2, '', false)
+          ), false, 'B');
+
+          $totalesTipo[0] += floatval($gasto->subtotal);
+          $totalesTipo[1] += floatval($gasto->importe_iva);
+          $totalesTipo[2] += floatval($gasto->total);
+          $ttotalGastosVentas += floatval($gasto->subtotal);
+          if ($gasto->comprobacion == 't') {
+            $ttotalGastosEf += floatval($gasto->total);
+            $foliosGastosEf .= "{$gasto->folio}, ";
+          }
+        }
+      }
+
+      $pdf->SetFont('Arial', 'B', 6);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(142, 15, 15, 15));
+      $pdf->Row(array('',
+        MyString::formatoNumero($totalesTipo[0], 2, '', false),
+        MyString::formatoNumero($totalesTipo[1], 2, '', false),
+        MyString::formatoNumero($totalesTipo[2], 2, '', false)
+      ), false, false);
+    }
+
+    if ($ttotalGastosVentas > 0) {
+      $pdf->SetTextColor(0, 0, 0);
+
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(20));
+      $pdf->SetFont('Arial', 'B', 6);
+      $pdf->SetXY(193, $pdf->GetY()-10);
+      $pdf->Row(array('Gtos Vta'), false, 'B');
+      $pdf->SetX(193);
+      $pdf->Row(array(MyString::formatoNumero($ttotalGastosVentas, 2, '$', false)), false, 'B');
+    }
+
     $pdf->SetXY(6, $pdf->GetY()+5);
     $ttotalRepMantEf = $ttotalRepMant = $ttotalRepMantLocal = 0;
+    $folioRepMantEf = '';
     if (count($caja['repmant']) > 0) {
       $pdf->SetFont('Arial','B', 6);
       $pdf->SetAligns(array('L', 'C'));
@@ -938,6 +1149,7 @@ class estado_resultado_trans_model extends privilegios_model{
         $ttotalRepMantLocal += floatval($rem->subtotal);
         if ($rem->comprobacion == 't') {
           $ttotalRepMantEf += floatval($rem->total);
+          $folioRepMantEf .= "{$rem->folio}, ";
         }
       }
 
@@ -949,7 +1161,7 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->Row(array(MyString::formatoNumero($ttotalRepMantLocal, 2, '$', false)), false, 'B');
     }
 
-    $ttotalGastosEf = 0;
+    // $ttotalGastosEf = 0;
     $pdf->SetXY(6, $pdf->GetY()+5);
     if (count($caja['gastos']) > 0) {
       $pdf->SetFont('Arial','B', 6);
@@ -968,50 +1180,53 @@ class estado_resultado_trans_model extends privilegios_model{
       $totalesTipo = [0, 0, 0];
       foreach ($caja['gastos'] as $key => $gasto)
       {
-        if ($auxTipo != $gasto->id_tipo) {
-          if ($key != 0) {
+        if ($gasto->id_tipo != 6) { // si no es comisiones
+          if ($auxTipo != $gasto->id_tipo) {
+            if ($key != 0) {
+              $pdf->SetFont('Arial', 'B', 6);
+              $pdf->SetXY(6, $pdf->GetY());
+              $pdf->SetAligns(array('L', 'R', 'R', 'R'));
+              $pdf->SetWidths(array(142, 15, 15, 15));
+              $pdf->Row(array('',
+                MyString::formatoNumero($totalesTipo[0], 2, '', false),
+                MyString::formatoNumero($totalesTipo[1], 2, '', false),
+                MyString::formatoNumero($totalesTipo[2], 2, '', false)
+              ), false, false);
+            }
+
             $pdf->SetFont('Arial', 'B', 6);
             $pdf->SetXY(6, $pdf->GetY());
-            $pdf->SetAligns(array('L', 'R', 'R', 'R'));
-            $pdf->SetWidths(array(142, 15, 15, 15));
-            $pdf->Row(array('',
-              MyString::formatoNumero($totalesTipo[0], 2, '', false),
-              MyString::formatoNumero($totalesTipo[1], 2, '', false),
-              MyString::formatoNumero($totalesTipo[2], 2, '', false)
-            ), false, false);
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(187));
+            $pdf->Row(array($gasto->tiposg), false, 'B');
+
+            $totalesTipo = [0, 0, 0];
+            $auxTipo = $gasto->id_tipo;
           }
 
-          $pdf->SetFont('Arial', 'B', 6);
+          $pdf->SetFont('Arial','', 6);
           $pdf->SetXY(6, $pdf->GetY());
-          $pdf->SetAligns(array('L'));
-          $pdf->SetWidths(array(187));
-          $pdf->Row(array($gasto->tiposg), false, 'B');
+          $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
+          $pdf->Row(array(
+            $comprobacion[$gasto->comprobacion],
+            $gasto->fecha,
+            $gasto->folio,
+            $gasto->proveedor,
+            $gasto->codg,
+            MyString::formatoNumero($gasto->subtotal, 2, '', false),
+            MyString::formatoNumero($gasto->importe_iva, 2, '', false),
+            MyString::formatoNumero($gasto->total, 2, '', false)
+          ), false, 'B');
 
-          $totalesTipo = [0, 0, 0];
-          $auxTipo = $gasto->id_tipo;
-        }
-
-        $pdf->SetFont('Arial','', 6);
-        $pdf->SetXY(6, $pdf->GetY());
-        $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R'));
-        $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
-        $pdf->Row(array(
-          $comprobacion[$gasto->comprobacion],
-          $gasto->fecha,
-          $gasto->folio,
-          $gasto->proveedor,
-          $gasto->codg,
-          MyString::formatoNumero($gasto->subtotal, 2, '', false),
-          MyString::formatoNumero($gasto->importe_iva, 2, '', false),
-          MyString::formatoNumero($gasto->total, 2, '', false)
-        ), false, 'B');
-
-        $totalesTipo[0] += floatval($gasto->subtotal);
-        $totalesTipo[1] += floatval($gasto->importe_iva);
-        $totalesTipo[2] += floatval($gasto->total);
-        $ttotalGastos += floatval($gasto->subtotal);
-        if ($gasto->comprobacion == 't') {
-          $ttotalGastosEf += floatval($gasto->total);
+          $totalesTipo[0] += floatval($gasto->subtotal);
+          $totalesTipo[1] += floatval($gasto->importe_iva);
+          $totalesTipo[2] += floatval($gasto->total);
+          $ttotalGastos += floatval($gasto->subtotal);
+          if ($gasto->comprobacion == 't') {
+            $ttotalGastosEf += floatval($gasto->total);
+            $foliosGastosEf .= "{$gasto->folio}, ";
+          }
         }
       }
 
@@ -1026,6 +1241,53 @@ class estado_resultado_trans_model extends privilegios_model{
       ), false, false);
     }
 
+    // ------ estimaciones
+    $ttotalCostos = 0;
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetAligns(array('L', 'C'));
+    $pdf->SetWidths(array(206));
+    $pdf->Row(array('ESTIMACION DE GASTOS'), false, false);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      'SAN JORGE LOGISTIC',
+      'COSTO MENSUAL ESTIMADO',
+      '',
+      '',
+      MyString::formatoNumero($this->getOtrosDatos('od_costoEstimado'), 2, '', false)
+    ), false, 'B');
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      'SAN JORGE LOGISTIC',
+      'COSTO MENSUAL GENERAL EST',
+      '',
+      '',
+      MyString::formatoNumero($this->getOtrosDatos('od_costoGeneral'), 2, '', false)
+    ), false, 'B');
+    $ttotalCostos += floatval($this->getOtrosDatos('od_costoEstimado'));
+    $ttotalCostos += floatval($this->getOtrosDatos('od_costoGeneral'));
+    $ttotalGastos += $ttotalCostos;
+
+    $pdf->SetFont('Arial', 'B', 6);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(142, 15, 15, 15));
+    $pdf->Row(array('',
+      '',
+      '',
+      MyString::formatoNumero($ttotalCostos, 2, '', false)
+    ), false, false);
+
     if ($ttotalGastos > 0) {
       $pdf->SetTextColor(0, 0, 0);
 
@@ -1038,17 +1300,18 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->Row(array(MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, 'B');
     }
 
+    $pdf->chkSaltaPag([6, 6], 15);
+
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(25, 25));
     $pdf->SetFont('Arial', 'B', 6);
     $pdf->SetXY(163, $pdf->GetY()+5);
     $yaux = $pdf->GetY();
     $pagaux = $pdf->page;
-    $pdf->Row(array(' Utilidad Estimada', MyString::formatoNumero($ttotalRemisiones - $ttotalGastos, 2, '$', false)), false, 'B');
+    $pdf->Row(array(' Utilidad Estimada', MyString::formatoNumero($ttotalRemisiones - $ttotalGastosVentas - $ttotalGastos, 2, '$', false)), false, 'B');
 
-    if ($pdf->limiteY <= $pdf->GetY()+15) {
-      $pdf->AddPage();
-    }
+    $pdf->chkSaltaPag([6, 6], 15);
+
     $pdf->SetAligns(array('C', 'C', 'C'));
     $pdf->SetWidths(array(20, 20, 20));
     $pdf->SetFont('Arial', 'B', 6);
@@ -1065,9 +1328,8 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetXY(150, $pdf->GetY());
     $pdf->Row(array($caja['info']->km_rec, $caja['info']->vel_max, $caja['info']->rep_lt_hist), false, true);
 
-    if ($pdf->limiteY <= $pdf->GetY()+15) {
-      $pdf->AddPage();
-    }
+    $pdf->chkSaltaPag([6, 6], 15);
+
     $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
     $pdf->SetWidths(array(20, 20, 20, 20, 20));
     $pdf->SetFont('Arial', 'B', 6);
@@ -1086,32 +1348,51 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetY($yaux);
 
     $pdf->SetAligns(array('C'));
-    $pdf->SetWidths(array(60));
+    $pdf->SetWidths(array(65));
     $pdf->SetFont('Arial', 'B', 6);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('COMPROBACION DE GASTOS CAJA 2'), false, true);
     $pdf->SetAligns(array('C', 'C', 'C'));
-    $pdf->SetWidths(array(35, 25));
+    $pdf->SetWidths(array(20, 25, 20));
     $pdf->SetFont('Arial', '', 6);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('Cuenta', 'Importe'), true, true);
+    $pdf->Row(array('Cuenta', 'Folios', 'Importe'), true, true);
     $pdf->chkSaltaPag([6, 6], 8);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('ANTICIPO', MyString::formatoNumero($caja['info']->gasto_monto, 2, '$', false)), false, true);
+    $pdf->Row(array('ANTICIPO',
+      (isset($caja['info']->gasto->folio_sig)? $caja['info']->gasto->folio_sig: ''),
+      MyString::formatoNumero($caja['info']->gasto_monto, 2, '$', false)), false, true);
     $pdf->chkSaltaPag([6, 6], 8);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('INGRESO', MyString::formatoNumero($ttotalRemisionesEf, 2, '$', false)), false, true);
+    $pdf->Row(array('INGRESO', $folioRemisionesEf, MyString::formatoNumero($ttotalRemisionesEf, 2, '$', false)), false, true);
     $pdf->chkSaltaPag([6, 6], 8);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('EGRESOS (-)', MyString::formatoNumero(($ttotalSueldos + $ttotalGastosEf), 2, '$', false)), false, true);
+    $pdf->Row(array('EGRESOS (-)', $foliosGastosEf, MyString::formatoNumero(($ttotalSueldos + $ttotalGastosEf), 2, '$', false)), false, true);
     $pdf->chkSaltaPag([6, 6], 8);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('REP. GTOS (-)', MyString::formatoNumero($ttotalRepMantEf, 2, '$', false)), false, true);
+    $pdf->Row(array('REP. GTOS (-)', $folioRepMantEf, MyString::formatoNumero($ttotalRepMantEf, 2, '$', false)), false, true);
     $pdf->chkSaltaPag([6, 6], 8);
     $pdf->SetFont('Arial', 'B', 6);
     $pdf->SetXY(6, $pdf->GetY());
     $ttotalefectivo = $caja['info']->gasto_monto + $ttotalRemisionesEf - $ttotalSueldos - $ttotalGastosEf - $ttotalRepMantEf;
-    $pdf->Row(array('DEV. EFECTIVO', MyString::formatoNumero($ttotalefectivo, 2, '$', false)), false, true);
+    $pdf->Row(array('DEV. EFECTIVO', '', MyString::formatoNumero($ttotalefectivo, 2, '$', false)), false, true);
+
+    $pdf->chkSaltaPag([6, 6], 15);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(65));
+    $pdf->SetFont('Arial', 'B', 6);
+    $pdf->SetXY(15, $pdf->GetY()+20);
+    $pdf->Row(array('Hector Miguel Espinosa Ruiz'), false, 'B');
+    $pdf->SetFont('Arial', '', 6);
+    $pdf->SetXY(15, $pdf->GetY());
+    $pdf->Row(array('Firma del Supervisor'), false, false);
+
+    $pdf->SetFont('Arial', 'B', 6);
+    $pdf->SetXY(90, $pdf->GetY()-11);
+    $pdf->Row(array('Vianey Rocio Gudiño Toscano'), false, 'B');
+    $pdf->SetFont('Arial', '', 6);
+    $pdf->SetXY(90, $pdf->GetY());
+    $pdf->Row(array('Firma de la Gerencia'), false, false);
 
     $pdf->Output('estado_resultado.pdf', 'I');
   }

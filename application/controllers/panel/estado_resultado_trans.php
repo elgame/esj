@@ -78,6 +78,7 @@ class estado_resultado_trans extends MY_Controller {
     $this->carabiner->js(array(
       array('libs/jquery.numeric.js'),
       array('libs/jquery.filtertable.min.js'),
+      array('libs/jquery.mask.min.js'),
       array('general/keyjump.js'),
       array('general/util.js'),
       ['panel/estado_resultado_trans/addmod.js'],
@@ -265,6 +266,22 @@ class estado_resultado_trans extends MY_Controller {
         ['field' => 'rend_thrs_lts'           , 'label' => 'rend_thrs_lts'         , 'rules' => 'numeric']          ,
         ['field' => 'rend_thrs_hxl'           , 'label' => 'rend_thrs_hxl'         , 'rules' => 'numeric']          ,
 
+
+        ['field' => 'od_termo'                , 'label' => 'od_termo'              , 'rules' => '']          ,
+        ['field' => 'od_termoId'              , 'label' => 'od_termoId'            , 'rules' => 'numeric']          ,
+        ['field' => 'od_camionCapTanq'        , 'label' => 'od_camionCapTanq'      , 'rules' => 'numeric']          ,
+        ['field' => 'od_camionRendHist'       , 'label' => 'od_camionRendHist'     , 'rules' => 'numeric']          ,
+        ['field' => 'od_camionTEncendido'     , 'label' => 'od_camionTEncendido'   , 'rules' => '']          ,
+        ['field' => 'od_termoCapTanq'         , 'label' => 'od_termoCapTanq'       , 'rules' => 'numeric']          ,
+        ['field' => 'od_hrsalida'             , 'label' => 'od_hrsalida'           , 'rules' => '']          ,
+        ['field' => 'od_hrllegada'            , 'label' => 'od_hrllegada'          , 'rules' => '']          ,
+        ['field' => 'od_gobernado'            , 'label' => 'od_gobernado'          , 'rules' => 'numeric']          ,
+        ['field' => 'od_maxdiesel'            , 'label' => 'od_maxdiesel'          , 'rules' => 'numeric']          ,
+        ['field' => 'od_1captanque'           , 'label' => 'od_1captanque'         , 'rules' => 'numeric']          ,
+        ['field' => 'od_2captanque'           , 'label' => 'od_2captanque'         , 'rules' => 'numeric']          ,
+        ['field' => 'od_costoEstimado'        , 'label' => 'od_costoEstimado'      , 'rules' => 'numeric']          ,
+        ['field' => 'od_costoGeneral'         , 'label' => 'od_costoGeneral'       , 'rules' => 'numeric']          ,
+
         ['field' => 'remision_fecha[]'        , 'label' => 'remision_fecha'        , 'rules' => '']                 ,
         ['field' => 'remision_numero[]'       , 'label' => 'remision_numero'       , 'rules' => '']                 ,
         ['field' => 'remision_cliente[]'      , 'label' => 'remision_cliente'      , 'rules' => '']                 ,
@@ -279,6 +296,7 @@ class estado_resultado_trans extends MY_Controller {
         ['field' => 'sueldos_proveedor[]'     , 'label' => 'sueldos_proveedor'     , 'rules' => '']                 ,
         ['field' => 'sueldos_proveedor_id[]'  , 'label' => 'sueldos_proveedor_id'  , 'rules' => 'numeric']          ,
         ['field' => 'sueldos_concepto[]'      , 'label' => 'sueldos_concepto'      , 'rules' => '']                 ,
+        ['field' => 'sueldos_cantidad[]'      , 'label' => 'sueldos_cantidad'      , 'rules' => 'numeric']          ,
         ['field' => 'sueldos_importe[]'       , 'label' => 'sueldos_importe'       , 'rules' => 'numeric']          ,
         ['field' => 'sueldos_comprobacion[]'  , 'label' => 'sueldos_comprobacion'  , 'rules' => '']                 ,
         ['field' => 'sueldos_del[]'           , 'label' => 'sueldos_del'           , 'rules' => '']                 ,

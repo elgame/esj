@@ -367,9 +367,9 @@
                                 <td>Uso RH</td>
                                 <td>
                                   <select name="perUsoRH[]" class="span12 perUsoRH">
-                                    <option <?php echo set_select('perUsoRH', 'Unica', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ACADEMICO</option>
-                                    <option <?php echo set_select('perUsoRH', 'Unica', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ADMINISTRATIVO</option>
-                                    <option <?php echo set_select('perUsoRH', 'Unica', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ASUNTOS PERSONALES</option>
+                                    <option <?php echo set_select('perUsoRH', 'ACADEMICO', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ACADEMICO</option>
+                                    <option <?php echo set_select('perUsoRH', 'ADMINISTRATIVO', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ADMINISTRATIVO</option>
+                                    <option <?php echo set_select('perUsoRH', 'ASUNTOS PERSONALES', false, (isset($permiso->uso_rh)?$permiso->uso_rh:'0')); ?>>ASUNTOS PERSONALES</option>
                                   </select>
                                   <input type="hidden" name="perUsoRHValue[]" value="<?php echo (isset($permiso->uso_rh_value)? $permiso->uso_rh_value:'') ?>" placeholder="50%" class="span12 hide perUsoRHValue">
                                 </td>

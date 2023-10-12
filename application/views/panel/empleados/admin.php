@@ -81,39 +81,57 @@
 								<td><?php echo $usuario->no_seguro; ?></td>
                 <td><?php echo $usuario->dias_faltantes ?> Días</td>
 								<td class="center">
-										<?php
-										echo $this->usuarios_model->getLinkPrivSm('empleados/modificar/', array(
-												'params'   => 'id='.$usuario->id_usuario,
-												'btn_type' => 'btn-success')
-										);
-										if ($usuario->status == 't') {
-											if($usuario->id_usuario != $this->session->userdata('id_usuario'))
-												echo $this->usuarios_model->getLinkPrivSm('empleados/eliminar/', array(
-														'params'   => 'id='.$usuario->id_usuario,
-														'btn_type' => 'btn-danger',
-														'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar el empleado?', 'Usuarios', this); return false;"))
-											);
-										}else{
-											echo $this->usuarios_model->getLinkPrivSm('empleados/activar/', array(
-													'params'   => 'id='.$usuario->id_usuario,
-													'btn_type' => 'btn-danger',
-													'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el empleado?', 'Usuarios', this); return false;"))
-											);
-										}
+                  <div class="btn-group">
+                    <?php
+                    echo $this->usuarios_model->getLinkPrivSm('empleados/modificar/', array(
+                        'params'   => 'id='.$usuario->id_usuario,
+                        'btn_type' => 'btn-success')
+                    );
+                    ?>
+                    <button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                      <?php
+                      if ($usuario->status == 't') {
+                        if($usuario->id_usuario != $this->session->userdata('id_usuario'))
+                          echo $this->usuarios_model->getLinkPrivSm('empleados/eliminar/', array(
+                              'params'   => 'id='.$usuario->id_usuario,
+                              'btn_type' => 'red',
+                              'ul' => true,
+                              'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar el empleado?', 'Usuarios', this); return false;"))
+                        );
+                      } else {
+                        echo $this->usuarios_model->getLinkPrivSm('empleados/activar/', array(
+                            'params'   => 'id='.$usuario->id_usuario,
+                            'btn_type' => 'red',
+                            'ul' => true,
+                            'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el empleado?', 'Usuarios', this); return false;"))
+                        );
+                      }
 
                       echo $this->usuarios_model->getLinkPrivSm('empleados/historial/', array(
                         'params'   => 'id='.$usuario->id_usuario,
-                        'btn_type' => 'btn-info',
+                        'btn_type' => 'green',
+                        'ul' => true,
                         'attrs' => array('target' => '_BLANK')
                       ));
 
                       echo $this->usuarios_model->getLinkPrivSm('empleados/prestamos/', array(
                         'params'   => 'id='.$usuario->id_usuario,
-                        'btn_type' => 'btn-info',
+                        'btn_type' => 'blue',
+                        'ul' => true,
                         'attrs' => array('target' => '_BLANK')
                       ));
 
-										?>
+                      echo $this->usuarios_model->getLinkPrivSm('empleados/permisos/', array(
+                        'params'   => 'id='.$usuario->id_usuario,
+                        'btn_type' => 'yellow',
+                        'ul' => true,
+                        'attrs' => array('target' => '_BLANK')
+                      ));
+                      ?>
+                      <li class="divider"></li>
+                    </ul>
+                  </div>
 								</td>
 							</tr>
 					<?php }?>

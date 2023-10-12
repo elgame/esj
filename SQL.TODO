@@ -1,12 +1,18 @@
 
- ☐ Ligar las compras/nc compras con salidas de almacen y cancelar
-    -- pcc
+ ✔ Estado resultado trans, nuevos datos @done (23-10-11 18:12)
+   -- lap|san
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans ADD COLUMN otros_datos json;
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_sueldos ADD COLUMN cantidad double precision DEFAULT 0;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Permisos',207,false,'empleados/permisos/','remove-circle',true);
+
+ ✔ Ligar las compras/nc compras con salidas de almacen y cancelar @done (23-10-11 18:12)
+    -- pcc|lap|san
     ALTER TABLE IF EXISTS public.compras_salidas ADD COLUMN id_compra bigint;
     COMMENT ON COLUMN public.compras_salidas.id_compra IS 'id del compras y nc compras, para cancelar automatico';
     ALTER TABLE IF EXISTS public.compras_salidas ADD CONSTRAINT compras_salidas_id_compra_fkey FOREIGN KEY (id_compra)
       REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL NOT VALID;
 
- ☐ Registro de permisos en nomina
+ ✔ Registro de permisos en nomina @done (23-10-11 18:12)
    -- lap|san|pcc
    CREATE TABLE IF NOT EXISTS public.nomina_permisos
     (
@@ -42,7 +48,7 @@
     ALTER TABLE IF EXISTS public.nomina_permisos OWNER to programa;
     COMMENT ON COLUMN public.nomina_permisos.id_creo IS 'usuario que creeo el registro';
 
- ☐ Reporte de gastos compras, poner grupo
+ ✔ Reporte de gastos compras, poner grupo @done (23-10-11 18:12)
    -- lap|san|pcc
    ALTER TABLE IF EXISTS public.compras_vehiculos ADD COLUMN grupo character varying(100) COLLATE pg_catalog."default";
 
@@ -64,7 +70,7 @@
     COMMENT ON COLUMN public.nomina_asistencia_hrs.hrs_aut
         IS 'Hrs extras autorizadas para bono o descuento';
 
- ☐ Cambios estados de resultado
+ ✔ Cambios estados de resultado @done (23-10-11 18:12)
    -- lap|san|pcc
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_ventas ADD COLUMN imp_comprobacion double precision DEFAULT 0;
    CREATE TABLE IF NOT EXISTS otros.estado_resultado_trans_tiposg
@@ -94,12 +100,12 @@
     ('Telefono', 12),
     ('Estimaciones', 13);
 
- ☐ Cambios en bascula salidas, kg promedio
+ ✔ Cambios en bascula salidas, kg promedio @done (23-10-11 18:12)
    -- pcc|lap|san
    ALTER TABLE IF EXISTS public.bascula_productos ADD COLUMN kilos double precision NOT NULL DEFAULT 0;
    ALTER TABLE IF EXISTS public.bascula_productos ADD COLUMN promedio double precision NOT NULL DEFAULT 0;
 
- ☐ Reporte por codigo de area, empresa, folio orden, folio compra, concepto, importe
+ ✔ Reporte por codigo de area, empresa, folio orden, folio compra, concepto, importe @done (23-10-11 18:12)
  ✔ Cambios en remisiones, papeletas y pallets para sacar los kg y ponerlos en l remisión @done (23-08-02 17:53)
    -- lap|san|pcc
    ALTER TABLE IF EXISTS public.rastria_pallets_rendimiento ADD COLUMN kg_desc real DEFAULT 0;
@@ -131,7 +137,7 @@
       ORDER BY rp.folio;
    ALTER TABLE IF EXISTS public.facturacion_otrosdatos ADD COLUMN extras jsonb;
 
- ☐ Cambios estado res transporte
+ ✔ Cambios estado res transporte @done (23-10-11 18:12)
     -- lap|san|pcc
     ALTER TABLE IF EXISTS otros.estado_resultado_trans_cods ADD COLUMN tipo character varying(10) COLLATE pg_catalog."default" DEFAULT 'g'::character varying;
     COMMENT ON COLUMN otros.estado_resultado_trans_cods.tipo IS 'g: gastos, rm: repara manteni';

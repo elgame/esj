@@ -57,10 +57,39 @@
               </div>
 
               <div class="control-group">
-                <label class="control-label" for="dactivo">Activo</label>
+                <label class="control-label" for="dactivo">Camión</label>
                 <div class="controls">
                   <input type="text" name="dactivo" class="span9" id="dactivo" value="<?php echo set_value('dactivo', isset($borrador) ? $borrador['info']->activo->nombre : ''); ?>" size="73">
                   <input type="hidden" name="did_activo" id="did_activo" value="<?php echo set_value('did_activo', isset($borrador) ? $borrador['info']->activo->id_producto : ''); ?>">
+
+                  <div class="row-fluid" style="margin-top: 8px;">
+                    <label class="span4">Cap Diesel
+                      <input type="number" step="any" name="od_camionCapTanq" id="od_camionCapTanq"
+                        value="<?php echo set_value('od_camionCapTanq', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_camionCapTanq : ''); ?>" style="width: 50%;">
+                    </label>
+                    <label class="span3">R Hist
+                      <input type="number" step="any" name="od_camionRendHist" id="od_camionRendHist"
+                        value="<?php echo set_value('od_camionRendHist', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_camionRendHist : ''); ?>" style="width: 50%;">
+                    </label>
+                    <label class="span5">T Encendido
+                      <input type="text" name="od_camionTEncendido" id="od_camionTEncendido" class="mtime"
+                        value="<?php echo set_value('od_camionTEncendido', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_camionTEncendido : ''); ?>" style="width: 50%;">
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="od_termo">Termo</label>
+                <div class="controls">
+                  <div class="row-fluid">
+                    <input type="text" name="od_termo" class="span6" id="od_termo" value="<?php echo set_value('od_termo', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_termo : ''); ?>" size="73" style="float: left;">
+                    <input type="hidden" name="od_termoId" id="od_termoId" value="<?php echo set_value('od_termoId', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_termoId : ''); ?>">
+
+                    <label class="span6">Cap Diesel
+                      <input type="number" step="any" name="od_termoCapTanq" id="od_termoCapTanq" value="<?php echo set_value('od_termoCapTanq', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_termoCapTanq : ''); ?>" style="width: 50%;">
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -107,6 +136,51 @@
                 <div class="controls">
                   <input type="text" name="destino" class="span9" id="destino"
                     value="<?php echo set_value('destino', isset($borrador) ? $borrador['info']->destino : ''); ?>" placeholder="">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="od_hrsalida">Hr Salida</label>
+                <div class="controls">
+                  <div class="row-fluid">
+                    <input type="datetime-local" name="od_hrsalida" class="span5" id="od_hrsalida"
+                      value="<?php echo set_value('od_hrsalida', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_hrsalida : ''); ?>" placeholder="" style="float: left;">
+
+                    <label class="span6">Hr Llegada
+                      <input type="datetime-local" name="od_hrllegada" id="od_hrllegada"
+                    value="<?php echo set_value('od_hrllegada', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_hrllegada : ''); ?>" placeholder="" style="width: 70%;">
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="od_gobernado">Gobernado</label>
+                <div class="controls">
+                  <div class="row-fluid">
+                    <input type="numeric" step="any" name="od_gobernado" class="span5" id="od_gobernado"
+                      value="<?php echo set_value('od_gobernado', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_gobernado : ''); ?>" placeholder="" style="float: left;">
+
+                    <label class="span6">Max Diesel
+                      <input type="numeric" step="any" name="od_maxdiesel" id="od_maxdiesel"
+                        value="<?php echo set_value('od_maxdiesel', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_maxdiesel : ''); ?>" placeholder="" style="width: 70%;">
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="od_1captanque">#1Cap Tanque</label>
+                <div class="controls">
+                  <div class="row-fluid">
+                    <input type="numeric" step="any" name="od_1captanque" class="span5" id="od_1captanque"
+                      value="<?php echo set_value('od_1captanque', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_1captanque : ''); ?>" placeholder="" style="float: left;">
+
+                    <label class="span7">#2Cap Tanque
+                      <input type="numeric" step="any" name="od_2captanque" id="od_2captanque"
+                        value="<?php echo set_value('od_2captanque', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_2captanque : ''); ?>" placeholder="" style="width: 60%;">
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -189,6 +263,19 @@
                 <label class="control-label" for="rend_thrs_hxl">Termo Hrs/Lts</label>
                 <div class="controls">
                   <input type="text" name="rend_thrs_hxl" class="span9" id="rend_thrs_hxl" value="<?php echo set_value('rend_thrs_hxl', isset($borrador) ? $borrador['info']->rend_thrs_hxl : ''); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="od_costoEstimado">Costo Estimado</label>
+                <div class="controls">
+                  <div class="row-fluid">
+                    <input type="number" step="any" name="od_costoEstimado" class="span5" id="od_costoEstimado" value="<?php echo set_value('od_costoEstimado', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_costoEstimado : ''); ?>" size="73" style="float: left;">
+
+                    <label class="span7">Costo General
+                      <input type="number" step="any" name="od_costoGeneral" id="od_costoGeneral" value="<?php echo set_value('od_costoGeneral', !empty($borrador['info']->otros_datos) ? $borrador['info']->otros_datos->od_costoGeneral : ''); ?>" style="width: 50%;">
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -327,7 +414,7 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-sueldos">
                           <thead>
                             <tr>
-                              <th colspan="6">SUELDOS
+                              <th colspan="7">SUELDOS
                                 <button type="button" class="btn btn-success" id="btn-add-sueldos" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
                               </th>
                             </tr>
@@ -335,6 +422,7 @@
                               <th style="width: 15%;">FECHA</th>
                               <th style="width: 30%;">PROVEEDOR</th>
                               <th style="width: 37%;">CONCEPTO</th>
+                              <th style="width: 15%;">CANTIDAD</th>
                               <th style="width: 15%;">IMPORTE</th>
                               <th style="width: 15%;">COMPRO</th>
                               <th style="width: 3%;"></th>
@@ -355,7 +443,8 @@
                                   <td style="">
                                     <input type="text" name="sueldos_concepto[]" value="<?php echo $_POST['sueldos_concepto'][$key] ?>" class="span12 sueldos-concepto" required>
                                   </td>
-                                  <td style="width: 60px;"><input type="text" name="sueldos_importe[]" value="<?php echo $_POST['sueldos_importe'][$key] ?>" class="span12 vpositive sueldos-importe" required></td>
+                                  <td><input type="text" name="sueldos_cantidad[]" value="<?php echo $_POST['sueldos_cantidad'][$key] ?>" class="span12 vpositive sueldos-cantidad" required></td>
+                                  <td><input type="text" name="sueldos_importe[]" value="<?php echo $_POST['sueldos_importe'][$key] ?>" class="span12 vpositive sueldos-importe" required></td>
                                   <td style="">
                                     <input type="checkbox" value="true" class="chkcomprobacion" <?php echo ($_POST['sueldos_comprobacion'][$key] == 'true'? 'checked': '') ?>>
                                     <input type="hidden" name="sueldos_comprobacion[]" value="<?php echo $_POST['sueldos_comprobacion'][$key] ?>" class="valcomprobacion">
@@ -380,7 +469,8 @@
                                 <td style="">
                                   <input type="text" name="sueldos_concepto[]" value="<?php echo $sueldo->descripcion ?>" class="span12 sueldos-concepto" required>
                                 </td>
-                                <td style="width: 60px;"><input type="text" name="sueldos_importe[]" value="<?php echo $sueldo->importe ?>" class="span12 vpositive sueldos-importe" required></td>
+                                <td><input type="text" name="sueldos_cantidad[]" value="<?php echo $sueldo->cantidad ?>" class="span12 vpositive sueldos-cantidad" required></td>
+                                <td><input type="text" name="sueldos_importe[]" value="<?php echo $sueldo->importe ?>" class="span12 vpositive sueldos-importe" required></td>
                                 <td style="">
                                   <input type="checkbox" value="true" class="chkcomprobacion" <?php echo (isset($sueldo->comprobacion) && $sueldo->comprobacion == 't'? 'checked': '') ?>>
                                   <input type="hidden" name="sueldos_comprobacion[]" value="<?php echo (isset($sueldo->comprobacion) && $sueldo->comprobacion == 't'? 'true': '') ?>" class="valcomprobacion">
@@ -392,7 +482,7 @@
                               </tr>
                             <?php }} ?>
                             <tr class="row-total">
-                              <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                              <td colspan="4" style="text-align: right; font-weight: bolder;">TOTAL</td>
                               <td><input type="text" value="<?php echo $totalSueldos ?>" class="vpositive" id="ttotal-sueldos" style="text-align: right;" readonly></td>
                               <td colspan="2"></td>
                             </tr>
