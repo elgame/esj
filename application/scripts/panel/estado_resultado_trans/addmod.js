@@ -2,7 +2,7 @@
   closure(jQuery, window);
 })(function ($, window) {
   $(function () {
-    $('.mtime').mask('00:00');
+    $('.mtime').mask('000:00');
 
     obtenRemisionesAjax();
     cargaRemisiones();
