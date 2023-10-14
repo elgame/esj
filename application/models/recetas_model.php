@@ -1555,11 +1555,11 @@ class recetas_model extends CI_Model {
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $widths = array(6, 12, 57, 14, 14, 17, 15, 18);
           // $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
-          $header = array('#', 'Id', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+          $header = array('#', 'Id', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'TOTAL', 'PRECIO', 'IMPORTE');
         } else {
           $widths = array(6, 12, 57, 14, 14, 17);
           // $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
-          $header = array('#', 'Id', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
+          $header = array('#', 'Id', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'TOTAL');
         }
 
         $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem));
@@ -1577,13 +1577,14 @@ class recetas_model extends CI_Model {
           ];
         } else {
           $datos = [
-            '', 'Cargas',
+            '', '', 'Cargas',
             MyString::formatoNumero($receta['info']->carga1, 2, '', false),
             MyString::formatoNumero($receta['info']->carga2, 2, '', false),
             ''
           ];
         }
-        $pdf->Row($datos, false, false);
+        // $pdf->Row($datos, false, false);
+        $pdf->SetY($pdf->GetY()+5);
 
         $yaux = $pdf->GetY();
         $page_aux = $pdf->page;
