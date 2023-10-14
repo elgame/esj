@@ -1473,10 +1473,10 @@ class recetas_model extends CI_Model {
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R');
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $widths = array(10, 62, 18, 22, 18, 22);
-          $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+          $header = array('#', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
           $widths = array(10, 62, 18, 22);
-          $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL');
+          $header = array('#', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL');
         }
 
         $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+3);
@@ -1499,7 +1499,8 @@ class recetas_model extends CI_Model {
           $pdf->SetTextColor(0,0,0);
           if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
             $datos = array(
-              "{$prod->percent}%",
+              // "{$prod->percent}%",
+              $key+1,
               $prod->producto,
               MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
               MyString::formatoNumero($prod->aplicacion_total, 2, '', false),
@@ -1508,7 +1509,8 @@ class recetas_model extends CI_Model {
             );
           } else {
             $datos = array(
-              "{$prod->percent}%",
+              // "{$prod->percent}%",
+              $key+1,
               $prod->producto,
               MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
               MyString::formatoNumero($prod->aplicacion_total, 2, '', false)
@@ -1549,15 +1551,15 @@ class recetas_model extends CI_Model {
 
       } else { // lts
         $tpercent = $tcantidad = $ttaplicacion = $timporte = $tcarga1 = $tcarga2 = 0;
-        $aligns = array('C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+        $aligns = array('C', 'C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
-          $widths = array(10, 64, 14, 14, 17, 15, 18);
+          $widths = array(6, 12, 57, 14, 14, 17, 15, 18);
           // $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
-          $header = array('%', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+          $header = array('#', 'Id', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
-          $widths = array(10, 64, 14, 14, 17);
+          $widths = array(6, 12, 57, 14, 14, 17);
           // $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
-          $header = array('%', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
+          $header = array('#', 'Id', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
         }
 
         $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem));
@@ -1607,7 +1609,9 @@ class recetas_model extends CI_Model {
           $pdf->SetTextColor(0,0,0);
           if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
             $datos = array(
-              "{$prod->percent}%",
+              // "{$prod->percent}%",
+              $key+1,
+              $prod->id_producto,
               $prod->producto,
               // MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
               MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
@@ -1618,7 +1622,9 @@ class recetas_model extends CI_Model {
             );
           } else {
             $datos = array(
-              "{$prod->percent}%",
+              // "{$prod->percent}%",
+              $key+1,
+              $prod->id_producto,
               $prod->producto,
               // MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
               MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
@@ -1644,7 +1650,9 @@ class recetas_model extends CI_Model {
         $pdf->SetX(6);
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $pdf->Row([
-            "{$tpercent}%",
+            // "{$tpercent}%",
+            '',
+            '',
             '',
             // MyString::formatoNumero($tcantidad, 2, '', false),
             MyString::formatoNumero($tcarga1, 2, '', false),
@@ -1655,7 +1663,9 @@ class recetas_model extends CI_Model {
           ], false);
         } else {
           $pdf->Row([
-            "{$tpercent}%",
+            // "{$tpercent}%",
+            '',
+            '',
             '',
             // MyString::formatoNumero($tcantidad, 2, '', false),
             MyString::formatoNumero($tcarga1, 2, '', false),
