@@ -67,7 +67,8 @@
 									<th>RFC</th>
 									<th>Banco</th>
                   <th>No Seguro</th>
-									<th>Contrato</th>
+                  <th>Contrato</th>
+									<th>Status</th>
 								  <th>Opciones</th>
 							  </tr>
 						  </thead>
@@ -80,6 +81,7 @@
 								<td><?php echo $usuario->cuenta_banco; ?></td>
 								<td><?php echo $usuario->no_seguro; ?></td>
                 <td><?php echo $usuario->dias_faltantes ?> Días</td>
+                <td><?php echo ($usuario->status == 't'? 'Activo': 'Eliminado') ?></td>
 								<td class="center">
                   <div class="btn-group">
                     <?php
