@@ -1570,21 +1570,21 @@ class recetas_model extends CI_Model {
         $pdf->SetX(6);
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $datos = [
-            '', '', 'Cargas',
+            '', '', '',
             MyString::formatoNumero($receta['info']->carga1, 2, '', false),
             MyString::formatoNumero($receta['info']->carga2, 2, '', false),
             ''
           ];
         } else {
           $datos = [
-            '', '', 'Cargas',
+            '', '', '',
             MyString::formatoNumero($receta['info']->carga1, 2, '', false),
             MyString::formatoNumero($receta['info']->carga2, 2, '', false),
             ''
           ];
         }
-        // $pdf->Row($datos, false, false);
-        $pdf->SetY($pdf->GetY()+5);
+        $pdf->Row($datos, false, false);
+        // $pdf->SetY($pdf->GetY()+5);
 
         $yaux = $pdf->GetY();
         $page_aux = $pdf->page;
@@ -1596,8 +1596,8 @@ class recetas_model extends CI_Model {
             $pdf->SetFont('Arial','B', 6);
 
             if ($key === 0) {
-              $header[3] = MyString::formatoNumero($receta['info']->dosis_equipo, 2, '', false);
-              $header[4] = MyString::formatoNumero($receta['info']->dosis_equipo_car2, 2, '', false);
+              // $header[3] = MyString::formatoNumero($receta['info']->dosis_equipo, 2, '', false);
+              $header[4] = ''; // MyString::formatoNumero($receta['info']->dosis_equipo_car2, 2, '', false);
             }
 
             $pdf->SetX(6);
