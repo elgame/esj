@@ -2779,11 +2779,11 @@ class caja_chica_model extends CI_Model {
             $pdf->AddPage();
           // // nomenclatura
           // $this->printCajaNomenclatura($pdf, $nomenclaturas);
-          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetFont('Arial','', 6);
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
           $pdf->SetWidths(array(15, 15, 10, 53, 52, 20, 20, 20));
-          $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
+          $pdf->Row(array('FOLIO', 'FECHA', 'NOM', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
         }
 
         $totalAcreedores += floatval($acreedor->saldo);
