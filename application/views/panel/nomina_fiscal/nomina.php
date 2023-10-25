@@ -113,6 +113,8 @@
                     <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_cfdis/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Descargar XML"><img src="<?php echo base_url('application/images/otros/doc_xml.png') ?>" width="40" height="40"></a>
                     <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_banco/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Descargar Archivo Banco"><img src="<?php echo base_url('application/images/otros/creditcard.png') ?>" width="40" height="40"></a>
                   <?php } ?>
+
+                    <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_new_pdf/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
                 </div>
               </div>
 
