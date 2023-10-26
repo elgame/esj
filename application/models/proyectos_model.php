@@ -395,35 +395,37 @@ class proyectos_model extends CI_Model {
     if (count($presupuesto['ordenes']) > 0) {
       foreach ($presupuesto['ordenes'] as $key => $prod)
       {
-        $band_head = false;
-        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
-          if($pdf->GetY()+5 >= $pdf->limiteY)
-            $pdf->AddPage();
+        if ($prod->cantidad > 0 || $prod->piezas > 0) {
+          $band_head = false;
+          if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+            if($pdf->GetY()+5 >= $pdf->limiteY)
+              $pdf->AddPage();
 
-          $pdf->SetFont('Arial','B',8);
-          $pdf->SetFillColor(160,160,160);
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, true);
+          }
+
+          $pdf->SetFont('Arial','',8);
+          $datos = array(
+            $prod->fecha,
+            $prod->folio,
+            $prod->concepto,
+            MyString::formatoNumero($prod->costo, 2, '$', false),
+            MyString::formatoNumero($prod->cantidad, 2, '', false),
+            MyString::formatoNumero($prod->piezas, 2, '', false),
+          );
+
           $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($header, true);
+          $pdf->Row($datos, false);
+
+          $cantidad += floatval($prod->cantidad);
+          $piezas += floatval($prod->piezas);
+          $ordenes += floatval($prod->costo);
         }
-
-        $pdf->SetFont('Arial','',8);
-        $datos = array(
-          $prod->fecha,
-          $prod->folio,
-          $prod->concepto,
-          MyString::formatoNumero($prod->costo, 2, '$', false),
-          MyString::formatoNumero($prod->cantidad, 2, '', false),
-          MyString::formatoNumero($prod->piezas, 2, '', false),
-        );
-
-        $pdf->SetX(6);
-        $pdf->Row($datos, false);
-
-        $cantidad += floatval($prod->cantidad);
-        $piezas += floatval($prod->piezas);
-        $ordenes += floatval($prod->costo);
       }
     }
 

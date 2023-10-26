@@ -379,6 +379,7 @@ class MYpdf extends FPDF {
         } else
           $this->AddPage();
       }
+      return $this->page;
     }
 
     function CheckPageBreak($h, $limit=0){

@@ -32,7 +32,13 @@
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
-        <h2><i class="icon-plus"></i> <?php echo (isset($_GET['id_nrc'])? 'Agregar Nota de credito': 'Agregar Venta de Remisión') ?></h2>
+        <h2><i class="icon-plus"></i> Agregar Flete
+
+          <form enctype="multipart/form-data" class="hide">
+            <input id="uploadGps" type=file name="files[]">
+          </form>
+          <a href="#" id="btnCargarArchivo" class="btn btn-round btn-info" style="margin-right: 10px;font-size: 1.5em;" title="Cargar archivo GPS"><i class="icon-upload"></i></a>
+        </h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
         </div>

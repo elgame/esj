@@ -30,6 +30,8 @@
 
     chkcomprobacion();
     termohrs();
+
+    loadFileGps();
   });
 
   var submitForm = function () {
@@ -827,5 +829,81 @@
       });
     });
   };
+
+  loadFileGps = function() {
+    const ExcelToJSON = function() {
+      const $this = this;
+      this.parseExcel = function(file) {
+        let reader = new FileReader();
+
+        reader.onload = function(e) {
+          let data = e.target.result;
+          let workbook = XLSX.read(data, {
+            type: 'binary'
+          });
+          workbook.SheetNames.forEach(function(sheetName) {
+            // Here is your object
+            let XL_row_object = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+            let sCSV = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName]);
+            // let json_object = JSON.stringify(XL_row_object);
+            let csvObj = $.csv.toArrays(sCSV);
+            // console.log(XL_row_object);
+            // console.log(sCSV);
+            $this.showData(csvObj);
+          })
+        };
+
+        reader.onerror = function(ex) {
+          console.log(ex);
+        };
+
+        reader.readAsBinaryString(file);
+      };
+
+      this.showData = function(csvObj) {
+        if(csvObj && csvObj[3]) {
+          const datos = {
+            distancia_rec: csvObj[3][0],
+            motor_encendido: $this.parseHrsTxt(csvObj[3][5]),
+            velocidad_max: parseFloat(csvObj[3][7]),
+            hr_salida: $this.parseDate(csvObj[3][10]),
+            hr_llegada: $this.parseDate(csvObj[3][11]),
+            reposicion_lts: parseFloat(csvObj[3][13]),
+          };
+
+          $('#od_camionTEncendido').val(datos.motor_encendido);
+          $('#dkm_rec').val(datos.distancia_rec);
+          $('#dvel_max').val(datos.velocidad_max);
+          $('#drep_lt_hist').val(datos.reposicion_lts);
+          $('#od_hrsalida').val(datos.hr_salida);
+          $('#od_hrllegada').val(datos.hr_llegada);
+        }
+      };
+
+      this.parseDate = function(date) {
+        date = date.split(' ');
+        let hr = date[0].substring(0, 5);
+        let fecha = date[1].split('/');
+
+        return `${fecha[2]}-${fecha[1]}-${fecha[0]} ${hr}`;
+      };
+
+      this.parseHrsTxt = function(date) {
+        date = date.replace(' h ', ':').replace(' m', '');
+        date = date.length === 5 ? `0${date}`: date;
+        return date;
+      };
+    };
+
+    $("#btnCargarArchivo").click(function(event) {
+      $("#uploadGps").click();
+    });
+
+    $("#uploadGps").change(function(evt){
+      let files = evt.target.files; // FileList object
+      let xl2json = new ExcelToJSON();
+      xl2json.parseExcel(files[0]);
+    });
+  }
 
 });

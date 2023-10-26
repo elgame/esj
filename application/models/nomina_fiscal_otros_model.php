@@ -2539,7 +2539,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
       'asegurado' => 'si',
       'regPatronal' => $regPatronal,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0'],
-      'ordenar' => "ORDER BY u.id ASC",
+      'ordenar' => "ORDER BY (u.nombre || u.apellido_paterno || u.apellido_materno) ASC",
       'dia_inicia_semana' => $diaComienza
     );
     $empleados = $this->nomina($configuraciones, $filtros);
@@ -2563,41 +2563,77 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
-    $pdf->SetFont('Helvetica','', 10);
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetXY(6, 27);
-    $pdf->Cell(100, 6, "Reg. Pat. IMSS: {$empresa['info']->registro_patronal}", 0, 0, 'L', 0);
-
-    $pdf->SetFont('Helvetica','B', 10);
-    $pdf->SetXY(6, $pdf->GetY() + 6);
-    $pdf->Cell(100, 6, "ADMINISTRACION Reg. Pat. IMSS: {$empresa['info']->registro_patronal}", 0, 0, 'L', 0);
-
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetFont('Helvetica', '', 6);
-    $pdf->SetXY(6, $pdf->GetY() + 8);
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(15, 15, 12, 10, 10, 11, 11, 11, 11));
-    $pdf->Row(['Fecha', 'Dia Abierto', 'Clave Empleado', 'Entrada', 'Salida', 'Hrs Laboro', 'Hrs Turno', 'Dif', 'Ext Aut'], true, true, null, 1, 1);
+    $pdf->SetXY(6, $pdf->GetY());
+    $headda = ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'];
+    $headdw = [13, 10, 12, 10, 10, 11, 11, 11, 11, 25, 11];
+    $headd = ['Fecha', 'Dia Abierto', 'Clave Empleado', 'Entrada', 'Salida', 'Hrs Laboro', 'Hrs Turno', 'Dif', 'Ext Aut',
+      'Justificacion', 'Salario Diario'];
+    $pdf->SetAligns($headda);
+    $pdf->SetWidths($headdw);
+    $pdf->Row($headd, true, true, null, 1, 1);
 
     foreach ($empleados as $key => $empleado) {
+      $auxpag = $pdf->page;
+      if ($pdf->chkSaltaPag([6, $pdf->GetY()]) != $auxpag) {
+        $pdf->SetFont('Helvetica', '', 6);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns($headda);
+        $pdf->SetWidths($headdw);
+        $pdf->Row($headd, true, true, null, 1, 1);
+      }
+
+      $pdf->chkSaltaPag([6, $pdf->GetY()]);
+      $pdf->SetFont('Helvetica', '', 6);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'C', 'C'));
+      $pdf->SetWidths(array(77, 47, 11));
+      $pdf->Row([$empleado->nombre, $empleado->puesto, ''], true, true, null, 1, 1);
+
       $empleado->asistenciass = array_filter($hrsAsistencias, function($val) use($empleado) {
         return $val->id_empleado == $empleado->id;
       });
-      // if (count($empleado->asistenciass) > 0) {
-      //   echo "<pre>";
-      //   var_dump($empleado);
-      //   echo "</pre>";exit;
-      // }
 
       $fechaIni = new DateTime($empleado->fecha_inicial_pago);
       $fechaFin = new DateTime($empleado->fecha_final_pago);
       while ($fechaIni <= $fechaFin) {
+        $asiss = array_filter($empleado->asistenciass, function($val) use($fechaIni) {
+          return $fechaIni->format('Y-m-d') == $val->fecha;
+        });
+        $asiss = array_shift($asiss);
         // if (count($empleado->asistenciass) > 0) {
         //   echo "<pre>";
-        //   var_dump($fechaIni->format('Y-m-d'));
+        //   var_dump($empleado);
         //   echo "</pre>";exit;
         // }
+
+        $auxpag = $pdf->page;
+        if ($pdf->chkSaltaPag([6, $pdf->GetY()]) != $auxpag) {
+          $pdf->SetFont('Helvetica', '', 6);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns($headda);
+          $pdf->SetWidths($headdw);
+          $pdf->Row($headd, true, true, null, 1, 1);
+        }
+
+        $pdf->SetFont('Helvetica', '', 6);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R', 'L'));
+        $pdf->SetWidths($headdw);
+        $pdf->Row([
+          $fechaIni->format('d/m/Y'),
+          (empty($asiss->hr_entrada)? '': 'Abierto'),
+          $empleado->id,
+          (empty($asiss->hr_entrada)? '': substr($asiss->hr_entrada, 0, 5)),
+          (empty($asiss->hr_entrada)? '': substr($asiss->hr_salida, 0, 5)),
+          (empty($asiss->hr_entrada)? '': $asiss->hrs),
+          (empty($asiss->hr_entrada)? '': $asiss->hrs_turno),
+          (empty($asiss->hr_entrada)? '': $asiss->hrs_dif),
+          (empty($asiss->hr_entrada)? '': $asiss->hrs_aut),
+          (empty($asiss->hr_entrada)? '': $asiss->observaciones),
+          (empty($asiss->hr_entrada)? '': $empleado->salario_diario_real),
+        ], false, true, null, 1, 1);
 
         $fechaIni->modify('+1 day');
       }
