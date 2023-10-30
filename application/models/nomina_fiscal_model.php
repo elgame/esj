@@ -1876,7 +1876,7 @@ class nomina_fiscal_model extends CI_Model {
         array(
           'serie'                         => $nomina[0]->nomina->receptor['NumEmpleado'],
           'folio'                         => $nomina[0]->folio,
-          'nombre'                        => !empty($nomina[0]->nombre2) ? "{$nomina[0]->nombre2} {$nomina[0]->apellido_paterno} {$nomina[0]->apellido_materno}": $nomina[0]->nombre,
+          'nombre'                        => (!empty($nomina[0]->nombre2) ? "{$nomina[0]->nombre2}": '').(!empty($nomina[0]->apellido_paterno) ? " {$nomina[0]->apellido_paterno}": '').(!empty($nomina[0]->apellido_materno) ? " {$nomina[0]->apellido_materno}": ''),
           'rfc'                           => isset($nomina[0]->rfc)? $nomina[0]->rfc: $empleado['info'][0]->rfc,
           'curp'                          => $nomina[0]->curp,
           'cp'                            => $empleado['info'][0]->cp,
