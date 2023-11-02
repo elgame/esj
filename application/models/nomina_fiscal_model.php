@@ -1490,6 +1490,7 @@ class nomina_fiscal_model extends CI_Model {
               u.id_empresa,
               u.id_puesto, u.id_departamente,
               (u.nombre || ' ' || COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '')) as nombre,
+              u.nombre as nombre2, u.apellido_paterno, u.apellido_materno,
               u.curp,
               DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
               '{$fechaSalida->format('Y-m-d')}' as fecha_salida,
