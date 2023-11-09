@@ -2,7 +2,7 @@
  ☐ Reporte de salidas registradas en registro de pallets, Producto, dia del 1-31 existencia
 
  ☐ Estado de resultado nuevos cambios de la señora
-   -- lap
+   -- lap|san
     ALTER TABLE IF EXISTS otros.estado_resultado_trans ADD COLUMN tipo_flete character varying(20) COLLATE pg_catalog."default";
     COMMENT ON COLUMN otros.estado_resultado_trans.tipo_flete IS 'bg: Bodega GDL, ff: Flete foraneo, fl: flete local';
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Rendimiento Equipo',572,true,'estado_resultado_trans/rpt_rend_equipo/','print',true);
