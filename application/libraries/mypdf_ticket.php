@@ -13,6 +13,8 @@ class mypdf_ticket extends FPDF {
 
     public $header_entrar = true;
 
+    public $countCopias = 0;
+
 	/**
 	 * P:Carta Vertical, L:Carta Horizontal, lP:Legal vertical, lL:Legal Horizontal
 	 * @param unknown_type $orientation
@@ -361,11 +363,16 @@ class mypdf_ticket extends FPDF {
         } else {
           $this->Row(array(MyString::fechaATexto(substr($data->fecha_imp_orig, 0, 10), '/c').' '.substr($data->fecha_imp_orig, -11, -3), 'ORIGINAL'), false, false, 4);
         }
+
+        $this->SetWidths(array($this->pag_size[0]));
+        $this->SetFounts(array($this->fount_txt), array(1), ['B']);
+        $this->SetAligns(array('R'));
+        $this->Row(array(($this->countCopias === 1? 'CONTABILIDAD': 'PRODUCTOR')), false, false, 4);
       }
       $this->SetWidths(array($this->pag_size[0]));
       $this->SetFounts(array($this->fount_txt), array(-1));
       $this->SetAligns(array('L'));
-      $this->SetY($this->GetY()-1);
+      $this->SetY($this->GetY()-5);
       $this->Row(array($data->creadox ), false, false, 4);
       if (!empty($data->cerradox)) {
         $this->SetFont($this->fount_txt, '', $this->font_size+1);
@@ -451,6 +458,8 @@ class mypdf_ticket extends FPDF {
     }
 
     public function printTicket($data, $data_prod, $cajas_clasf){
+      $this->countCopias++;
+
       $this->headerTicket($data);
       $this->datosTicket($data);
       if ($data->tipo == 'sa') {
@@ -499,6 +508,9 @@ class mypdf_ticket extends FPDF {
     var $links;
     var $font;
     var $fontz;
+    var $fontb;
+    var $font_bold = '';
+
 
     function SetWidths($w){
         $this->widths=$w;
@@ -512,9 +524,10 @@ class mypdf_ticket extends FPDF {
         $this->links=$a;
     }
 
-    function SetFounts($a, $z=array()){
+    function SetFounts($a=null, $z=array(), $b=[]){
         $this->font=$a;
         $this->fontz=$z;
+        $this->fontb=$b;
     }
 
     function Row($data, $header=false, $bordes=true, $h=NULL){
@@ -531,7 +544,7 @@ class mypdf_ticket extends FPDF {
                 $x=$this->GetX();
                 $y=$this->GetY();
 
-                $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), '', ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
+                $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), (isset($this->fontb[$i]) ? $this->fontb[$i] : $this->font_bold), ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
 
                 if($header && $bordes)
                     $this->Rect($x,$y,$w,$h,'DF');

@@ -741,15 +741,21 @@ class bascula_model extends CI_Model {
       $pdf->header_entrar = true;
       $pdf->SetWidths(array(63));
       $pdf->SetAligns(array('R'));
+      $pdf->font_size = 11;
       $pdf->Row(array('Pag 1'), false, false);
+      $pdf->font_size = 8;
+
       // $pdf->SetY($pdf->GetY()+10);
       // $pdf->Row(array('---------------------------------------------------------'), false, false);
       // $pdf->SetY($pdf->GetY()+10);
       if (count($ids) === 1) {
         $pdf->AddPage();
         $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
+        $pdf->SetWidths(array(63));
         $pdf->SetAligns(array('R'));
+        $pdf->font_size = 11;
         $pdf->Row(array('Pag 2'), false, false);
+        $pdf->font_size = 8;
       }
     }
 
@@ -946,6 +952,10 @@ class bascula_model extends CI_Model {
       if($this->input->get('ftipop') == 'sa') {
         $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
         $tipo_rpt = "Salida";
+      }
+
+      if ($this->input->get('fconceptoo') != '') {
+        $sql .= " AND pagos.concepto ".($_GET['fconceptoo'] == 'si'? '<>': '=')." ''";
       }
 
       // if ($this->input->get('ftipop') != '')

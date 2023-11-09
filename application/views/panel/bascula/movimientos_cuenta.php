@@ -79,6 +79,17 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="fconceptoo">Con Concepto</label>
+                  <div class="controls">
+                    <select name="fconceptoo">
+                      <option value="" <?php echo set_select_get('fconceptoo', '') ?>>TODOS</option>
+                      <option value="si" <?php echo set_select_get('fconceptoo', 'si') ?>>Si</option>
+                      <option value="no" <?php echo set_select_get('fconceptoo', 'no') ?>>No</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

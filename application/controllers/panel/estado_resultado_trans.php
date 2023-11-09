@@ -13,6 +13,10 @@ class estado_resultado_trans extends MY_Controller {
     'estado_resultado_trans/ajax_get_gastos_caja/',
     'estado_resultado_trans/rpt_rel_fletes_pdf/',
     'estado_resultado_trans/rpt_rel_fletes_xls/',
+    'estado_resultado_trans/rpt_rend_equipo_pdf/',
+    'estado_resultado_trans/rpt_rend_equipo_xls/',
+    'estado_resultado_trans/rpt_estado_results_pdf/',
+    'estado_resultado_trans/rpt_estado_results_xls/',
 
     'estado_resultado_trans/imprimir/',
   );
@@ -130,6 +134,7 @@ class estado_resultado_trans extends MY_Controller {
     // Parametros por default.
     // Obtiene los datos de la empresa predeterminada.
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    $params['tiposFletes'] = $this->estado_resultado_trans_model->tipos;
 
 
     $params['getId'] = '';
@@ -234,6 +239,86 @@ class estado_resultado_trans extends MY_Controller {
     if ($this->input->get('did_empresa') > 0 && $this->input->get('activoId') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
       $this->load->model('estado_resultado_trans_model');
       $this->estado_resultado_trans_model->getRelFletesXls('xls');
+    }
+  }
+
+  public function rpt_rend_equipo()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_salidas_codigos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('estado_resultado_trans_model');
+    $this->load->model('productos_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Rendimiento de Equipo');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['tipos'] = $this->estado_resultado_trans_model->tipos;
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/estado_resultado_trans/rpt_rend_equipo',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_rend_equipo_pdf(){
+    if ($this->input->get('did_empresa') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $this->load->model('estado_resultado_trans_model');
+      $this->estado_resultado_trans_model->getRendEquipoTransXls();
+    }
+  }
+  public function rpt_rend_equipo_xls(){
+    if ($this->input->get('did_empresa') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $this->load->model('estado_resultado_trans_model');
+      $this->estado_resultado_trans_model->getRendEquipoTransXls('xls');
+    }
+  }
+
+  public function rpt_estado_results()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_salidas_codigos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('estado_resultado_trans_model');
+    $this->load->model('productos_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Estado de Resultados de Transporte');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['tipos'] = $this->estado_resultado_trans_model->tipos;
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/estado_resultado_trans/rpt_estado_result',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_estado_results_pdf(){
+    if ($this->input->get('did_empresa') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $this->load->model('estado_resultado_trans_model');
+      $this->estado_resultado_trans_model->getEstadoResultadoTransXls();
+    }
+  }
+  public function rpt_estado_results_xls(){
+    if ($this->input->get('did_empresa') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $this->load->model('estado_resultado_trans_model');
+      $this->estado_resultado_trans_model->getEstadoResultadoTransXls('xls');
     }
   }
 

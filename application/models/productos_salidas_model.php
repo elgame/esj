@@ -1124,11 +1124,12 @@ class productos_salidas_model extends CI_Model {
         $pdf->MultiCell($pdf->pag_size[0], 4, 'Vigilancia', 0, 'C');
       }
 
-      $pdf->SetWidths(array(10, 20, 11, 20));
+      $pdf->SetWidths(array(11, 21, 11, 19));
       $pdf->SetAligns(array('L','L', 'R', 'R'));
-      $pdf->SetFounts(array($pdf->fount_txt));
+      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num, $pdf->fount_txt, $pdf->fount_num),
+        [2.5, 2.5, 1, 1]);
       $pdf->SetX(0);
-      $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 10) )), false, false, 5);
+      $pdf->Row2(array('Folio', $orden['info'][0]->folio, 'Fecha', MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 11) )), false, false, 5);
 
       $semana = MyString::obtenerSemanaDeFecha(substr($orden['info'][0]->fecha, 0, 10), $orden['info'][0]->dia_inicia_semana);
 
@@ -1138,11 +1139,11 @@ class productos_salidas_model extends CI_Model {
 
       if (isset($orden['info'][0]->proyecto)) {
         $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
-        $pdf->SetXY(0, $pdf->GetY()-1);
+        $pdf->SetXY(0, $pdf->GetY());
         $pdf->Row2(array('Proyecto: '. $orden['info'][0]->proyecto['info']->nombre), false, false);
       }
 
-      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->SetXY(0, $pdf->GetY());
       $pdf->Row2(array('Empresa aplicación: '), false, false);
       $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
       $pdf->SetXY(0, $pdf->GetY()-2);

@@ -194,6 +194,17 @@
 
             <div class="span6">
               <div class="control-group">
+                <label class="control-label" for="dtipo">Tipo</label>
+                <div class="controls">
+                  <select name="dtipo" class="span9" id="dtipo" required>
+                    <?php foreach ($tiposFletes as $tipo => $text): ?>
+                    <option value="<?php echo $tipo ?>" <?php echo set_select('dtipo', $tipo, false, (!empty($borrador['info']->tipo_flete) ? $borrador['info']->tipo_flete : $this->input->get('dtipo'))); ?>><?php echo $text ?></option>
+                    <?php endforeach ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="dfecha">Fecha</label>
                 <div class="controls">
                   <input type="date" name="dfecha" class="span9" id="dfecha" value="<?php echo set_value('dfecha', isset($borrador) ? $borrador['info']->fecha : $fecha); ?>" size="25">

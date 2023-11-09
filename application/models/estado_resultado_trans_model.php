@@ -2,6 +2,13 @@
 class estado_resultado_trans_model extends privilegios_model{
   private $otrosDatoss = null;
 
+  public $tipos = [
+    '' => '',
+    'bg' => '(Bodega GDL)',
+    'ff' => '(Flete Foráneo)',
+    'fl' => '(Flete Loca)l'
+  ];
+
 	function __construct(){
 		parent::__construct();
     $this->load->model('bitacora_model');
@@ -251,6 +258,7 @@ class estado_resultado_trans_model extends privilegios_model{
       'id_activo'      => $this->input->post('did_activo'),
       'id_empresa'     => $this->input->post('did_empresa'),
       'id_creo'        => $this->session->userdata('id_usuario'),
+      'tipo_flete'     => $this->input->post('dtipo'),
       'fecha'          => $this->input->post('dfecha'),
       'fecha_viaje'    => $this->input->post('dfecha_viaje'),
       'folio'          => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
@@ -406,7 +414,8 @@ class estado_resultado_trans_model extends privilegios_model{
       'id_chofer'      => $this->input->post('did_chofer'),
       'id_activo'      => $this->input->post('did_activo'),
       'id_empresa'     => $this->input->post('did_empresa'),
-      'id_creo'        => $this->session->userdata('id_usuario'),
+      // 'id_creo'        => $this->session->userdata('id_usuario'),
+      'tipo_flete'     => $this->input->post('dtipo'),
       'fecha'          => $this->input->post('dfecha'),
       'fecha_viaje'    => $this->input->post('dfecha_viaje'),
       // 'folio'       => $this->getFolio($this->input->post('did_empresa'), $this->input->post('did_activo')),
@@ -790,7 +799,7 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetX(6);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(140));
-    $pdf->Row(array(mb_strtoupper("Estado de Resultados en EQUIPO DE TRANSPORTE", 'UTF-8')), true, true, null, 3);
+    $pdf->Row(array(mb_strtoupper("Estado de Resultados en EQUIPO DE TRANSPORTE {$this->tipos[$caja['info']->tipo_flete]}", 'UTF-8')), true, true, null, 3);
 
     $pdf->Image(APPPATH.(str_replace(APPPATH, '', $logo)), 65, 15, 50);
     $pdf->Ln(20);
@@ -853,15 +862,20 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetWidths(array(104));
     $pdf->Row(array("Cap Diesel: {$this->getOtrosDatos('od_camionCapTanq')} | R Hist: {$this->getOtrosDatos('od_camionRendHist')} | T Encendido: {$this->getOtrosDatos('od_camionTEncendido')}"), false, false);
 
-    $pdf->SetXY(6, $pdf->GetY() );
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(104));
-    $pdf->Row(array($this->getOtrosDatos('od_termo')), false, false);
+    $resyy = 6;
+    if ($caja['info']->tipo_flete === 'ff') {
+      $pdf->SetXY(6, $pdf->GetY() );
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(104));
+      $pdf->Row(array("Termo: {$this->getOtrosDatos('od_termo')}"), false, false);
 
-    $pdf->SetXY(6, $pdf->GetY()-1 );
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(104));
-    $pdf->Row(array("Cap Diesel: {$this->getOtrosDatos('od_termoCapTanq')}"), false, false);
+      $pdf->SetXY(6, $pdf->GetY()-1 );
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(104));
+      $pdf->Row(array("Cap Diesel Termo: {$this->getOtrosDatos('od_termoCapTanq')}"), false, false);
+
+      $resyy = 14;
+    }
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetXY(16, $pdf->GetY() );
@@ -878,7 +892,7 @@ class estado_resultado_trans_model extends privilegios_model{
     ), false, true);
 
     $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(129, $pdf->GetY()-14 );
+    $pdf->SetXY(129, $pdf->GetY()-$resyy );
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(104));
     $fllegada = explode('T', $this->getOtrosDatos('od_hrllegada'));
@@ -977,7 +991,8 @@ class estado_resultado_trans_model extends privilegios_model{
       $pdf->SetFont('Arial','B', 6);
       $pdf->SetAligns(array('L', 'C'));
       $pdf->SetWidths(array(206));
-      $pdf->Row(array('SUELDOS'), false, false);
+      $titulosueldo = 'GASTOS DE VENTAS (Sueldos)'; // $caja['info']->tipo_flete == 'bg'? 'GASTOS DE VENTAS': 'SUELDOS';
+      $pdf->Row(array($titulosueldo), false, false);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
@@ -1039,28 +1054,6 @@ class estado_resultado_trans_model extends privilegios_model{
       foreach ($caja['gastos'] as $key => $gasto)
       {
         if ($gasto->id_tipo == 6) { // solo las comisiones
-          // if ($auxTipo != $gasto->id_tipo) {
-          //   if ($key != 0) {
-          //     $pdf->SetFont('Arial', 'B', 6);
-          //     $pdf->SetXY(6, $pdf->GetY());
-          //     $pdf->SetAligns(array('L', 'R', 'R', 'R'));
-          //     $pdf->SetWidths(array(142, 15, 15, 15));
-          //     $pdf->Row(array('',
-          //       MyString::formatoNumero($totalesTipo[0], 2, '', false),
-          //       MyString::formatoNumero($totalesTipo[1], 2, '', false),
-          //       MyString::formatoNumero($totalesTipo[2], 2, '', false)
-          //     ), false, false);
-          //   }
-
-          //   $pdf->SetFont('Arial', 'B', 6);
-          //   $pdf->SetXY(6, $pdf->GetY());
-          //   $pdf->SetAligns(array('L'));
-          //   $pdf->SetWidths(array(187));
-          //   $pdf->Row(array($gasto->tiposg), false, 'B');
-
-          //   $totalesTipo = [0, 0, 0];
-          //   $auxTipo = $gasto->id_tipo;
-          // }
 
           $pdf->SetFont('Arial','', 6);
           $pdf->SetXY(6, $pdf->GetY());
@@ -1247,7 +1240,7 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetAligns(array('L', 'C'));
     $pdf->SetWidths(array(206));
-    $pdf->Row(array('ESTIMACION DE GASTOS'), false, false);
+    $pdf->Row(array('ESTIMACION DE COSTOS'), false, false);
 
     $pdf->SetFont('Arial','', 6);
     $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R'));
@@ -1868,6 +1861,539 @@ class estado_resultado_trans_model extends privilegios_model{
       $html .= '<td style="width:300px;border:1px solid #000;">'.$value.'</td>';
     }
     $html .= '</tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  public function getTotalesEstadoRes($caja)
+  {
+    $this->otrosDatoss = $caja['info']->otros_datos;
+
+    $response = [
+      'ventasTotalKg' => 0,
+      'ventasTotalCantidad' => 0,
+      'ventasTotalImporte' => 0,
+      'sueldosTotal' => 0,
+      'comisionesTotal' => 0,
+      'repMantTotal' => 0,
+      'gastosTotal' => 0,
+      'estimacionCostoTotal' => 0,
+      'gastosTotales' => 0,
+      'utilidadEstimadaTotal' => 0,
+    ];
+
+    $comprobacion = ['t' => 'Si', 'f' => 'No'];
+
+    $ttotalRemisiones = 0;
+    $ttotalRemisionesEf = 0;
+    $folioRemisionesEf = '';
+    $totalKgs = $totalCantidad = 0;
+    if (count($caja['remisiones']) > 0) {
+      $auxrem = 0;
+      foreach ($caja['remisiones'] as $key => $rem)
+      {
+        $ttotalRemisiones += floatval($rem->importe);
+        if ($rem->comprobacion == 't') {
+          $folioRemisionesEf .= ($auxrem != $rem->id_remision? $rem->folio: '').", ";
+          $ttotalRemisionesEf += floatval($rem->imp_comprobacion > 0? $rem->imp_comprobacion: $rem->importe);
+        }
+        $auxrem = $rem->id_remision;
+
+        $totalKgs += $rem->kilos;
+        $totalCantidad += $rem->cantidad;
+      }
+    }
+    $response['ventasTotalKg'] = $totalKgs;
+    $response['ventasTotalCantidad'] = $totalCantidad;
+    $response['ventasTotalImporte'] = $ttotalRemisiones;
+
+    $ttotalGastos = 0;
+    $ttotalGastosVentas = 0;
+    $ttotalSueldos = 0;
+    $ttotalSueldoslocal = 0;
+    if (count($caja['sueldos']) > 0) {
+      foreach ($caja['sueldos'] as $key => $sueldo)
+      {
+        $ttotalGastosVentas += floatval($sueldo->importe);
+        $ttotalSueldoslocal += floatval($sueldo->importe);
+        if ($sueldo->comprobacion == 't') {
+          $ttotalSueldos += floatval($sueldo->importe);
+        }
+      }
+
+      $response['sueldosTotal'] = $ttotalSueldoslocal;
+    }
+
+    $ttotalGastosEf = 0;
+    $foliosGastosEf = '';
+    if (count($caja['gastos']) > 0) {
+      $auxTipo = 0;
+      $totalesTipo = [0, 0, 0];
+      foreach ($caja['gastos'] as $key => $gasto)
+      {
+        if ($gasto->id_tipo == 6) { // solo las comisiones
+          $totalesTipo[0] += floatval($gasto->subtotal);
+          $totalesTipo[1] += floatval($gasto->importe_iva);
+          $totalesTipo[2] += floatval($gasto->total);
+          $ttotalGastosVentas += floatval($gasto->subtotal);
+          if ($gasto->comprobacion == 't') {
+            $ttotalGastosEf += floatval($gasto->total);
+            $foliosGastosEf .= "{$gasto->folio}, ";
+          }
+        }
+      }
+
+      $response['comisionesTotal'] = $totalesTipo[0];
+    }
+
+
+    $ttotalRepMantEf = $ttotalRepMant = $ttotalRepMantLocal = 0;
+    $folioRepMantEf = '';
+    if (count($caja['repmant']) > 0) {
+      $auxrem = 0;
+      foreach ($caja['repmant'] as $key => $rem)
+      {
+        $ttotalGastos += floatval($rem->subtotal);
+        $ttotalRepMant += floatval($rem->total);
+        $ttotalRepMantLocal += floatval($rem->subtotal);
+        if ($rem->comprobacion == 't') {
+          $ttotalRepMantEf += floatval($rem->total);
+          $folioRepMantEf .= "{$rem->folio}, ";
+        }
+      }
+
+      $response['repMantTotal'] = $ttotalRepMantLocal;
+    }
+
+    if (count($caja['gastos']) > 0) {
+      $auxTipo = 0;
+      $totalesTipo = [0, 0, 0];
+      foreach ($caja['gastos'] as $key => $gasto)
+      {
+        if ($gasto->id_tipo != 6) { // si no es comisiones
+          if ($auxTipo != $gasto->id_tipo) {
+            $totalesTipo = [0, 0, 0];
+            $auxTipo = $gasto->id_tipo;
+          }
+
+          $totalesTipo[0] += floatval($gasto->subtotal);
+          $totalesTipo[1] += floatval($gasto->importe_iva);
+          $totalesTipo[2] += floatval($gasto->total);
+          $ttotalGastos += floatval($gasto->subtotal);
+          if ($gasto->comprobacion == 't') {
+            $ttotalGastosEf += floatval($gasto->total);
+            $foliosGastosEf .= "{$gasto->folio}, ";
+          }
+        }
+      }
+
+      $response['gastosTotal'] = $totalesTipo[0];
+    }
+
+    // ------ estimaciones
+    $ttotalCostos = 0;
+    $ttotalCostos += floatval($this->getOtrosDatos('od_costoEstimado'));
+    $ttotalCostos += floatval($this->getOtrosDatos('od_costoGeneral'));
+    $ttotalGastos += $ttotalCostos;
+
+    $response['estimacionCostoTotal'] = $ttotalCostos;
+
+
+    $response['gastosTotales'] = $ttotalGastos;
+    $response['utilidadEstimadaTotal'] = ($ttotalRemisiones - $ttotalGastosVentas - $ttotalGastos);
+
+    return $response;
+  }
+
+  public function getRendEquipoTransData($id_producto=null, $id_almacen=null, $con_req=false, $extras = [])
+  {
+    $sql_com = $sql_sal = $sql_req = $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+
+    if (!empty($_GET['activoId']) && $_GET['activoId'] > 0) {
+      $sql .= " AND et.id_activo = {$_GET['activoId']}";
+    }
+
+    if (!empty($_GET['dtipo'])) {
+      $sql .= " AND et.tipo_flete = '{$_GET['dtipo']}'";
+    }
+
+    if (!empty($_GET['dgrupo'])) {
+      $sql .= " AND UPPER(a.grupo_activo) = UPPER('{$_GET['dgrupo']}')";
+    }
+
+    $fletes = $this->db->query("SELECT et.id, et.id_activo, et.fecha, et.folio, et.rend_actual, et.tipo_flete,
+        Coalesce(et.otros_datos->>'od_camionTEncendido', '0') AS camion_tencendido,
+        et.vel_max, et.km_rec, et.rep_lt_hist, et.destino,
+        Coalesce(et.otros_datos->>'od_hrllegada', '') AS hrllegada,
+        et.fecha_viaje, a.grupo_activo, a.nombre AS activo, c.nombre AS chofer
+      FROM otros.estado_resultado_trans et
+        INNER JOIN productos a ON a.id_producto = et.id_activo
+        INNER JOIN choferes c ON c.id_chofer = et.id_chofer
+      WHERE et.id_empresa = {$_GET['did_empresa']} AND et.fecha_viaje BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        AND et.status = 't' {$sql}
+      ORDER BY activo ASC, fecha_viaje ASC, folio ASC")->result();
+    // echo "<pre>";
+    // var_dump($fletes);
+    // echo "</pre>";exit;
+
+    $response = [];
+    foreach ($fletes as $keyf => $flete) {
+      $infoFlete = $this->getInfoVenta($flete->id, false, true);
+      $totalesEstado = $this->getTotalesEstadoRes($infoFlete);
+      // echo "<pre>";
+      // var_dump($totalesEstado);
+      // echo "</pre>";exit;
+      if (!isset($response[$flete->id_activo])) {
+        $response[$flete->id_activo] = [];
+      }
+
+      $flete->ventasTotalKg = $totalesEstado['ventasTotalKg'];
+      $flete->sueldosTotal = $totalesEstado['sueldosTotal'];
+      $flete->utilidadEstimadaTotal = $totalesEstado['utilidadEstimadaTotal'];
+      $response[$flete->id_activo][] = $flete;
+    }
+
+    // echo "<pre>";
+    // var_dump($response);
+    // echo "</pre>";exit;
+
+    return $response;
+  }
+  public function getRendEquipoTransXls($tipo = 'html'){
+    if ($tipo == 'xls') {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=RendEquipoTrans.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
+
+    $res = $this->getRendEquipoTransData();
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'REPORTE DE RENDIMIENTO EN EQUIPOS DE TRANSPORTE';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."<br>\n";
+    $titulo3 .= (empty($this->input->get('dtipo'))? '': "Tipo: {$this->tipos[$_GET['dtipo']]} | ");
+    $titulo3 .= (empty($_GET['activos'])? '': "Activo: {$_GET['activos']}");
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    foreach ($res as $key => $activo) {
+      $html .= '<tr style="font-weight:bold">';
+        $html .= '<td colspan="13" style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$activo[0]->activo.'</td>';
+      $html .= '</tr>';
+      $html .= '<tr style="font-weight:bold">';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Folio</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Fecha</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Chofer</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Rend Actual</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Carga Total Kg</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Tiempo Encendido</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Velocidad Max</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Km Recorridos</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Reposición Lts</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Destino</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Hr Llegada</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Sueldo Chofer</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Utilidad Estimada</td>';
+      $html .= '</tr>';
+
+      $totalRend = $totalKg = $totalTiempo = $totalKmRec = $reposicionLts = $totalSueldo = $totalUtilEsti = 0;
+      foreach ($activo as $keyff => $flete) {
+        $html .= '<tr style="font-weight:bold">';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->folio.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->fecha_viaje.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->chofer.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->rend_actual.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->ventasTotalKg.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->camion_tencendido.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->vel_max.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->km_rec.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->rep_lt_hist.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->destino.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->hrllegada.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->sueldosTotal.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->utilidadEstimadaTotal.'</td>';
+        $html .= '</tr>';
+
+        $totalRend += $flete->rend_actual;
+        $totalKg += $flete->ventasTotalKg;
+        $totalTiempo = $this->sumTiempo($totalTiempo, $flete->camion_tencendido);
+        $totalKmRec += $flete->km_rec;
+        $reposicionLts += $flete->rep_lt_hist;
+        $totalSueldo += $flete->sueldosTotal;
+        $totalUtilEsti += $flete->utilidadEstimadaTotal;
+      }
+
+      $html .= '<tr style="font-weight:bold">';
+        $html .= '<td style=""></td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalRend), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKg), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.($totalTiempo).'</td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKmRec), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($reposicionLts), 2, '').'</td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalSueldo), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalUtilEsti), 2, '').'</td>';
+      $html .= '</tr>';
+
+      $html .= '<tr style="font-weight:bold">';
+        $html .= '<td style=""></td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalRend/count($activo)), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKg/count($activo)), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$this->sumTiempo($totalTiempo, '0:0', count($activo)).'</td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKmRec/count($activo)), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($reposicionLts/count($activo)), 2, '').'</td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style=""></td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalSueldo/count($activo)), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalUtilEsti/count($activo)), 2, '').'</td>';
+      $html .= '</tr>
+      <tr>
+        <td colspan="13"></td>
+      </tr>';
+    }
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+  private function sumTiempo($totalTiempo, $tiempo, $promedio=null)
+  {
+    $tiempo1 = explode(':', $totalTiempo);
+    $tiempo2 = explode(':', $tiempo);
+    $hrs = (isset($tiempo2[0])? intval($tiempo2[0]): 0);
+    $min = (isset($tiempo2[1])? intval($tiempo2[1]): 0);
+
+    $tiempo1[0] = (isset($tiempo1[0])? $tiempo1[0]: 0) + $hrs;
+    $tiempo1[1] = (isset($tiempo1[1])? $tiempo1[1]: 0) + $min;
+
+    if ($promedio) {
+      $tiempo1[0] /= $promedio;
+      $tiempo1[1] /= $promedio;
+    }
+
+    return "{$tiempo1[0]}:{$tiempo1[1]}";
+  }
+
+  public function getEstadoResultadoTransData()
+  {
+    $sql_com = $sql_sal = $sql_req = $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+
+    if (!empty($_GET['activoId']) && $_GET['activoId'] > 0) {
+      $sql .= " AND et.id_activo = {$_GET['activoId']}";
+    }
+
+    if (!empty($_GET['dtipo'])) {
+      $sql .= " AND et.tipo_flete = '{$_GET['dtipo']}'";
+    }
+
+    if (!empty($_GET['dgrupo'])) {
+      $sql .= " AND UPPER(a.grupo_activo) = UPPER('{$_GET['dgrupo']}')";
+    }
+
+    $fletes = $this->db->query("SELECT et.id, et.id_activo, et.fecha, et.folio, et.rend_actual, et.tipo_flete,
+        Coalesce(et.otros_datos->>'od_camionTEncendido', '0') AS camion_tencendido,
+        et.vel_max, et.km_rec, et.rep_lt_hist, et.destino,
+        Coalesce(et.otros_datos->>'od_hrllegada', '') AS hrllegada,
+        et.fecha_viaje, a.grupo_activo, a.nombre AS activo, c.nombre AS chofer
+      FROM otros.estado_resultado_trans et
+        INNER JOIN productos a ON a.id_producto = et.id_activo
+        INNER JOIN choferes c ON c.id_chofer = et.id_chofer
+      WHERE et.id_empresa = {$_GET['did_empresa']} AND et.fecha_viaje BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        AND et.status = 't' {$sql}
+      ORDER BY activo ASC, fecha_viaje ASC, folio ASC")->result();
+    // echo "<pre>";
+    // var_dump($fletes);
+    // echo "</pre>";exit;
+
+    $response = [];
+    foreach ($fletes as $keyf => $flete) {
+      $infoFlete = $this->getInfoVenta($flete->id, false, true);
+      $totalesEstado = $this->getTotalesEstadoRes($infoFlete);
+      // echo "<pre>";
+      // var_dump($totalesEstado, $infoFlete);
+      // echo "</pre>";exit;
+      if (!isset($response[$flete->id_activo])) {
+        $response[$flete->id_activo] = [];
+      }
+
+      $gastosTotalesTp = [];
+      if (isset($infoFlete['gastos']) && count($infoFlete['gastos']) > 0) {
+        foreach ($infoFlete['gastos'] as $keyg => $gasto) {
+          if (isset($gastosTotalesTp[$gasto->tiposg])) {
+            $gastosTotalesTp[$gasto->tiposg] += $gasto->subtotal;
+          } else {
+            $gastosTotalesTp[$gasto->tiposg] = $gasto->subtotal;
+          }
+        }
+      }
+      $flete->gastosTotalesTp = $gastosTotalesTp;
+
+      $flete->ventasTotalKg = $totalesEstado['ventasTotalKg'];
+      $flete->sueldosTotal = $totalesEstado['sueldosTotal'];
+      $flete->comisionesTotal = $totalesEstado['comisionesTotal'];
+      $flete->estimacionCostoTotal = $totalesEstado['estimacionCostoTotal'];
+      $flete->utilidadEstimadaTotal = $totalesEstado['utilidadEstimadaTotal'];
+      $response[$flete->id_activo][] = $flete;
+    }
+
+    // echo "<pre>";
+    // var_dump($response);
+    // echo "</pre>";exit;
+
+    return $response;
+  }
+  private function getHeadersGastosTp($activo)
+  {
+    $headers = [];
+    foreach ($activo as $key => $flete) {
+      foreach ($flete->gastosTotalesTp as $gasto => $total) {
+        $headers[$gasto] = 0;
+      }
+    }
+
+    return $headers;
+  }
+  public function getEstadoResultadoTransXls($tipo = 'html'){
+    if ($tipo == 'xls') {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=RendEquipoTrans.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
+
+    $res = $this->getEstadoResultadoTransData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'REPORTE ESTADO DE RESULTADO DE TRANSPORTE';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."<br>\n";
+    $titulo3 .= (empty($this->input->get('dtipo'))? '': "Tipo: {$this->tipos[$_GET['dtipo']]} | ");
+    $titulo3 .= (empty($_GET['activos'])? '': "Activo: {$_GET['activos']}");
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    foreach ($res as $key => $activo) {
+      $headers = $this->getHeadersGastosTp($activo);
+
+      $html .= '<tr style="font-weight:bold">';
+        $html .= '<td colspan="'.(8+count($headers)).'" style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$activo[0]->activo.'</td>';
+      $html .= '</tr>';
+      $html .= '<tr style="font-weight:bold">';
+        $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Folio</td>';
+        $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Fecha</td>';
+        $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Chofer</td>';
+        $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Destino</td>';
+        $html .= '<td colspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;text-align:center;">Gastos de Ventas</td>';
+        $html .= '<td colspan="'.(count($headers)).'" style="width:300px;border:1px solid #000;background-color: #cccccc;text-align:center;">Gastos Generales</td>';
+        $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Estimación Costo</td>';
+        $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Utilidad Estimada</td>';
+      $html .= '</tr>';
+      $html .= '<tr style="font-weight:bold">';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Comisiones</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Sueldos</td>';
+        foreach ($headers as $head => $headTotal) {
+          $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$head.'</td>';
+        }
+      $html .= '</tr>';
+
+      $totalRend = $totalKg = $totalTiempo = $totalKmRec = $reposicionLts = $totalSueldo = $totalUtilEsti = 0;
+      foreach ($activo as $keyff => $flete) {
+        $html .= '<tr style="font-weight:bold">';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->folio.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->fecha_viaje.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->chofer.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->destino.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->sueldosTotal.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->comisionesTotal.'</td>';
+          foreach ($headers as $head => $headTotal) {
+            $html .= '<td style="width:300px;border:1px solid #000;">'.(isset($flete->gastosTotalesTp[$head])? $flete->gastosTotalesTp[$head]: 0).'</td>';
+          }
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->estimacionCostoTotal.'</td>';
+          $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->utilidadEstimadaTotal.'</td>';
+        $html .= '</tr>';
+
+        // $totalRend += $flete->rend_actual;
+        // $totalKg += $flete->ventasTotalKg;
+      }
+
+      // $html .= '<tr style="font-weight:bold">';
+      //   $html .= '<td style=""></td>';
+      //   $html .= '<td style=""></td>';
+      //   $html .= '<td style=""></td>';
+      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalRend), 2, '').'</td>';
+      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKg), 2, '').'</td>';
+      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.($totalTiempo).'</td>';
+      //   $html .= '<td style=""></td>';
+      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKmRec), 2, '').'</td>';
+      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($reposicionLts), 2, '').'</td>';
+      //   $html .= '<td style=""></td>';
+      //   $html .= '<td style=""></td>';
+      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalSueldo), 2, '').'</td>';
+      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalUtilEsti), 2, '').'</td>';
+      // $html .= '</tr>';
+
+      $html .= '<tr>
+        <td colspan="13"></td>
+      </tr>';
+    }
 
     $html .= '</tbody>
     </table>';

@@ -145,7 +145,7 @@
                     <label class="control-label" for="fcurp">CURP </label>
                     <div class="controls">
                       <input type="text" name="fcurp" id="fcurp" class="span12" value="<?php echo isset($data->curp)?$data->curp:''; ?>"
-                        maxlength="10" placeholder="IIML781216MCMXNS02, MONA731117HMNRRL05">
+                        maxlength="30" placeholder="IIML781216MCMXNS02, MONA731117HMNRRL05">
                     </div>
                   </div>
 

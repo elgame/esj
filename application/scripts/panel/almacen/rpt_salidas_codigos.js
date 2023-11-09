@@ -57,7 +57,7 @@ $(function(){
     var linkDownXls = $("#linkDownXls"),
       url = {};
 
-    $("input").each(function(index, el) {
+    $("input, select").each(function(index, el) {
       if ($(this).attr('name').indexOf('[]') >= 0) {
         url[$(this).attr('name')] = [];
         $("input[name='"+$(this).attr('name')+"']").each(function(index, el) {
