@@ -3500,8 +3500,6 @@ class nomina_fiscal_model extends CI_Model {
         AND n.anio = {$filtros['anio']} AND n.semana = {$filtros['semana']}
       LIMIT 1")->row();
 
-    $usuario = $this->usuarios_model->get_usuario_info($empleados[0]->id);
-
     // echo "<pre>";
     //   var_dump($empleados);
     // echo "</pre>";exit;
@@ -5398,7 +5396,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->AddPage();
 
       $pdf->SetFont('Helvetica','', 9);
-      $pdf->SetWidths(array(60));
+      $pdf->SetWidths(array(120));
       $pdf->SetAligns(array('C'));
       $pdf->SetXY(6, $pdf->GetY()+5);
       $pdf->Row(array('CAPTURA DE NOMINAS'), false, 0, null, 1, 1);
@@ -5411,7 +5409,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetXY(6, $pdf->GetY()+2);
       $pdf->Row(array("ELABORO: "), false, 0, null, 1, 1);
-      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetXY(6, $pdf->GetY()+2);
       $pdf->Row(array("SUPERVISOR: "), false, 0, null, 1, 1);
     }
 
