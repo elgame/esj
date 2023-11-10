@@ -955,7 +955,7 @@ class bascula_model extends CI_Model {
       }
 
       if ($this->input->get('fconceptoo') != '') {
-        $sql .= " AND pagos.concepto ".($_GET['fconceptoo'] == 'si'? '<>': '=')." ''";
+        $sql .= " AND pagos.concepto ".($_GET['fconceptoo'] == 'si'? " <> ''": " IS NULL ")."";
       }
 
       // if ($this->input->get('ftipop') != '')

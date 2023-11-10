@@ -3464,6 +3464,7 @@ class nomina_fiscal_model extends CI_Model {
     $anio = $anio==null? date("Y"): $anio;
     $this->load->model('empresas_model');
     $this->load->model('usuarios_departamentos_model');
+    $this->load->model('usuarios_model');
 
     if ($empresaId !== '')
       $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
@@ -3490,6 +3491,16 @@ class nomina_fiscal_model extends CI_Model {
         INNER JOIN finiquito AS f ON u.id = f.id_empleado
       WHERE f.id_empresa = {$empresaId} AND f.registro_patronal = '{$regPatronal}'
         AND f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
+
+    $usuarioCreo = $this->db->query("SELECT u.usuario,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS nombre
+      FROM usuarios AS u
+        INNER JOIN nomina_fiscal AS n ON n.id_empleado_creador = u.id
+      WHERE n.id_empresa = {$empresaId} AND n.registro_patronal = '{$regPatronal}'
+        AND n.anio = {$filtros['anio']} AND n.semana = {$filtros['semana']}
+      LIMIT 1")->row();
+
+    $usuario = $this->usuarios_model->get_usuario_info($empleados[0]->id_empleado);
 
     // echo "<pre>";
     //   var_dump($empleados);
@@ -5381,6 +5392,28 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
     $pdf->Row(array('', 'Total Neto ('.$numero_trabajadores.' - '.$numero_trabajadores2.')', MyString::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+
+    if (!empty($usuarioCreo)) {
+      if($pdf->GetY()+10 >= $pdf->limiteY)
+        $pdf->AddPage();
+
+      $pdf->SetFont('Helvetica','', 9);
+      $pdf->SetWidths(array(60));
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->Row(array('CAPTURA DE NOMINAS'), false, 0, null, 1, 1);
+
+      $pdf->SetAligns(array('L'));
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array("USUARIO: {$usuarioCreo->usuario}"), false, 0, null, 1, 1);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array("NOMBRE: {$usuarioCreo->nombre}"), false, 0, null, 1, 1);
+
+      $pdf->SetXY(6, $pdf->GetY()+2);
+      $pdf->Row(array("ELABORO: "), false, 0, null, 1, 1);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array("SUPERVISOR: "), false, 0, null, 1, 1);
+    }
 
     $pdf->Output('Nomina.pdf', 'I');
   }
