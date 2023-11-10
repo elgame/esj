@@ -3500,7 +3500,7 @@ class nomina_fiscal_model extends CI_Model {
         AND n.anio = {$filtros['anio']} AND n.semana = {$filtros['semana']}
       LIMIT 1")->row();
 
-    $usuario = $this->usuarios_model->get_usuario_info($empleados[0]->id_empleado);
+    $usuario = $this->usuarios_model->get_usuario_info($empleados[0]->id);
 
     // echo "<pre>";
     //   var_dump($empleados);
