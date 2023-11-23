@@ -82,7 +82,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
     $semana = $this->fechasDeUnaSemana($numSemana, $anio, $diaComienza);
     $sql = $idPermiso?
       " np.id_permiso = {$idPermiso}":
-      " np.id_trabajador = {$empleadoId} AND DATE(np.fecha_creo) >= '{$semana['fecha_inicio']}' AND DATE(np.fecha_creo) <= '{$semana['fecha_final']}'";
+      " np.id_trabajador = {$empleadoId} AND DATE(np.fecha_ini) >= '{$semana['fecha_inicio']}' AND DATE(np.fecha_ini) <= '{$semana['fecha_final']}'";
 
     $query = $this->db->query("SELECT np.id_permiso, np.id_empresa, np.id_creo, np.id_trabajador, np.folio, np.fecha_ini,
         np.fecha_fin, np.dias, np.hrs, np.uso_dir, np.uso_dir_value, np.uso_rh, np.uso_rh_value,
