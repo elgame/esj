@@ -655,6 +655,10 @@
                                             <label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="<?php echo $_POST['disr'][$k] ?>" id="disr" max="100" min="0" class="span9 pull-right vpositive">
                                             <input type="hidden" name="disr_total[]" value="<?php echo $_POST['disr_total'][$k] ?>" id="disr_total" class="span12">
                                           </li>
+                                          <li class="divider"></li>
+                                          <li class="clearfix">
+                                            <label class="pull-left">Cta Predial:</label> <input type="text" name="dcuentaPredial[]" value="<?php echo $_POST['dcuentaPredial'][$k] ?>" id="dcuentaPredial" class="span9 pull-right">
+                                          </li>
                                         </ul>
                                       </div>
                                       <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
@@ -771,6 +775,10 @@
                                     <li class="clearfix">
                                       <label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="0" id="disr" max="100" min="0" class="span9 pull-right vpositive">
                                       <input type="hidden" name="disr_total[]" value="0" id="disr_total" class="span12">
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li class="clearfix">
+                                      <label class="pull-left">Cta Predial:</label> <input type="text" name="dcuentaPredial[]" value="" id="dcuentaPredial" class="span9 pull-right">
                                     </li>
                                   </ul>
                                 </div>

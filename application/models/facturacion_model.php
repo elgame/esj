@@ -854,7 +854,8 @@ class facturacion_model extends privilegios_model{
             'key'   => $_POST['pclave_unidad_cod'][$key],
             'value' => $_POST['pclave_unidad'][$key],
           ],
-          'objetoImp' => "02"
+          'objetoImp' => "02",
+          'cuentaPredial' => (isset($_POST['dcuentaPredial'][$key])? $_POST['dcuentaPredial'][$key]: ''),
         ];
 
         $kgs_unidad = ($_POST['prod_dcantidad'][$key] * $dunidad_c);
@@ -909,7 +910,7 @@ class facturacion_model extends privilegios_model{
             'unidad'                  => $_POST['prod_dmedida'][$key],
             'cantidad'                => ($_POST['prod_dcantidad'][$key]>0? $_POST['prod_dcantidad'][$key]: 1),
             'concepto'                => $descripcion,
-            'cuentaPredial'           => '',
+            'cuentaPredial'           => $cfdi_extpp['cuentaPredial'],
             'descuentoProd'           => '0',
             'descuentoProdPorcent'    => '0',
             'importe'                 => $_POST['prod_importe'][$key],
@@ -6679,7 +6680,13 @@ class facturacion_model extends privilegios_model{
       if ($item->certificado === 't')
         $hay_prod_certificados = true;
 
+      $cfdi_ext = json_decode($item->cfdi_ext);
+
       $descripcion_ext = strlen($item->descripcion2)>0? " ({$item->descripcion2})": '';
+
+      if (!empty($cfdi_ext->cuentaPredial)) {
+        $descripcion_ext .= " | Cta. Predial: {$cfdi_ext->cuentaPredial}";
+      }
 
       if($printRow)
         $pdf->Row(array(
