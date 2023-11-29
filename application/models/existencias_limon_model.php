@@ -2550,6 +2550,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(30, 20, 18, 17, 17, 25));
 
+    $produccionPercent = [];
     $produccion_kilos = $produccion_cantidad = $produccion_importe = 0;
     foreach ($caja['produccion'] as $produccion) {
       if($pdf->GetY() >= $pdf->limiteY){
@@ -2563,6 +2564,17 @@ class existencias_limon_model extends CI_Model {
       $produccion_kilos    += floatval($produccion->kilos);
       $produccion_cantidad += floatval($produccion->cantidad);
       $produccion_importe  += floatval($produccion->importe);
+
+      if (!isset($produccionPercent[$produccion->id_calibre])) {
+        $produccionPercent[$produccion->id_calibre] = [
+          'cantidad' => $produccion->cantidad,
+          'kilos'    => $produccion->kilos,
+          'calibre'  => $produccion->calibre,
+        ];
+      } else {
+        $produccionPercent[$produccion->id_calibre]['cantidad'] += $produccion->cantidad;
+        $produccionPercent[$produccion->id_calibre]['kilos'] += $produccion->kilos;
+      }
 
       $pdf->SetX(60);
       $pdf->Row(array(
@@ -3054,6 +3066,25 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array('(=) RESULTADO DEL DIA', MyString::formatoNumero($resultado_importe, 2, '', false)), true, 'B');
 
     $pdf->page = count($pdf->pages);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(150));
+    $pdf->Row(array('Rendimiento'), true, true);
+    $pdf->SetAligns(array('L', 'R', 'R'));
+    $pdf->SetWidths(array(60, 30, 30, 30));
+    $pdf->Row(array('Calibre', 'Bultos', 'Kilos', '%'), true, 'B');
+    foreach ($produccionPercent as $key => $value) {
+      $pdf->chkSaltaPag([6, 10]);
+      $pdf->SetFont('Arial', 'B', 9);
+      $pdf->SetXY(120, $pdf->GetY());
+      $pdf->Row(array(
+        $value['calibre'],
+        MyString::formatoNumero($value['cantidad'], 2, '', false),
+        MyString::formatoNumero($value['kilos'], 2, '', false),
+        MyString::formatoNumero(($value['kilos']*100/($produccion_kilos>0? $produccion_kilos: 1)), 2, '', false),
+      ), true, 'B');
+    }
+
     $pdf->Output('REPORTE_EXISTENCIAS.pdf', 'I');
 
   }
