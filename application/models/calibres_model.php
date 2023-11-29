@@ -22,6 +22,23 @@ class calibres_model extends CI_Model {
     return $response;
   }
 
+  public function getCalibre($id)
+  {
+    $sql = '';
+    $res = $this->db->query("
+        SELECT id_calibre, nombre, tipo, order
+        FROM calibres
+        WHERE id_calibre = {$id}
+        ORDER BY nombre ASC");
+
+    $response = null;
+    if($res->num_rows() > 0){
+      $response = $res->row();
+    }
+
+    return $response;
+  }
+
   public function addCalibre($nombre)
   {
     $nombre = str_replace(' ', '', $nombre);

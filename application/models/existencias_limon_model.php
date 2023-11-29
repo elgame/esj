@@ -2550,6 +2550,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(30, 20, 18, 17, 17, 25));
 
+    $this->load->model('calibres_model');
     $produccionPercent = [];
     $produccion_kilos = $produccion_cantidad = $produccion_importe = 0;
     foreach ($caja['produccion'] as $produccion) {
@@ -2566,10 +2567,12 @@ class existencias_limon_model extends CI_Model {
       $produccion_importe  += floatval($produccion->importe);
 
       if (!isset($produccionPercent[$produccion->id_calibre])) {
+        $calibre = $this->calibres_model->getCalibre($produccion->id_calibre);
         $produccionPercent[$produccion->id_calibre] = [
           'cantidad' => $produccion->cantidad,
           'kilos'    => $produccion->kilos,
           'calibre'  => $produccion->calibre,
+          'order'  => $calibre->order,
         ];
       } else {
         $produccionPercent[$produccion->id_calibre]['cantidad'] += $produccion->cantidad;
@@ -3066,17 +3069,22 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array('(=) RESULTADO DEL DIA', MyString::formatoNumero($resultado_importe, 2, '', false)), true, 'B');
 
     $pdf->page = count($pdf->pages);
+    $pdf->SetXY(6, $pdf->GetY()+5);
 
+
+    $keyValuesProduc = array_column($produccionPercent, 'order');
+    array_multisort($keyValuesProduc, SORT_ASC, $produccionPercent);
     $pdf->SetAligns(array('C'));
-    $pdf->SetWidths(array(150));
+    $pdf->SetWidths(array(90));
     $pdf->Row(array('Rendimiento'), true, true);
-    $pdf->SetAligns(array('L', 'R', 'R'));
-    $pdf->SetWidths(array(60, 30, 30, 30));
-    $pdf->Row(array('Calibre', 'Bultos', 'Kilos', '%'), true, 'B');
+    $pdf->SetAligns(array('L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 25, 30, 15));
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('Calibre', 'Bultos', 'Kilos', '%'), true, true);
     foreach ($produccionPercent as $key => $value) {
       $pdf->chkSaltaPag([6, 10]);
       $pdf->SetFont('Arial', 'B', 9);
-      $pdf->SetXY(120, $pdf->GetY());
+      $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array(
         $value['calibre'],
         MyString::formatoNumero($value['cantidad'], 2, '', false),
