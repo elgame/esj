@@ -3073,7 +3073,7 @@ class existencias_limon_model extends CI_Model {
 
 
     $keyValuesProduc = array_column($produccionPercent, 'order');
-    array_multisort($keyValuesProduc, SORT_ASC, $produccionPercent);
+    array_multisort($keyValuesProduc, SORT_DESC, $produccionPercent);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(90));
     $pdf->Row(array('Rendimiento'), true, true);
