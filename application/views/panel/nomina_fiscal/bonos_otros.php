@@ -380,6 +380,10 @@
                                     <i class="ico icon-print" style="cursor:pointer"></i></a>
                                 </td>
                               </tr>
+                              <tr>
+                                <td>Observaciones</td>
+                                <td colspan="3"><textarea name="perObservaciones[]" rows="2" class="span12 perObservaciones"><?php echo (isset($permiso->observaciones)? $permiso->observaciones:'') ?></textarea></td>
+                              </tr>
                             </table>
                           </td>
                         </tr>

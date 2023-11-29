@@ -629,9 +629,11 @@ class compras_requisicion_model extends CI_Model {
       $this->db->insert_batch('compras_requisicion_productos', $productos);
 
       // Generar las ordenes compra
-      if(isset($data['autorizado']))
-        if($data['autorizado'] == 't')
+      if(isset($data['autorizado'])){
+        if($data['autorizado'] == 't'){
           $this->crearOrdenes($idOrden);
+        }
+      }
 
     }
 

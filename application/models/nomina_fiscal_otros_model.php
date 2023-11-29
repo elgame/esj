@@ -43,6 +43,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
             'uso_dir_value' => $datos['perUsoDirValue'][$key],
             'uso_rh' => $datos['perUsoRH'][$key],
             'uso_rh_value' => $datos['perUsoRHValue'][$key],
+            'observaciones' => $datos['perObservaciones'][$key],
           ), "id_permiso = {$datos['perIdPermiso'][$key]}");
         }
 
@@ -61,6 +62,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
           'uso_dir_value' => $datos['perUsoDirValue'][$key],
           'uso_rh' => $datos['perUsoRH'][$key],
           'uso_rh_value' => $datos['perUsoRHValue'][$key],
+          'observaciones' => $datos['perObservaciones'][$key],
         );
         $this->db->insert('nomina_permisos', $insertData);
       }
@@ -86,7 +88,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
 
     $query = $this->db->query("SELECT np.id_permiso, np.id_empresa, np.id_creo, np.id_trabajador, np.folio, np.fecha_ini,
         np.fecha_fin, np.dias, np.hrs, np.uso_dir, np.uso_dir_value, np.uso_rh, np.uso_rh_value,
-        Date(np.fecha_creo) AS fecha_creo, np.no_impresiones,
+        Date(np.fecha_creo) AS fecha_creo, np.no_impresiones, np.observaciones,
         e.nombre_fiscal AS empresa, uc.nombre AS creo,
         (ut.nombre || ' ' || ut.apellido_paterno || ' ' || ut.apellido_materno) AS trabajador,
         udt.nombre AS departamento
@@ -2575,6 +2577,12 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
     $pdf->Row($headd, true, true, null, 1, 1);
 
     foreach ($empleados as $key => $empleado) {
+      // if ($empleado->id == 5287) {
+      //   echo "<pre>";
+      //   var_dump($empleado);
+      //   echo "</pre>";exit;
+
+      // }
       $auxpag = $pdf->page;
       if ($pdf->chkSaltaPag([6, $pdf->GetY()]) != $auxpag) {
         $pdf->SetFont('Helvetica', '', 6);
@@ -2595,6 +2603,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
         return $val->id_empleado == $empleado->id;
       });
 
+      $pageaux1 = $pdf->page;
+      $yaux1 = $pdf->GetY();
       $fechaIni = new DateTime($empleado->fecha_inicial_pago);
       $fechaFin = new DateTime($empleado->fecha_final_pago);
       while ($fechaIni <= $fechaFin) {
@@ -2637,6 +2647,71 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
 
         $fechaIni->modify('+1 day');
       }
+      $pageaux2 = $pdf->page;
+      $yaux2 = $pdf->GetY();
+
+      $pdf->page = $pageaux1;
+      $pdf->SetXY(141, $yaux1);
+
+      $pdf->SetFont('Helvetica', '', 6);
+      $pdf->SetXY(141, $pdf->GetY()-3);
+      $pdf->SetAligns(array('C', 'C'));
+      $pdf->SetWidths(array(36, 36));
+      $pdf->Row(['INGRESOS', 'DESCUENTOS'], true, true, null, 1, 1);
+
+      $pdf->SetFont('Helvetica', '', 5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(36));
+      $ingresos = [
+        'sueldo_real' => 'Sueldo',
+        'bonos' => 'Bonos',
+        'otros' => 'Otros',
+      ];
+      $totalIngresos = 0;
+      foreach ($ingresos as $keying => $ingre) {
+        if (isset($empleado->{$keying}) && $empleado->{$keying} > 0) {
+          $pdf->SetXY(141, $pdf->GetY());
+          $pdf->Row(["{$ingre}: ".MyString::formatoNumero($empleado->{$keying}, 2, '', false)], false, false, null, 1, 1);
+          $totalIngresos += $empleado->{$keying};
+        }
+      }
+      $pdf->SetFont('Helvetica', 'B', 5);
+      $pdf->SetXY(141, $pdf->GetY());
+      $pdf->Row(["Ingresos: ".MyString::formatoNumero($totalIngresos, 2, '', false)], false, false, null, 1, 1);
+
+      $pdf->SetFont('Helvetica', '', 5);
+      $pdf->page = $pageaux1;
+      $pdf->SetXY(177, $yaux1);
+      $descuentos = [
+        'infonavit' => 'Infonavit',
+        'fondo_ahorro' => 'Fondo de Ahorro',
+        'descuento_playeras' => 'Desc Playera',
+        'descuento_otros' => 'Desc Otros',
+        'descuento_cocina' => 'Desc Cocina',
+        'otros_datos->dePensionAlimenticia' => 'Pension Alimenticia',
+        'otros_datos->deInfonacot' => 'Infonacot',
+        'otros_datos->totalPrestamosEf' => 'Prestamos Ef',
+        'otros_datos->totalDescuentoMaterial' => 'Desc Material',
+      ];
+      $totalDescuentos = 0;
+      foreach ($descuentos as $keydes => $desc) {
+        if (isset($empleado->{$keydes}) && $empleado->{$keydes} > 0) {
+          $pdf->SetXY(177, $pdf->GetY());
+          $pdf->Row(["{$desc}: ".MyString::formatoNumero($empleado->{$keydes}, 2, '', false)], false, false, null, 1, 1);
+          $totalDescuentos += $empleado->{$keydes};
+        }
+      }
+      $pdf->SetFont('Helvetica', 'B', 5);
+      $pdf->SetXY(177, $pdf->GetY());
+      $pdf->Row(["Descuentos: ".MyString::formatoNumero($totalDescuentos, 2, '', false)], false, false, null, 1, 1);
+
+      $pdf->page = $pageaux2;
+      $pdf->SetXY(141, $yaux2-4);
+      $pdf->SetFont('Helvetica', 'B', 6);
+      $pdf->Row(["Pagado: ".MyString::formatoNumero($totalIngresos-$totalDescuentos, 2, '', false)], false, false, null, 1, 1);
+
+      $pdf->page = $pageaux2;
+      $pdf->SetXY(6, $yaux2);
     }
 
     $pdf->Output('Nomina.pdf', 'I');

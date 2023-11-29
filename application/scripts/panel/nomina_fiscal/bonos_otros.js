@@ -394,6 +394,10 @@
                         <input type="hidden" name="perDelete[]" value="" data class="perDelete">
                       </td>
                     </tr>
+                    <tr>
+                      <td>Observaciones</td>
+                      <td colspan="3"><textarea name="perObservaciones[]" rows="2" class="span12 perObservaciones"></textarea></td>
+                    </tr>
                   </table>
                 </td>
               </tr>`;

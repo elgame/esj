@@ -268,7 +268,7 @@ class Usuario_historial_model extends CI_Model {
   {
     return $this->db->query(
       "SELECT np.id_permiso, np.folio, Date(np.fecha_ini) AS fecha,
-        np.dias, np.hrs, np.uso_dir, np.uso_rh,
+        np.dias, np.hrs, np.uso_dir, np.uso_rh, np.observaciones,
         (u.nombre || ' ' || u.apellido_paterno) AS empleado
        FROM nomina_permisos np
         INNER JOIN usuarios u ON u.id = np.id_trabajador
@@ -304,9 +304,9 @@ class Usuario_historial_model extends CI_Model {
     //$pdf->AddPage();
     $pdf->SetFont('helvetica','', 8);
 
-    $aligns = array('L', 'L', 'L', 'L', 'L', 'R');
-    $widths = array(20, 20, 35, 55, 55, 30);
-    $header = array('FOLIO', 'FECHA', 'TIEMPO AUSENCIA', 'USO DIRECCION', 'USO RH');
+    $aligns = array('L', 'L', 'L', 'L', 'L', 'L');
+    $widths = array(15, 20, 30, 40, 35, 65);
+    $header = array('FOLIO', 'FECHA', 'TIEMPO AUSENCIA', 'USO DIRECCION', 'USO RH', 'OBSERVACIONES');
 
     foreach($historial as $key => $log)
     {
@@ -316,12 +316,12 @@ class Usuario_historial_model extends CI_Model {
 
         $pdf->SetFont('helvetica', 'B', 8);
         $pdf->SetTextColor(0,0,0);
-        $pdf->SetFillColor(240,240,240);
+        // $pdf->SetFillColor(240,240,240);
         $pdf->SetY($pdf->GetY()-2);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row($header, 1, 1);
+        $pdf->Row($header, false, true);
       }
 
       $pdf->SetFont('helvetica', '', 8);
@@ -337,6 +337,7 @@ class Usuario_historial_model extends CI_Model {
         "{$log->dias} Dias y/o {$log->hrs} Hrs",
         $log->uso_dir,
         $log->uso_rh,
+        $log->observaciones,
       ), false, false);
     }
 

@@ -1,4 +1,8 @@
 
+ ☐ Agregar descripsion en permisos
+ -- lap|san
+   ALTER TABLE IF EXISTS public.nomina_permisos ADD COLUMN observaciones text COLLATE pg_catalog."default";
+
  ☐ Reporte de salidas registradas en registro de pallets, Producto, dia del 1-31 existencia
 
  ☐ Estado de resultado nuevos cambios de la señora
