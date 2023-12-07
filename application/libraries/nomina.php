@@ -345,16 +345,14 @@ class nomina
       $this->empleado->nomina->subtotal        += floatval($otroPago['total']);
     }
 
-    if ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se') {
-      if ((isset($this->empleado->p_alimenticia) && $this->empleado->p_alimenticia > 0) ||
-          isset($this->empleado->otros_datos->dePensionAlimenticia)) {
-        $this->empleado->nomina->deducciones['pencion_alimenticia'] = $this->dPencionAlimenticia();
-      }
-
-      if ((isset($this->empleado->fonacot) && $this->empleado->fonacot > 0) ||
-          isset($this->empleado->otros_datos->deInfonacot)) {
-        $this->empleado->nomina->deducciones['infonacot'] = $this->dInfonacot();
-      }
+    if (($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' || $this->nominaFiltros['tipo_nomina']['tipo'] == 'ag') &&
+      ( (isset($this->empleado->p_alimenticia) && $this->empleado->p_alimenticia > 0) ||
+        isset($this->empleado->otros_datos->dePensionAlimenticia) )) {
+      $this->empleado->nomina->deducciones['pencion_alimenticia'] = $this->dPencionAlimenticia();
+    }
+    if ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' && ( (isset($this->empleado->fonacot) && $this->empleado->fonacot > 0) ||
+        isset($this->empleado->otros_datos->deInfonacot) )) {
+      $this->empleado->nomina->deducciones['infonacot'] = $this->dInfonacot();
     }
 
     // Totales Deducciones
