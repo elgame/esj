@@ -469,7 +469,11 @@ class nomina_fiscal extends MY_Controller {
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
-
+    if ($_GET['empresaId'] == 2) {
+      echo "<pre>";
+      var_dump($params['empleados']);
+      echo "</pre>";exit;
+    }
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
     $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
 

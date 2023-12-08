@@ -177,7 +177,7 @@
                                 </select>
                               </td>
                               <td style="width: 65px;">
-                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="1">
+                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
                               </td>
                               <td style="width: 90px;">
                                   <input type="text" name="valorUnitario[]" value="<?php echo $_POST['valorUnitario'][$key] ?>" id="valorUnitario" class="span12 vpositive">
@@ -225,7 +225,7 @@
                                 </select>
                               </td>
                               <td style="width: 65px;">
-                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->cantidad ?>" id="cantidad" class="span12 vpositive" min="1">
+                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->cantidad ?>" id="cantidad" class="span12 vpositive" min="0">
                               </td>
                               <td style="width: 90px;">
                                   <input type="text" name="valorUnitario[]" value="<?php echo $prod->precio_unitario ?>" id="valorUnitario" class="span12 vpositive">
