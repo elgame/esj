@@ -193,6 +193,19 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
     $pdf->SetXY(0, $pdf->GetY()-1);
     $pdf->Row(array("{$permiso->uso_rh} {$permiso->uso_rh_value}"), false, false);
 
+    if (!empty($permiso->observaciones)) {
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetWidths(array(63));
+      $pdf->SetAligns(array('C'));
+      $pdf->SetX(0);
+      $pdf->Row(array('OBSERVACIONES'), false, true);
+      $pdf->SetFont('helvetica', '', 8);
+      $pdf->SetWidths(array(63));
+      $pdf->SetAligns(array('L'));
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row(array("{$permiso->observaciones}"), false, false);
+    }
+
     $pdf->SetFont('helvetica', 'B', 8);
     $pdf->SetWidths(array(63));
     $pdf->SetAligns(array('C'));
