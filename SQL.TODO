@@ -1,4 +1,146 @@
 
+ ☐ Apartado de plasticos, produccion, ventas, inventarios, etc
+ -- lap
+   CREATE TABLE IF NOT EXISTS otros.pg_moldes
+    (
+        id_molde bigserial NOT NULL,
+        nombre character varying(120) COLLATE pg_catalog."default" NOT NULL,
+        status boolean NOT NULL DEFAULT true,
+        CONSTRAINT pg_moldes_pkey PRIMARY KEY (id_molde)
+    )
+    TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS otros.pg_moldes OWNER to programa;
+   CREATE TABLE IF NOT EXISTS otros.pg_maquinas
+    (
+        id_maquina bigserial NOT NULL,
+        nombre character varying(120) COLLATE pg_catalog."default" NOT NULL,
+        status boolean NOT NULL DEFAULT true,
+        CONSTRAINT pg_maquinas_pkey PRIMARY KEY (id_maquina)
+    )
+    TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS otros.pg_maquinas OWNER to programa;
+   CREATE TABLE IF NOT EXISTS otros.pg_grupos
+    (
+        id_grupo serial NOT NULL,
+        nombre character varying(50) COLLATE pg_catalog."default" NOT NULL,
+        status boolean NOT NULL DEFAULT true,
+        CONSTRAINT pg_grupos_pkey PRIMARY KEY (id_grupo)
+    )
+    TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS otros.pg_grupos OWNER to programa;
+   CREATE TABLE IF NOT EXISTS otros.pg_produccion
+    (
+        id_produccion bigserial NOT NULL,
+        id_empresa integer NOT NULL,
+        id_sucursal integer,
+        id_maquina bigint NOT NULL,
+        id_molde bigint NOT NULL,
+        id_grupo integer NOT NULL,
+        id_registro bigint NOT NULL,
+        id_jefe_turno bigint NOT NULL,
+        folio bigint NOT NULL,
+        turno integer NOT NULL,
+        fecha date NOT NULL,
+        cajas_buenas integer NOT NULL DEFAULT 0,
+        cajas_merma integer NOT NULL DEFAULT 0,
+        cajas_total bigint NOT NULL DEFAULT 0,
+        plasta_kg double precision NOT NULL DEFAULT 0,
+        inyectado_kg double precision NOT NULL DEFAULT 0,
+        peso_prom double precision NOT NULL DEFAULT 0,
+        fecha_creada timestamp without time zone NOT NULL DEFAULT now(),
+        status boolean NOT NULL DEFAULT true,
+        CONSTRAINT pg_produccion_pkey PRIMARY KEY (id_produccion),
+        CONSTRAINT pg_produccion_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_produccion_id_grupo_fkey FOREIGN KEY (id_grupo)
+            REFERENCES otros.pg_grupos (id_grupo) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_produccion_id_jefe_turno_fkey FOREIGN KEY (id_jefe_turno)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_produccion_id_maquina_fkey FOREIGN KEY (id_maquina)
+            REFERENCES otros.pg_maquinas (id_maquina) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_produccion_id_molde_fkey FOREIGN KEY (id_molde)
+            REFERENCES otros.pg_moldes (id_molde) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_produccion_id_registro_fkey FOREIGN KEY (id_registro)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_produccion_id_sucursal_fkey FOREIGN KEY (id_sucursal)
+            REFERENCES public.empresas_sucursales (id_sucursal) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS otros.pg_produccion OWNER to programa;
+    COMMENT ON COLUMN otros.pg_produccion.peso_prom IS 'peso promedio del producto';
+   CREATE TABLE IF NOT EXISTS otros.pg_prod_ensa
+    (
+        id_prod_ensa bigserial NOT NULL,
+        id_empresa integer NOT NULL,
+        id_sucursal integer,
+        id_registro bigint NOT NULL,
+        fecha date NOT NULL,
+        fecha_creada timestamp without time zone DEFAULT now(),
+        tipo boolean NOT NULL DEFAULT true,
+        status boolean NOT NULL DEFAULT true,
+        CONSTRAINT pg_prod_ensa_pkey PRIMARY KEY (id_prod_ensa),
+        CONSTRAINT pg_prod_ensa_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_prod_ensa_id_registro_fkey FOREIGN KEY (id_registro)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_prod_ensa_id_sucursal_fkey FOREIGN KEY (id_sucursal)
+            REFERENCES public.empresas_sucursales (id_sucursal) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS otros.pg_prod_ensa OWNER to programa;
+    COMMENT ON TABLE otros.pg_prod_ensa IS 'Tabla que se registran entradas y salidas de productos que afectan el inventario de plastico (produccion y ventas)';
+    COMMENT ON COLUMN otros.pg_prod_ensa.tipo IS 'true: entrada de producto, false: salida de producto';
+   CREATE TABLE IF NOT EXISTS otros.pg_prod_ensa_productos
+    (
+        id_prod_ensa bigint NOT NULL,
+        id_clasificacion integer NOT NULL,
+        nrow integer NOT NULL,
+        cantidad double precision NOT NULL DEFAULT 0,
+        CONSTRAINT pg_prod_ensa_productos_pkey PRIMARY KEY (id_prod_ensa, nrow, id_clasificacion),
+        CONSTRAINT pg_prod_ensa_productos_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+            REFERENCES public.clasificaciones (id_clasificacion) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_prod_ensa_productos_id_prod_ensa_fkey FOREIGN KEY (id_prod_ensa)
+            REFERENCES otros.pg_prod_ensa (id_prod_ensa) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS otros.pg_prod_ensa_productos OWNER to programa;
+   INSERT INTO otros.pg_grupos(nombre) VALUES ('1'),('2'),('3');
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Plasticos Gubalu',0,true,'pg_produccion/','gift',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Produccion',602,true,'pg_produccion/','th-large',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',603,true,'pg_produccion/agregar/','plus',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',603,false,'pg_produccion/modificar/','edit',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',603,false,'pg_produccion/imprimir/','print',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',603,false,'pg_produccion/cancelar/','remove',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Maquinas',602,true,'pg_produccion/maquinas/','th-list',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',608,true,'pg_produccion/maquinasAgregar/','plus',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',608,false,'pg_produccion/maquinasModificar/','edit',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',608,false,'pg_produccion/maquinasEliminar/','remove',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Moldes',602,true,'pg_produccion/moldes/','th-list',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',612,true,'pg_produccion/moldesAgregar/','plus',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',612,false,'pg_produccion/moldesModificar/','edit',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',612,false,'pg_produccion/moldesEliminar/','remove',false);
+
  ☐ Agregar descripsion en permisos
  -- lap|san
    ALTER TABLE IF EXISTS public.nomina_permisos ADD COLUMN observaciones text COLLATE pg_catalog."default";
