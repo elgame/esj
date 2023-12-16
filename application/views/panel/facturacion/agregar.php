@@ -522,7 +522,7 @@
                                 $_POST['dieps'][$key]                   = $p->porcentaje_ieps;
                                 $_POST['disr_total'][$key]              = $p->isr;
                                 $_POST['disr'][$key]                    = $p->porcentaje_isr;
-                                $_POST['dcuentaPredial'][$k]            = (isset($cfdi_extp->cuentaPredial)? $cfdi_extp->cuentaPredial: '');
+                                $_POST['dcuentaPredial'][$key]          = (isset($cfdi_extp->cuentaPredial)? $cfdi_extp->cuentaPredial: '');
 
                                 $_POST['prod_dclase'][$key]             = $p->clase;
                                 $_POST['prod_dpeso'][$key]              = $p->peso;
