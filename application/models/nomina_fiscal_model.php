@@ -5676,7 +5676,7 @@ class nomina_fiscal_model extends CI_Model {
       FROM usuarios AS u
         INNER JOIN nomina_fiscal AS n ON n.id_empleado_creador = u.id
       WHERE n.id_empresa = {$empresaId} AND n.registro_patronal = '{$regPatronal}'
-        AND n.anio = {$anio} AND n.semana = {$semana}
+        AND n.anio = {$anio} AND n.semana = {$semana['semana']}
       LIMIT 1")->row();
 
     $this->load->library('mypdf');
