@@ -92,7 +92,7 @@ class MyFiles {
               $find = true;
 
             if ($find) {
-              $files[strtotime($fecha)+intval($folioInt)] = [
+              $files["{$cont}-{$xml->Complemento->TimbreFiscalDigital['UUID']}"] = [
                 'name'              => $file->getBasename(),
                 'rfc'               => $brfcProv,
                 'fecha'             => $fecha,
@@ -103,7 +103,9 @@ class MyFiles {
                 'metodoPago'        => $metodoPago,
                 'tipoDeComprobante' => $tipoDeComprobante,
               ];
+              $cont++;
             }
+
           }
         }
       }
