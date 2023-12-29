@@ -19,9 +19,11 @@
     eventBtnAddProducto();
     eventBtnDelProducto();
     eventCantidadProd();
+    eventChangeEquipo();
 
     opcClear.datos = opcClear.formula = ($('#tipooo').val()=='false'? true: false);
     $('#tipo').change();
+    $('#a_equipo').change();
     calculaTotal('aplicacion_total');
   });
 
@@ -436,6 +438,7 @@
       $('#no_plantas').show();
       $(".datos-lts, .datos-kg").hide();
       $(".datos-"+tipo).show();
+      $('.opcVolumenlts').hide();
       if (tipo === 'kg') {
         // $('#ha_neta').removeAttr('readonly');
         // $('#no_plantas').attr('readonly', 'readonly');
@@ -446,6 +449,7 @@
         // $('#ha_neta, #carga1, #carga2').attr('readonly', 'readonly');
         $('.titulo-box-kglts').text('Datos Lts');
         $('.tipostyle').show();
+        $('.opcVolumenlts').show();
       }
 
       opcClear.datos = opcClear.formula = true;
@@ -656,6 +660,20 @@
       $parent.remove();
 
       calculaTotal();
+    });
+  };
+
+  var eventChangeEquipo = function () {
+    $("#a_equipo").on('change', function(){
+      let volumenes = recetasVolumenes.get($(this).val());
+      let $aVolumen = $("#a_volumen").attr('data-value');
+      let html = '<option value=""></option>';
+      if(volumenes.length > 0) {
+        $.each(volumenes, function(index, val) {
+           html += '<option value="'+val+'" '+($aVolumen==val? 'selected': '')+'>'+util.darFormatoNum(val, '')+'</option>';
+        });
+      }
+      $("#a_volumen").html(html);
     });
   };
 

@@ -223,12 +223,33 @@
                 <div class="row-fluid">
                   <div class="span3">
                     Etapa
-                    <input type="text" name="a_etapa" class="span12 datosapl" id="a_etapa" value="<?php echo set_value('a_etapa'); ?>">
+                    <!-- <input type="text" name="a_etapa" class="span12 datosapl" id="a_etapa" value="<?php echo set_value('a_etapa'); ?>"> -->
+                    <select name="a_etapa" class="span12 datosapl" id="a_etapa">
+                      <option value=""></option>
+                      <option value="Prep. Terreno" <?php echo set_select('a_etapa', 'Prep. Terreno'); ?>>Prep. Terreno</option>
+                      <option value="Estab. Cultivo" <?php echo set_select('a_etapa', 'Estab. Cultivo'); ?>>Estab. Cultivo</option>
+                      <option value="D/Planta" <?php echo set_select('a_etapa', 'D/Planta'); ?>>D/Planta</option>
+                      <option value="D/Fruta" <?php echo set_select('a_etapa', 'D/Fruta'); ?>>D/Fruta</option>
+                      <option value="Semillero" <?php echo set_select('a_etapa', 'Semillero'); ?>>Semillero</option>
+                    </select>
                   </div>
 
                   <div class="span3">
                     Ciclo
-                    <input type="text" name="a_ciclo" class="span12 datosapl" id="a_ciclo" value="<?php echo set_value('a_ciclo'); ?>">
+                    <!-- <input type="text" name="a_ciclo" class="span12 datosapl" id="a_ciclo" value="<?php echo set_value('a_ciclo'); ?>"> -->
+                    <select name="a_ciclo" class="span12 datosapl" id="a_ciclo">
+                      <option value=""></option>
+                      <option value="1" <?php echo set_select('a_ciclo', '1'); ?>>1</option>
+                      <option value="2" <?php echo set_select('a_ciclo', '2'); ?>>2</option>
+                      <option value="3" <?php echo set_select('a_ciclo', '3'); ?>>3</option>
+                      <option value="4" <?php echo set_select('a_ciclo', '4'); ?>>4</option>
+                      <option value="5" <?php echo set_select('a_ciclo', '5'); ?>>5</option>
+                      <option value="6" <?php echo set_select('a_ciclo', '6'); ?>>6</option>
+                      <option value="7" <?php echo set_select('a_ciclo', '7'); ?>>7</option>
+                      <option value="8" <?php echo set_select('a_ciclo', '8'); ?>>8</option>
+                      <option value="9" <?php echo set_select('a_ciclo', '9'); ?>>9</option>
+                      <option value="10" <?php echo set_select('a_ciclo', '10'); ?>>10</option>
+                    </select>
                   </div>
 
                   <div class="span3">
@@ -238,14 +259,31 @@
 
                   <div class="span3">
                     Turno
-                    <input type="text" name="a_turno" class="span12 datosapl" id="a_turno" value="<?php echo set_value('a_turno'); ?>">
+                    <!-- <input type="text" name="a_turno" class="span12 datosapl" id="a_turno" value="<?php echo set_value('a_turno'); ?>"> -->
+                    <select name="a_turno" class="span12 datosapl" id="a_turno">
+                      <option value=""></option>
+                      <option value="Por el Dia (7am / 4pm)" <?php echo set_select('a_turno', 'Por el Dia (7am / 4pm)'); ?>>Por el Dia (7am / 4pm)</option>
+                      <option value="Amanecer (6am / 9am)" <?php echo set_select('a_turno', 'Amanecer (6am / 9am)'); ?>>Amanecer (6am / 9am)</option>
+                      <option value="Tard-Noch (5pm / 10pm)" <?php echo set_select('a_turno', 'Tard-Noch (5pm / 10pm)'); ?>>Tard-Noch (5pm / 10pm)</option>
+                      <option value="Madrudada (4am / 7am)" <?php echo set_select('a_turno', 'Madrudada (4am / 7am)'); ?>>Madrudada (4am / 7am)</option>
+                    </select>
                   </div>
                 </div>
 
                 <div class="row-fluid">
                   <div class="span3">
                     Via
-                    <input type="text" name="a_via" class="span12 datosapl" id="a_via" value="<?php echo set_value('a_via'); ?>">
+                    <!-- <input type="text" name="a_via" class="span12 datosapl" id="a_via" value="<?php echo set_value('a_via'); ?>"> -->
+                    <select name="a_via" class="span12 datosapl" id="a_via">
+                      <option value=""></option>
+                      <option value="Elaboración de Solución" <?php echo set_select('a_via', 'Elaboración de Solución'); ?>>Elaboración de Solución</option>
+                      <option value="Elaboración de Composta" <?php echo set_select('a_via', 'Elaboración de Composta'); ?>>Elaboración de Composta</option>
+                      <option value="Aplicación Foliar" <?php echo set_select('a_via', 'Aplicación Foliar'); ?>>Aplicación Foliar</option>
+                      <option value="Aplicación Solida al Suelo" <?php echo set_select('a_via', 'Aplicación Solida al Suelo'); ?>>Aplicación Solida al Suelo</option>
+                      <option value="Aplicación en Sistema Riego" <?php echo set_select('a_via', 'Aplicación en Sistema Riego'); ?>>Aplicación en Sistema Riego</option>
+                      <option value="Aplicación en Drench a Piso" <?php echo set_select('a_via', 'Aplicación en Drench a Piso'); ?>>Aplicación en Drench a Piso</option>
+                      <option value="Aplicación en Drench a Planta" <?php echo set_select('a_via', 'Aplicación en Drench a Planta'); ?>>Aplicación en Drench a Planta</option>
+                    </select>
                   </div>
 
                   <div class="span3">
@@ -255,14 +293,44 @@
 
                   <div class="span3">
                     Equipo
-                    <input type="text" name="a_equipo" class="span12 datosapl" id="a_equipo" value="<?php echo set_value('a_equipo'); ?>">
+                    <!-- <input type="text" name="a_equipo" class="span12 datosapl" id="a_equipo" value="<?php echo set_value('a_equipo'); ?>"> -->
+                    <select name="a_equipo" class="span12 datosapl" id="a_equipo">
+                      <option value=""></option>
+                      <option value="Pileta-Raquis" <?php echo set_select('a_equipo', 'Pileta-Raquis'); ?>>Pileta-Raquis</option>
+                      <option value="Pileta-Bioles" <?php echo set_select('a_equipo', 'Pileta-Bioles'); ?>>Pileta-Bioles</option>
+                      <option value="Rotoplas" <?php echo set_select('a_equipo', 'Rotoplas'); ?>>Rotoplas</option>
+                      <option value="Biodigestor" <?php echo set_select('a_equipo', 'Biodigestor'); ?>>Biodigestor</option>
+                      <option value="Boom" <?php echo set_select('a_equipo', 'Boom'); ?>>Boom</option>
+                      <option value="Aspersora" <?php echo set_select('a_equipo', 'Aspersora'); ?>>Aspersora</option>
+                      <option value="Aguilón" <?php echo set_select('a_equipo', 'Aguilón'); ?>>Aguilón</option>
+                      <option value="Tambo" <?php echo set_select('a_equipo', 'Tambo'); ?>>Tambo</option>
+                      <option value="Garrafa" <?php echo set_select('a_equipo', 'Garrafa'); ?>>Garrafa</option>
+                      <option value="Motobomba" <?php echo set_select('a_equipo', 'Motobomba'); ?>>Motobomba</option>
+                      <option value="Termo" <?php echo set_select('a_equipo', 'Termo'); ?>>Termo</option>
+                      <option value="Mochila" <?php echo set_select('a_equipo', 'Mochila'); ?>>Mochila</option>
+                      <option value="Avioneta" <?php echo set_select('a_equipo', 'Avioneta'); ?>>Avioneta</option>
+                      <option value="Dron" <?php echo set_select('a_equipo', 'Dron'); ?>>Dron</option>
+                      <option value="Sistema Riego" <?php echo set_select('a_equipo', 'Sistema Riego'); ?>>Sistema Riego</option>
+                      <option value="Cama-Humus" <?php echo set_select('a_equipo', 'Cama-Humus'); ?>>Cama-Humus</option>
+                    </select>
                   </div>
 
-                  <div class="span3">
+                  <div class="span3 opcVolumenlts" style="display: none;">
+                    Volumen (lts)
+                    <select name="a_volumen" class="span12 datosapl" id="a_volumen" data-value="<?php echo (isset($_POST['a_volumen'])? $_POST['a_volumen']: '') ?>">
+                      <option value=""></option>
+                    </select>
+                  </div>
+
+                </div>
+
+                <div class="row-fluid">
+                  <div class="span11">
                     Observaciones
                     <input type="text" name="a_observaciones" class="span12 datosapl" id="a_observaciones" value="<?php echo set_value('a_observaciones'); ?>" data-next="dosis_planta|ha_bruta">
                   </div>
                 </div>
+
               </div> <!-- /box-body -->
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
