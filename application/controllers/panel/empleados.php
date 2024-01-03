@@ -276,7 +276,8 @@ class empleados extends MY_Controller {
         'puestoId'          => '',
         'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
         'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
-        'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
+        'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0'],
+        'showe' => true
       );
       $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
       foreach ($data as $key => $value)

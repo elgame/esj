@@ -744,7 +744,9 @@ class nomina_fiscal_model extends CI_Model {
 
       if (floatval($empleado->nomina->TotalPercepciones) == 0 &&
           floatval($empleado->nomina->TotalDeducciones) == 0 &&
-          floatval($empleado->nomina->TotalOtrosPagos) == 0) {
+          floatval($empleado->nomina->TotalOtrosPagos) == 0 &&
+          (!isset($filtros['showe']) || (isset($filtros['showe']) && !$filtros['showe']))
+        ) {
         unset($empleados[$key]);
       }
     }
