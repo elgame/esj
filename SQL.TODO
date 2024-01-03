@@ -1,6 +1,6 @@
 
  ☐ Cambios en recetas
-   -- lap
+   -- lap|san
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN a_volumen character varying(50) COLLATE pg_catalog."default";
 
  ☐ Apartado de plasticos, produccion, ventas, inventarios, etc
