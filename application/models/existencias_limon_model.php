@@ -2720,6 +2720,67 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array(MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false)), false, 'B');
 
 
+    // Certificados
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(182));
+    $pdf->Row(array('CERTIFICADOS'), true, 'B');
+
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(22, 60, 40, 15, 20, 25));
+    $pdf->Row(array('FOLIO', 'PROVEEDORES', 'TIPO', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(22, 60, 40, 15, 20, 25));
+
+    $cert_importe = $cert_kilos = $cert_cantidad = 0;
+    foreach ($caja['certificados'] as $venta) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $cert_importe += floatval($venta->importe);
+      $cert_cantidad += floatval($venta->cantidad);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $venta->serie.$venta->folio,
+        $venta->proveedores,
+        $venta->clasificacion,
+        MyString::formatoNumero($venta->cantidad, 2, '', false),
+        MyString::formatoNumero($venta->precio, 2, '', false),
+        MyString::formatoNumero($venta->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      MyString::formatoNumero($cert_cantidad, 2, '', false),
+      MyString::formatoNumero(($cert_importe/($cert_cantidad==0? 1: $cert_cantidad)), 2, '', false),
+      MyString::formatoNumero($cert_importe, 2, '', false),
+    ), false, 'B');
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(22));
+    $pdf->SetXY(188, $pdf->GetY()-11);
+    $pdf->Row(array('CERTIFICADOS'), false, 'B');
+    $pdf->SetXY(188, $pdf->GetY());
+    $pdf->Row(array(MyString::formatoNumero($cert_importe, 2, '$', false)), false, 'B');
+
+
     // COMISIONES A TERCEROS
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetXY(6, $pdf->GetY()+5);
@@ -2948,7 +3009,7 @@ class existencias_limon_model extends CI_Model {
 
 
     // TOTALES
-    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) - $totalGastos + $industrial_importe;
+    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $cert_importe + $comisionTerceros_importe) - $totalGastos + $industrial_importe;
     $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos + $frutaCompra_kilos + $devFruta_kilos;
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
@@ -3049,11 +3110,14 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array('(+) FLETES', MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false)), true, false);
     $pdf->chkSaltaPag([120, 10]);
     $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) CERTIFICADOS', MyString::formatoNumero($cert_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
     $pdf->Row(array('(+) COMISION A TERCEROS', MyString::formatoNumero($comisionTerceros_importe, 2, '', false)), true, false);
     $pdf->chkSaltaPag([120, 10]);
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(120, $pdf->GetY());
-    $pdf->Row(array('(-) GASTOS DE VENTAS', MyString::formatoNumero($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe, 2, '', false)), true, 'B');
+    $pdf->Row(array('(-) GASTOS DE VENTAS', MyString::formatoNumero($costoVentas_importe + $descuentoVentasFletes_importe + $cert_importe + $comisionTerceros_importe, 2, '', false)), true, 'B');
     $pdf->chkSaltaPag([120, 10]);
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(120, $pdf->GetY());

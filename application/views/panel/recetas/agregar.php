@@ -116,7 +116,16 @@
                 <label class="control-label" for="objetivo">Objetivo </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="objetivo" class="span11" id="objetivo" value="<?php echo set_value('objetivo') ?>">
+                    <!-- <input type="text" name="objetivo" class="span11" id="objetivo" value="<?php echo set_value('objetivo') ?>"> -->
+                    <select name="objetivo" class="span12 datosapl" id="objetivo">
+                      <option value=""></option>
+                      <option value="Nutrición Foliar" <?php echo set_select('objetivo', 'Nutrición Foliar'); ?>>Nutrición Foliar</option>
+                      <option value="Nutrición Fisica" <?php echo set_select('objetivo', 'Nutrición Fisica'); ?>>Nutrición Fisica</option>
+                      <option value="Control Plaga & Enf." <?php echo set_select('objetivo', 'Control Plaga & Enf.'); ?>>Control Plaga & Enf.</option>
+                      <option value="Control Malezas" <?php echo set_select('objetivo', 'Control Malezas'); ?>>Control Malezas</option>
+                      <option value="Elaboración Producto" <?php echo set_select('objetivo', 'Elaboración Producto'); ?>>Elaboración Producto</option>
+                      <option value="Limpieza Equipos" <?php echo set_select('objetivo', 'Limpieza Equipos'); ?>>Limpieza Equipos</option>
+                    </select>
                   </div>
                 </div>
               </div>

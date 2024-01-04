@@ -1375,7 +1375,7 @@ class estado_resultado_trans_model extends privilegios_model{
     $pdf->SetWidths(array(65));
     $pdf->SetFont('Arial', 'B', 6);
     $pdf->SetXY(15, $pdf->GetY()+20);
-    $pdf->Row(array('Hector Miguel Espinosa Ruiz'), false, 'B');
+    $pdf->Row(array('Nereyda Elizabeth Bernardino Maravilla'), false, 'B');
     $pdf->SetFont('Arial', '', 6);
     $pdf->SetXY(15, $pdf->GetY());
     $pdf->Row(array('Firma del Supervisor'), false, false);

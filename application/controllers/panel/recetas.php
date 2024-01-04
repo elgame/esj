@@ -13,6 +13,7 @@ class recetas extends MY_Controller {
     'recetas/ajax_get_recetas/',
     'recetas/ajax_get_calendarios/',
     'recetas/imprimir_salida/',
+    'recetas/modificar_ajax/',
     'recetas/show_import_recetas_corona/'
   );
 
@@ -194,6 +195,24 @@ class recetas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function modificar_ajax()
+  {
+    $response = array('passes' => false, 'msg' => '');
+
+    $this->configUpdRecetaAjax();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $response['msg'] = preg_replace("[\n|\r|\n\r]", '', validation_errors());
+    }
+    else
+    {
+      $this->load->model('recetas_model');
+      $response = $this->recetas_model->modificarAjax($_GET['id']);
+    }
+
+    echo json_encode($response);
+  }
+
   /**
    * Visualiza el formulario para registrar una salida de receta.
    *
@@ -264,6 +283,7 @@ class recetas extends MY_Controller {
       array('general/supermodal.js'),
       array('general/util.js'),
       array('panel/compras_ordenes/ver.js'),
+      array('panel/recetas/recetas_list_salidas.js'),
     ));
 
     $this->load->model('recetas_model');
@@ -622,9 +642,9 @@ class recetas extends MY_Controller {
       ['field' => 'fecha_aplicacion',       'label' => 'Fecha Aplicación',     'rules' => ''],
       ['field' => 'calendario',             'label' => 'Calendario',           'rules' => 'required'],
 
-      ['field' => 'ar_semana',              'label' => 'Semana',               'rules' => 'required|numeric'],
+      ['field' => 'ar_semana',              'label' => 'Semana',               'rules' => ''],
       ['field' => 'ar_fecha',               'label' => 'Fecha',                'rules' => ''],
-      ['field' => 'ar_ph',                  'label' => 'Ph',                   'rules' => 'required|numeric'],
+      ['field' => 'ar_ph',                  'label' => 'Ph',                   'rules' => ''],
 
       ['field' => 'dosis_planta',           'label' => 'Dosis Planta',         'rules' => ($val_datos['dosis_planta']? 'required': '')],
       ['field' => 'ha_bruta',               'label' => 'Ha Bruta',             'rules' => ($val_datos['ha_bruta']? 'required': '')],
@@ -648,6 +668,19 @@ class recetas extends MY_Controller {
 
       ['field' => 'total_importe',          'label' => 'Importe',              'rules' => ''],
 
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  public function configUpdRecetaAjax($prereq = false)
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      ['field' => 'ar_semana',              'label' => 'Semana',               'rules' => 'required|numeric'],
+      ['field' => 'ar_fecha',               'label' => 'Fecha',                'rules' => 'required'],
+      ['field' => 'ar_ph',                  'label' => 'Ph',                   'rules' => 'numeric'],
     );
 
     $this->form_validation->set_rules($rules);

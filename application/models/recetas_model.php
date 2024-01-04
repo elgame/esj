@@ -108,7 +108,8 @@ class recetas_model extends CI_Model {
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
         r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas,
         (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion, r.id_recetas_calendario,
-        r.id_empresa_ap, eap.nombre_fiscal AS empresa_ap, r.folio_hoja, r.extras, r.ar_semana, r.ar_fecha, r.ar_ph
+        r.id_empresa_ap, eap.nombre_fiscal AS empresa_ap, r.folio_hoja, r.extras, r.ar_semana, r.ar_fecha, r.ar_ph,
+        r.paso
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
@@ -346,6 +347,19 @@ class recetas_model extends CI_Model {
     $this->saveCatalogos($recetaId);
 
     return array('passes' => true, 'msg' => 3);
+  }
+
+  public function modificarAjax($recetaId)
+  {
+    $data = array(
+      'ar_semana' => intval($_POST['ar_semana']),
+      'ar_fecha'  => (!empty($_POST['ar_fecha'])? $_POST['ar_fecha']: NULL),
+      'ar_ph'     => floatval($_POST['ar_ph']),
+    );
+
+    $this->db->update('otros.recetas', $data, "id_recetas = {$recetaId}");
+
+    return array('passes' => true, 'msg' => 'Se actualizaron los datos correctamente.');
   }
 
   private function saveCatalogos($recetaId)
@@ -1726,36 +1740,41 @@ class recetas_model extends CI_Model {
       $pdf->page = $page_aux;
       $pdf->SetXY($val_x, $yaux);
       $pdf->SetAligns(array('C', 'L'));
-      // $pdf->SetWidths($val_widths1);
-      // $pdf->Row(['PROGRAMA DE APLICACION'], true);
+      $pdf->SetWidths($val_widths1);
+      $pdf->Row(['DATOS PARA APLICACIÓN'], true);
 
       $pdf->SetAligns(array('R', 'L'));
       $pdf->SetWidths($val_widths2);
       $pdf->SetX($val_x);
+      $pdf->Row(['VIA APLC', $receta['info']->a_via], false, false);
+      $pdf->SetXY($val_x, $pdf->GetY()-1);
+      $pdf->Row(['TANQUE', $receta['info']->a_equipo], false, false);
+      $pdf->SetXY($val_x, $pdf->GetY()-1);
+      $pdf->Row(['TURNO', $receta['info']->a_turno], false, false);
+      $pdf->SetXY($val_x, $pdf->GetY()-1);
       $pdf->Row(['ETAPA', $receta['info']->a_etapa], false, false);
-      $pdf->SetX($val_x);
+      $pdf->SetXY($val_x, $pdf->GetY()-1);
       $pdf->Row(['CICLO', $receta['info']->a_ciclo], false, false);
-      $pdf->SetX($val_x);
-      $pdf->Row(['FECHA PROGRA', $receta['info']->a_dds], false, false);
-      $pdf->SetX($val_x);
-      $pdf->Row(['GRUPO', $receta['info']->a_turno], false, false);
-      $pdf->SetX($val_x);
-      $pdf->Row(['COSECHA', $receta['info']->a_via], false, false);
-      $pdf->SetX($val_x);
-      $pdf->Row(['TIPO APLICACION', $receta['info']->a_aplic], false, false);
-      $pdf->SetX($val_x);
-      $pdf->Row(['VOLUMEN', $receta['info']->a_observaciones], false, false);
-      $pdf->SetX($val_x);
-      $pdf->Row(['TANQUE', $receta['info']->a_equipo], false, 'B');
+      $pdf->SetXY($val_x, $pdf->GetY()-1);
+      $pdf->Row(['DDS', $receta['info']->a_dds], false, false);
+      // $pdf->SetX($val_x);
+      // $pdf->Row(['TIPO APLICACION', $receta['info']->a_aplic], false, false);
+      $pdf->SetXY($val_x, $pdf->GetY()-1);
+      $pdf->Row(['OBSERV', $receta['info']->a_observaciones], false, 'B');
 
-      // $pdf->SetAligns(array('C', 'L'));
-      // $pdf->SetWidths($val_widths1);
-      // $pdf->SetX($val_x);
-      // $pdf->Row(['OBSERVACIONES'], false);
-      // $pdf->SetAligns(array('L', 'L'));
-      // $pdf->SetWidths($val_widths1);
-      // $pdf->SetX($val_x);
-      // $pdf->Row([$receta['info']->a_observaciones], false, 'B');
+      $pdf->SetAligns(array('C', 'L'));
+      $pdf->SetWidths($val_widths1);
+      $pdf->SetX($val_x);
+      $pdf->Row(['DATOS DE APLICACIÓN REALIZADA'], true);
+      $pdf->SetAligns(array('C', 'L'));
+      $pdf->SetWidths($val_widths1);
+      $pdf->SetXY($val_x, $pdf->GetY()-1);
+      $pdf->Row(["Sem: {$receta['info']->ar_semana} | Fecha: {$receta['info']->ar_fecha}"], false, ((!empty($receta['info']->ar_ph))? false: 'B'));
+      if (!empty($receta['info']->ar_ph)) {
+        $pdf->SetXY($val_x, $pdf->GetY()-1);
+        $pdf->Row(["PH: {$receta['info']->ar_ph}"], false, 'B');
+      }
+
       $pdf->Line($val_x, $yaux, $val_x, $pdf->GetY());
       $pdf->Line(213, $yaux, 213, $pdf->GetY());
       $pdf->Line($val_x, $yaux, 213, $yaux);
