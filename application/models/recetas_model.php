@@ -108,7 +108,7 @@ class recetas_model extends CI_Model {
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
         r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas,
         (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion, r.id_recetas_calendario,
-        r.id_empresa_ap, eap.nombre_fiscal AS empresa_ap, r.folio_hoja, r.extras
+        r.id_empresa_ap, eap.nombre_fiscal AS empresa_ap, r.folio_hoja, r.extras, r.ar_semana, r.ar_fecha, r.ar_ph
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
@@ -221,6 +221,10 @@ class recetas_model extends CI_Model {
       'fecha_aplicacion'      => $_POST['fecha_aplicacion'],
       'id_recetas_calendario' => $_POST['calendario'],
 
+      'ar_semana' => intval($_POST['ar_semana']),
+      'ar_fecha'  => (!empty($_POST['ar_fecha'])? $_POST['ar_fecha']: NULL),
+      'ar_ph'     => floatval($_POST['ar_ph']),
+
       'total_importe'     => floatval($_POST['total_importe']),
     );
 
@@ -305,6 +309,10 @@ class recetas_model extends CI_Model {
       'a_observaciones'       => $_POST['a_observaciones'],
       'fecha_aplicacion'      => $_POST['fecha_aplicacion'],
       'id_recetas_calendario' => $_POST['calendario'],
+
+      'ar_semana' => intval($_POST['ar_semana']),
+      'ar_fecha'  => (!empty($_POST['ar_fecha'])? $_POST['ar_fecha']: NULL),
+      'ar_ph'     => floatval($_POST['ar_ph']),
 
       'total_importe'     => floatval($_POST['total_importe']),
     );

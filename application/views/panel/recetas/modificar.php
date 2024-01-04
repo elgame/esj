@@ -214,6 +214,36 @@
           <div class="row-fluid">
             <div class="box span12">
               <div class="box-header well" data-original-title>
+                <h2><i class="icon-list-alt"></i> Datos de Aplicación Realizada</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span3">
+                    Semana
+                    <input type="text" name="ar_semana" class="span12 datosapl" id="ar_semana" value="<?php echo $receta['info']->ar_semana ?>">
+                  </div>
+
+                  <div class="span3">
+                    Fecha
+                    <input type="datetime-local" name="ar_fecha" class="span12 datosapl" id="ar_fecha" value="<?php echo $receta['info']->ar_fecha ?>">
+                  </div>
+
+                  <div class="span3">
+                    PH
+                    <input type="text" name="ar_ph" class="span12 datosapl" id="ar_ph" value="<?php echo $receta['info']->ar_ph ?>">
+                  </div>
+                </div>
+
+              </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
+          <div class="row-fluid">
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
                 <h2><i class="icon-list-alt"></i> Programa de Aplicación</h2>
                 <div class="box-icon">
                   <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>

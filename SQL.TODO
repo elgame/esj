@@ -2,6 +2,10 @@
  ☐ Cambios en recetas
    -- lap|san
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN a_volumen character varying(50) COLLATE pg_catalog."default";
+   -- lap
+   ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_semana integer;
+   ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_fecha timestamp without time zone;
+   ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_ph numeric(15,4);
 
  ☐ Apartado de plasticos, produccion, ventas, inventarios, etc
  -- lap

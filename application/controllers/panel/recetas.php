@@ -622,6 +622,10 @@ class recetas extends MY_Controller {
       ['field' => 'fecha_aplicacion',       'label' => 'Fecha Aplicación',     'rules' => ''],
       ['field' => 'calendario',             'label' => 'Calendario',           'rules' => 'required'],
 
+      ['field' => 'ar_semana',              'label' => 'Semana',               'rules' => 'required|numeric'],
+      ['field' => 'ar_fecha',               'label' => 'Fecha',                'rules' => ''],
+      ['field' => 'ar_ph',                  'label' => 'Ph',                   'rules' => 'required|numeric'],
+
       ['field' => 'dosis_planta',           'label' => 'Dosis Planta',         'rules' => ($val_datos['dosis_planta']? 'required': '')],
       ['field' => 'ha_bruta',               'label' => 'Ha Bruta',             'rules' => ($val_datos['ha_bruta']? 'required': '')],
       ['field' => 'planta_ha',              'label' => 'Plantas x Ha',         'rules' => ($val_datos['planta_ha']? 'required': '')],
