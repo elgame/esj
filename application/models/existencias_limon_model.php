@@ -2572,6 +2572,7 @@ class existencias_limon_model extends CI_Model {
           'cantidad' => $produccion->cantidad,
           'kilos'    => $produccion->kilos,
           'calibre'  => $produccion->calibre,
+          'clasificacion' => $produccion->clasificacion,
           'order'  => $calibre->order,
         ];
       } else {
@@ -2939,7 +2940,7 @@ class existencias_limon_model extends CI_Model {
       $industrial_kilos = $caja['industrial']->kilos;
 
       $pdf->SetFont('Arial','B', 7);
-      $pdf->SetX(6);
+      $pdf->SetX(60);
       $pdf->Row(array(
         '', '',
         MyString::formatoNumero($caja['industrial']->kilos, 2, '', false),
@@ -3137,6 +3138,7 @@ class existencias_limon_model extends CI_Model {
 
 
     $keyValuesProduc = array_column($produccionPercent, 'order');
+    $kilosTotaless = $produccion_kilos; //  + $industrial_kilos
     array_multisort($keyValuesProduc, SORT_DESC, $produccionPercent);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(90));
@@ -3153,7 +3155,7 @@ class existencias_limon_model extends CI_Model {
         $value['calibre'],
         MyString::formatoNumero($value['cantidad'], 2, '', false),
         MyString::formatoNumero($value['kilos'], 2, '', false),
-        MyString::formatoNumero(($value['kilos']*100/($produccion_kilos>0? $produccion_kilos: 1)), 2, '', false),
+        MyString::formatoNumero(($value['kilos']*100/($kilosTotaless>0? $kilosTotaless: 1)), 2, '', false),
       ), true, 'B');
     }
 

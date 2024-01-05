@@ -1,6 +1,7 @@
 
  ☐ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones
  ✔ En reporte de existencia de limon poner los gastos de certificados @done (24-01-04 17:29)
+ ☐ Cambio en existencia de limon revisar el archivo que mando la señora
  ☐ Cambios en recetas
    -- lap|san
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN a_volumen character varying(50) COLLATE pg_catalog."default";
