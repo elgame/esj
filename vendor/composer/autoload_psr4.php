@@ -6,9 +6,14 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Symfony\\Polyfill\\Php80\\' => array($vendorDir . '/symfony/polyfill-php80'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
+    'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
     'Symfony\\Component\\Translation\\' => array($vendorDir . '/symfony/translation'),
+    'Ramsey\\Uuid\\' => array($vendorDir . '/ramsey/uuid/src'),
+    'Ramsey\\Collection\\' => array($vendorDir . '/ramsey/collection/src'),
     'Illuminate\\' => array($vendorDir . '/tightenco/collect/src/Illuminate'),
     'Catalogos\\' => array($baseDir . '/application/libraries/catalogos'),
+    'Brick\\Math\\' => array($vendorDir . '/brick/math/src'),
     '' => array($vendorDir . '/nesbot/carbon/src'),
 );

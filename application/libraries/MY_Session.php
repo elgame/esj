@@ -60,8 +60,8 @@ class MY_Session extends CI_Session
     if(!isset($_SESSION)){
       session_start();
     }
-    ini_set('session.gc_maxlifetime', 3600);
-    ini_set('session.cookie_lifetime', 0);
+    // ini_set('session.gc_maxlifetime', 3600);
+    // ini_set('session.cookie_lifetime', 0);
 
     if ( ! $this->sess_read())
     {

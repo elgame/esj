@@ -138,34 +138,80 @@ $config['subclass_prefix'] = 'MY_';
  *
  * @author gama
  */
-function __autoload($class_name) {
-	$clasesPath = array(
-			"core/",
-			"core/system/",
-			"libraries/",
+// function __autoload($class_name) {
+// 	$clasesPath = array(
+// 			"core/",
+// 			"core/system/",
+// 			"libraries/",
+//       'libraries/fpdf/',
+// 			'libraries/catalogos/',
+// 			"models/"
+// 	);
+
+// 	foreach ($clasesPath as $clasePath){
+// 		if(file_exists(APPPATH.$clasePath.$class_name.'.php')){
+// 			include_once(APPPATH.$clasePath.$class_name.'.php');
+// 		}else{
+// 			$class_name_lower = strtolower($class_name);
+
+// 			//hacemos un ?ltimo intento pero con FirstCharUpper
+// 			if(file_exists(APPPATH.$clasePath.$class_name_lower.'.php')){
+// 				include_once(APPPATH.$clasePath.$class_name_lower.'.php');
+// 			}
+// 		}
+// 	}
+
+//   $clasesPath = array(
+//       "vendor/tightenco/collect/src/Illuminate/Support/",
+//       "vendor/tightenco/collect/src/Illuminate/Traits/",
+//       "vendor/tightenco/collect/src/Illuminate/Contracts/Support/",
+//       "vendor/tightenco/collect/src/Illuminate/Support/Traits/",
+//   );
+
+//   foreach ($clasesPath as $clasePath){
+//     // echo $clasePath.$class_name.'.php'.'<br>';
+//     if(file_exists($clasePath.$class_name.'.php')){
+//       // var_dump(file_exists($clasePath.$class_name.'.php'));
+//       include_once($clasePath.$class_name.'.php');
+//     }else{
+//       $class_name_lower = strtolower($class_name);
+
+//       //hacemos un ?ltimo intento pero con FirstCharUpper
+//       if(file_exists($clasePath.$class_name_lower.'.php')){
+//         include_once($clasePath.$class_name_lower.'.php');
+//       }
+//     }
+//   }
+// }
+spl_autoload_register(function($class_name) {
+  $clasesPath = array(
+      "core/",
+      "core/system/",
+      "libraries/",
       'libraries/fpdf/',
-			'libraries/catalogos/',
-			"models/"
-	);
+      'libraries/catalogos/',
+      "models/"
+  );
 
-	foreach ($clasesPath as $clasePath){
-		if(file_exists(APPPATH.$clasePath.$class_name.'.php')){
-			include_once(APPPATH.$clasePath.$class_name.'.php');
-		}else{
-			$class_name_lower = strtolower($class_name);
+  foreach ($clasesPath as $clasePath){
+    if(file_exists(APPPATH.$clasePath.$class_name.'.php')){
+      include_once(APPPATH.$clasePath.$class_name.'.php');
+    }else{
+      $class_name_lower = strtolower($class_name);
 
-			//hacemos un ?ltimo intento pero con FirstCharUpper
-			if(file_exists(APPPATH.$clasePath.$class_name_lower.'.php')){
-				include_once(APPPATH.$clasePath.$class_name_lower.'.php');
-			}
-		}
-	}
+      //hacemos un ?ltimo intento pero con FirstCharUpper
+      if(file_exists(APPPATH.$clasePath.$class_name_lower.'.php')){
+        include_once(APPPATH.$clasePath.$class_name_lower.'.php');
+      }
+    }
+  }
 
   $clasesPath = array(
       "vendor/tightenco/collect/src/Illuminate/Support/",
       "vendor/tightenco/collect/src/Illuminate/Traits/",
       "vendor/tightenco/collect/src/Illuminate/Contracts/Support/",
       "vendor/tightenco/collect/src/Illuminate/Support/Traits/",
+      "vendor/tightenco/collect/src/Illuminate/Support/Traits/"
   );
 
   foreach ($clasesPath as $clasePath){
@@ -182,7 +228,8 @@ function __autoload($class_name) {
       }
     }
   }
-}
+  require 'vendor/autoload.php';
+});
 
 
 /*
