@@ -9,8 +9,7 @@
         "tightenco/collect": "5.4.*",
         "nesbot/carbon": "^1.22",
         "tecnickcom/tcpdf": "^6.2",
-        "setasign/fpdf": "1.8.1",
-        "ramsey/uuid": "4.2.3"
+        "setasign/fpdf": "1.8.1"
     },
     "autoload": {
         "psr-4": {

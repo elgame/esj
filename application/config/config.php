@@ -228,7 +228,7 @@ spl_autoload_register(function($class_name) {
       }
     }
   }
-  require 'vendor/autoload.php';
+  // require 'vendor/autoload.php';
 });
 
 
