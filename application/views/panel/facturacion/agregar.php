@@ -2316,7 +2316,7 @@
 
                         <div class="span4">
                           <div class="control-group">
-                            <label class="control-label" for="cp_mercancias_autotransporte_ident_pesoBrutoVehicular">Placa vehicular del autotransporte <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <label class="control-label" for="cp_mercancias_autotransporte_ident_pesoBrutoVehicular">Peso Bruto Vehicular <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][identificacionVehicular][pesoBrutoVehicular]"
                                 value="<?php echo set_value('cp[mercancias][autotransporte][identificacionVehicular][pesoBrutoVehicular]', isset($cpobj->mercancias->autotransporte->identificacionVehicular->pesoBrutoVehicular) ? $cpobj->mercancias->autotransporte->identificacionVehicular->pesoBrutoVehicular : ''); ?>"
