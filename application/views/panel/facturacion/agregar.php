@@ -2325,7 +2325,7 @@
                           </div>
                         </div>
 
-                        <div class="span4">
+                        <div class="span4" style="clear: both;">
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_autotransporte_ident_placaVM">Placa vehicular del autotransporte <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
