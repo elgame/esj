@@ -14,8 +14,8 @@ class recetas extends MY_Controller {
     'recetas/ajax_get_calendarios/',
     'recetas/imprimir_salida/',
     'recetas/modificar_ajax/',
-    'recetas/show_import_recetas_corona/'
-    'recetas/rptaplicaciones_pdf/'
+    'recetas/show_import_recetas_corona/',
+    'recetas/rptaplicaciones_pdf/',
     'recetas/rptaplicaciones_xls/'
   );
 
