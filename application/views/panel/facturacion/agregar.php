@@ -2273,8 +2273,9 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_ident_configVehicular">Configuración Vehicular <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <?php $configVehicular = isset($cpobj->mercancias->autotransporte->identificacionVehicular->configVehicular) ? $cpobj->mercancias->autotransporte->identificacionVehicular->configVehicular : ''; ?>
-                              <select name="cp[mercancias][autotransporte][identificacionVehicular][configVehicular]" class="span12 sikey" id="cp_mercancias_autotransporte_ident_configVehicular" data-next="cp_mercancias_autotransporte_ident_placaVM">
+                              <select name="cp[mercancias][autotransporte][identificacionVehicular][configVehicular]" class="span12 sikey" id="cp_mercancias_autotransporte_ident_configVehicular" data-next="cp_mercancias_autotransporte_ident_pesoBrutoVehicular">
                                 <option value="" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', '', $configVehicular === '' ? true : false, $configVehicular); ?>></option>
+                                <option value="VL" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'VL', $configVehicular === 'VL' ? true : false, $configVehicular); ?>>VL</option>
                                 <option value="C2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C2', $configVehicular === 'C2' ? true : false, $configVehicular); ?>>C2</option>
                                 <option value="C3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C3', $configVehicular === 'C3' ? true : false, $configVehicular); ?>>C3</option>
                                 <option value="C2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C2R2', $configVehicular === 'C2R2' ? true : false, $configVehicular); ?>>C2R2</option>
@@ -2298,11 +2299,8 @@
                                 <option value="T2S2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T2S2S2', $configVehicular === 'T2S2S2' ? true : false, $configVehicular); ?>>T2S2S2</option>
                                 <option value="T3S2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S2S2', $configVehicular === 'T3S2S2' ? true : false, $configVehicular); ?>>T3S2S2</option>
                                 <option value="T3S3S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S3S2', $configVehicular === 'T3S3S2' ? true : false, $configVehicular); ?>>T3S3S2</option>
-                                <option value="OTROEV" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROEV', $configVehicular === 'OTROEV' ? true : false, $configVehicular); ?>>OTROEV</option>
-                                <option value="OTROEGP" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROEGP', $configVehicular === 'OTROEGP' ? true : false, $configVehicular); ?>>OTROEGP</option>
-                                <option value="OTROSG" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROSG', $configVehicular === 'OTROSG' ? true : false, $configVehicular); ?>>OTROSG</option>
-                                <option value="VL" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'VL', $configVehicular === 'VL' ? true : false, $configVehicular); ?>>VL</option>
                                 <option value="OTROEVGP" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROEVGP', $configVehicular === 'OTROEVGP' ? true : false, $configVehicular); ?>>OTROEVGP</option>
+                                <option value="OTROSG" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROSG', $configVehicular === 'OTROSG' ? true : false, $configVehicular); ?>>OTROSG</option>
                                 <option value="GPLUTA" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLUTA', $configVehicular === 'GPLUTA' ? true : false, $configVehicular); ?>>GPLUTA</option>
                                 <option value="GPLUTB" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLUTB', $configVehicular === 'GPLUTB' ? true : false, $configVehicular); ?>>GPLUTB</option>
                                 <option value="GPLUTC" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLUTC', $configVehicular === 'GPLUTC' ? true : false, $configVehicular); ?>>GPLUTC</option>
@@ -2317,6 +2315,17 @@
                         </div>
 
                         <div class="span4">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_ident_pesoBrutoVehicular">Peso Bruto Vehicular <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][identificacionVehicular][pesoBrutoVehicular]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][identificacionVehicular][pesoBrutoVehicular]', isset($cpobj->mercancias->autotransporte->identificacionVehicular->pesoBrutoVehicular) ? $cpobj->mercancias->autotransporte->identificacionVehicular->pesoBrutoVehicular : ''); ?>"
+                                id="cp_mercancias_autotransporte_ident_pesoBrutoVehicular" class="span12 sikey" data-next="cp_mercancias_autotransporte_ident_anioModeloVM">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span4" style="clear: both;">
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_autotransporte_ident_placaVM">Placa vehicular del autotransporte <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">

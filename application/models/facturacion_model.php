@@ -1,4 +1,5 @@
 <?php
+
 class facturacion_model extends privilegios_model{
 
 	function __construct(){
@@ -669,6 +670,7 @@ class facturacion_model extends privilegios_model{
         count($_POST['cp']['ubicaciones']) > 0 &&
         count($_POST['cp']['mercancias']['mercancias']) > 0 &&
         count($_POST['cp']['figuraTransporte']['tiposFigura']) > 0 ) {
+      $_POST['cp']['idCCP'] = 'CCC'.substr(Myuuid::getv4(), 3);
       $cfdi_ext['cartaPorteSat'] = $_POST['cp'];
     }
 
