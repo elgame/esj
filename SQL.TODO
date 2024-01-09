@@ -5,10 +5,11 @@
  ☐ Cambios en recetas
    -- lap|san
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN a_volumen character varying(50) COLLATE pg_catalog."default";
-   -- lap|san
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_semana integer;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_fecha timestamp without time zone;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_ph numeric(15,4);
+   -- lap
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Aplicaciones',521,true,'recetas/rptaplicaciones/','print',true);
 
  ☐ Apartado de plasticos, produccion, ventas, inventarios, etc
  -- lap

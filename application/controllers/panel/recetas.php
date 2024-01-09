@@ -15,6 +15,8 @@ class recetas extends MY_Controller {
     'recetas/imprimir_salida/',
     'recetas/modificar_ajax/',
     'recetas/show_import_recetas_corona/'
+    'recetas/rptaplicaciones_pdf/'
+    'recetas/rptaplicaciones_xls/'
   );
 
   public function _remap($method){
@@ -831,5 +833,40 @@ class recetas extends MY_Controller {
         'title' => $title,
         'msg' => $txt,
         'ico' => $icono);
+  }
+
+  /*-------------------------------------------
+   --------------- Rpt ----------------
+   -------------------------------------------*/
+
+  public function rptaplicaciones()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de Aplicaciones');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/recetas/rptaplicaciones',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rptaplicaciones_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCProveedorPdf();
+  }
+  public function rptaplicaciones_xls(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCProveedorXls();
   }
 }

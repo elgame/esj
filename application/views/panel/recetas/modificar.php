@@ -124,6 +124,8 @@
                       <option value="Control Malezas" <?php echo set_select('objetivo', 'Control Malezas', ($receta['info']->objetivo==='Control Malezas')); ?>>Control Malezas</option>
                       <option value="Elaboración Producto" <?php echo set_select('objetivo', 'Elaboración Producto', ($receta['info']->objetivo==='Elaboración Producto')); ?>>Elaboración Producto</option>
                       <option value="Limpieza Equipos" <?php echo set_select('objetivo', 'Limpieza Equipos', ($receta['info']->objetivo==='Limpieza Equipos')); ?>>Limpieza Equipos</option>
+                      <option value="Fertilización Sistema de Riego" <?php echo set_select('objetivo', 'Fertilización Sistema de Riego', ($receta['info']->objetivo==='Fertilización Sistema de Riego')); ?>>Fertilización Sistema de Riego</option>
+                      <option value="Enraizador" <?php echo set_select('objetivo', 'Enraizador', ($receta['info']->objetivo==='Enraizador')); ?>>Enraizador</option>
                     </select>
                   </div>
                 </div>
