@@ -292,7 +292,7 @@ class MYpdf extends FPDF {
           else
             $this->SetXY($x,$y+$positionY);
 
-          if (count($this->bg) > 0 && isset($this->bg[$i]) && $this->bg[$i]) {
+          if ($this->bg && count($this->bg) > 0 && isset($this->bg[$i]) && $this->bg[$i]) {
             $this->Rect($x,$y,$w,$h,'F');
           }
 

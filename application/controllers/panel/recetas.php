@@ -843,7 +843,7 @@ class recetas extends MY_Controller {
   {
     $this->carabiner->js(array(
       array('general/msgbox.js'),
-      array('panel/almacen/rpt_compras.js'),
+      array('panel/recetas/rpt_recetas.js'),
     ));
 
     $this->load->library('pagination');
@@ -862,11 +862,11 @@ class recetas extends MY_Controller {
     $this->load->view('panel/footer',$params);
   }
   public function rptaplicaciones_pdf(){
-    $this->load->model('inventario_model');
-    $this->inventario_model->getCProveedorPdf();
+    $this->load->model('recetas_model');
+    $this->recetas_model->getRptAplicacionesPdf();
   }
   public function rptaplicaciones_xls(){
-    $this->load->model('inventario_model');
-    $this->inventario_model->getCProveedorXls();
+    $this->load->model('recetas_model');
+    $this->recetas_model->getRptAplicacionesXls();
   }
 }

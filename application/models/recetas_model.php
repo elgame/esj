@@ -2131,4 +2131,245 @@ class recetas_model extends CI_Model {
     return $response;
   }
 
+  /**
+   * Reporte existencias por unidad
+   *
+   * @return
+   */
+  public function getRptAplicacionesData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    if($this->input->get('fid_producto') != ''){
+      $sql .= " AND cp.id_producto = ".$this->input->get('fid_producto');
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND r.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('a_via'))
+    {
+      $sql .= " AND r.a_via = '{$_GET['a_via']}'";
+    }
+
+    if($this->input->get('areaId'))
+    {
+      $sql .= " AND r.id_area = {$_GET['areaId']}";
+    }
+
+    $sqlRancho = '';
+    if($this->input->get('ranchoId'))
+    {
+      $sqlRancho = " INNER JOIN otros.recetas_rancho rr ON (rr.id_receta = r.id_recetas AND rr.id_rancho = {$_GET['ranchoId']}) ";
+    }
+
+    $sqlCc = '';
+    if($this->input->get('centroCostoId'))
+    {
+      $sqlCc = " INNER JOIN otros.recetas_centro_costo rcc ON (rcc.id_receta = r.id_recetas AND rcc.id_centro_costo = {$_GET['centroCostoId']}) ";
+    }
+
+    $recetas = $this->db->query(
+      "SELECT r.id_recetas, r.semana, r.fecha, r.folio, r.fecha_aplicacion,
+        r.ar_semana, r.ar_fecha, r.ar_ph, r.objetivo, r.a_equipo, r.a_volumen,
+        rp.dosis_mezcla, rp.aplicacion_total, rp.precio, rp.importe,
+        p.nombre AS producto
+      FROM otros.recetas r
+        INNER JOIN otros.recetas_productos rp ON r.id_recetas = rp.id_receta
+        INNER JOIN public.productos p ON p.id_producto = rp.id_producto
+        {$sqlRancho} {$sqlCc}
+      WHERE r.status = 't' {$sql}
+        AND Date(r.fecha_aplicacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+      ORDER BY id_recetas ASC");
+
+    return $recetas->result();;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptAplicacionesPdf(){
+    $res = $this->getRptAplicacionesData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte de Aplicaciones';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= (!empty($_GET['a_via'])? 'Via: '.$_GET['a_via']: '').(!empty($_GET['areaId'])? ' | Cultivo: '.$_GET['area']: '')."\n";
+    $pdf->titulo3 .= (!empty($_GET['centroCostoId'])? 'CC: '.$_GET['centroCosto']: '').(!empty($_GET['ranchoId'])? ' | Rancho: '.$_GET['rancho']: '')."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'L');
+    $widths = array(11, 15, 16, 50, 14, 18, 14, 17, 50);
+    $header = array('# Sem', 'Fecha A.', 'No Receta', 'Producto', 'D. Mezcla', 'Aplic. Total', 'Precio', 'Importe', 'Aplicación Realizada');
+
+    $familia = '';
+    $total_cantidad = $total_importe = $total_impuestos = $total_total = 0;
+    foreach($res as $key => $item){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial', 'B', 7);
+        // $pdf->SetTextColor(255,255,255);
+        // $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false);
+      }
+
+      $pdf->SetFont('Arial', '', 6.5);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row([
+        $item->semana,
+        $item->fecha_aplicacion,
+        $item->folio,
+        $item->producto,
+        MyString::formatoNumero($item->dosis_mezcla, 2, '', false),
+        MyString::formatoNumero($item->aplicacion_total, 2, '', false),
+        MyString::formatoNumero($item->precio, 2, '', false),
+        MyString::formatoNumero($item->importe, 2, '', false),
+        "Objetivo: {$item->objetivo}\n".
+        "Tanque: {$item->a_equipo} | Lts: {$item->a_volumen}".(!empty($item->ar_ph)? " | PH: {$item->ar_ph}": '')."\n".
+        "Semana: {$item->ar_semana} | Fecha: {$item->ar_fecha}",
+      ], false, false);
+    }
+
+    // $datos = array('Total General',
+    //   MyString::formatoNumero($total_cantidad, 2, '', false),
+    //   '',
+    //   MyString::formatoNumero($total_importe, 2, '', false),
+    //   MyString::formatoNumero($total_impuestos, 2, '', false),
+    //   MyString::formatoNumero(($total_total), 2, '', false),
+    //   );
+    // $pdf->SetXY(6, $pdf->GetY());
+    // $pdf->SetAligns($aligns);
+    // $pdf->SetWidths($widths);
+    // $pdf->Row($datos, false);
+
+    $pdf->Output('reporte_aplicaciones.pdf', 'I');
+  }
+
+  public function getCProveedorXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=compras_x_proveedor.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getCProveedorData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Compras por Proveedor';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre (Producto, Servicio)</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Neto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuestos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+      </tr>';
+    $familia = '';
+    $total_cantidad = $total_importe = $total_impuestos = $total_total = 0;
+    foreach($res as $key => $item){
+      $html .= '<tr>
+          <td colspan="6" style="font-weight:bold">'.$item->nombre_fiscal.'</td>
+        </tr>';
+
+      $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+      foreach ($item->productos as $key => $producto)
+      {
+        $html .= '<tr>
+            <td style="width:400px;border:1px solid #000;">'.$producto->nombre.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->abreviatura.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->cantidad.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->importe.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->impuestos.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->total.'</td>
+          </tr>';
+
+        $proveedor_cantidad  += $producto->cantidad;
+        $proveedor_importe   += $producto->importe;
+        $proveedor_impuestos += $producto->impuestos;
+        $proveedor_total     += $producto->total;
+      }
+
+      $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="2">Total Proveedor</td>
+            <td style="border:1px solid #000;">'.$proveedor_cantidad.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_importe.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_impuestos.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_total.'</td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>';
+      $total_cantidad  += $proveedor_cantidad;
+      $total_importe   += $proveedor_importe;
+      $total_impuestos += $proveedor_impuestos;
+      $total_total     += $proveedor_total;
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="2">Total General</td>
+          <td style="border:1px solid #000;">'.$total_cantidad.'</td>
+          <td style="border:1px solid #000;">'.$total_importe.'</td>
+          <td style="border:1px solid #000;">'.$total_impuestos.'</td>
+          <td style="border:1px solid #000;">'.$total_total.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }
