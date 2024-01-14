@@ -2761,6 +2761,19 @@
             <input type="text" id="mcpsat_uuidComercioExt" class="span12" value="">
           </label>
         </div>
+
+        <div class="span4">
+          <label class="control-label" for="mcpsat_tipoMateria">Tipo Materia
+            <select id="mcpsat_tipoMateria" class="span12">
+              <option value=""></option>
+              <option value="01">01 - Materia prima</option>
+              <option value="02">02 - Materia procesada</option>
+              <option value="03">03 - Materia terminada(producto terminado)</option>
+              <option value="04">04 - Materia para la industria manufacturera</option>
+              <option value="05">05 - Otra</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <fieldset>

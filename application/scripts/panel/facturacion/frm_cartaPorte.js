@@ -256,6 +256,7 @@ function eventAddCpProductoModal() {
       fraccionArancelaria: $('#mcpsat_fraccionArancelaria').val(),
       fraccionArancelaria_text: $('#mcpsat_fraccionArancelaria_text').val(),
       uuidComercioExt: $('#mcpsat_uuidComercioExt').val(),
+      tipoMateria: $('#mcpsat_tipoMateria').val(),
     };
     objson.detalleMercancia = {
       unidadPeso: $('#mcpsat_detalleMercancia_unidadPeso').val(),
@@ -291,6 +292,7 @@ function eventAddCpProductoModal() {
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][fraccionArancelaria]" value="${$('#mcpsat_fraccionArancelaria').val()}" class="cpMercans-fraccionArancelaria">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][fraccionArancelaria_text]" value="${$('#mcpsat_fraccionArancelaria_text').val()}" class="cpMercans-fraccionArancelaria_text">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][uuidComercioExt]" value="${$('#mcpsat_uuidComercioExt').val()}" class="cpMercans-uuidComercioExt">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][tipoMateria]" value="${$('#mcpsat_tipoMateria').val()}" class="cpMercans-tipoMateria">
 
           ${pedimentos}
           ${guias}
