@@ -1912,6 +1912,25 @@
 
                     <div class="span6">
                       <div class="control-group">
+                        <label class="control-label" for="cp_regimenAduanero">Régimen Aduanero <i class="icon-question-sign helpover" data-title=""></i></label>
+                        <div class="controls">
+                          <?php $regimenAduanero = isset($cpobj->regimenAduanero) ? $cpobj->regimenAduanero : ''; ?>
+                          <select name="cp[regimenAduanero]" class="span12 sikey" id="cp_regimenAduanero" data-next="cp_totalDistRec">
+                            <option value="" <?php echo set_select('cp[regimenAduanero]', '', $regimenAduanero === '' ? true : false); ?>></option>
+                            <option value="IMD" <?php echo set_select('cp[regimenAduanero]', 'IMD', $regimenAduanero === 'IMD' ? true : false, $regimenAduanero); ?>>IMD - Definitivo de importación.</option>
+                            <option value="EXD" <?php echo set_select('cp[regimenAduanero]', 'EXD', $regimenAduanero === 'EXD' ? true : false, $regimenAduanero); ?>>EXD - Definitivo de exportación.</option>
+                            <option value="ITR" <?php echo set_select('cp[regimenAduanero]', 'ITR', $regimenAduanero === 'ITR' ? true : false, $regimenAduanero); ?>>ITR - Temporales de importación para retomar al extranjero en el mismo estado.</option>
+                            <option value="ITE" <?php echo set_select('cp[regimenAduanero]', 'ITE', $regimenAduanero === 'ITE' ? true : false, $regimenAduanero); ?>>ITE - Temporales de importación para elaboración, transformación o reparación para empresas con programa IMMEX.</option>
+                            <option value="ETR" <?php echo set_select('cp[regimenAduanero]', 'ETR', $regimenAduanero === 'ETR' ? true : false, $regimenAduanero); ?>>ETR - Temporales de exportación para retornar al país en el mismo estado.</option>
+                            <option value="ETE" <?php echo set_select('cp[regimenAduanero]', 'ETE', $regimenAduanero === 'ETE' ? true : false, $regimenAduanero); ?>>ETE - Temporales de exportación para elaboración, transformación o reparación.</option>
+                            <option value="DFI" <?php echo set_select('cp[regimenAduanero]', 'DFI', $regimenAduanero === 'DFI' ? true : false, $regimenAduanero); ?>>DFI - Depósito Fiscal.</option>
+                            <option value="RFE" <?php echo set_select('cp[regimenAduanero]', 'RFE', $regimenAduanero === 'RFE' ? true : false, $regimenAduanero); ?>>RFE - Elaboración, transformación o reparación en recinto fiscalizado.</option>
+                            <option value="RFS" <?php echo set_select('cp[regimenAduanero]', 'RFS', $regimenAduanero === 'RFS' ? true : false, $regimenAduanero); ?>>RFS - Recinto fiscalizado estratégico.</option>
+                            <option value="TRA" <?php echo set_select('cp[regimenAduanero]', 'TRA', $regimenAduanero === 'TRA' ? true : false, $regimenAduanero); ?>>TRA - Tránsitos.</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="control-group">
                         <label class="control-label" for="cp_viaEntradaSalida">Via de Entrada / Salida <i class="icon-question-sign helpover" data-title=""></i></label>
                         <div class="controls">
                           <?php $viaEntradaSalida = isset($cpobj->viaEntradaSalida) ? $cpobj->viaEntradaSalida : ''; ?>
