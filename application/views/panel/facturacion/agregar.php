@@ -2153,6 +2153,7 @@
                                 <input type="hidden" name="cp[mercancias][mercancias][<?php echo $count ?>][fraccionArancelaria]" value="<?php echo set_value('cp[mercancias][mercancias]['.$count.'][fraccionArancelaria]', isset($merca->fraccionArancelaria) ? $merca->fraccionArancelaria : ''); ?>" class="cpMercans-fraccionArancelaria">
                                 <input type="hidden" name="cp[mercancias][mercancias][<?php echo $count ?>][fraccionArancelaria_text]" value="<?php echo set_value('cp[mercancias][mercancias]['.$count.'][fraccionArancelaria_text]', isset($merca->fraccionArancelaria_text) ? $merca->fraccionArancelaria_text : ''); ?>" class="cpMercans-fraccionArancelaria_text">
                                 <input type="hidden" name="cp[mercancias][mercancias][<?php echo $count ?>][uuidComercioExt]" value="<?php echo set_value('cp[mercancias][mercancias]['.$count.'][uuidComercioExt]', isset($merca->uuidComercioExt) ? $merca->uuidComercioExt : ''); ?>" class="cpMercans-uuidComercioExt">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $count ?>][tipoMateria]" value="<?php echo set_value('cp[mercancias][mercancias]['.$count.'][tipoMateria]', isset($merca->tipoMateria) ? $merca->tipoMateria : ''); ?>" class="cpMercans-tipoMateria">
 
                                 <?php if (isset($merca->pedimentos)): ?>
                                   <?php foreach ($merca->pedimentos as $key2 => $pedimento): ?>
