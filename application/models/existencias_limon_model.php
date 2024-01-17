@@ -2574,6 +2574,7 @@ class existencias_limon_model extends CI_Model {
           'calibre'  => $produccion->calibre,
           'clasificacion' => $produccion->clasificacion,
           'order'  => $calibre->order,
+          'grupo'  => $calibre->grupo,
         ];
       } else {
         $produccionPercent[$produccion->id_calibre]['cantidad'] += $produccion->cantidad;
@@ -3136,7 +3137,8 @@ class existencias_limon_model extends CI_Model {
     $pdf->page = count($pdf->pages);
     $pdf->SetXY(6, $pdf->GetY()+5);
 
-
+    $pagaux = $pdf->page;
+    $yaux = $pdf->GetY();
     $keyValuesProduc = array_column($produccionPercent, 'order');
     $kilosTotaless = $produccion_kilos; //  + $industrial_kilos
     array_multisort($keyValuesProduc, SORT_DESC, $produccionPercent);
@@ -3146,6 +3148,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R', 'R', 'R'));
     $pdf->SetWidths(array(20, 25, 30, 15));
     $pdf->SetXY(6, $pdf->GetY());
+    $totalesRendimientos = [];
     $pdf->Row(array('Calibre', 'Bultos', 'Kilos', '%'), true, true);
     foreach ($produccionPercent as $key => $value) {
       $pdf->chkSaltaPag([6, 10]);
@@ -3156,6 +3159,31 @@ class existencias_limon_model extends CI_Model {
         MyString::formatoNumero($value['cantidad'], 2, '', false),
         MyString::formatoNumero($value['kilos'], 2, '', false),
         MyString::formatoNumero(($value['kilos']*100/($kilosTotaless>0? $kilosTotaless: 1)), 2, '', false),
+      ), true, 'B');
+
+      if (isset($totalesRendimientos[$value['grupo']])) {
+        $totalesRendimientos[$value['grupo']] += $value['kilos'];
+      } else {
+        $totalesRendimientos[$value['grupo']] = $value['kilos'];
+      }
+    }
+
+    $pdf->page = $pagaux;
+    $pdf->SetXY(100, $yaux);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(35));
+    $pdf->Row(array('Rendimiento Totales'), true, true);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(20, 15));
+    $pdf->SetXY(100, $pdf->GetY());
+    $pdf->Row(array('Calibre', '%'), true, true);
+    foreach ($totalesRendimientos as $key => $value) {
+      $pdf->chkSaltaPag([100, 10]);
+      $pdf->SetFont('Arial', 'B', 9);
+      $pdf->SetXY(100, $pdf->GetY());
+      $pdf->Row(array(
+        $key,
+        MyString::formatoNumero(($value*100/($kilosTotaless>0? $kilosTotaless: 1)), 2, '', false),
       ), true, 'B');
     }
 

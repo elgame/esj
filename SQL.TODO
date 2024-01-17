@@ -1,7 +1,26 @@
 
- ☐ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones
+ ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
+ ☐ recetas seleccionar multi centros se agregan
  ✔ En reporte de existencia de limon poner los gastos de certificados @done (24-01-04 17:29)
- ☐ Cambio en existencia de limon revisar el archivo que mando la señora
+ ✔ Cambio en existencia de limon revisar el archivo que mando la señora @done (24-01-16 17:05)
+     -- san|lap
+    ALTER TABLE IF EXISTS public.calibres ADD COLUMN grupo character varying(15) COLLATE pg_catalog."default";
+    UPDATE public.calibres SET grupo='ind' WHERE id_calibre = 133;
+    UPDATE public.calibres SET grupo='am2' WHERE id_calibre = 132;
+    UPDATE public.calibres SET grupo='ev2' WHERE id_calibre = 113;
+    UPDATE public.calibres SET grupo='amc' WHERE id_calibre = 128;
+    UPDATE public.calibres SET grupo='amv' WHERE id_calibre = 127;
+    UPDATE public.calibres SET grupo='eal' WHERE id_calibre = 125;
+    UPDATE public.calibres SET grupo='Ev' WHERE id_calibre = 112;
+    UPDATE public.calibres SET grupo='ext' WHERE id_calibre = 118;
+    UPDATE public.calibres SET grupo='alc' WHERE id_calibre = 123;
+    UPDATE public.calibres SET grupo='alv' WHERE id_calibre = 122;
+    UPDATE public.calibres SET grupo='600' WHERE id_calibre = 110;
+    UPDATE public.calibres SET grupo='600' WHERE id_calibre = 109;
+    UPDATE public.calibres SET grupo='500' WHERE id_calibre = 108;
+    UPDATE public.calibres SET grupo='500' WHERE id_calibre = 107;
+    UPDATE public.calibres SET grupo='300' WHERE id_calibre = 106;
+    UPDATE public.calibres SET grupo='300' WHERE id_calibre = 105;
  ☐ Cambios en recetas
    -- lap|san
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN a_volumen character varying(50) COLLATE pg_catalog."default";

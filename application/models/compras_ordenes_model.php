@@ -975,8 +975,21 @@ class compras_ordenes_model extends CI_Model {
             array_pop($facturasss);
             foreach ($facturasss as $key => $value)
             {
+              $kgms = 0;
+              $kgms_importe = 0;
               $facturaa = explode(':', $value);
-              $data['info'][0]->facturasligadas[] = $this->facturacion_model->getInfoFactura($facturaa[1])['info'];
+              $infFactura = $this->facturacion_model->getInfoFactura($facturaa[1]);
+              if (!empty($infFactura['productos'])) {
+                foreach ($infFactura['productos'] as $keyp => $prod) {
+                  if (!GastosProductos::searchGastosProductos($prod->id_clasificacion)) {
+                    $kgms += $prod->kilos;
+                    $kgms_importe += $prod->importe;
+                  }
+                }
+              }
+              $infFactura['info']->kilos_fruta = $kgms;
+              $infFactura['info']->kilos_fruta_imp = $kgms_importe;
+              $data['info'][0]->facturasligadas[] = $infFactura['info'];
             }
           }
         } else { // boletas
@@ -2352,7 +2365,8 @@ class compras_ordenes_model extends CI_Model {
           if ($orden['info'][0]->flete_de == 'v') {
             foreach ($orden['info'][0]->facturasligadas as $key => $value)
             {
-              $facturassss .= ' / '.$value->serie.$value->folio.' '.$value->fechaT;
+              $facturassss .= ' / '.$value->serie.$value->folio.' '.$value->fechaT.
+                " (Kgs: ".MyString::formatoNumero($value->kilos_fruta, 2, '', false).", Importe: ".MyString::formatoNumero($value->kilos_fruta_imp, 2, '', false).") \n";
               $clientessss .= ', '.$value->cliente->nombre_fiscal;
 
               if($info_bascula === false)
