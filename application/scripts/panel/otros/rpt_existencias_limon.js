@@ -11,6 +11,7 @@
     existenciaReProceso();
     compraFruta();
     devolucionFruta();
+    devolucionFrutaIndus();
     manoObraInsumos();
     descuentoVentas();
     comisionTerceros();
@@ -414,6 +415,91 @@
     $('#devFrutaCantidad').text(cantidadt);
     $('#devFrutaKilos').text(kilost);
     $('#devFrutaImporte').text(importet);
+  };
+
+  const devolucionFrutaIndus = () => {
+    $('#table-devolucion-fruta-indus').on('focus', 'input.devFrutaInds_calibre:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+
+          $tr.find('.devFrutaInds_id_calibre').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('.devFrutaInds_id_calibre').val('');
+        }
+      });
+    });
+
+    $('#btnAddDevFrutaIndus').click(function(event) {
+      const unidades = JSON.parse($('#unidades').val());
+      htmlUnidad = '';
+      $.each(unidades, function(index, val) {
+         htmlUnidad += '<option value="' + val.id_unidad + '" data-cantidad="' + val.cantidad + '">' + val.nombre + '</option>';
+      });
+
+      html =
+        '<tr>'+
+          '<td>'+
+            '<input type="text" name="devFrutaInds_calibre[]" value="" class="span12 devFrutaInds_calibre" required>'+
+            '<input type="hidden" name="devFrutaInds_id_calibre[]" value="" class="span12 devFrutaInds_id_calibre" required>'+
+          '</td>'+
+          '<td>'+
+            '<select name="devFrutaInds_id_unidad[]" class="span12 devFrutaInds_id_unidad" required>'+
+            htmlUnidad+
+            '</select>'+
+          '</td>'+
+          '<td><input type="text" name="devFrutaInds_cantidad[]" value="" class="span12 vpositive devFrutaInds_cantidad" required></td>'+
+          '<td><input type="text" name="devFrutaInds_kilos[]" value="" class="span12 vpositive devFrutaInds_kilos" readonly></td>'+
+          '<td><input type="text" name="devFrutaInds_costo[]" value="" class="span12 vpositive devFrutaInds_costo" required></td>'+
+          '<td><input type="text" name="devFrutaInds_importe[]" value="" class="span12 vpositive devFrutaInds_importe" readonly></td>'+
+          '<td style="width: 30px;">'+
+            '<button type="button" class="btn btn-danger devFrutaInds_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+          '</td>'+
+        '</tr>';
+      $(html).insertBefore($('#table-devolucion-fruta-indus tbody tr.footer'));
+      $("#table-devolucion-fruta-indus tbody .vpositive").numeric({ negative: false }); //Numero positivo
+    });
+
+    $('#table-devolucion-fruta-indus').on('click', '.devFrutaInds_del', function(event) {
+      var $tr = $(this).parents('tr');
+      $tr.remove();
+
+      calculaTotalDevolucionFrutaIndus();
+    });
+
+    $('#table-devolucion-fruta-indus').on('keyup', '.devFrutaInds_cantidad, .devFrutaInds_costo', function(event) {
+      let $tr = $(this).parents('tr');
+      let cantidad = parseFloat($tr.find('.devFrutaInds_cantidad').val())||0;
+      let costo = parseFloat($tr.find('.devFrutaInds_costo').val())||0;
+      let unidad = parseFloat($tr.find('.devFrutaInds_id_unidad option:selected').attr('data-cantidad'))||0;
+
+      $tr.find('.devFrutaInds_kilos').val(cantidad*unidad);
+      $tr.find('.devFrutaInds_importe').val(cantidad*costo);
+
+      calculaTotalDevolucionFrutaIndus();
+    });
+  };
+  const calculaTotalDevolucionFrutaIndus = () => {
+    cantidadt = kilost = importet = 0;
+    $("#table-devolucion-fruta-indus tbody tr:not(.footer)").each(function(index, el) {
+      cantidadt += parseFloat($(el).find('.devFrutaInds_cantidad').val())||0;
+      kilost += parseFloat($(el).find('.devFrutaInds_kilos').val())||0;
+      importet += parseFloat($(el).find('.devFrutaInds_importe').val())||0;
+    });
+    $('#devFrutaIndsCantidad').text(cantidadt);
+    $('#devFrutaIndsKilos').text(kilost);
+    $('#devFrutaIndsImporte').text(importet);
   };
 
   const manoObraInsumos = () => {

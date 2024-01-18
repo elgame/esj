@@ -267,11 +267,13 @@ class centros_costos_model extends CI_Model {
     //     $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
     // }
 
-    // if ($this->input->get('id_area') !== false)
-    //   $sql .= " AND cc.id_area = {$this->input->get('id_area')}";
+    if ($this->input->get('areaId') !== false)
+      $sql .= " AND cc.id_area = {$this->input->get('areaId')}";
 
-    // if (!is_null($sqlX))
-    //   $sql .= $sqlX;
+    if ($this->input->get('ranchosId') !== false){
+      $ranchh = implode(',', $_GET['ranchosId']);
+      $sql .= " AND cc.id_rancho IN({$ranchh})";
+    }
 
     $res = $this->db->query(
         "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area,

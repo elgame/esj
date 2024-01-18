@@ -10,11 +10,16 @@
   var clickRangoCentrosCosto = function () {
     $('#btnRangoCentrosCosto').on('click', function(event) {
       if (validaFormatoRango()) {
+        let ranchosId = $( ".ranchoId" ).serializeArray().map(function(itm){
+          return itm.value;
+        });
         $.ajax({
           url: base_url + 'panel/centro_costo/ajax_get_centros_costos/',
           dataType: "json",
           data: {
-            centrosCosto: $('#rangoCentrosCosto').val()
+            centrosCosto: $('#rangoCentrosCosto').val(),
+            areaId: $('#areaId').val(),
+            ranchosId: ranchosId
           },
           success: function(data) {
             if (data.length > 0) {

@@ -1,6 +1,16 @@
 
+ ☐ Reporte de existencia de limon
+   Existencia reproceso agregarlo en PRODUCCION y va restar
+   Existencia de piso y existencia de piso anterior
+   Dev limon al industrial se captura
+   Costos de produccion cambia a Mano de obra, se agrupan las cajas pro unidad y se pone restando la existencia reproceso
+   Comision a terceros, que se capture desde remisiones, poner folio de remision
+   GASTOS GENERALES se cambio a Otros gastos , capturar eso tambien en remisiones
+   -- lap
+    ALTER TABLE IF EXISTS otros.existencias_limon_devolucion_fruta ADD COLUMN tipo character varying(5) COLLATE pg_catalog."default" DEFAULT 'frut'::character varying;
+    COMMENT ON COLUMN otros.existencias_limon_devolucion_fruta.tipo IS 'frut: dev fruta, inds: dev industrial';
  ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
- ☐ recetas seleccionar multi centros se agregan
+ ✔ recetas seleccionar multi centros se agregan @done (24-01-17 10:49)
  ✔ En reporte de existencia de limon poner los gastos de certificados @done (24-01-04 17:29)
  ✔ Cambio en existencia de limon revisar el archivo que mando la señora @done (24-01-16 17:05)
      -- san|lap
@@ -27,7 +37,6 @@
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_semana integer;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_fecha timestamp without time zone;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_ph numeric(15,4);
-   -- lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Aplicaciones',521,true,'recetas/rptaplicaciones/','print',true);
 
  ☐ Apartado de plasticos, produccion, ventas, inventarios, etc

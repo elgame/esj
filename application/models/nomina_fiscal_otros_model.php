@@ -1644,7 +1644,9 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
                   if (trim($datos['Tiempo Trabajado']) != '') {
                     $hhrr = explode(':', $datos['Tiempo Trabajado']);
                     $hrs = floatval($hhrr[0]);
-                    $hrs += floatval($hhrr[1])/60;
+                    if (isset($hhrr[1])) {
+                      $hrs += floatval($hhrr[1])/60;
+                    }
                   }
                   $hrs = round($hrs, 2);
 
