@@ -502,7 +502,7 @@ class facturacion_model extends privilegios_model{
       $inputce = $this->input->post('comercioExterior');
 
       $extras = [
-        'version'                   => '1.1',
+        'version'                   => '2.0',
         'motivoTraslado'            => isset($inputce['motivoTraslado'])? $inputce['motivoTraslado'] : '',
         'tipoOperacion'             => isset($inputce['tipoOperacion'])? $inputce['tipoOperacion'] : '',
         'clavePedimento'            => isset($inputce['clavePedimento'])? $inputce['clavePedimento'] : '',
