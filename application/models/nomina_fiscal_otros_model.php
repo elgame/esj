@@ -1656,12 +1656,16 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model {
                   }
 
                   if (!empty(trim($datos['Tiempo Extra Autorizado']))) {
-                    $hhrr = explode(':', $datos['Tiempo Extra Autorizado']);
-                    $datos['Tiempo Extra Autorizado'] = floatval($hhrr[0]);
-                    if (count($hhrr) > 1) {
-                      $datos['Tiempo Extra Autorizado'] += floatval($hhrr[1])/60;
+                    if (strpos($datos['Tiempo Extra Autorizado'], ':') !== false) {
+                      $hhrr = explode(':', $datos['Tiempo Extra Autorizado']);
+                      $datos['Tiempo Extra Autorizado'] = floatval($hhrr[0]);
+                      if (count($hhrr) > 1) {
+                        $datos['Tiempo Extra Autorizado'] += floatval($hhrr[1])/60;
+                      }
+                      $datos['Tiempo Extra Autorizado'] = round($datos['Tiempo Extra Autorizado'], 2);
+                    } else {
+                      $datos['Tiempo Extra Autorizado'] = round(floatval($datos['Tiempo Extra Autorizado']), 2);
                     }
-                    $datos['Tiempo Extra Autorizado'] = round($datos['Tiempo Extra Autorizado'], 2);
                   }
 
                   $this->db->insert('nomina_asistencia_hrs', [
