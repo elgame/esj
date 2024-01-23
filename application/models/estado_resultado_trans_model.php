@@ -598,8 +598,10 @@ class estado_resultado_trans_model extends privilegios_model{
    */
   public function getFolio($empresa, $activo)
   {
+    $anio = date("Y");
     $res = $this->db->select('folio')->
                       from('otros.estado_resultado_trans')->
+                      where("EXTRACT(YEAR FROM fecha) = {$anio}")->
                       where("id_empresa = {$empresa}")->
                       where("id_activo = '{$activo}'")->
                       order_by('folio', 'DESC')->
