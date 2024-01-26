@@ -443,9 +443,12 @@ class compras extends MY_Controller {
   {
     $serie = mb_strtoupper($this->input->post('serie'), 'utf-8');
     $compra = $this->compras_model->getInfoCompra($_GET['id'])['info'];
-    $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND folio = {$folio} AND UPPER(serie) = '{$serie}'
+    $sqlupdate = (!empty($_GET['id'])? " AND id_compra <> ".$_GET['id']: '');
+
+    $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras
+      WHERE status <> 'ca' AND folio = {$folio} AND UPPER(serie) = '{$serie}'
       AND id_empresa = {$compra->id_empresa} AND id_proveedor = {$compra->id_proveedor}
-      AND id_nc IS NOT NULL "
+      AND id_nc IS NOT NULL {$sqlupdate}"
     )->row();
     if ($query->num > 0)
     {
