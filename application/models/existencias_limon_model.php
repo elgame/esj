@@ -145,7 +145,7 @@ class existencias_limon_model extends CI_Model {
         AND c.id_area = {$id_area} AND Date(f.fecha) = '{$fecha}'
         AND Date(f.fecha) >= '{$fechaa_inicioo}'
       GROUP BY ca.id_calibre, cl.id_cliente, f.id_factura, u.id_unidad, fo.id_factura
-      ORDER BY folio ASC"
+      ORDER BY id_factura ASC, folio ASC"
     );
 
     $ids_ventas = [];
@@ -2495,6 +2495,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetWidths(array(20, 18, 35, 25, 16, 18, 18, 12, 20, 22));
 
     $venta_importe = $venta_kilos = $venta_cantidad = 0;
+    $auxvent = 0;
     foreach ($caja['ventas'] as $venta) {
       if($pdf->GetY() >= $pdf->limiteY){
         if (count($pdf->pages) > $pdf->page) {
@@ -2510,9 +2511,9 @@ class existencias_limon_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
-        $venta->serie.$venta->folio,
-        $venta->no_salida_fruta,
-        $venta->nombre_fiscal,
+        ($vent->id_factura != $auxvent ? $venta->serie.$venta->folio : ''),
+        ($vent->id_factura != $auxvent ? $venta->no_salida_fruta : ''),
+        ($vent->id_factura != $auxvent ? $venta->nombre_fiscal : ''),
         $venta->calibre,
         // $venta->clasificacion,
         $venta->unidad,
@@ -2521,6 +2522,8 @@ class existencias_limon_model extends CI_Model {
         MyString::formatoNumero($venta->precio, 2, '', false),
         MyString::formatoNumero($venta->importe, 2, '', false),
       ), false, 'B');
+
+      $auxvent = $vent->id_factura;
     }
 
     $pdf->SetFont('Arial','B', 7);
@@ -2720,7 +2723,7 @@ class existencias_limon_model extends CI_Model {
           'kilos'    => $existencia->kilos * -1,
           'unidad'   => $existencia->unidad,
           'costo'    => $existencia->costo,
-          'importe'  => $calibre->importe * -1,
+          'importe'  => $existencia->importe * -1,
         ];
       } else {
         $grupByUnidad[$existencia->unidad]['cantidad'] += $existencia->cantidad * -1;
