@@ -614,6 +614,32 @@ class ventas_model extends privilegios_model{
     // // Registra la salida de productos si tiene pallets
     // $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
 
+    // Agregar datos a la caja de existencia de limon
+    $this->load->model('existencias_limon_model');
+    $exisLimonData = [
+      'id_remision_rm' => $id_venta,
+      'fecha_caja_chica' => substr($datosFactura['fecha'], 0, 10),
+      'fno_caja' => 1,
+      'farea' => 2,
+
+      "comisionTerceros_nombre"      => $_POST['comisionTerceros_nombre'],
+      "comisionTerceros_id"          => $_POST['comisionTerceros_id'],
+      "comisionTerceros_delete"      => $_POST['comisionTerceros_delete'],
+      "comisionTerceros_descripcion" => $_POST['comisionTerceros_descripcion'],
+      "comisionTerceros_cantidad"    => $_POST['comisionTerceros_cantidad'],
+      "comisionTerceros_costo"       => $_POST['comisionTerceros_costo'],
+      "comisionTerceros_importe"     => $_POST['comisionTerceros_importe'],
+
+      "gasto_id_gasto" => $_POST['gasto_id_gasto'],
+      "gasto_del"      => $_POST['gasto_del'],
+      "codigoAreaId"   => $_POST['codigoAreaId'],
+      "codigoCampo"    => $_POST['codigoCampo'],
+      "gasto_nombre"   => $_POST['gasto_nombre'],
+      "gasto_concepto" => $_POST['gasto_concepto'],
+      "gasto_importe"  => $_POST['gasto_importe'],
+    ];
+    $res_mdl = $this->existencias_limon_model->guardar($exisLimonData);
+
 		return array('passes' => true, 'id_venta' => $id_venta);
 	}
 

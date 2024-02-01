@@ -108,6 +108,7 @@ class ventas extends MY_Controller {
   public function agregar()
   {
     $this->carabiner->js(array(
+      array('bootstrap/bootstrap-tab.js'),
       array('libs/jquery.numeric.js'),
       array('libs/jquery.filtertable.min.js'),
       array('general/keyjump.js'),
@@ -115,6 +116,7 @@ class ventas extends MY_Controller {
       array('panel/facturacion/gastos_productos.js'),
       array('panel/ventas_remision/frm_addmod.js'),
       array('panel/facturacion/frm_otros.js'),
+      array('panel/ventas_remision/frm_exis_limon.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
@@ -211,6 +213,12 @@ class ventas extends MY_Controller {
         $params['borrador']['info']->total         = '';
         $params['seo']['titulo'] = 'Agregar Nota de credito';
       }
+
+      $this->load->model('existencias_limon_model');
+      $params['cajaExtLimon'] = $this->existencias_limon_model->get(
+        substr($params['borrador']['info']->fecha, 0, 10), 1, 2,
+        ['rremisionId' => $params['borrador']['info']->id_factura]
+      );
     } elseif (isset($_GET['id_vd']))
     {
       // Si es una venta del dia la que se quiere facturar carga sus datos.

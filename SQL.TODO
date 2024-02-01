@@ -6,9 +6,16 @@
    Costos de produccion cambia a Mano de obra, se agrupan las cajas pro unidad y se pone restando la existencia reproceso
    Comision a terceros, que se capture desde remisiones, poner folio de remision
    GASTOS GENERALES se cambio a Otros gastos , capturar eso tambien en remisiones
+   ☐ en los conceptos que paso ceci el de Expedición de certificado poner cuadro como certificado fitosanitario igual
+     1601 - COMISIONES A TERCEROS
+     1602 - DESCUENTO POR DISTRIBUCION
+     1603 - EXPEDICION DE CERTIFICADO FITOSANITARIO <--
+     1610 - MANIOBRA EN DESTINO
    -- lap
     ALTER TABLE IF EXISTS otros.existencias_limon_devolucion_fruta ADD COLUMN tipo character varying(5) COLLATE pg_catalog."default" DEFAULT 'frut'::character varying;
     COMMENT ON COLUMN otros.existencias_limon_devolucion_fruta.tipo IS 'frut: dev fruta, inds: dev industrial';
+    ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_remision bigint;
+    ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_remision bigint;
  ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
  ✔ recetas seleccionar multi centros se agregan @done (24-01-17 10:49)
  ✔ En reporte de existencia de limon poner los gastos de certificados @done (24-01-04 17:29)
