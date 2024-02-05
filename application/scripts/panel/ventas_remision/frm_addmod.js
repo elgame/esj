@@ -3,6 +3,7 @@ $(function(){
   $('#form').keyJump();
   $('#modal-seguro').keyJump();
   $('#modal-certificado51').keyJump();
+  $('#modal-certificado1603').keyJump();
   $('#modal-certificado52').keyJump();
   $('#modal-supcarga').keyJump();
 
@@ -365,7 +366,7 @@ $(function(){
 
   EventOnChangeMoneda();
 
-  $('#modal-seguro, #modal-certificado51, #modal-certificado52').modal({
+  $('#modal-seguro, #modal-certificado51, #modal-certificado52, #modal-certificado1603').modal({
     backdrop: 'static',
     keyboard: false,
     show: false
@@ -375,6 +376,7 @@ $(function(){
   enabledCloseModal('#modal-seguro');
   enabledCloseModal('#modal-certificado51');
   enabledCloseModal('#modal-certificado52');
+  enabledCloseModal('#modal-certificado1603');
   enabledCloseModal('#modal-supcarga');
 
   $('#table_prod').on('click', '.is-cert-check', function(event) {
@@ -1268,7 +1270,7 @@ var loadModalSegCert = function (idClasificacion) {
 
   // Si la clasificacion es el certificado de origin o fitosanitario.
   // muestra el modal para agregar sus datos.
-  if (idClasificacion === '51' || idClasificacion === '52') {
+  if (idClasificacion === '51' || idClasificacion === '52' || idClasificacion === '1603') {
     $('#modal-certificado'+idClasificacion).modal('show');
     $("#pproveedor_certificado"+idClasificacion).focus();
   }
@@ -1283,6 +1285,9 @@ var autocompleteProveedores = function () {
     $(this).one('focus', setAutocompleteProveedores);
   })
   $('#form input.pproveedor_certificado52').each(function () {
+    $(this).one('focus', setAutocompleteProveedores);
+  })
+  $('#form input.pproveedor_certificado1603').each(function () {
     $(this).one('focus', setAutocompleteProveedores);
   })
   $('#form input.pproveedor_supcarga').each(function () {
@@ -1372,7 +1377,10 @@ var validaProductosEspecials = function() {
       //Seguro
       noty({"text": 'Seguro incompleto, no se ha capturado los datos de proveedor, seleccione nuevamente el concepto.', "layout":"topRight", "type": 'error'});
       result = false;
-    }else if (($(this).val() === '51' && $('#cert_id_proveedor51').val() == "") || ($(this).val() === '52' && $('#cert_id_proveedor52').val() == "")) {
+    }else if (($(this).val() === '51' && $('#cert_id_proveedor51').val() == "") ||
+      ($(this).val() === '52' && $('#cert_id_proveedor52').val() == "") ||
+      ($(this).val() === '1603' && $('#cert_id_proveedor1603').val() == "")
+    ) {
       //certificados
       noty({"text": 'Certificado incompleto, no se ha capturado los datos de proveedor, seleccione nuevamente el concepto.', "layout":"topRight", "type": 'error'});
       result = false;
@@ -1403,6 +1411,7 @@ var getMsgDatos = function(id){
     'd49': 'El Seguro no esta agregado en los productos.',
     'd50': 'El Flete no esta agregado en los productos.',
     'd51': 'El Certificado fitosanitario no esta agregado en los productos.',
+    'd1603': 'La Expedicion del Certificado fitosanitario no esta agregado en los productos.',
     'd52': 'El Certificado de origen no esta agregado en los productos.',
     'd53': 'El Supervisor de carga no esta agregado en los productos.',
   };

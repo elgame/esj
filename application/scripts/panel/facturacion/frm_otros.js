@@ -198,6 +198,28 @@ function extrasProductosEspeciales() {
     });
   });
 
+  $("#btn_certificado1603_add").click(function(event) {
+    var $this = $(this),
+      $modal = $this.parents("#modal-certificado1603"),
+      grup = $modal.find('.modal-body .grup_datos:first').clone();
+
+    var prov = grup.find('label[for="pproveedor_certificado1603"]');
+    prov.append('<i class="icon-remove"></i> ');
+    grup.find('#pproveedor_certificado1603').val('').css("background-color", "inherit").one('focus', setAutocompleteProveedores);
+    grup.find('#cert_id_proveedor1603').val('');
+    grup.find('#cert_certificado1603').val('');
+    grup.find('#cert_bultos1603').val('');
+    grup.find('#cert_num_operacion1603').val('');
+    grup.find('#cert_no_certificado1603').val('').on('click', openNoCertModal);
+    grup.find('#cert_id_orden1603').val('');
+
+    $modal.find('.modal-body').append(grup);
+
+    prov.find('i.icon-remove').click(function(event) {
+      grup.remove();
+    });
+  });
+
   $("#btn_certificado52_add").click(function(event) {
     var $this = $(this),
       $modal = $this.parents("#modal-certificado52"),
@@ -221,6 +243,9 @@ function extrasProductosEspeciales() {
   });
 
   $('#form .modal input.cert_no_certificado51').each(function () {
+    $(this).on('click', openNoCertModal);
+  });
+  $('#form .modal input.cert_no_certificado1603').each(function () {
     $(this).on('click', openNoCertModal);
   });
   $('#form .modal input.cert_no_certificado52').each(function () {
@@ -257,10 +282,13 @@ function extrasProductosEspeciales() {
   function selectNoCert() {
     $tr = $(this).parents('tr.row_certs');
     if($("#modal-certificado51 .cert_no_certificado51[value="+$tr.data('nocertificado')+"]").length == 0 &&
-      $("#modal-certificado52 .cert_no_certificado52[value="+$tr.data('nocertificado')+"]").length == 0) {
+      $("#modal-certificado52 .cert_no_certificado52[value="+$tr.data('nocertificado')+"]").length == 0 &&
+      $("#modal-certificado1603 .cert_no_certificado1603[value="+$tr.data('nocertificado')+"]").length == 0) {
       $cerSelInt.find('#cert_no_certificado51').val($tr.data('nocertificado'));
+      $cerSelInt.find('#cert_no_certificado1603').val($tr.data('nocertificado'));
       $cerSelInt.find('#cert_no_certificado52').val($tr.data('nocertificado'));
       $cerSelInt.find('#cert_id_orden51').val($tr.data('idorden'));
+      $cerSelInt.find('#cert_id_orden1603').val($tr.data('idorden'));
       $cerSelInt.find('#cert_id_orden52').val($tr.data('idorden'));
       $('#modal-no-certificados').modal('hide');
     } else {

@@ -6,6 +6,8 @@ class estado_resultado_trans extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'estado_resultado_trans/ajustaFolios/',
+
     'estado_resultado_trans/ajax_get_remisiones/',
     'estado_resultado_trans/ajax_get_repmant/',
     'estado_resultado_trans/ajax_get_proveedores/',
@@ -35,6 +37,22 @@ class estado_resultado_trans extends MY_Controller {
         redirect(base_url('panel/home?msg=1'));
     }else
       redirect(base_url('panel/home'));
+  }
+
+  public function ajustaFolios()
+  {
+    $rows = $this->db->query("SELECT id, id_activo, id_empresa, folio from otros.estado_resultado_trans
+      where EXTRACT(YEAR FROM fecha) = 2024
+      order by id_activo ASC, id_empresa ASC, folio ASC")->result();
+    $aux = '';
+    foreach ($rows as $key => $itm) {
+      if ($aux != "{$itm->id_activo}{$itm->id_empresa}") {
+        $folio = 1;
+        $aux = "{$itm->id_activo}{$itm->id_empresa}";
+      }
+      $this->db->update('otros.estado_resultado_trans', ['folio' => $folio], "id = {$itm->id}");
+      $folio++;
+    }
   }
 
   public function index()
