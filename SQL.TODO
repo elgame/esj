@@ -45,6 +45,7 @@
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_semana integer;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_fecha timestamp without time zone;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_ph numeric(15,4);
+   -- lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Aplicaciones',521,true,'recetas/rptaplicaciones/','print',true);
 
  ☐ Apartado de plasticos, produccion, ventas, inventarios, etc
@@ -188,7 +189,6 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',612,true,'pg_produccion/moldesAgregar/','plus',false);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',612,false,'pg_produccion/moldesModificar/','edit',false);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',612,false,'pg_produccion/moldesEliminar/','remove',false);
- -- pcc
    ALTER TABLE IF EXISTS otros.pg_produccion ADD COLUMN tiempo_ciclo double precision DEFAULT 0;
 
  ☐ Agregar descripsion en permisos
