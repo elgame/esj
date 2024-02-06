@@ -83,20 +83,14 @@ class pg_produccion extends MY_Controller {
       array('libs/jquery.numeric.js'),
       array('libs/jquery.filtertable.min.js'),
       array('libs/jquery.mask.min.js'),
-      array('libs/jquery.csv.js'),
-      array('libs/jszip.js'),
-      array('libs/xlsx.js'),
       array('general/keyjump.js'),
       array('general/util.js'),
-      ['panel/estado_resultado_trans/addmod.js'],
-      // array('panel/facturacion/gastos_productos.js'),
-      // array('panel/ventas_remision/frm_addmod.js'),
-      // array('panel/facturacion/frm_otros.js'),
+      ['panel/pg/agregar_produccion.js'],
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
-    $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
-    $params['seo']            = array('titulo' => 'Agregar Estado de Resultados');
+    // $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
+    $params['seo']            = array('titulo' => 'Agregar Producción Plástico');
     $params['pagar_ordent']   = false;
 
     $this->load->library('cfdi');
@@ -111,34 +105,23 @@ class pg_produccion extends MY_Controller {
     }
     else
     {
-      if (isset($_GET['id_nr']))
-        $respons = $this->pg_produccion_model->updateEstadoResult($_GET['id_nr']);
+      if (isset($_GET['idp']))
+        $respons = $this->pg_produccion_model->updateEstadoResult($_GET['idp']);
       else
         $respons = $this->pg_produccion_model->addEstadoResult();
 
       if($respons['passes'])
       {
-        if (isset($_GET['id_nr']))
-          redirect(base_url('panel/estado_resultado_trans/agregar/?msg=3&id_nr='.$_GET['id_nr']));
+        if (isset($_GET['idp']))
+          redirect(base_url('panel/pg_produccion/agregar/?msg=3&idp='.$_GET['idp']));
         else
-          redirect(base_url('panel/estado_resultado_trans/?msg='.$respons['msg']));
+          redirect(base_url('panel/pg_produccion/?msg='.$respons['msg']));
       } else {
         $params['frm_errors'] = $this->showMsgs($respons['msg']);
       }
     }
 
-    // Parametros por default.
-    // $params['series'] = $this->pg_produccion_model->getSeriesFolios(100);
-    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
-
-    // Parametros por default.
-    // Obtiene los datos de la empresa predeterminada.
-    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    $params['tiposFletes'] = $this->pg_produccion_model->tipos;
-
-
-    $params['getId'] = '';
-    if (isset($_GET['id_nr']) || isset($_GET['id_nrc']))
+    if (isset($_GET['idp']))
     {
       $params['borrador'] = $this->pg_produccion_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']) );
       // echo "<pre>";
@@ -146,7 +129,18 @@ class pg_produccion extends MY_Controller {
       // echo "</pre>";exit;
     }
 
-    $params['tipos'] = $this->pg_produccion_model->getTipos();
+    // Parametros por default.
+    // Obtiene los datos de la empresa predeterminada.
+    $params['fecha']  = date("Y-m-d");
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    $params['sucursales'] = $this->empresas_model->getSucursales($params['empresa_default']->id_empresa);
+    $params['tiposFletes'] = $this->pg_produccion_model->tipos;
+    $params['maquinas'] = $this->pg_produccion_model->maquinasGet(99999, 't');
+    $params['moldes'] = $this->pg_produccion_model->moldesGet(99999, 't');
+    $params['grupos'] = $this->pg_produccion_model->gruposGet(99999, 't');
+
+
+
 
 
     if(isset($_GET['msg']{0}))
@@ -154,7 +148,7 @@ class pg_produccion extends MY_Controller {
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/estado_resultado_trans/agregar', $params);
+    $this->load->view('panel/pg/produccionAgregar', $params);
     $this->load->view('panel/footer');
   }
 

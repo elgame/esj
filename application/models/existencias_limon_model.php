@@ -2522,9 +2522,9 @@ class existencias_limon_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
-        ($vent->id_factura != $auxvent ? $venta->serie.$venta->folio : ''),
-        ($vent->id_factura != $auxvent ? $venta->no_salida_fruta : ''),
-        ($vent->id_factura != $auxvent ? $venta->nombre_fiscal : ''),
+        ($venta->id_factura != $auxvent ? $venta->serie.$venta->folio : ''),
+        ($venta->id_factura != $auxvent ? $venta->no_salida_fruta : ''),
+        ($venta->id_factura != $auxvent ? $venta->nombre_fiscal : ''),
         $venta->calibre,
         // $venta->clasificacion,
         $venta->unidad,
@@ -2534,7 +2534,7 @@ class existencias_limon_model extends CI_Model {
         MyString::formatoNumero($venta->importe, 2, '', false),
       ), false, 'B');
 
-      $auxvent = $vent->id_factura;
+      $auxvent = $venta->id_factura;
     }
 
     $pdf->SetFont('Arial','B', 7);

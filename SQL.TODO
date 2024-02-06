@@ -11,16 +11,17 @@
      1602 - DESCUENTO POR DISTRIBUCION
      1603 - EXPEDICION DE CERTIFICADO FITOSANITARIO <--
      1610 - MANIOBRA EN DESTINO
-   -- lap
+   -- lap|pcc
     ALTER TABLE IF EXISTS otros.existencias_limon_devolucion_fruta ADD COLUMN tipo character varying(5) COLLATE pg_catalog."default" DEFAULT 'frut'::character varying;
     COMMENT ON COLUMN otros.existencias_limon_devolucion_fruta.tipo IS 'frut: dev fruta, inds: dev industrial';
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_remision bigint;
+
  ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
  ✔ recetas seleccionar multi centros se agregan @done (24-01-17 10:49)
  ✔ En reporte de existencia de limon poner los gastos de certificados @done (24-01-04 17:29)
  ✔ Cambio en existencia de limon revisar el archivo que mando la señora @done (24-01-16 17:05)
-     -- san|lap
+     -- san|lap|pcc
     ALTER TABLE IF EXISTS public.calibres ADD COLUMN grupo character varying(15) COLLATE pg_catalog."default";
     UPDATE public.calibres SET grupo='ind' WHERE id_calibre = 133;
     UPDATE public.calibres SET grupo='am2' WHERE id_calibre = 132;
@@ -39,7 +40,7 @@
     UPDATE public.calibres SET grupo='300' WHERE id_calibre = 106;
     UPDATE public.calibres SET grupo='300' WHERE id_calibre = 105;
  ☐ Cambios en recetas
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN a_volumen character varying(50) COLLATE pg_catalog."default";
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_semana integer;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_fecha timestamp without time zone;
@@ -47,7 +48,7 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Aplicaciones',521,true,'recetas/rptaplicaciones/','print',true);
 
  ☐ Apartado de plasticos, produccion, ventas, inventarios, etc
- -- lap
+ -- lap|pcc
    CREATE TABLE IF NOT EXISTS otros.pg_moldes
     (
         id_molde bigserial NOT NULL,
@@ -187,22 +188,24 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',612,true,'pg_produccion/moldesAgregar/','plus',false);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',612,false,'pg_produccion/moldesModificar/','edit',false);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',612,false,'pg_produccion/moldesEliminar/','remove',false);
+ -- pcc
+   ALTER TABLE IF EXISTS otros.pg_produccion ADD COLUMN tiempo_ciclo double precision DEFAULT 0;
 
  ☐ Agregar descripsion en permisos
- -- lap|san
+ -- lap|san|pcc
    ALTER TABLE IF EXISTS public.nomina_permisos ADD COLUMN observaciones text COLLATE pg_catalog."default";
 
  ☐ Reporte de salidas registradas en registro de pallets, Producto, dia del 1-31 existencia
 
  ☐ Estado de resultado nuevos cambios de la señora
-   -- lap|san
+   -- lap|san|pcc
     ALTER TABLE IF EXISTS otros.estado_resultado_trans ADD COLUMN tipo_flete character varying(20) COLLATE pg_catalog."default";
     COMMENT ON COLUMN otros.estado_resultado_trans.tipo_flete IS 'bg: Bodega GDL, ff: Flete foraneo, fl: flete local';
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Rendimiento Equipo',572,true,'estado_resultado_trans/rpt_rend_equipo/','print',true);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Estado de Resultados',572,true,'estado_resultado_trans/rpt_estado_results/','print',true);
 
  ✔ Estado resultado trans, nuevos datos @done (23-10-11 18:12)
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE IF EXISTS otros.estado_resultado_trans ADD COLUMN otros_datos json;
    ALTER TABLE IF EXISTS otros.estado_resultado_trans_sueldos ADD COLUMN cantidad double precision DEFAULT 0;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Permisos',207,false,'empleados/permisos/','remove-circle',true);
