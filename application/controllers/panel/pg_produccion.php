@@ -98,7 +98,7 @@ class pg_produccion extends MY_Controller {
     $this->load->model('pg_produccion_model');
     $this->load->model('empresas_model');
 
-    $this->configAddModEstadoRest();
+    $this->configAddModProduccion();
     if($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -108,7 +108,7 @@ class pg_produccion extends MY_Controller {
       if (isset($_GET['idp']))
         $respons = $this->pg_produccion_model->updateEstadoResult($_GET['idp']);
       else
-        $respons = $this->pg_produccion_model->addEstadoResult();
+        $respons = $this->pg_produccion_model->addProduccion();
 
       if($respons['passes'])
       {
@@ -134,12 +134,9 @@ class pg_produccion extends MY_Controller {
     $params['fecha']  = date("Y-m-d");
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
     $params['sucursales'] = $this->empresas_model->getSucursales($params['empresa_default']->id_empresa);
-    $params['tiposFletes'] = $this->pg_produccion_model->tipos;
     $params['maquinas'] = $this->pg_produccion_model->maquinasGet(99999, 't');
     $params['moldes'] = $this->pg_produccion_model->moldesGet(99999, 't');
     $params['grupos'] = $this->pg_produccion_model->gruposGet(99999, 't');
-
-
 
 
 
@@ -163,246 +160,35 @@ class pg_produccion extends MY_Controller {
     }
   }
 
-  public function ajax_get_remisiones($id_empresa = 24)
-  {
-    $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
-    $this->load->model('pg_produccion_model');
-    echo json_encode($this->pg_produccion_model->getRemisiones($id_empresa));
-  }
-
-  public function ajax_get_repmant($id_empresa = 24)
-  {
-    $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
-    $this->load->model('pg_produccion_model');
-    echo json_encode($this->pg_produccion_model->getRepMant($id_empresa));
-  }
-
-  public function ajax_get_proveedores($id_empresa = 24)
-  {
-    $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
-    $this->load->model('pg_produccion_model');
-    echo json_encode($this->pg_produccion_model->ajaxProveedores($id_empresa));
-  }
-
-  public function ajax_get_cods()
-  {
-    $this->load->model('pg_produccion_model');
-    echo json_encode($this->pg_produccion_model->ajaxCodsGastos());
-  }
-
-  public function ajax_get_gastos_caja($id_empresa = 24)
-  {
-    $id_empresa = isset($_GET['did_empresa'])? $_GET['did_empresa']: $id_empresa;
-    $this->load->model('pg_produccion_model');
-    echo json_encode($this->pg_produccion_model->getGastosCaja($id_empresa));
-  }
-
-  public function rpt_rel_fletes()
-  {
-    $this->carabiner->js(array(
-      array('general/msgbox.js'),
-      array('panel/almacen/rpt_salidas_codigos.js'),
-    ));
-    $this->carabiner->css(array(
-      array('panel/tags.css', 'screen'),
-    ));
-
-    $this->load->library('pagination');
-    $this->load->model('productos_model');
-    $this->load->model('almacenes_model');
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Reporte Relación de Fletes');
-
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
-
-    if(isset($_GET['msg']{0}))
-      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/estado_resultado_trans/rpt_rel_fletes',$params);
-    $this->load->view('panel/footer',$params);
-  }
-  public function rpt_rel_fletes_pdf(){
-    if ($this->input->get('did_empresa') > 0 && $this->input->get('activoId') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
-      $this->load->model('pg_produccion_model');
-      $this->pg_produccion_model->getRelFletesXls();
-    }
-  }
-  public function rpt_rel_fletes_xls(){
-    if ($this->input->get('did_empresa') > 0 && $this->input->get('activoId') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
-      $this->load->model('pg_produccion_model');
-      $this->pg_produccion_model->getRelFletesXls('xls');
-    }
-  }
-
-  public function rpt_rend_equipo()
-  {
-    $this->carabiner->js(array(
-      array('general/msgbox.js'),
-      array('panel/almacen/rpt_salidas_codigos.js'),
-    ));
-    $this->carabiner->css(array(
-      array('panel/tags.css', 'screen'),
-    ));
-
-    $this->load->library('pagination');
-    $this->load->model('pg_produccion_model');
-    $this->load->model('productos_model');
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Reporte Rendimiento de Equipo');
-
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
-    $params['tipos'] = $this->pg_produccion_model->tipos;
-
-    if(isset($_GET['msg']{0}))
-      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/estado_resultado_trans/rpt_rend_equipo',$params);
-    $this->load->view('panel/footer',$params);
-  }
-  public function rpt_rend_equipo_pdf(){
-    if ($this->input->get('did_empresa') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
-      $this->load->model('pg_produccion_model');
-      $this->pg_produccion_model->getRendEquipoTransXls();
-    }
-  }
-  public function rpt_rend_equipo_xls(){
-    if ($this->input->get('did_empresa') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
-      $this->load->model('pg_produccion_model');
-      $this->pg_produccion_model->getRendEquipoTransXls('xls');
-    }
-  }
-
-  public function rpt_estado_results()
-  {
-    $this->carabiner->js(array(
-      array('general/msgbox.js'),
-      array('panel/almacen/rpt_salidas_codigos.js'),
-    ));
-    $this->carabiner->css(array(
-      array('panel/tags.css', 'screen'),
-    ));
-
-    $this->load->library('pagination');
-    $this->load->model('pg_produccion_model');
-    $this->load->model('productos_model');
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Reporte Estado de Resultados de Transporte');
-
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
-    $params['tipos'] = $this->pg_produccion_model->tipos;
-
-    if(isset($_GET['msg']{0}))
-      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/estado_resultado_trans/rpt_estado_result',$params);
-    $this->load->view('panel/footer',$params);
-  }
-  public function rpt_estado_results_pdf(){
-    if ($this->input->get('did_empresa') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
-      $this->load->model('pg_produccion_model');
-      $this->pg_produccion_model->getEstadoResultadoTransXls();
-    }
-  }
-  public function rpt_estado_results_xls(){
-    if ($this->input->get('did_empresa') > 0 && $this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
-      $this->load->model('pg_produccion_model');
-      $this->pg_produccion_model->getEstadoResultadoTransXls('xls');
-    }
-  }
-
 
   /**
    * Configura los metodos de agregar y modificar
    *
    * @return void
    */
-  private function configAddModEstadoRest($borrador = false)
+  private function configAddModProduccion($borrador = false)
   {
     $this->load->library('form_validation');
     $rules = array(
-        ['field' => 'dempresa'                , 'label' => 'dempresa'              , 'rules' => '']                 ,
-        ['field' => 'did_empresa'             , 'label' => 'did_empresa'           , 'rules' => 'required|numeric'] ,
-        ['field' => 'dactivo'                 , 'label' => 'dactivo'               , 'rules' => '']                 ,
-        ['field' => 'did_activo'              , 'label' => 'did_activo'            , 'rules' => 'required|numeric'] ,
-        ['field' => 'did_gasto'               , 'label' => 'did_gasto'             , 'rules' => '']                 ,
-        ['field' => 'gasto_monto'             , 'label' => 'gasto_monto'           , 'rules' => '']                 ,
-        ['field' => 'dchofer'                 , 'label' => 'dchofer'               , 'rules' => '']                 ,
-        ['field' => 'did_chofer'              , 'label' => 'did_chofer'            , 'rules' => 'required|numeric'] ,
-        ['field' => 'dkm_rec'                 , 'label' => 'dkm_rec'               , 'rules' => 'numeric']          ,
-        ['field' => 'dvel_max'                , 'label' => 'dvel_max'              , 'rules' => 'numeric']          ,
-        ['field' => 'drep_lt_hist'            , 'label' => 'drep_lt_hist'          , 'rules' => 'numeric']          ,
-        ['field' => 'dfecha'                  , 'label' => 'dfecha'                , 'rules' => '']                 ,
-        ['field' => 'dfecha_viaje'            , 'label' => 'dfecha_viaje'          , 'rules' => '']                 ,
-        ['field' => 'rend_km_gps'             , 'label' => 'rend_km_gps'           , 'rules' => 'numeric']          ,
-        ['field' => 'rend_actual'             , 'label' => 'rend_actual'           , 'rules' => 'numeric']          ,
-        ['field' => 'rend_lts'                , 'label' => 'rend_lts'              , 'rules' => 'numeric']          ,
-        ['field' => 'rend_precio'             , 'label' => 'rend_precio'           , 'rules' => 'numeric']          ,
-        ['field' => 'destino'                 , 'label' => 'destino'               , 'rules' => '']                 ,
-        ['field' => 'rend_thrs_trab'          , 'label' => 'rend_thrs_trab'        , 'rules' => 'numeric']          ,
-        ['field' => 'rend_thrs_lts'           , 'label' => 'rend_thrs_lts'         , 'rules' => 'numeric']          ,
-        ['field' => 'rend_thrs_hxl'           , 'label' => 'rend_thrs_hxl'         , 'rules' => 'numeric']          ,
+        ['field' => 'dempresa', 'label' => 'dempresa', 'rules' => ''] ,
+        ['field' => 'did_empresa', 'label' => 'did_empresa', 'rules' => 'required|numeric'],
+        ['field' => 'sucursalId', 'label' => 'sucursalId', 'rules' => 'numeric'] ,
+        ['field' => 'dmaquina', 'label' => 'dmaquina', 'rules' => 'required|numeric'],
+        ['field' => 'dmolde', 'label' => 'dmolde', 'rules' => 'required|numeric'] ,
+        ['field' => 'dgrupo', 'label' => 'dgrupo', 'rules' => 'required|numeric'] ,
+        ['field' => 'dturno', 'label' => 'dturno', 'rules' => 'required|numeric'] ,
+        ['field' => 'dfecha', 'label' => 'dfecha', 'rules' => 'required'] ,
+        ['field' => 'djefeTurn', 'label' => 'djefeTurn', 'rules' => ''] ,
+        ['field' => 'djefeTurnId', 'label' => 'djefeTurnId', 'rules' => 'required|numeric'] ,
 
+        ['field' => 'cajas_buenas', 'label' => 'cajas_buenas', 'rules' => 'required|numeric'],
+        ['field' => 'cajas_merma', 'label' => 'cajas_merma', 'rules' => 'required|numeric'],
+        ['field' => 'cajas_total', 'label' => 'cajas_total', 'rules' => 'required|numeric'],
+        ['field' => 'peso_prom', 'label' => 'peso_prom', 'rules' => 'required|numeric'],
+        ['field' => 'plasta_kg', 'label' => 'plasta_kg', 'rules' => 'required|numeric'],
+        ['field' => 'inyectado_kg', 'label' => 'inyectado_kg', 'rules' => 'required|numeric'],
+        ['field' => 'tiempo_ciclo', 'label' => 'tiempo_ciclo', 'rules' => 'required|numeric'],
 
-        ['field' => 'od_termo'                , 'label' => 'od_termo'              , 'rules' => '']          ,
-        ['field' => 'od_termoId'              , 'label' => 'od_termoId'            , 'rules' => 'numeric']          ,
-        ['field' => 'od_camionCapTanq'        , 'label' => 'od_camionCapTanq'      , 'rules' => 'numeric']          ,
-        ['field' => 'od_camionRendHist'       , 'label' => 'od_camionRendHist'     , 'rules' => 'numeric']          ,
-        ['field' => 'od_camionTEncendido'     , 'label' => 'od_camionTEncendido'   , 'rules' => '']          ,
-        ['field' => 'od_termoCapTanq'         , 'label' => 'od_termoCapTanq'       , 'rules' => 'numeric']          ,
-        ['field' => 'od_hrsalida'             , 'label' => 'od_hrsalida'           , 'rules' => '']          ,
-        ['field' => 'od_hrllegada'            , 'label' => 'od_hrllegada'          , 'rules' => '']          ,
-        ['field' => 'od_gobernado'            , 'label' => 'od_gobernado'          , 'rules' => 'numeric']          ,
-        ['field' => 'od_maxdiesel'            , 'label' => 'od_maxdiesel'          , 'rules' => 'numeric']          ,
-        ['field' => 'od_1captanque'           , 'label' => 'od_1captanque'         , 'rules' => 'numeric']          ,
-        ['field' => 'od_2captanque'           , 'label' => 'od_2captanque'         , 'rules' => 'numeric']          ,
-        ['field' => 'od_costoEstimado'        , 'label' => 'od_costoEstimado'      , 'rules' => 'numeric']          ,
-        ['field' => 'od_costoGeneral'         , 'label' => 'od_costoGeneral'       , 'rules' => 'numeric']          ,
-
-        ['field' => 'remision_fecha[]'        , 'label' => 'remision_fecha'        , 'rules' => '']                 ,
-        ['field' => 'remision_numero[]'       , 'label' => 'remision_numero'       , 'rules' => '']                 ,
-        ['field' => 'remision_cliente[]'      , 'label' => 'remision_cliente'      , 'rules' => '']                 ,
-        ['field' => 'remision_id[]'           , 'label' => 'remision_id'           , 'rules' => 'numeric']          ,
-        ['field' => 'remision_row[]'          , 'label' => 'remision_row'          , 'rules' => '']                 ,
-        ['field' => 'remision_importe[]'      , 'label' => 'remision_importe'      , 'rules' => 'numeric']          ,
-        ['field' => 'remision_comprobacion[]' , 'label' => 'remision_comprobacion' , 'rules' => '']                 ,
-        ['field' => 'remision_del[]'          , 'label' => 'remision_del'          , 'rules' => '']                 ,
-
-        ['field' => 'sueldos_fecha[]'         , 'label' => 'sueldos_fecha'         , 'rules' => '']                 ,
-        ['field' => 'sueldos_id_sueldo[]'     , 'label' => 'sueldos_id_sueldo'     , 'rules' => '']                 ,
-        ['field' => 'sueldos_proveedor[]'     , 'label' => 'sueldos_proveedor'     , 'rules' => '']                 ,
-        ['field' => 'sueldos_proveedor_id[]'  , 'label' => 'sueldos_proveedor_id'  , 'rules' => 'numeric']          ,
-        ['field' => 'sueldos_concepto[]'      , 'label' => 'sueldos_concepto'      , 'rules' => '']                 ,
-        ['field' => 'sueldos_cantidad[]'      , 'label' => 'sueldos_cantidad'      , 'rules' => 'numeric']          ,
-        ['field' => 'sueldos_importe[]'       , 'label' => 'sueldos_importe'       , 'rules' => 'numeric']          ,
-        ['field' => 'sueldos_comprobacion[]'  , 'label' => 'sueldos_comprobacion'  , 'rules' => '']                 ,
-        ['field' => 'sueldos_del[]'           , 'label' => 'sueldos_del'           , 'rules' => '']                 ,
-
-        ['field' => 'repmant_fecha[]'         , 'label' => 'repmant_fecha'         , 'rules' => '']                 ,
-        ['field' => 'repmant_numero[]'        , 'label' => 'repmant_numero'        , 'rules' => '']                 ,
-        ['field' => 'repmant_proveedor[]'     , 'label' => 'repmant_proveedor'     , 'rules' => '']                 ,
-        ['field' => 'repmant_id[]'            , 'label' => 'repmant_id'            , 'rules' => '']                 ,
-        ['field' => 'repmant_row[]'           , 'label' => 'repmant_row'           , 'rules' => '']                 ,
-        ['field' => 'repmant_concepto[]'      , 'label' => 'repmant_concepto'      , 'rules' => '']                 ,
-        ['field' => 'repmant_codg_id[]'       , 'label' => 'repmant_codg_id'       , 'rules' => 'numeric'] ,
-        ['field' => 'repmant_importe[]'       , 'label' => 'repmant_importe'       , 'rules' => '']                 ,
-        ['field' => 'repmant_comprobacion[]'  , 'label' => 'repmant_comprobacion'  , 'rules' => '']                 ,
-        ['field' => 'repmant_del[]'           , 'label' => 'repmant_del'           , 'rules' => '']                 ,
-
-        ['field' => 'gastos_fecha[]'          , 'label' => 'gastos_fecha'          , 'rules' => '']                 ,
-        ['field' => 'gastos_id_gasto[]'       , 'label' => 'gastos_id_gasto'       , 'rules' => '']                 ,
-        ['field' => 'gastos_proveedor[]'      , 'label' => 'gastos_proveedor'      , 'rules' => '']                 ,
-        ['field' => 'gastos_proveedor_id[]'   , 'label' => 'gastos_proveedor_id'   , 'rules' => 'numeric']          ,
-        ['field' => 'gastos_codg[]'           , 'label' => 'gastos_codg'           , 'rules' => '']                 ,
-        ['field' => 'gastos_codg_id[]'        , 'label' => 'gastos_codg_id'        , 'rules' => 'numeric'] ,
-        ['field' => 'gastos_importe[]'        , 'label' => 'gastos_importe'        , 'rules' => '']                 ,
-        ['field' => 'gastos_comprobacion[]'   , 'label' => 'gastos_comprobacion'   , 'rules' => '']                 ,
-        ['field' => 'gastos_del[]'            , 'label' => 'gastos_del'            , 'rules' => '']                 ,
     );
 
     $this->form_validation->set_rules($rules);
@@ -724,15 +510,15 @@ class pg_produccion extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'El Estado de Resultados se guardo correctamente.';
+        $txt = 'La Producción se guardo correctamente.';
         $icono = 'success';
         break;
       case 33:
-        $txt = 'El Estado de Resultados se guardo pero algunos gastos no porque que no se selecciono del catalogo.';
+        $txt = 'La Producción se guardo pero algunos gastos no porque que no se selecciono del catalogo.';
         $icono = 'error';
         break;
       case 34:
-        $txt = 'El Estado de Resultados se guardo pero algunos rep/matto no porque que no se selecciono del catalogo.';
+        $txt = 'La Producción se guardo pero algunos rep/matto no porque que no se selecciono del catalogo.';
         $icono = 'error';
         break;
       case 4:

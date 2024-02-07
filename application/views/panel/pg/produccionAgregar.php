@@ -59,8 +59,8 @@
                   <div class="control-group sucursales" style="display: none;">
                     <label class="control-label" for="sucursalId">Sucursal </label>
                     <div class="controls">
-                      <div class="input-append span12">
-                        <select name="sucursalId" class="span11" id="sucursalId">
+                      <div class="input-append span9">
+                        <select name="sucursalId" class="span12" id="sucursalId">
                           <option></option>
                           <?php foreach ($sucursales as $key => $sucur) { ?>
                             <option value="<?php echo $sucur->id_sucursal ?>" <?php echo set_select('sucursalId', $sucur->id_departamento); ?>><?php echo $depa->nombre_fiscal ?></option>
@@ -128,7 +128,7 @@
                   <div class="control-group">
                     <label class="control-label" for="djefeTurn">Jefe de Turno</label>
                     <div class="controls">
-                      <input type="text" name="djefeTurn" class="span11 ui-autocomplete-input" id="djefeTurn" value="" autocomplete="off"><span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
+                      <input type="text" name="djefeTurn" class="span9 ui-autocomplete-input" id="djefeTurn" value="" autocomplete="off"><span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
                       <input type="hidden" name="djefeTurnId" id="djefeTurnId" value="" required="">
                     </div>
                   </div>
@@ -166,21 +166,21 @@
                     <div class="control-group span4">
                       <label class="control-label" for="cajas_buenas">Cajas Buenas</label>
                       <div class="controls">
-                        <input type="text" name="cajas_buenas" class="span9" id="cajas_buenas" value="<?php echo set_value('cajas_buenas', isset($borrador) ? $borrador['info']->cajas_buenas : ''); ?>">
+                        <input type="text" name="cajas_buenas" class="span11 vpositive" id="cajas_buenas" value="<?php echo set_value('cajas_buenas', isset($borrador) ? $borrador['info']->cajas_buenas : ''); ?>">
                       </div>
                     </div>
 
                     <div class="control-group span4">
                       <label class="control-label" for="cajas_merma">Cajas Merma</label>
                       <div class="controls">
-                        <input type="text" name="cajas_merma" class="span9" id="cajas_merma" value="<?php echo set_value('cajas_merma', isset($borrador) ? $borrador['info']->cajas_merma : ''); ?>">
+                        <input type="text" name="cajas_merma" class="span11 vpositive" id="cajas_merma" value="<?php echo set_value('cajas_merma', isset($borrador) ? $borrador['info']->cajas_merma : ''); ?>">
                       </div>
                     </div>
 
                     <div class="control-group span4">
                       <label class="control-label" for="cajas_total">Total Cajas</label>
                       <div class="controls">
-                        <input type="text" name="cajas_total" class="span9" id="cajas_total" value="<?php echo set_value('cajas_total', isset($borrador) ? $borrador['info']->cajas_total : ''); ?>" readonly>
+                        <input type="text" name="cajas_total" class="span11" id="cajas_total" value="<?php echo set_value('cajas_total', isset($borrador) ? $borrador['info']->cajas_total : ''); ?>" readonly>
                       </div>
                     </div>
 
@@ -190,21 +190,21 @@
                     <div class="control-group span4">
                       <label class="control-label" for="peso_prom">Peso Promedio Producto</label>
                       <div class="controls">
-                        <input type="text" name="peso_prom" class="span9" id="peso_prom" value="<?php echo set_value('peso_prom', isset($borrador) ? $borrador['info']->peso_prom : ''); ?>">
+                        <input type="text" name="peso_prom" class="span11 vpositive" id="peso_prom" value="<?php echo set_value('peso_prom', isset($borrador) ? $borrador['info']->peso_prom : ''); ?>">
                       </div>
                     </div>
 
                     <div class="control-group span4">
                       <label class="control-label" for="plasta_kg">Plasta (kg)</label>
                       <div class="controls">
-                        <input type="text" name="plasta_kg" class="span9" id="plasta_kg" value="<?php echo set_value('plasta_kg', isset($borrador) ? $borrador['info']->plasta_kg : ''); ?>">
+                        <input type="text" name="plasta_kg" class="span11 vpositive" id="plasta_kg" value="<?php echo set_value('plasta_kg', isset($borrador) ? $borrador['info']->plasta_kg : ''); ?>">
                       </div>
                     </div>
 
                     <div class="control-group span4">
                       <label class="control-label" for="inyectado_kg">Kgs Inyectados</label>
                       <div class="controls">
-                        <input type="text" name="inyectado_kg" class="span9" id="inyectado_kg" value="<?php echo set_value('inyectado_kg', isset($borrador) ? $borrador['info']->inyectado_kg : ''); ?>" readonly>
+                        <input type="text" name="inyectado_kg" class="span11" id="inyectado_kg" value="<?php echo set_value('inyectado_kg', isset($borrador) ? $borrador['info']->inyectado_kg : ''); ?>" readonly>
                       </div>
                     </div>
                   </div>
@@ -213,7 +213,7 @@
                     <div class="control-group span4">
                       <label class="control-label" for="tiempo_ciclo">Tiempo Ciclo</label>
                       <div class="controls">
-                        <input type="text" name="tiempo_ciclo" class="span9" id="tiempo_ciclo" value="<?php echo set_value('tiempo_ciclo', isset($borrador) ? $borrador['info']->tiempo_ciclo : ''); ?>">
+                        <input type="text" name="tiempo_ciclo" class="span11 vpositive" id="tiempo_ciclo" value="<?php echo set_value('tiempo_ciclo', isset($borrador) ? $borrador['info']->tiempo_ciclo : ''); ?>">
                       </div>
                     </div>
 
