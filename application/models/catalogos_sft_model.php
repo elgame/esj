@@ -946,7 +946,7 @@ class catalogos_sft_model extends CI_Model{
                 SELECT
                   ca.id_cat_codigos AS id_area, ca.nombre, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
                   Date(c.fecha) fecha_compra, (c.serie || c.folio) folio_compra, cp.descripcion producto,
-                  cp.total importe, oranc.areas
+                  cp.total importe, oranc.areas, co.solicito, co.descripcion
                 FROM compras_ordenes co
                   INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
@@ -964,7 +964,7 @@ class catalogos_sft_model extends CI_Model{
                 SELECT
                   ca.id_cat_codigos AS id_area, ca.nombre, Date(c.fecha_factura) fecha_orden, (c.serie || c.folio) folio_orden,
                   NULL fecha_compra, NULL folio_compra, ((CASE WHEN c.intangible = 't' THEN '(Intangible) ' ELSE '' END) || c.concepto) producto,
-                  c.total importe, oranc.areas
+                  c.total importe, oranc.areas, '' AS solicito, '' AS descripcion
                 FROM compras c
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = c.id_cat_codigos
                   LEFT JOIN (
@@ -980,7 +980,7 @@ class catalogos_sft_model extends CI_Model{
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(cg.fecha) fecha_orden, cg.folio::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   ('Caja #' || cg.no_caja || ' ' || cg.concepto) producto,
-                  cg.monto AS importe, oranc.areas
+                  cg.monto AS importe, oranc.areas, '' AS solicito, '' AS descripcion
                 FROM cajachica_gastos cg
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cg.id_cat_codigos
                   INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
@@ -997,7 +997,7 @@ class catalogos_sft_model extends CI_Model{
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndl.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || ', Labor ' || csl.nombre || ' ' || ndl.horas || 'hrs') producto,
-                  ndl.importe, '' AS areas
+                  ndl.importe, '' AS areas, '' AS solicito, '' AS descripcion
                 FROM nomina_trabajos_dia_labores ndl
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = ndl.id_area
                   INNER JOIN compras_salidas_labores csl ON csl.id_labor = ndl.id_labor
@@ -1007,7 +1007,7 @@ class catalogos_sft_model extends CI_Model{
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndh.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || ', horas Ext ' || ndh.horas) producto,
-                  ndh.importe, '' AS areas
+                  ndh.importe, '' AS areas, '' AS solicito, '' AS descripcion
                 FROM nomina_trabajos_dia_hrsext ndh
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = ndh.id_area
                   INNER JOIN usuarios u ON u.id = ndh.id_usuario
@@ -1203,6 +1203,8 @@ class catalogos_sft_model extends CI_Model{
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Areas</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Solicito</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Observaciones</td>
       </tr>';
     }
     $lts_combustible = $horas_totales = 0;
@@ -1213,6 +1215,7 @@ class catalogos_sft_model extends CI_Model{
       $html .= '<tr style="font-weight:bold">
           <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->nombre.'</td>
           <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->importe.'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;"></td>
         </tr>';
       if (isset($vehiculo->detalle)) {
         foreach ($vehiculo->detalle as $key2 => $item)
@@ -1227,6 +1230,8 @@ class catalogos_sft_model extends CI_Model{
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->producto.'</td>
               <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->importe.'</td>
               <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->areas.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->solicito.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->descripcion.'</td>
             </tr>';
         }
       }
