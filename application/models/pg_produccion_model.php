@@ -59,7 +59,7 @@ class pg_produccion_model extends privilegios_model{
         SELECT pgp.id_produccion, pgp.folio, pgp.turno, pgp.fecha, pgp.cajas_total,
           pgp.status, es.nombre_fiscal AS sucursal, pgm.nombre AS maquina, pgmo.nombre AS molde
         FROM otros.pg_produccion pgp
-          INNER JOIN empresas_sucursales es ON es.id_sucursal = pgp.id_sucursal
+          LEFT JOIN empresas_sucursales es ON es.id_sucursal = pgp.id_sucursal
           INNER JOIN otros.pg_maquinas pgm ON pgm.id_maquina = pgp.id_maquina
           INNER JOIN otros.pg_moldes pgmo ON pgmo.id_molde = pgp.id_molde
         WHERE 1 = 1 ".$sql."
@@ -77,6 +77,38 @@ class pg_produccion_model extends privilegios_model{
       $response['producciones'] = $res->result();
 
     return $response;
+  }
+
+  public function addProduccion($data=NULL)
+  {
+
+    if ($data==NULL)
+    {
+      $data = array(
+        'id_empresa'    => $this->input->post('did_empresa'),
+        'id_sucursal'   => $this->input->post('sucursalId'),
+        'id_maquina'    => $this->input->post('dmaquina'),
+        'id_molde'      => $this->input->post('dmolde'),
+        'id_grupo'      => $this->input->post('dgrupo'),
+        'id_registro'   => $this->session->userdata('id_usuario'),
+        'id_jefe_turno' => $this->input->post('djefeTurnId'),
+        'folio'         => $this->input->post('folio'),
+        'turno'         => $this->input->post('dturno'),
+        'fecha'         => $this->input->post('dfecha'),
+        'cajas_buenas'  => $this->input->post('cajas_buenas'),
+        'cajas_merma'   => $this->input->post('cajas_merma'),
+        'cajas_total'   => $this->input->post('cajas_total'),
+        'plasta_kg'     => $this->input->post('plasta_kg'),
+        'inyectado_kg'  => $this->input->post('inyectado_kg'),
+        'peso_prom'     => $this->input->post('peso_prom'),
+        'tiempo_ciclo'  => $this->input->post('tiempo_ciclo'),
+      );
+    }
+
+    $this->db->insert('otros.pg_produccion', $data);
+    $id_produccion = $this->db->insert_id('otros.pg_produccion_id_produccion_seq');
+
+    return array('passes' => true);
   }
 
 
