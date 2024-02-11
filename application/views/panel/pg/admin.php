@@ -90,7 +90,7 @@
                     <?php
 
                       if($this->usuarios_model->tienePrivilegioDe('', 'pg_produccion/modificar/')){
-                        echo '<a class="btn btn-success" href="'.base_url().'panel/pg_produccion/agregar/?id_nr='.$prod->id_produccion.'" title="Modificar">
+                        echo '<a class="btn btn-success" href="'.base_url().'panel/pg_produccion/agregar/?idp='.$prod->id_produccion.'" title="Modificar">
                               <i class="icon-edit icon-white"></i> <span class="hidden-tablet">Modificar</span></a>';
                       }
 

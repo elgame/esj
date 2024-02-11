@@ -30,7 +30,7 @@
   </div>
 
   <div class="row-fluid">
-    <form class="form-horizontal" action="<?php echo base_url('panel/pg_produccion/agregar/'); ?>" method="POST" id="form">
+    <form class="form-horizontal" action="<?php echo base_url('panel/pg_produccion/agregar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
       <div class="row-fluid">
         <div class="box span12">
@@ -60,10 +60,10 @@
                     <label class="control-label" for="sucursalId">Sucursal </label>
                     <div class="controls">
                       <div class="input-append span9">
-                        <select name="sucursalId" class="span12" id="sucursalId">
+                        <select name="sucursalId" class="span12" id="sucursalId" data-selected="<?php echo (!empty($borrador['info']->id_sucursal) ? $borrador['info']->id_sucursal : $this->input->get('sucursalId')) ?>">
                           <option></option>
                           <?php foreach ($sucursales as $key => $sucur) { ?>
-                            <option value="<?php echo $sucur->id_sucursal ?>" <?php echo set_select('sucursalId', $sucur->id_departamento); ?>><?php echo $depa->nombre_fiscal ?></option>
+                            <option value="<?php echo $sucur->id_sucursal ?>" <?php echo set_select('sucursalId', $sucur->id_sucursal, false, (!empty($borrador['info']->id_sucursal) ? $borrador['info']->id_sucursal : $this->input->get('sucursalId'))); ?>><?php echo $sucur->nombre_fiscal ?></option>
                           <?php } ?>
                         </select>
                       </div>
@@ -128,8 +128,8 @@
                   <div class="control-group">
                     <label class="control-label" for="djefeTurn">Jefe de Turno</label>
                     <div class="controls">
-                      <input type="text" name="djefeTurn" class="span9 ui-autocomplete-input" id="djefeTurn" value="" autocomplete="off"><span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
-                      <input type="hidden" name="djefeTurnId" id="djefeTurnId" value="" required="">
+                      <input type="text" name="djefeTurn" class="span9 ui-autocomplete-input" id="djefeTurn" value="<?php echo set_value('djefeTurn', isset($borrador) ? $borrador['info']->jefe_turno : ''); ?>">
+                      <input type="hidden" name="djefeTurnId" id="djefeTurnId" value="<?php echo set_value('djefeTurnId', isset($borrador) ? $borrador['info']->id_jefe_turno : ''); ?>" required="">
                     </div>
                   </div>
 

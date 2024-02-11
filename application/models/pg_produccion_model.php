@@ -79,6 +79,35 @@ class pg_produccion_model extends privilegios_model{
     return $response;
   }
 
+  public function produccionInfo($id, $full = false)
+  {
+    $query = $this->db->query(
+      "SELECT pgp.id_produccion, pgp.id_empresa, pgp.id_sucursal, pgp.id_maquina, pgp.id_molde, pgp.id_grupo, pgp.id_registro,
+          pgp.id_jefe_turno, pgp.folio, pgp.turno, pgp.fecha, pgp.cajas_buenas, pgp.cajas_merma, pgp.cajas_total, pgp.plasta_kg,
+          pgp.inyectado_kg, pgp.peso_prom, pgp.fecha_creada, pgp.status, pgp.tiempo_ciclo, pgma.nombre AS maquina,
+          pgmo.nombre AS molde, pggr.nombre AS grupo, Concat(jt.nombre, ' ', jt.apellido_paterno, ' ', jt.apellido_materno) AS jefe_turno
+        FROM otros.pg_produccion pgp
+          LEFT JOIN otros.pg_maquinas pgma ON pgma.id_maquina = pgp.id_maquina
+          LEFT JOIN otros.pg_moldes pgmo ON pgmo.id_molde = pgp.id_molde
+          LEFT JOIN otros.pg_grupos pggr ON pggr.id_grupo = pgp.id_grupo
+          LEFT JOIN usuarios jt ON jt.id = pgp.id_jefe_turno
+        WHERE id_produccion = {$id}");
+
+    $data = array();
+    if ($query->num_rows() > 0)
+    {
+      $data['info'] = $query->row();
+    }
+
+    if ($full && isset($data['info']->id_produccion)) {
+      $this->load->model('empresas_model');
+      $data['info']->empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa)['info'];
+      $data['info']->sucursal = $this->empresas_model->infoSucursal($data['info']->id_sucursal);
+    }
+
+    return $data;
+  }
+
   public function addProduccion($data=NULL)
   {
 
@@ -92,7 +121,7 @@ class pg_produccion_model extends privilegios_model{
         'id_grupo'      => $this->input->post('dgrupo'),
         'id_registro'   => $this->session->userdata('id_usuario'),
         'id_jefe_turno' => $this->input->post('djefeTurnId'),
-        'folio'         => $this->input->post('folio'),
+        'folio'         => $this->getFolio($this->input->post('did_empresa'), $this->input->post('sucursalId')),
         'turno'         => $this->input->post('dturno'),
         'fecha'         => $this->input->post('dfecha'),
         'cajas_buenas'  => $this->input->post('cajas_buenas'),
@@ -109,6 +138,62 @@ class pg_produccion_model extends privilegios_model{
     $id_produccion = $this->db->insert_id('otros.pg_produccion_id_produccion_seq');
 
     return array('passes' => true);
+  }
+
+  public function updateProduccion($idProd, $data=NULL)
+  {
+
+    if ($data==NULL)
+    {
+      $data = array(
+        // 'id_empresa'    => $this->input->post('did_empresa'),
+        // 'id_sucursal'   => $this->input->post('sucursalId'),
+        'id_maquina'    => $this->input->post('dmaquina'),
+        'id_molde'      => $this->input->post('dmolde'),
+        'id_grupo'      => $this->input->post('dgrupo'),
+        // 'id_registro'   => $this->session->userdata('id_usuario'),
+        'id_jefe_turno' => $this->input->post('djefeTurnId'),
+        // 'folio'         => $this->getFolio($this->input->post('did_empresa'), $this->input->post('sucursalId')),
+        'turno'         => $this->input->post('dturno'),
+        'fecha'         => $this->input->post('dfecha'),
+        'cajas_buenas'  => $this->input->post('cajas_buenas'),
+        'cajas_merma'   => $this->input->post('cajas_merma'),
+        'cajas_total'   => $this->input->post('cajas_total'),
+        'plasta_kg'     => $this->input->post('plasta_kg'),
+        'inyectado_kg'  => $this->input->post('inyectado_kg'),
+        'peso_prom'     => $this->input->post('peso_prom'),
+        'tiempo_ciclo'  => $this->input->post('tiempo_ciclo'),
+      );
+    }
+
+    $this->db->update('otros.pg_produccion', $data, "id_produccion = {$idProd}");
+
+    return array('passes' => true);
+  }
+
+  public function cancelar($idProd)
+  {
+
+    $this->db->update('otros.pg_produccion', ['status' => 'f'], "id_produccion = {$idProd}");
+
+    return array('passes' => true);
+  }
+
+  /**
+   * Obtiene el folio de acuerdo a la serie seleccionada
+   */
+  public function getFolio($empresa, $sucursal)
+  {
+    $res = $this->db->select('folio')->
+                      from('otros.pg_produccion')->
+                      where("id_empresa = {$empresa}")->
+                      where("id_sucursal = '{$sucursal}'")->
+                      order_by('folio', 'DESC')->
+                      limit(1)->get()->row();
+
+    $folio = (isset($res->folio)? $res->folio: 0)+1;
+
+    return $folio;
   }
 
 
@@ -636,22 +721,7 @@ class pg_produccion_model extends privilegios_model{
 
     return array('passes' => $passes, 'id_estado' => $id_estado, 'msg' => $msg);
   }
-  /**
-   * Obtiene el folio de acuerdo a la serie seleccionada
-   */
-  public function getFolio($empresa, $activo)
-  {
-    $res = $this->db->select('folio')->
-                      from('otros.estado_resultado_trans')->
-                      where("id_empresa = {$empresa}")->
-                      where("id_activo = '{$activo}'")->
-                      order_by('folio', 'DESC')->
-                      limit(1)->get()->row();
 
-    $folio = (isset($res->folio)? $res->folio: 0)+1;
-
-    return $folio;
-  }
 
 
 

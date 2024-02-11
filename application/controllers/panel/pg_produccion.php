@@ -106,7 +106,7 @@ class pg_produccion extends MY_Controller {
     else
     {
       if (isset($_GET['idp']))
-        $respons = $this->pg_produccion_model->updateEstadoResult($_GET['idp']);
+        $respons = $this->pg_produccion_model->updateProduccion($_GET['idp']);
       else
         $respons = $this->pg_produccion_model->addProduccion();
 
@@ -121,9 +121,12 @@ class pg_produccion extends MY_Controller {
       }
     }
 
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    $idEmpresa = $params['empresa_default']->id_empresa;
     if (isset($_GET['idp']))
     {
-      $params['borrador'] = $this->pg_produccion_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']) );
+      $params['borrador'] = $this->pg_produccion_model->produccionInfo($_GET['idp'], true);
+      $idEmpresa = $params['borrador']['info']->empresa->id_empresa;
       // echo "<pre>";
       // var_dump($params['borrador']);
       // echo "</pre>";exit;
@@ -132,8 +135,7 @@ class pg_produccion extends MY_Controller {
     // Parametros por default.
     // Obtiene los datos de la empresa predeterminada.
     $params['fecha']  = date("Y-m-d");
-    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    $params['sucursales'] = $this->empresas_model->getSucursales($params['empresa_default']->id_empresa);
+    $params['sucursales'] = $this->empresas_model->getSucursales($idEmpresa);
     $params['maquinas'] = $this->pg_produccion_model->maquinasGet(99999, 't');
     $params['moldes'] = $this->pg_produccion_model->moldesGet(99999, 't');
     $params['grupos'] = $this->pg_produccion_model->gruposGet(99999, 't');
@@ -156,7 +158,7 @@ class pg_produccion extends MY_Controller {
       $this->load->model('pg_produccion_model');
       $this->pg_produccion_model->cancelar($_GET['id']);
 
-      redirect(base_url('panel/estado_resultado_trans/?'.MyString::getVarsLink(array('msg','id')).'&msg=5'));
+      redirect(base_url('panel/pg_produccion/?'.MyString::getVarsLink(array('msg','id')).'&msg=5'));
     }
   }
 
