@@ -5884,7 +5884,10 @@ class caja_chica_model extends CI_Model {
     }
 
     if ($this->input->get('dprov_clien') != '') {
-      $sql2 .= " AND Lower(ci.concepto) LIKE '%".mb_strtolower($this->input->get('dprov_clien'))."%'";
+      $sql2 .= " AND (
+          Lower(ci.concepto) LIKE '%".mb_strtolower($this->input->get('dprov_clien'))."%' OR
+          Lower(ci.nombre) LIKE '%".mb_strtolower($this->input->get('dprov_clien'))."%'
+        )";
       $sql3 .= " AND Lower(cr.observacion) LIKE '%".mb_strtolower($this->input->get('fno_caja'))."%'";
       $sqlpres .= " AND Lower(concepto) LIKE '%".mb_strtolower($this->input->get('dprov_clien'))."%'";
     }
@@ -5894,7 +5897,7 @@ class caja_chica_model extends CI_Model {
     if ($this->input->get('fno_caja') == 'prest1') {
       $movimientos = $this->db->query(
         "SELECT id_pago, id_empleado, id_empresa, anio, semana, id_prestamo, id_categoria, concepto, monto, fecha, id_nomenclatura, categoria,
-          nombre_nomen, nomenclatura, null AS poliza
+          nombre_nomen, nomenclatura, null AS poliza, '' AS ing_nombre
         FROM (
           SELECT cp.id_pago, cp.id_empleado, cp.id_empresa, cp.anio, cp.semana, cp.id_prestamo, cp.id_categoria, cp.concepto, cp.monto, cp.fecha,
             cp.id_nomenclatura, cc.abreviatura as categoria, cn.nombre AS nombre_nomen, cn.nomenclatura
@@ -5919,7 +5922,7 @@ class caja_chica_model extends CI_Model {
     } else {
       $movimientos = $this->db->query("SELECT ci.id_ingresos, cc.id_categoria, cc.nombre AS categoria,
             cn.nombre AS nombre_nomen, cn.nomenclatura, ci.concepto, ci.monto, ci.fecha, ci.poliza,
-            cn.id AS id_nomenclatura
+            cn.id AS id_nomenclatura, ci.nombre AS ing_nombre
           FROM cajachica_ingresos ci
             INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
             INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
@@ -5967,9 +5970,9 @@ class caja_chica_model extends CI_Model {
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'L', 'L', 'L', 'R');
-    $widths = array(20, 22, 45, 80, 35);
-    $header = array('Fecha', 'Nomenclatura', 'Poliza', 'Concepto', 'Importe');
+    $aligns = array('L', 'L', 'L', 'L', 'L', 'R');
+    $widths = array(20, 12, 20, 58, 58, 35);
+    $header = array('Fecha', 'Nomen', 'Poliza', 'Concepto', 'Nombre', 'Importe');
 
     $aux_categoria = '';
     $total_nomenclatura = array();
@@ -6011,6 +6014,7 @@ class caja_chica_model extends CI_Model {
         $producto->nomenclatura,
         $producto->poliza,
         $producto->concepto,
+        $producto->ing_nombre,
         MyString::formatoNumero($producto->monto, 2, '', false),
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
@@ -6038,10 +6042,10 @@ class caja_chica_model extends CI_Model {
   }
 
   public function getRptIngresosXls(){
-    header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=ingresos_caja.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
+    // header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    // header("Content-Disposition: attachment; filename=ingresos_caja.xls");
+    // header("Pragma: no-cache");
+    // header("Expires: 0");
 
     $res = $this->getRptIngresosData();
 
@@ -6094,6 +6098,7 @@ class caja_chica_model extends CI_Model {
           <td style="border:1px solid #000;background-color: #cccccc;">Nomenclatura</td>
           <td style="border:1px solid #000;background-color: #cccccc;">Poliza</td>
           <td style="border:1px solid #000;background-color: #cccccc;">Concepto</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Nombre</td>
           <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
         </tr>';
       }
@@ -6103,6 +6108,7 @@ class caja_chica_model extends CI_Model {
           <td style="border:1px solid #000;">'.$producto->nomenclatura.'</td>
           <td style="border:1px solid #000;">'.$producto->poliza.'</td>
           <td style="border:1px solid #000;">'.$producto->concepto.'</td>
+          <td style="border:1px solid #000;">'.$producto->ing_nombre.'</td>
           <td style="border:1px solid #000;">'.$producto->monto.'</td>
         </tr>';
 
