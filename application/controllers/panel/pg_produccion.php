@@ -528,7 +528,7 @@ class pg_produccion extends MY_Controller {
         $icono = 'success';
         break;
       case 5:
-        $txt = 'La Nota de remisión se cancelo correctamente.';
+        $txt = 'La Producción se cancelo correctamente.';
         $icono = 'success';
         break;
       case 6:

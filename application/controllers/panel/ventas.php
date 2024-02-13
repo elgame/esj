@@ -214,11 +214,11 @@ class ventas extends MY_Controller {
         $params['seo']['titulo'] = 'Agregar Nota de credito';
       }
 
-      $this->load->model('existencias_limon_model');
-      $params['cajaExtLimon'] = $this->existencias_limon_model->get(
-        substr($params['borrador']['info']->fecha, 0, 10), 1, 2,
-        ['rremisionId' => $params['borrador']['info']->id_factura]
-      );
+      // $this->load->model('existencias_limon_model');
+      // $params['cajaExtLimon'] = $this->existencias_limon_model->get(
+      //   substr($params['borrador']['info']->fecha, 0, 10), 1, 2,
+      //   ['rremisionId' => $params['borrador']['info']->id_factura]
+      // );
     } elseif (isset($_GET['id_vd']))
     {
       // Si es una venta del dia la que se quiere facturar carga sus datos.

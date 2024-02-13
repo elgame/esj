@@ -478,8 +478,11 @@ class ventas_model extends privilegios_model{
           $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
         }
 
-        if (($_POST['prod_did_prod'][$key] === '51' && !isset($seg_cer_entro['51'])) || ($_POST['prod_did_prod'][$key] === '52' && !isset($seg_cer_entro['52'])))
-        {
+        // Certificados
+        if (($_POST['prod_did_prod'][$key] === '51' && !isset($seg_cer_entro['51'])) ||
+          ($_POST['prod_did_prod'][$key] === '52' && !isset($seg_cer_entro['52'])) ||
+          ($_POST['prod_did_prod'][$key] === '1603' && !isset($seg_cer_entro['1603']))
+        ) {
           foreach ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]] as $keysecer => $data_secer) {
             if ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer] > 0) {
               $dataSeguroCerti[] = array(
@@ -616,29 +619,31 @@ class ventas_model extends privilegios_model{
 
     // Agregar datos a la caja de existencia de limon
     $this->load->model('existencias_limon_model');
-    $exisLimonData = [
-      'id_remision_rm' => $id_venta,
-      'fecha_caja_chica' => substr($datosFactura['fecha'], 0, 10),
-      'fno_caja' => 1,
-      'farea' => 2,
+    $datosFactura['id_venta'] = $id_venta;
+    $this->existencias_limon_model->guardarRemisionesGastos($datosFactura, $productosFactura);
+    // $exisLimonData = [
+    //   'id_remision_rm' => $id_venta,
+    //   'fecha_caja_chica' => substr($datosFactura['fecha'], 0, 10),
+    //   'fno_caja' => 1,
+    //   'farea' => 2,
 
-      "comisionTerceros_nombre"      => $_POST['comisionTerceros_nombre'],
-      "comisionTerceros_id"          => $_POST['comisionTerceros_id'],
-      "comisionTerceros_delete"      => $_POST['comisionTerceros_delete'],
-      "comisionTerceros_descripcion" => $_POST['comisionTerceros_descripcion'],
-      "comisionTerceros_cantidad"    => $_POST['comisionTerceros_cantidad'],
-      "comisionTerceros_costo"       => $_POST['comisionTerceros_costo'],
-      "comisionTerceros_importe"     => $_POST['comisionTerceros_importe'],
+    //   "comisionTerceros_nombre"      => $_POST['comisionTerceros_nombre'],
+    //   "comisionTerceros_id"          => $_POST['comisionTerceros_id'],
+    //   "comisionTerceros_delete"      => $_POST['comisionTerceros_delete'],
+    //   "comisionTerceros_descripcion" => $_POST['comisionTerceros_descripcion'],
+    //   "comisionTerceros_cantidad"    => $_POST['comisionTerceros_cantidad'],
+    //   "comisionTerceros_costo"       => $_POST['comisionTerceros_costo'],
+    //   "comisionTerceros_importe"     => $_POST['comisionTerceros_importe'],
 
-      "gasto_id_gasto" => $_POST['gasto_id_gasto'],
-      "gasto_del"      => $_POST['gasto_del'],
-      "codigoAreaId"   => $_POST['codigoAreaId'],
-      "codigoCampo"    => $_POST['codigoCampo'],
-      "gasto_nombre"   => $_POST['gasto_nombre'],
-      "gasto_concepto" => $_POST['gasto_concepto'],
-      "gasto_importe"  => $_POST['gasto_importe'],
-    ];
-    $res_mdl = $this->existencias_limon_model->guardar($exisLimonData);
+    //   "gasto_id_gasto" => $_POST['gasto_id_gasto'],
+    //   "gasto_del"      => $_POST['gasto_del'],
+    //   "codigoAreaId"   => $_POST['codigoAreaId'],
+    //   "codigoCampo"    => $_POST['codigoCampo'],
+    //   "gasto_nombre"   => $_POST['gasto_nombre'],
+    //   "gasto_concepto" => $_POST['gasto_concepto'],
+    //   "gasto_importe"  => $_POST['gasto_importe'],
+    // ];
+    // $res_mdl = $this->existencias_limon_model->guardar($exisLimonData);
 
 		return array('passes' => true, 'id_venta' => $id_venta);
 	}

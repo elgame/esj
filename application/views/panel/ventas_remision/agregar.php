@@ -30,7 +30,7 @@
         <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'.$getId.(isset($_GET['id_nr'])? '?id_nr='.$_GET['id_nr']:'')); ?>" method="POST" id="form">
           <ul class="nav nav-tabs" id="myTab">
             <li class="active"><a href="#tabRemision">Remisión</a></li>
-            <li><a href="#tabExisLimon">Exis. Limón</a></li>
+            <!-- <li><a href="#tabExisLimon">Exis. Limón</a></li> -->
           </ul>
 
           <div id="myTabContent" class="tab-content">
