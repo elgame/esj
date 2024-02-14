@@ -6042,10 +6042,10 @@ class caja_chica_model extends CI_Model {
   }
 
   public function getRptIngresosXls(){
-    // header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    // header("Content-Disposition: attachment; filename=ingresos_caja.xls");
-    // header("Pragma: no-cache");
-    // header("Expires: 0");
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=ingresos_caja.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
 
     $res = $this->getRptIngresosData();
 
