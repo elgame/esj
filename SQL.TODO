@@ -1,4 +1,17 @@
 
+ ☐ Crear reporte de movimientos de bancos concentrado por empresa, como el de Reporte Acumulado Por Empresa
+   Egresos facturas
+   Egresos facturas USD
+   Egresos prestamos (PTMO) + TR ENTRE CUENTAS + movimientos internos
+   Egresos prestamos USD (PTMO) + TR ENTRE CUENTAS + movimientos internos
+   Ingresos facturas
+   Ingresos facturas USD
+   Ingresos prestamos (PTMO) + TR ENTRE CUENTAS + movimientos internos
+   Ingresos prestamos USD (PTMO) + TR ENTRE CUENTAS + movimientos internos
+   Banco En cuentas agregar campo cuentas en uso y esas cuentas son las que sumaria en el reporte
+   Tipos en cuentas por pagar y cobrar =
+   prestamo/abonos, traspasos, pago a proveedores (externos), movimientos internos
+
  ☐ Reporte de existencia de limon
    Existencia reproceso agregarlo en PRODUCCION y va restar
    Existencia de piso y existencia de piso anterior
@@ -16,6 +29,8 @@
     COMMENT ON COLUMN otros.existencias_limon_devolucion_fruta.tipo IS 'frut: dev fruta, inds: dev industrial';
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_remision bigint;
+    -- lap
+    ALTER TABLE IF EXISTS otros.existencias_limon ADD COLUMN extras json;
 
  ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
  ✔ recetas seleccionar multi centros se agregan @done (24-01-17 10:49)
@@ -23,22 +38,26 @@
  ✔ Cambio en existencia de limon revisar el archivo que mando la señora @done (24-01-16 17:05)
      -- san|lap|pcc
     ALTER TABLE IF EXISTS public.calibres ADD COLUMN grupo character varying(15) COLLATE pg_catalog."default";
-    UPDATE public.calibres SET grupo='ind' WHERE id_calibre = 133;
-    UPDATE public.calibres SET grupo='am2' WHERE id_calibre = 132;
-    UPDATE public.calibres SET grupo='ev2' WHERE id_calibre = 113;
-    UPDATE public.calibres SET grupo='amc' WHERE id_calibre = 128;
-    UPDATE public.calibres SET grupo='amv' WHERE id_calibre = 127;
-    UPDATE public.calibres SET grupo='eal' WHERE id_calibre = 125;
-    UPDATE public.calibres SET grupo='Ev' WHERE id_calibre = 112;
-    UPDATE public.calibres SET grupo='ext' WHERE id_calibre = 118;
-    UPDATE public.calibres SET grupo='alc' WHERE id_calibre = 123;
-    UPDATE public.calibres SET grupo='alv' WHERE id_calibre = 122;
-    UPDATE public.calibres SET grupo='600' WHERE id_calibre = 110;
-    UPDATE public.calibres SET grupo='600' WHERE id_calibre = 109;
-    UPDATE public.calibres SET grupo='500' WHERE id_calibre = 108;
-    UPDATE public.calibres SET grupo='500' WHERE id_calibre = 107;
-    UPDATE public.calibres SET grupo='300' WHERE id_calibre = 106;
-    UPDATE public.calibres SET grupo='300' WHERE id_calibre = 105;
+    -- lap
+    UPDATE public.calibres SET "order"=19, grupo='IND' WHERE id_calibre = 133;
+    UPDATE public.calibres SET "order"=18, grupo='AM2' WHERE id_calibre = 132;
+    UPDATE public.calibres SET "order"=17, grupo='EV2' WHERE id_calibre = 113;
+    UPDATE public.calibres SET "order"=16, grupo='2ALM' WHERE id_calibre = 126;
+    UPDATE public.calibres SET "order"=15, grupo='AMC' WHERE id_calibre = 128;
+    UPDATE public.calibres SET "order"=14, grupo='AMV' WHERE id_calibre = 127;
+    UPDATE public.calibres SET "order"=13, grupo='EAL' WHERE id_calibre = 125;
+    UPDATE public.calibres SET "order"=12, grupo='EV' WHERE id_calibre = 112;
+    UPDATE public.calibres SET "order"=11, grupo='EXX' WHERE id_calibre = 143;
+    UPDATE public.calibres SET "order"=10, grupo='EXX' WHERE id_calibre = 142;
+    UPDATE public.calibres SET "order"=9, grupo='EXT' WHERE id_calibre = 118;
+    UPDATE public.calibres SET "order"=8, grupo='ALC' WHERE id_calibre = 123;
+    UPDATE public.calibres SET "order"=7, grupo='ALV' WHERE id_calibre = 122;
+    UPDATE public.calibres SET "order"=6, grupo='600' WHERE id_calibre = 110;
+    UPDATE public.calibres SET "order"=5, grupo='600' WHERE id_calibre = 109;
+    UPDATE public.calibres SET "order"=4, grupo='500' WHERE id_calibre = 108;
+    UPDATE public.calibres SET "order"=3, grupo='500' WHERE id_calibre = 107;
+    UPDATE public.calibres SET "order"=2, grupo='300' WHERE id_calibre = 106;
+    UPDATE public.calibres SET "order"=1, grupo='300' WHERE id_calibre = 105;
  ☐ Cambios en recetas
    -- lap|san|pcc
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN a_volumen character varying(50) COLLATE pg_catalog."default";

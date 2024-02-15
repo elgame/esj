@@ -82,7 +82,14 @@
                   <div class="span12">Saldo Inicial <input type="text" name="saldo_inicial" value="<?php echo set_value('saldo_inicial', $caja['saldo_inicial']) ?>" id="saldo_inicial" class="input-medium vpositive" <?php echo $readonly ?>></div>
                 </div>
               </div>
-              <div class="span6">
+              <div class="span2" style="text-align: right;">
+                <div class="row-fluid" style="margin: 3px 0;">
+                  <div class="span12">Factor Merma
+                    <input type="text" name="factor_merma" value="<?php echo set_value('factor_merma', (isset($caja['ext']->factor_merma)? $caja['ext']->factor_merma: '')) ?>" id="factor_merma" class="input-medium vpositive">
+                  </div>
+                </div>
+              </div>
+              <div class="span4">
                 <div class="row-fluid">
                   <input type="hidden" name="fno_caja" id="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
                   <input type="hidden" name="farea" id="farea" value="<?php echo $farea; ?>">
@@ -97,7 +104,7 @@
 
                   <?php if ($caja['guardado']) { ?>
                     <div class="span3"><a href="<?php echo base_url('panel/existencias_limon/print_caja?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
-                    <div class="span3"><a href="<?php echo base_url('panel/existencias_limon/print_caja2?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir 2</a></div>
+                    <!-- <div class="span3"><a href="<?php echo base_url('panel/existencias_limon/print_caja2?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir 2</a></div> -->
                   <?php }  ?>
                 </div>
               </div>
@@ -351,7 +358,10 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-devolucion-fruta">
                           <thead>
                             <tr>
-                              <th colspan="6">DEVOLUCIÓN DE FRUTA</th>
+                              <th colspan="6">DEVOLUCIÓN DE FRUTA
+                                <input type="text" name="precio_dev_fruta" id="precio_dev_fruta" class="vpositive"
+                                value="<?php echo set_value('precio_dev_fruta', (isset($caja['ext']->precio_dev_fruta)? $caja['ext']->precio_dev_fruta: '')) ?>" placeholder="Precio para devolucion de fruta">
+                              </th>
                               <th>
                                 <button type="button" class="btn btn-success" id="btnAddDevFruta"><i class="icon-plus"></i></button>
                               </th>
