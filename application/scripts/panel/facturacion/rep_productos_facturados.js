@@ -101,7 +101,7 @@
 
   function loadSerieFolio (ide, forceLoad, tipo = 'f') {
     var objselect = $('#dserie');
-    $.getJSON(base_url+'panel/facturacion/get_series/?tipof='+tipo+'&ide='+ide,
+    $.getJSON(base_url+'panel/facturacion/get_series/?tipof='+tipo+'&ide='+ide+"&all=1",
       function(res){
         if(res.data) {
           var html_option = '<option value="void"></option>',
