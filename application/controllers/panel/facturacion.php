@@ -2374,7 +2374,7 @@ class facturacion extends MY_Controller {
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Reporte Productos Facturados');
 
-    $params['series'] = $this->facturacion_model->get_series($params['empresa']->id_empresa, 'r');
+    $params['series'] = $this->facturacion_model->get_series($params['empresa']->id_empresa, 'r', true);
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);
