@@ -2074,8 +2074,9 @@ class facturacion extends MY_Controller {
     if(isset($_GET['ide']))
     {
       $tipo = isset($_GET['tipof'])? $_GET['tipof']: 'f';
+      $all = isset($_GET['all'])? (bool)$_GET['all']: false;
       $this->load->model('facturacion_model');
-      $res = $this->facturacion_model->get_series($_GET['ide'], $tipo);
+      $res = $this->facturacion_model->get_series($_GET['ide'], $tipo, $all);
       echo json_encode($res);
     }
   }
