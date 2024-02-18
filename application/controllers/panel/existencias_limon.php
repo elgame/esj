@@ -107,6 +107,8 @@ class existencias_limon extends MY_Controller {
       ->get()->result();
 
     $params['caja'] = $this->existencias_limon_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1'), $area );
+    $params['caja_data'] = $this->existencias_limon_model->printCaja($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1'), $area, $params['caja'], true);
+    $params['caja_data'] = $this->existencias_limon_model->ajustesDataJson($params['caja'], $params['caja_data']);
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
 

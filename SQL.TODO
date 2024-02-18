@@ -29,7 +29,6 @@
     COMMENT ON COLUMN otros.existencias_limon_devolucion_fruta.tipo IS 'frut: dev fruta, inds: dev industrial';
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_remision bigint;
-    -- lap
     ALTER TABLE IF EXISTS otros.existencias_limon ADD COLUMN extras json;
 
  ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
@@ -38,7 +37,7 @@
  ✔ Cambio en existencia de limon revisar el archivo que mando la señora @done (24-01-16 17:05)
      -- san|lap|pcc
     ALTER TABLE IF EXISTS public.calibres ADD COLUMN grupo character varying(15) COLLATE pg_catalog."default";
-    -- lap
+    -- lap|pcc
     UPDATE public.calibres SET "order"=19, grupo='IND' WHERE id_calibre = 133;
     UPDATE public.calibres SET "order"=18, grupo='AM2' WHERE id_calibre = 132;
     UPDATE public.calibres SET "order"=17, grupo='EV2' WHERE id_calibre = 113;
@@ -64,7 +63,7 @@
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_semana integer;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_fecha timestamp without time zone;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_ph numeric(15,4);
-   -- lap
+   -- lap|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Aplicaciones',521,true,'recetas/rptaplicaciones/','print',true);
 
  ☐ Apartado de plasticos, produccion, ventas, inventarios, etc

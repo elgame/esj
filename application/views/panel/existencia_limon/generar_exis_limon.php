@@ -1386,6 +1386,39 @@
                     </div>
                     <!--/ MANO DE OBRA E INSUMOS -->
 
+                    <!-- ESTIMACION DE PRECIOS -->
+                    <div class="row-fluid">
+                      <div class="span4" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-estima-precio">
+                          <thead>
+                            <tr>
+                              <th colspan="2">ESTIMACION DE PRECIOS</th>
+                            </tr>
+                            <tr>
+                              <th>CALIBRE</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php if (isset($caja_data['tabla_rendimientos']) && count($caja_data['tabla_rendimientos']) > 0): ?>
+                            <?php foreach ($caja_data['tabla_rendimientos'] as $estimaprecio): ?>
+                              <tr>
+                                <td><?php echo $estimaprecio['calibre'] ?>
+                                  <input type="hidden" name="estimaprecio_id_calibre[]" value="<?php echo $estimaprecio['id_calibre'] ?>" class="span12 estimaprecio_id_calibre">
+                                  <input type="hidden" name="estimaprecio_calibre[]" value="<?php echo $estimaprecio['calibre'] ?>" class="span12 estimaprecio_calibre">
+                                  <input type="hidden" name="estimaprecio_cantidad[]" value="<?php echo $estimaprecio['cantidad'] ?>" class="span12 estimaprecio_cantidad">
+                                  <input type="hidden" name="estimaprecio_kilos[]" value="<?php echo $estimaprecio['kilos'] ?>" class="span12 estimaprecio_kilos">
+                                </td>
+                                <td><input type="text" name="estimaprecio_importe[]" value="<?php echo (isset($estimaprecio['importe'])? $estimaprecio['importe']: '') ?>" class="span12 vpositive estimaprecio_importe" required></td>
+                              </tr>
+                            <?php endforeach ?>
+                            <?php endif ?>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ ESTIMACION DE PRECIOS -->
+
                 </div>
               </div>
             </div>
