@@ -2074,8 +2074,9 @@ class facturacion extends MY_Controller {
     if(isset($_GET['ide']))
     {
       $tipo = isset($_GET['tipof'])? $_GET['tipof']: 'f';
+      $all = isset($_GET['all'])? (bool)$_GET['all']: false;
       $this->load->model('facturacion_model');
-      $res = $this->facturacion_model->get_series($_GET['ide'], $tipo);
+      $res = $this->facturacion_model->get_series($_GET['ide'], $tipo, $all);
       echo json_encode($res);
     }
   }
@@ -2373,7 +2374,7 @@ class facturacion extends MY_Controller {
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Reporte Productos Facturados');
 
-    $params['series'] = $this->facturacion_model->get_series($params['empresa']->id_empresa, 'r');
+    $params['series'] = $this->facturacion_model->get_series($params['empresa']->id_empresa, 'r', true);
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);
