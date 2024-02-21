@@ -42,6 +42,13 @@
                   <option value="t" <?php echo set_select_get('ftipo', 't'); ?>>GASTOS</option>
                 </select>
 
+                <label for="ftipo_doc">Documento</label>
+                <select name="ftipo_doc" class="input-medium" id="ftipo_doc">
+                  <option value="">TODAS</option>
+                  <option value="nv" <?php echo set_select_get('ftipo_doc', 'nv'); ?>>NOTA DE VENTA</option>
+                  <option value="fa" <?php echo set_select_get('ftipo_doc', 'fa'); ?>>FACTURA</option>
+                </select>
+
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date('Y-m-01\TH:i')); ?>" size="10">
