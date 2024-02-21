@@ -132,10 +132,10 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       }
     }
 
-    foreach ($impuestos as $key => $value) {
-      $impuestos[$key]['base'] = number_format($pago_factura * $impuestos[$key]['base'] / $impuestos[$key]['total'], 6, '.', '');
-      $impuestos[$key]['importe'] = number_format($pago_factura * $impuestos[$key]['importe'] / $impuestos[$key]['total'], 6, '.', '');
-    }
+    // foreach ($impuestos as $key => $value) {
+    //   $impuestos[$key]['base'] = number_format($pago_factura * $impuestos[$key]['base'] / $impuestos[$key]['total'], 6, '.', '');
+    //   $impuestos[$key]['importe'] = number_format($pago_factura * $impuestos[$key]['importe'] / $impuestos[$key]['total'], 6, '.', '');
+    // }
 
     // echo "<pre>";
     // var_dump($impuestos);
