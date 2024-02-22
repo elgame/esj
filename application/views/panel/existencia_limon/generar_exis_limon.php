@@ -1057,9 +1057,52 @@
                     </div>
                     <!--/ Costo de venta -->
 
-                    <!-- Comisiones a terceros -->
+                    <!-- Certificados -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-costo-ventas" style="margin-bottom: 0px;">
+                          <thead>
+                            <tr>
+                              <th colspan="6">CERTIFICADOS</th>
+                            </tr>
+                            <tr>
+                              <th>FOLIO</th>
+                              <th>PROVEEDORES</th>
+                              <th>TIPO</th>
+                              <th>CANTIDAD</th>
+                              <th>PRECIO</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                              $certificados_importe = 0;
+                              foreach ($caja['certificados'] as $cert) {
+                                $certificados_importe  += floatval($cert->importe);
+                              ?>
+                              <tr>
+                                <td><?php echo $cert->serie.$cert->folio ?></td>
+                                <td><?php echo $cert->proveedores ?></td>
+                                <td><?php echo $cert->clasificacion ?></td>
+                                <td><?php echo $cert->certificado ?></td>
+                                <td><?php echo $cert->precio ?></td>
+                                <td><?php echo $cert->importe ?></td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr class="footer">
+                              <th colspan="5"></th>
+                              <th id="certificados_importe"><?php echo $certificados_importe ?></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Certificados -->
+
+                    <!-- Comisiones a terceros -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 10px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-comision-terceros">
                           <thead>
                             <tr>
