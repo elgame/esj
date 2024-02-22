@@ -56,6 +56,11 @@ class compras_model extends privilegios_model{
       $sql .= " AND co.isgasto = '".$this->input->get('ftipo')."'";
     }
 
+    if($this->input->get('ftipo_doc') != '')
+    {
+      $sql .= " AND co.tipo_documento = '".$this->input->get('ftipo_doc')."'";
+    }
+
     if($this->input->get('fxml') == 'si')
     {
       $sql .= " AND Coalesce(co.uuid, '') <> ''";
