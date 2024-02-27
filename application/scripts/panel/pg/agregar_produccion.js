@@ -7,12 +7,16 @@
 
     autocompleteEmpresas();
     autocompleteAutorizo();
+    autocompleteClasifi();
 
     getSucursales();
 
     eventCalcular();
+    eventAddProducto();
 
   });
+
+
 
 
   /*
@@ -72,6 +76,37 @@
     });
   };
 
+  const autocompleteClasifi = function() {
+    $('.box-content').on('focus', 'input#clasificacion:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/facturacion/ajax_get_clasificaciones/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+
+          $tr.find('#id_clasificacion').val(ui.item.id);
+
+
+          setTimeout(function(){
+            let parts = $this.val().split(' - ');
+            $this.val((parts.length > 1? parts[0]: $this.val()));
+          }, 300);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('#id_clasificacion').val('');
+        }
+      });
+    });
+  };
+
 
   /*
    |------------------------------------------------------------------------
@@ -96,6 +131,76 @@
 
     $('.box-content').on('keyup', '#peso_prom, #plasta_kg', totalKgInyectados);
 
+  };
+
+  let eventAddProducto = function () {
+    function valAdd() {
+      let fields = ["#clasificacion", "#id_clasificacion", "#cajas_buenas", "#cajas_merma", "#cajas_total",
+        "#peso_prom", "#plasta_kg", "#inyectad_kg", "#tiempo_ciclo"];
+      let valida = true;
+      for (var i = 0; i < fields.length; i++) {
+        if ($(fields[i]).val() == '') {
+          valida = false;
+        }
+      }
+
+      return valida;
+    };
+
+    $('#addProducto').click(function(event) {
+      if (valAdd()) {
+        let htmltr = `
+          <tr>
+            <td>${$("#clasificacion").val()}
+              <input type="hidden" name="prod_id[]" id="prod_id" value="">
+              <input type="hidden" name="prod_clasificacion[]" id="prod_clasificacion" value="${$("#clasificacion").val()}">
+              <input type="hidden" name="prod_id_clasificacion[]" id="prod_id_clasificacion" value="${$("#id_clasificacion").val()}">
+              <input type="hidden" name="prod_cajas_buenas[]" id="prod_cajas_buenas" value="${$("#cajas_buenas").val()}">
+              <input type="hidden" name="prod_cajas_merma[]" id="prod_cajas_merma" value="${$("#cajas_merma").val()}">
+              <input type="hidden" name="prod_total_cajas[]" id="prod_total_cajas" value="${$("#cajas_total").val()}">
+              <input type="hidden" name="prod_peso_promedio[]" id="prod_peso_promedio" value="${$("#peso_prom").val()}">
+              <input type="hidden" name="prod_plasta[]" id="prod_plasta" value="${$("#plasta_kg").val()}">
+              <input type="hidden" name="prod_Kgs_inyectados[]" id="prod_Kgs_inyectados" value="${$("#inyectado_kg").val()}">
+              <input type="hidden" name="prod_ciclo[]" id="prod_ciclo" value="${$("#tiempo_ciclo").val()}">
+              <input type="hidden" name="prod_del[]" id="prod_del" value="false">
+            </td>
+            <td>${$("#cajas_buenas").val()}</td>
+            <td>${$("#cajas_merma").val()}</td>
+            <td>${$("#cajas_total").val()}</td>
+            <td>${$("#peso_prom").val()}</td>
+            <td>${$("#plasta_kg").val()}</td>
+            <td>${$("#inyectado_kg").val()}</td>
+            <td>${$("#tiempo_ciclo").val()}</td>
+            <td>
+              <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
+            </td>
+          </tr>`;
+        $("#table_prod tbody").append(htmltr);
+
+        $("#clasificacion").val('').focus();
+        $("#id_clasificacion").val('');
+        $("#cajas_buenas").val('');
+        $("#cajas_merma").val('');
+        $("#cajas_total").val('');
+        $("#peso_prom").val('');
+        $("#plasta_kg").val('');
+        $("#inyectado_kg").val('');
+        $("#tiempo_ciclo").val('');
+      } else {
+        noty({"text":"Los Campos son requeridos para agregar el producto.", "layout":"topRight", "type":"error"});
+        $("#clasificacion").focus();
+      }
+    });
+
+    $('#table_prod').on('click', '#delProd', function(event) {
+      event.preventDefault();
+      if ($("#prod_id").val() == '') {
+        $(this).parents('tr').remove();
+      } else {
+        $(this).parents('tr').find('#prod_del').val('true');
+        $(this).parents('tr').hide();
+      }
+    });
   };
 
 

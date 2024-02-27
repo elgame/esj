@@ -208,6 +208,31 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',612,false,'pg_produccion/moldesModificar/','edit',false);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',612,false,'pg_produccion/moldesEliminar/','remove',false);
    ALTER TABLE IF EXISTS otros.pg_produccion ADD COLUMN tiempo_ciclo double precision DEFAULT 0;
+   -- pcc
+   CREATE TABLE IF NOT EXISTS otros.pg_produccion_productos
+    (
+        id bigserial NOT NULL,
+        id_produccion bigint NOT NULL,
+        id_clasificacion bigint NOT NULL,
+        cajas_buenas integer NOT NULL DEFAULT 0,
+        cajas_merma integer NOT NULL DEFAULT 0,
+        cajas_total bigint NOT NULL DEFAULT 0,
+        plasta_kg double precision NOT NULL DEFAULT 0,
+        inyectado_kg double precision NOT NULL DEFAULT 0,
+        peso_prom double precision NOT NULL DEFAULT 0,
+        tiempo_ciclo double precision NOT NULL DEFAULT 0,
+        CONSTRAINT pg_produccion_productos_pkey PRIMARY KEY (id),
+        CONSTRAINT pg_produccion_productos_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+            REFERENCES public.clasificaciones (id_clasificacion) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT pg_produccion_productos_id_produccion_fkey FOREIGN KEY (id_produccion)
+            REFERENCES otros.pg_produccion (id_produccion) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE IF EXISTS otros.pg_produccion_productos OWNER to programa;
+   ALTER TABLE IF EXISTS otros.pg_produccion ADD COLUMN no_impresiones integer DEFAULT 0;
 
  ☐ Agregar descripsion en permisos
  -- lap|san|pcc

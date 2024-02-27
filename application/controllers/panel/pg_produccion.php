@@ -162,6 +162,20 @@ class pg_produccion extends MY_Controller {
     }
   }
 
+  /**
+   * Imprime la producción
+   * @return [type] [description]
+   */
+  public function imprimir()
+  {
+    if(isset($_GET['id']{0}))
+    {
+      $this->load->model('pg_produccion_model');
+      $this->pg_produccion_model->imprimir($_GET['id']);
+    }
+    else
+      redirect(base_url('panel/pg_produccion/?msg=1'));
+  }
 
   /**
    * Configura los metodos de agregar y modificar
@@ -183,39 +197,23 @@ class pg_produccion extends MY_Controller {
         ['field' => 'djefeTurn', 'label' => 'djefeTurn', 'rules' => ''] ,
         ['field' => 'djefeTurnId', 'label' => 'djefeTurnId', 'rules' => 'required|numeric'] ,
 
-        ['field' => 'cajas_buenas', 'label' => 'cajas_buenas', 'rules' => 'required|numeric'],
-        ['field' => 'cajas_merma', 'label' => 'cajas_merma', 'rules' => 'required|numeric'],
-        ['field' => 'cajas_total', 'label' => 'cajas_total', 'rules' => 'required|numeric'],
-        ['field' => 'peso_prom', 'label' => 'peso_prom', 'rules' => 'required|numeric'],
-        ['field' => 'plasta_kg', 'label' => 'plasta_kg', 'rules' => 'required|numeric'],
-        ['field' => 'inyectado_kg', 'label' => 'inyectado_kg', 'rules' => 'required|numeric'],
-        ['field' => 'tiempo_ciclo', 'label' => 'tiempo_ciclo', 'rules' => 'required|numeric'],
+        ['field' => 'prod_id[]', 'label' => 'prod_id', 'rules' => ''],
+        ['field' => 'prod_clasificacion[]', 'label' => 'prod_clasificacion', 'rules' => 'required'],
+        ['field' => 'prod_id_clasificacion[]', 'label' => 'prod_id_clasificacion', 'rules' => 'required|numeric'],
+        ['field' => 'prod_cajas_buenas[]', 'label' => 'prod_cajas_buenas', 'rules' => 'required|numeric'],
+        ['field' => 'prod_cajas_merma[]', 'label' => 'prod_cajas_merma', 'rules' => 'required|numeric'],
+        ['field' => 'prod_total_cajas[]', 'label' => 'prod_total_cajas', 'rules' => 'required|numeric'],
+        ['field' => 'prod_peso_promedio[]', 'label' => 'prod_peso_promedio', 'rules' => 'required|numeric'],
+        ['field' => 'prod_plasta[]', 'label' => 'prod_plasta', 'rules' => 'required|numeric'],
+        ['field' => 'prod_Kgs_inyectados[]', 'label' => 'prod_Kgs_inyectados', 'rules' => 'required|numeric'],
+        ['field' => 'prod_ciclo[]', 'label' => 'prod_ciclo', 'rules' => 'required|numeric'],
+        ['field' => 'prod_del[]', 'label' => 'prod_del', 'rules' => ''],
 
     );
 
     $this->form_validation->set_rules($rules);
   }
 
-
-  /**
-   * Imprime la venta remision
-   * @return [type] [description]
-   */
-  public function imprimir()
-  {
-    if(isset($_GET['id']{0}))
-    {
-      $this->load->model('pg_produccion_model');
-      $this->pg_produccion_model->print($_GET['id']);
-      // if($this->input->get('p') == 'true')
-      // else {
-      //   $params['url'] = 'panel/estado_resultado_trans/imprimir/?id='.$_GET['id'].'&p=true';
-      //   $this->load->view('panel/facturacion/print_view', $params);
-      // }
-    }
-    else
-      redirect(base_url('panel/estado_resultado_trans/?msg=1'));
-  }
 
 
 

@@ -328,3 +328,15 @@
 .cursorp {
   cursor: pointer !important;
 }
+
+
+/** ALL  **/
+.form-horizontal .formgrupslim .control-group {
+	margin-bottom: 0px
+}
+.form-horizontal .formgrupslim .control-label {
+	width: auto;
+}
+.form-horizontal .formgrupslim .controls {
+	margin-left: 0px;
+}
