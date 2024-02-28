@@ -1599,6 +1599,7 @@ class cuentas_pagar_model extends privilegios_model{
 					'id_cuenta_proveedor' => ($this->input->post('fcuentas_proveedor')!=''? $this->input->post('fcuentas_proveedor'): NULL),
 					'clasificacion'       => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
 					'tcambio'             => floatval($this->input->post('tcambio')),
+          'tipo_mov'            => ($this->input->post('dtipomov')? $this->input->post('dtipomov'): NULL),
 					));
 
 		if ($resp['error'] == false)
@@ -1684,6 +1685,8 @@ class cuentas_pagar_model extends privilegios_model{
 						'a_nombre_de'  => $inf_factura['proveedor']->nombre_fiscal,
 						'id_cuenta_proveedor' => ($data['id_cuenta_proveedor']!=''? $data['id_cuenta_proveedor']: NULL),
 						'clasificacion'       => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
+            'tipo_mov'  => ($this->input->post('dtipomov')? $this->input->post('dtipomov'): NULL),
+
 						));
 			//No hay saldo
 			if($resp['error'])

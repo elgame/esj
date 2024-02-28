@@ -879,6 +879,7 @@ class banco_cuentas_model extends banco_model {
 						'entransito'  => 'f',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						'a_nombre_de' => $this->input->post('dcliente'),
+            'tipo_mov'    => ($this->input->post('dtipomov')? $this->input->post('dtipomov'): 'pago proveedores'),
 						);
 			if(is_numeric($_POST['did_cliente']))
 				$data['id_cliente'] = $this->input->post('did_cliente');
@@ -925,6 +926,7 @@ class banco_cuentas_model extends banco_model {
         'id_rancho'       => ($this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL),
         'id_centro_costo' => ($this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL),
         'id_activo'       => ($this->input->post('activoId')? $this->input->post('activoId'): NULL),
+        'tipo_mov'        => ($this->input->post('dtipomov')? $this->input->post('dtipomov'): 'pago proveedores'),
 			);
 			if(is_numeric($_POST['did_proveedor']))
 				$data['id_proveedor'] = $this->input->post('did_proveedor');
@@ -967,6 +969,7 @@ class banco_cuentas_model extends banco_model {
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						'a_nombre_de' => $this->input->post('dproveedor'),
             'desglosar_iva' => 't',
+            'tipo_mov'    => 'pago proveedores',
 						);
 			}
 			$this->addRetiro($data_comision);
@@ -987,6 +990,7 @@ class banco_cuentas_model extends banco_model {
 						'tipo'        => 't',
 						'entransito'  => 'f',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
+            'tipo_mov'    => ($this->input->post('dtipomov')? $this->input->post('dtipomov'): 'traspaso'),
 						);
 			}
 			$res_trasp = $this->addDeposito($data_traspaso);
@@ -1320,6 +1324,7 @@ class banco_cuentas_model extends banco_model {
         'sucursal'         => $this->input->post('fsucursal'),
         'tipo'             => $this->input->post('ftipo'),
         'es_concentradora' => ($this->input->post('fes_concentradora')=='si'? 't': 'f'),
+        'cuenta_uso'       => ($this->input->post('fcuenta_uso')=='si'? 't': 'f'),
       );
 		}
 
@@ -1350,6 +1355,7 @@ class banco_cuentas_model extends banco_model {
         'numero_cheque'    => $this->input->post('fnumero_cheque'),
         'tipo'             => $this->input->post('ftipo'),
         'es_concentradora' => ($this->input->post('fes_concentradora')=='si'? 't': 'f'),
+        'cuenta_uso'       => ($this->input->post('fcuenta_uso')=='si'? 't': 'f'),
       );
 		}
 
@@ -1374,7 +1380,7 @@ class banco_cuentas_model extends banco_model {
 										(
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) -
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta)
-										) AS saldo, bc.tipo, bc.formato_cheque, bc.es_concentradora
+										) AS saldo, bc.tipo, bc.formato_cheque, bc.es_concentradora, bc.cuenta_uso
                  FROM banco_cuentas AS bc
                  		INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco
 										INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa
@@ -1552,14 +1558,14 @@ class banco_cuentas_model extends banco_model {
 
 
     return $response;
- }
+  }
 
  /**
   * Reporte de rendimientos de fruta
   * @return void
   */
   public function rie_pdf()
- {
+  {
     // Obtiene los datos del reporte.
     $data = $this->rie_data();
     // echo "<pre>";
@@ -1759,6 +1765,297 @@ class banco_cuentas_model extends banco_model {
         <td style="border:1px solid #000;" colspan="2">'.$total_importes_total.'</td>
         <td style="" colspan="2"></td>
       </tr>';
+
+    echo $html;
+  }
+
+
+  public function rpt_mov_totales_empresa_data()
+  {
+    $response = array();
+    $sql = '';
+
+    $_GET['ffecha1'] = isset($_GET['ffecha1'])? $_GET['ffecha1']: date("Y-m-1");
+    $_GET['ffecha2'] = isset($_GET['ffecha2'])? $_GET['ffecha2']: date("Y-m-d");
+    $sql .= " AND Date(bm.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."'";
+
+    //Filtros de area
+    if ($this->input->get('ftipo') != 'a') {
+      $sql .= " AND bm.tipo = '".($this->input->get('ftipo')==='i'? 't': 'f')."'";
+    }
+    if ($this->input->get('did_empresa') > 0) {
+      $sql .= " AND e.id_empresa = ".$this->input->get('did_empresa');
+    }
+
+
+    // Obtenemos los rendimientos en los lotes de ese dia
+    $query = $this->db->query(
+      "SELECT bm.id_movimiento, bm.monto, e.id_empresa, e.nombre_fiscal, bc.tipo AS moneda, bm.tipo,
+        bm.tipo_mov
+      FROM banco_movimientos bm
+        INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
+        INNER JOIN empresas e ON e.id_empresa = bc.id_empresa
+      WHERE bc.cuenta_uso = 't' {$sql}
+      ORDER BY e.num_orden ASC, bc.alias ASC, bm.id_movimiento ASC");
+    //bm.status = 't'
+    if($query->num_rows() > 0) {
+      $aux = '';
+      foreach ($query->result() as $key => $value) {
+        if (!isset($response[$value->id_empresa])) {
+          $response[$value->id_empresa] = (object)[
+            'empresa' => $value->nombre_fiscal,
+            'ef' => 0,
+            'efu' => 0,
+            'ep' => 0,
+            'epu' => 0,
+            'if' => 0,
+            'ifu' => 0,
+            'ip' => 0,
+            'ipu' => 0,
+          ];
+        }
+
+        if ($value->tipo == 'f' && $value->tipo_mov == 'pago proveedores') {
+          if ($value->moneda == 'USD') {
+            $response[$value->id_empresa]->efu += $value->monto;
+          } else {
+            $response[$value->id_empresa]->ef += $value->monto;
+          }
+        } elseif ($value->tipo == 'f' && ($value->tipo_mov == 'traspaso' || $value->tipo_mov == 'movimiento interno' || $value->tipo_mov == 'prestamo/abono')) {
+          if ($value->moneda == 'USD') {
+            $response[$value->id_empresa]->epu += $value->monto;
+          } else {
+            $response[$value->id_empresa]->ep += $value->monto;
+          }
+        } elseif ($value->tipo == 't' && $value->tipo_mov == 'pago proveedores') {
+          if ($value->moneda == 'USD') {
+            $response[$value->id_empresa]->ifu += $value->monto;
+          } else {
+            $response[$value->id_empresa]->if += $value->monto;
+          }
+        } elseif ($value->tipo == 't' && ($value->tipo_mov == 'traspaso' || $value->tipo_mov == 'movimiento interno' || $value->tipo_mov == 'prestamo/abono')) {
+          if ($value->moneda == 'USD') {
+            $response[$value->id_empresa]->ipu += $value->monto;
+          } else {
+            $response[$value->id_empresa]->ip += $value->monto;
+          }
+        }
+
+      }
+    }
+    $query->free_result();
+
+
+    return $response;
+  }
+
+ /**
+  * Reporte de rendimientos de fruta
+  * @return void
+  */
+  public function rpt_mov_totales_empresa_pdf()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_mov_totales_empresa_data();
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+    $isSameDate = ($fecha == $fecha2);
+
+    $this->load->library('mypdf');
+
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($_GET['did_empresa'])? $_GET['did_empresa']: 2));
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "REPORTE TOTAL MOVIMIENTOS POR EMPRESA";
+    // $pdf->titulo3 = $tipo."\n";
+    $pdf->titulo3 = ($isSameDate? "{$fecha->format('d/m/Y')}": "{$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}");
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+
+    // Listado de Rendimientos
+    $pdf->SetFont('helvetica','', 7);
+    $pdf->SetY($pdf->GetY()+2);
+
+    $aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
+    $widths = array(40, 21, 21, 21, 21, 21, 21, 21, 21);
+    $header = array('Empresa', 'E Fac', 'E Fac USD', 'E Prest', 'E Prest USA', 'I Fac', 'I Fac USD', 'I Prest', 'I Prest USA');
+
+    $totales = (object)[
+      'ef' => 0,
+      'efu' => 0,
+      'ep' => 0,
+      'epu' => 0,
+      'if' => 0,
+      'ifu' => 0,
+      'ip' => 0,
+      'ipu' => 0,
+    ];
+    $first = true;
+    foreach($data as $key => $mov)
+    {
+      if($pdf->GetY()+15 >= $pdf->limiteY || $first) //salta de pagina si exede el max
+      {
+        if($pdf->GetY()+15 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('helvetica','B',7);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(200,200,200);
+        // $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+
+        $first = false;
+      }
+
+      $pdf->SetFont('helvetica','', 7);
+      $pdf->SetTextColor(0,0,0);
+
+      // $pdf->SetY($pdf->GetY()-2);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+          $mov->empresa,
+          MyString::formatoNumero($mov->ef, 2, '$', false),
+          MyString::formatoNumero($mov->efu, 2, '$', false),
+          MyString::formatoNumero($mov->ep, 2, '$', false),
+          MyString::formatoNumero($mov->epu, 2, '$', false),
+          MyString::formatoNumero($mov->if, 2, '$', false),
+          MyString::formatoNumero($mov->ifu, 2, '$', false),
+          MyString::formatoNumero($mov->ip, 2, '$', false),
+          MyString::formatoNumero($mov->ipu, 2, '$', false),
+        ), false);
+
+      $totales->ef += $mov->ef;
+      $totales->efu += $mov->efu;
+      $totales->ep += $mov->ep;
+      $totales->epu += $mov->epu;
+      $totales->if += $mov->if;
+      $totales->ifu += $mov->ifu;
+      $totales->ip += $mov->ip;
+      $totales->ipu += $mov->ipu;
+    }
+
+    //total general
+    $pdf->SetFont('helvetica','B',7);
+    $pdf->SetTextColor(0 ,0 ,0 );
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      MyString::formatoNumero($totales->ef, 2, '$', false),
+      MyString::formatoNumero($totales->efu, 2, '$', false),
+      MyString::formatoNumero($totales->ep, 2, '$', false),
+      MyString::formatoNumero($totales->epu, 2, '$', false),
+      MyString::formatoNumero($totales->if, 2, '$', false),
+      MyString::formatoNumero($totales->ifu, 2, '$', false),
+      MyString::formatoNumero($totales->ip, 2, '$', false),
+      MyString::formatoNumero($totales->ipu, 2, '$', false),
+    ), false);
+
+
+    $pdf->Output('total_movs_empresas.pdf', 'I');
+  }
+
+  public function rpt_mov_totales_empresa_xls(){
+    $data = $this->rpt_mov_totales_empresa_data();
+
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=total_movs_empresas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($_GET['did_empresa'])? $_GET['did_empresa']: 2));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "REPORTE TOTAL MOVIMIENTOS POR EMPRESA";
+    $titulo3 = " DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="9" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="9" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="9" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="9"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">Empresa</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">E Fac</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">E Fac USD</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">E Prest</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">E Prest USA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">I Fac</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">I Fac USD</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">I Prest</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">I Prest USA</td>
+        </tr>';
+    $totales = (object)[
+      'ef' => 0,
+      'efu' => 0,
+      'ep' => 0,
+      'epu' => 0,
+      'if' => 0,
+      'ifu' => 0,
+      'ip' => 0,
+      'ipu' => 0,
+    ];
+    foreach($data as $key => $mov)
+    {
+      $html .= '<tr>
+        <td style="border:1px solid #000;">'.$mov->empresa.'</td>
+        <td style="border:1px solid #000;">'.$mov->ef.'</td>
+        <td style="border:1px solid #000;">'.$mov->efu.'</td>
+        <td style="border:1px solid #000;">'.$mov->ep.'</td>
+        <td style="border:1px solid #000;">'.$mov->epu.'</td>
+        <td style="border:1px solid #000;">'.$mov->if.'</td>
+        <td style="border:1px solid #000;">'.$mov->ifu.'</td>
+        <td style="border:1px solid #000;">'.$mov->ip.'</td>
+        <td style="border:1px solid #000;">'.$mov->ipu.'</td>
+      </tr>';
+
+      $totales->ef += $mov->ef;
+      $totales->efu += $mov->efu;
+      $totales->ep += $mov->ep;
+      $totales->epu += $mov->epu;
+      $totales->if += $mov->if;
+      $totales->ifu += $mov->ifu;
+      $totales->ip += $mov->ip;
+      $totales->ipu += $mov->ipu;
+    }
+
+    $html .= '<tr style="font-weight:bold">
+      <td style="border:1px solid #000;background-color: #cccccc;"></td>
+      <td style="border:1px solid #000;background-color: #cccccc;">'.$totales->ef.'</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">'.$totales->efu.'</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">'.$totales->ep.'</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">'.$totales->epu.'</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">'.$totales->if.'</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">'.$totales->ifu.'</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">'.$totales->ip.'</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">'.$totales->ipu.'</td>
+    </tr>';
 
     echo $html;
   }

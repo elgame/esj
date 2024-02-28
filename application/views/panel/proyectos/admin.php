@@ -113,6 +113,14 @@
 											);
 										}
 
+                    if ($proyecto->fecha_terminacion == '') {
+                      echo $this->usuarios_model->getLinkPrivSm('proyectos/finalizar/', array(
+                          'params'   => 'id='.$proyecto->id_proyecto,
+                          'btn_type' => 'btn-info',
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de finalizar el proyecto?', 'proyectos', this); return false;"))
+                      );
+                    }
+
 										?>
 								</td>
 							</tr>

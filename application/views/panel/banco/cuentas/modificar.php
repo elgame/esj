@@ -109,6 +109,13 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="fcuenta_uso">Cuenta en Uso </label>
+                  <div class="controls">
+                    <input type="checkbox" name="fcuenta_uso" id="fcuenta_uso" value="si" <?php echo set_checkbox('fcuenta_uso', 'si', ($data->cuenta_uso=='t'? true: false)); ?> data-uniform="false">
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Guardar</button>
                   <a href="<?php echo base_url('panel/banco/cuentas/'); ?>" class="btn">Cancelar</a>

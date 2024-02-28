@@ -1,5 +1,13 @@
 
- ☐ Crear reporte de movimientos de bancos concentrado por empresa, como el de Reporte Acumulado Por Empresa
+ ✔ Proyectos @done (24-02-28 11:11)
+   -- lap|san
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Finalizar',539,FALSE,'proyectos/finalizar/','check',FALSE);
+
+ ✔ Crear reporte de movimientos de bancos concentrado por empresa, como el de Reporte Acumulado Por Empresa @done (24-02-28 15:56)
+   -- lap|san
+   ALTER TABLE IF EXISTS public.banco_movimientos ADD COLUMN tipo_mov character varying(30) COLLATE pg_catalog."default";
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Total Movimientos x Empresa',104,true,'banco/rpt_mov_totales_empresa/','print',true);
+
    Egresos facturas
    Egresos facturas USD
    Egresos prestamos (PTMO) + TR ENTRE CUENTAS + movimientos internos
@@ -10,7 +18,7 @@
    Ingresos prestamos USD (PTMO) + TR ENTRE CUENTAS + movimientos internos
    Banco En cuentas agregar campo cuentas en uso y esas cuentas son las que sumaria en el reporte
    Tipos en cuentas por pagar y cobrar =
-   prestamo/abonos, traspasos, pago a proveedores (externos), movimientos internos
+   prestamo/abonos, traspaso, pago a proveedores (externos), movimientos internos
 
  ☐ Reporte de existencia de limon
    Existencia reproceso agregarlo en PRODUCCION y va restar
@@ -24,7 +32,7 @@
      1602 - DESCUENTO POR DISTRIBUCION
      1603 - EXPEDICION DE CERTIFICADO FITOSANITARIO <--
      1610 - MANIOBRA EN DESTINO
-   -- lap|pcc
+   -- lap|pcc|san
     ALTER TABLE IF EXISTS otros.existencias_limon_devolucion_fruta ADD COLUMN tipo character varying(5) COLLATE pg_catalog."default" DEFAULT 'frut'::character varying;
     COMMENT ON COLUMN otros.existencias_limon_devolucion_fruta.tipo IS 'frut: dev fruta, inds: dev industrial';
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_remision bigint;
@@ -37,7 +45,6 @@
  ✔ Cambio en existencia de limon revisar el archivo que mando la señora @done (24-01-16 17:05)
      -- san|lap|pcc
     ALTER TABLE IF EXISTS public.calibres ADD COLUMN grupo character varying(15) COLLATE pg_catalog."default";
-    -- lap|pcc
     UPDATE public.calibres SET "order"=19, grupo='IND' WHERE id_calibre = 133;
     UPDATE public.calibres SET "order"=18, grupo='AM2' WHERE id_calibre = 132;
     UPDATE public.calibres SET "order"=17, grupo='EV2' WHERE id_calibre = 113;
@@ -63,11 +70,10 @@
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_semana integer;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_fecha timestamp without time zone;
    ALTER TABLE IF EXISTS otros.recetas ADD COLUMN ar_ph numeric(15,4);
-   -- lap|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Aplicaciones',521,true,'recetas/rptaplicaciones/','print',true);
 
  ☐ Apartado de plasticos, produccion, ventas, inventarios, etc
- -- lap|pcc
+ -- lap|pcc|san
    CREATE TABLE IF NOT EXISTS otros.pg_moldes
     (
         id_molde bigserial NOT NULL,
@@ -194,21 +200,20 @@
     ALTER TABLE IF EXISTS otros.pg_prod_ensa_productos OWNER to programa;
    INSERT INTO otros.pg_grupos(nombre) VALUES ('1'),('2'),('3');
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Plasticos Gubalu',0,true,'pg_produccion/','gift',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Produccion',602,true,'pg_produccion/','th-large',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',603,true,'pg_produccion/agregar/','plus',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',603,false,'pg_produccion/modificar/','edit',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',603,false,'pg_produccion/imprimir/','print',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',603,false,'pg_produccion/cancelar/','remove',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Maquinas',602,true,'pg_produccion/maquinas/','th-list',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',608,true,'pg_produccion/maquinasAgregar/','plus',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',608,false,'pg_produccion/maquinasModificar/','edit',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',608,false,'pg_produccion/maquinasEliminar/','remove',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Moldes',602,true,'pg_produccion/moldes/','th-list',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',612,true,'pg_produccion/moldesAgregar/','plus',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',612,false,'pg_produccion/moldesModificar/','edit',false);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',612,false,'pg_produccion/moldesEliminar/','remove',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Produccion',605,true,'pg_produccion/','th-large',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',606,true,'pg_produccion/agregar/','plus',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',606,false,'pg_produccion/modificar/','edit',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',606,false,'pg_produccion/imprimir/','print',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',606,false,'pg_produccion/cancelar/','remove',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Maquinas',605,true,'pg_produccion/maquinas/','th-list',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',611,true,'pg_produccion/maquinasAgregar/','plus',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',611,false,'pg_produccion/maquinasModificar/','edit',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',611,false,'pg_produccion/maquinasEliminar/','remove',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Moldes',605,true,'pg_produccion/moldes/','th-list',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',615,true,'pg_produccion/moldesAgregar/','plus',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',615,false,'pg_produccion/moldesModificar/','edit',false);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',615,false,'pg_produccion/moldesEliminar/','remove',false);
    ALTER TABLE IF EXISTS otros.pg_produccion ADD COLUMN tiempo_ciclo double precision DEFAULT 0;
-   -- pcc
    CREATE TABLE IF NOT EXISTS otros.pg_produccion_productos
     (
         id bigserial NOT NULL,

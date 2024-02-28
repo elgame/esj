@@ -204,15 +204,13 @@ class proyectos_model extends CI_Model {
    * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
    */
   public function getProyectosAjax($sqlX = null){
-    $sql = '';
+    $sql = "WHERE p.status = 't' AND p.fecha_terminacion IS NULL";
     //Filtros para buscar
     if($this->input->get('fnombre') != '')
-      $sql = "WHERE ( lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
-
-    $sql .= ($sql==''? 'WHERE': ' AND')." p.status = 't'";
+      $sql .= " AND ( lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
     if($this->input->get('did_empresa') != '')
-      $sql .= ($sql==''? 'WHERE': ' AND').' e.id_empresa = ' . $this->input->get('did_empresa');
+      $sql .= ' AND e.id_empresa = ' . $this->input->get('did_empresa');
 
     $query['query'] =
           "SELECT p.id_proyecto, p.nombre, p.presupuesto, p.status,
