@@ -1177,6 +1177,7 @@ class cuentas_cobrar_model extends privilegios_model{
       'metodo_pago' => $this->input->post('fmetodo_pago'),
       'id_cliente'  => $inf_factura['cliente']->id_cliente,
       'a_nombre_de' => $inf_factura['cliente']->nombre_fiscal,
+      'tipo_mov'    => ($this->input->post('dtipomov')? $this->input->post('dtipomov'): NULL),
       ));
 
     $fecha_pago = $this->input->post('dfecha');
@@ -1277,6 +1278,7 @@ class cuentas_cobrar_model extends privilegios_model{
         'metodo_pago' => $this->input->post('fmetodo_pago'),
         'id_cliente'  => $inf_factura['cliente']->id_cliente,
         'a_nombre_de' => $inf_factura['cliente']->nombre_fiscal,
+        'tipo_mov'    => ($this->input->post('dtipomov')? $this->input->post('dtipomov'): NULL),
         ));
     }
 

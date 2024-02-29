@@ -160,65 +160,157 @@
               <div class="box-content">
 
 
-                <div class="row-fluid">
+                <div class="row-fluid formgrupslim">
                   <div class="row-fluid">
 
                     <div class="control-group span4">
+                      <label class="control-label" for="clasificacion">Clasificación</label>
+                      <div class="controls">
+                        <input type="text" name="clasificacion" class="span12" id="clasificacion" value="<?php echo set_value('clasificacion', isset($borrador->clasificacion) ? $borrador['info']->clasificacion : ''); ?>">
+                        <input type="hidden" name="id_clasificacion" class="span12" id="id_clasificacion" value="<?php echo set_value('id_clasificacion', isset($borrador->id_clasificacion) ? $borrador['info']->id_clasificacion : ''); ?>">
+                      </div>
+                    </div>
+
+                    <div class="control-group span2">
                       <label class="control-label" for="cajas_buenas">Cajas Buenas</label>
                       <div class="controls">
-                        <input type="text" name="cajas_buenas" class="span11 vpositive" id="cajas_buenas" value="<?php echo set_value('cajas_buenas', isset($borrador) ? $borrador['info']->cajas_buenas : ''); ?>">
+                        <input type="text" name="cajas_buenas" class="span12 vpositive" id="cajas_buenas" value="<?php echo set_value('cajas_buenas', isset($borrador) ? $borrador['info']->cajas_buenas : ''); ?>">
                       </div>
                     </div>
 
-                    <div class="control-group span4">
+                    <div class="control-group span2">
                       <label class="control-label" for="cajas_merma">Cajas Merma</label>
                       <div class="controls">
-                        <input type="text" name="cajas_merma" class="span11 vpositive" id="cajas_merma" value="<?php echo set_value('cajas_merma', isset($borrador) ? $borrador['info']->cajas_merma : ''); ?>">
+                        <input type="text" name="cajas_merma" class="span12 vpositive" id="cajas_merma" value="<?php echo set_value('cajas_merma', isset($borrador) ? $borrador['info']->cajas_merma : ''); ?>">
                       </div>
                     </div>
 
-                    <div class="control-group span4">
+                    <div class="control-group span2">
                       <label class="control-label" for="cajas_total">Total Cajas</label>
                       <div class="controls">
-                        <input type="text" name="cajas_total" class="span11" id="cajas_total" value="<?php echo set_value('cajas_total', isset($borrador) ? $borrador['info']->cajas_total : ''); ?>" readonly>
+                        <input type="text" name="cajas_total" class="span12" id="cajas_total" value="<?php echo set_value('cajas_total', isset($borrador) ? $borrador['info']->cajas_total : ''); ?>" readonly>
                       </div>
                     </div>
 
                   </div>
 
                   <div class="row-fluid">
-                    <div class="control-group span4">
+                    <div class="control-group span2">
                       <label class="control-label" for="peso_prom">Peso Promedio Producto</label>
                       <div class="controls">
-                        <input type="text" name="peso_prom" class="span11 vpositive" id="peso_prom" value="<?php echo set_value('peso_prom', isset($borrador) ? $borrador['info']->peso_prom : ''); ?>">
+                        <input type="text" name="peso_prom" class="span12 vpositive" id="peso_prom" value="<?php echo set_value('peso_prom', isset($borrador) ? $borrador['info']->peso_prom : ''); ?>">
                       </div>
                     </div>
 
-                    <div class="control-group span4">
+                    <div class="control-group span2">
                       <label class="control-label" for="plasta_kg">Plasta (kg)</label>
                       <div class="controls">
-                        <input type="text" name="plasta_kg" class="span11 vpositive" id="plasta_kg" value="<?php echo set_value('plasta_kg', isset($borrador) ? $borrador['info']->plasta_kg : ''); ?>">
+                        <input type="text" name="plasta_kg" class="span12 vpositive" id="plasta_kg" value="<?php echo set_value('plasta_kg', isset($borrador) ? $borrador['info']->plasta_kg : ''); ?>">
                       </div>
                     </div>
 
-                    <div class="control-group span4">
+                    <div class="control-group span2">
                       <label class="control-label" for="inyectado_kg">Kgs Inyectados</label>
                       <div class="controls">
-                        <input type="text" name="inyectado_kg" class="span11" id="inyectado_kg" value="<?php echo set_value('inyectado_kg', isset($borrador) ? $borrador['info']->inyectado_kg : ''); ?>" readonly>
+                        <input type="text" name="inyectado_kg" class="span12" id="inyectado_kg" value="<?php echo set_value('inyectado_kg', isset($borrador) ? $borrador['info']->inyectado_kg : ''); ?>" readonly>
                       </div>
                     </div>
-                  </div>
 
-                  <div class="row-fluid">
-                    <div class="control-group span4">
+                    <div class="control-group span2">
                       <label class="control-label" for="tiempo_ciclo">Tiempo Ciclo</label>
                       <div class="controls">
-                        <input type="text" name="tiempo_ciclo" class="span11 vpositive" id="tiempo_ciclo" value="<?php echo set_value('tiempo_ciclo', isset($borrador) ? $borrador['info']->tiempo_ciclo : ''); ?>">
+                        <input type="text" name="tiempo_ciclo" class="span12 vpositive" id="tiempo_ciclo" value="<?php echo set_value('tiempo_ciclo', isset($borrador) ? $borrador['info']->tiempo_ciclo : ''); ?>" data-next="addProducto">
                       </div>
                     </div>
 
+                    <div class="control-group span2">
+                      <div class="controls" style="margin-top: 18px;">
+                        <button type="button" class="btn btn-info addProducto" id="addProducto"><i class="icon-plus"></i> Agregar</button>
+                      </div>
+                    </div>
                   </div>
 
+                </div>
+
+                <div class="row-fluid">
+                  <table class="table table-striped table-bordered table-hover table-condensed" id="table_prod" style="margin-top: 10px;">
+                    <thead>
+                      <tr>
+                        <th>Clasificación</th>
+                        <th>Cajas Buenas</th>
+                        <th>Cajas Merma</th>
+                        <th>T Cajas</th>
+                        <th>P Prom</th>
+                        <th>Plasta</th>
+                        <th>Kgs Inyectados</th>
+                        <th>Ciclo</th>
+                        <th>Accion</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      if (isset($_POST['prod_id_clasificacion']) && count($_POST['prod_id_clasificacion']) > 0) {
+                        foreach ($_POST['prod_id_clasificacion'] as $key => $value): ?>
+                      <tr>
+                        <td>
+                          <input type="hidden" name="prod_id[]" id="prod_id" value="<?php echo $_POST['prod_id'][$key] ?>">
+                          <input type="hidden" name="prod_clasificacion[]" id="prod_clasificacion" value="<?php echo $_POST['prod_clasificacion'][$key] ?>">
+                          <input type="hidden" name="prod_id_clasificacion[]" id="prod_id_clasificacion" value="<?php echo $_POST['prod_id_clasificacion'][$key] ?>">
+                          <input type="hidden" name="prod_cajas_buenas[]" id="prod_cajas_buenas" value="<?php echo $_POST['prod_cajas_buenas'][$key] ?>">
+                          <input type="hidden" name="prod_cajas_merma[]" id="prod_cajas_merma" value="<?php echo $_POST['prod_cajas_merma'][$key] ?>">
+                          <input type="hidden" name="prod_total_cajas[]" id="prod_total_cajas" value="<?php echo $_POST['prod_total_cajas'][$key] ?>">
+                          <input type="hidden" name="prod_peso_promedio[]" id="prod_peso_promedio" value="<?php echo $_POST['prod_peso_promedio'][$key] ?>">
+                          <input type="hidden" name="prod_plasta[]" id="prod_plasta" value="<?php echo $_POST['prod_plasta'][$key] ?>">
+                          <input type="hidden" name="prod_Kgs_inyectados[]" id="prod_Kgs_inyectados" value="<?php echo $_POST['prod_Kgs_inyectados'][$key] ?>">
+                          <input type="hidden" name="prod_ciclo[]" id="prod_ciclo" value="<?php echo $_POST['prod_ciclo'][$key] ?>">
+                          <input type="hidden" name="prod_del[]" id="prod_del" value="<?php echo $_POST['prod_del'][$key] ?>">
+                        </td>
+                        <td><?php echo $_POST['prod_cajas_buenas'][$key] ?></td>
+                        <td><?php echo $_POST['prod_cajas_merma'][$key] ?></td>
+                        <td><?php echo $_POST['prod_total_cajas'][$key] ?></td>
+                        <td><?php echo $_POST['prod_peso_promedio'][$key] ?></td>
+                        <td><?php echo $_POST['prod_plasta'][$key] ?></td>
+                        <td><?php echo $_POST['prod_Kgs_inyectados'][$key] ?></td>
+                        <td><?php echo $_POST['prod_ciclo'][$key] ?></td>
+                        <td>
+                          <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
+                        </td>
+                      </tr>
+                      <?php endforeach ?>
+                      <?php
+                      } elseif(isset($borrador['info']) && count($borrador['info']->productos) > 0) {
+                        foreach ($borrador['info']->productos as $key => $itm):
+                      ?>
+                      <tr>
+                        <td><?php echo $itm->clasificacion ?>
+                          <input type="hidden" name="prod_id[]" id="prod_id" value="<?php echo $itm->id ?>">
+                          <input type="hidden" name="prod_clasificacion[]" id="prod_clasificacion" value="<?php echo $itm->clasificacion ?>">
+                          <input type="hidden" name="prod_id_clasificacion[]" id="prod_id_clasificacion" value="<?php echo $itm->id_clasificacion ?>">
+                          <input type="hidden" name="prod_cajas_buenas[]" id="prod_cajas_buenas" value="<?php echo $itm->cajas_buenas ?>">
+                          <input type="hidden" name="prod_cajas_merma[]" id="prod_cajas_merma" value="<?php echo $itm->cajas_merma ?>">
+                          <input type="hidden" name="prod_total_cajas[]" id="prod_total_cajas" value="<?php echo $itm->cajas_total ?>">
+                          <input type="hidden" name="prod_peso_promedio[]" id="prod_peso_promedio" value="<?php echo $itm->peso_prom ?>">
+                          <input type="hidden" name="prod_plasta[]" id="prod_plasta" value="<?php echo $itm->plasta_kg ?>">
+                          <input type="hidden" name="prod_Kgs_inyectados[]" id="prod_Kgs_inyectados" value="<?php echo $itm->inyectado_kg ?>">
+                          <input type="hidden" name="prod_ciclo[]" id="prod_ciclo" value="<?php echo $itm->tiempo_ciclo ?>">
+                          <input type="hidden" name="prod_del[]" id="prod_del" value="false">
+                        </td>
+                        <td><?php echo $itm->cajas_buenas ?></td>
+                        <td><?php echo $itm->cajas_merma ?></td>
+                        <td><?php echo $itm->cajas_total ?></td>
+                        <td><?php echo $itm->peso_prom ?></td>
+                        <td><?php echo $itm->plasta_kg ?></td>
+                        <td><?php echo $itm->inyectado_kg ?></td>
+                        <td><?php echo $itm->tiempo_ciclo ?></td>
+                        <td>
+                          <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
+                        </td>
+                      </tr>
+                      <?php endforeach ?>
+                      <?php } ?>
+
+                    </tbody>
+                  </table>
                 </div>
 
 

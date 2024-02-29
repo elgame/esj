@@ -198,6 +198,19 @@ class proyectos extends MY_Controller {
       redirect(base_url('panel/proyectos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
+  public function finalizar()
+  {
+    if (isset($_GET['id']))
+    {
+      $this->load->model('proyectos_model');
+      $res_mdl = $this->proyectos_model->updateProyecto( $this->input->get('id'), array('fecha_terminacion' => date("Y-m-d")) );
+      if($res_mdl)
+        redirect(base_url('panel/proyectos/?'.MyString::getVarsLink(array('msg')).'&msg=7'));
+    }
+    else
+      redirect(base_url('panel/proyectos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
+  }
+
   /**
    * Obtiene lostado de centros de costo para el autocomplete, ajax
    */
@@ -281,6 +294,10 @@ class proyectos extends MY_Controller {
         break;
       case 6:
         $txt = 'El proyecto se activó correctamente.';
+        $icono = 'success';
+        break;
+      case 7:
+        $txt = 'El proyecto se finalizo correctamente.';
         $icono = 'success';
         break;
     }

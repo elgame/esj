@@ -31,6 +31,8 @@ class banco extends MY_Controller {
     'banco/rpt_saldos_bancarios_pdf/',
     'banco/rpt_saldos_bancarios_xls/',
     'banco/ajax_get_cuentas/',
+    'banco/rpt_mov_totales_empresa_pdf/',
+    'banco/rpt_mov_totales_empresa_xls/',
 
     'banco/rptMovSinUuidPdf/',
 		);
@@ -872,6 +874,48 @@ class banco extends MY_Controller {
     {
       $this->load->model('banco_cuentas_model');
       $this->banco_cuentas_model->rie_xls();
+    }
+  }
+
+  public function rpt_mov_totales_empresa()
+  {
+    $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('panel/banco/rpt_rie.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'REPORTE TOTAL MOVIMIENTOS POR EMPRESA'
+    );
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/banco/rpt_mov_totales_empresa', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte ENTRADA DE FRUTA
+   * @return void
+   */
+  public function rpt_mov_totales_empresa_pdf()
+  {
+    if(isset($_GET['ftipo']))
+    {
+      $this->load->model('banco_cuentas_model');
+      $this->banco_cuentas_model->rpt_mov_totales_empresa_pdf();
+    }
+  }
+
+  public function rpt_mov_totales_empresa_xls()
+  {
+    if(isset($_GET['ftipo']))
+    {
+      $this->load->model('banco_cuentas_model');
+      $this->banco_cuentas_model->rpt_mov_totales_empresa_xls();
     }
   }
 

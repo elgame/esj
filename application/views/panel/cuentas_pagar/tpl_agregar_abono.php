@@ -39,6 +39,19 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="dtipomov">Tipo Movimiento</label>
+                <div class="controls">
+                  <select name="dtipomov" id="dtipomov" required>
+                    <option value=""></option>
+                    <option value="prestamo/abono" <?php echo set_select('dtipomov', 'prestamo/abono'); ?>>Prestamo / Abono</option>
+                    <option value="traspaso" <?php echo set_select('dtipomov', 'traspaso'); ?>>Traspaso</option>
+                    <option value="pago proveedores" <?php echo set_select('dtipomov', 'pago proveedores'); ?>>Pago a proveedores</option>
+                    <option value="movimiento interno" <?php echo set_select('dtipomov', 'movimiento interno'); ?>>Movimiento interno</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="dreferencia">Referencia</label>
                 <div class="controls">
                   <input type="text" name="dreferencia" class="span6" id="dreferencia" value="<?php echo set_value('dreferencia'); ?>" maxlength="10" required>

@@ -573,6 +573,10 @@ class cuentas_cobrar extends MY_Controller {
         array('field'   => 'fmetodo_pago',
               'label'   => 'Metodo de pago',
               'rules'   => 'required'),
+        array('field'   => 'dtipomov',
+              'label'   => 'Tipo Movimiento',
+              'rules'   => 'required'),
+
     );
     $this->form_validation->set_rules($rules);
   }
