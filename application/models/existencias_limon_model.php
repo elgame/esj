@@ -3475,7 +3475,7 @@ class existencias_limon_model extends CI_Model {
       MyString::formatoNumero($entrada_limon_fruta_importe, 2, '', false),
     ), false, false);
     $pdf->SetXY(6, $pdf->GetY());
-    $precio_devFrutaCapt = (isset($caja['ext']->factor_merma)? $caja['ext']->factor_merma: 0);
+    $precio_devFrutaCapt = floatval(isset($caja['ext']->factor_merma)? $caja['ext']->factor_merma: 0);
     $pdf->Row(array('DEV. L-FRUTA',
       MyString::formatoNumero($devFruta_kilos, 2, '', false),
       MyString::formatoNumero($precio_devFrutaCapt, 2, '', false),
@@ -3520,7 +3520,7 @@ class existencias_limon_model extends CI_Model {
       MyString::formatoNumero(($indsTotall * $costokgindustrial), 2, '', false),
     ), false, 'B');
 
-    $indsMermaFactor = $entrada_limon_fruta * (isset($caja['ext']->factor_merma)? $caja['ext']->factor_merma: 0) / 100;
+    $indsMermaFactor = $entrada_limon_fruta * floatval(isset($caja['ext']->factor_merma)? $caja['ext']->factor_merma: 0) / 100;
     $indsMermaFactorImporte = ($indsMermaFactor * $costokgindustrial);
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->Row(array('IND. MERMA',
@@ -3550,7 +3550,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->chkSaltaPag([160, 10]);
     $pdf->SetXY(138, $pdf->GetY());
 
-    $resultado_dia = -30361 + ($indsMermaFactorImporte*-1) // IND. MERMA
+    $resultado_dia = ($indsMermaFactorImporte*-1) // IND. MERMA
       + (($cert_importe+$descuentoVentasFletes_importe+$comisionTerceros_importe+$totalGastos)*-1) // costo de ventas
       + ($produccion_importe*-1) // Mano de obre e insumos,  costo de produccion
       + $industrial_importe // industrial del dia
@@ -3559,7 +3559,7 @@ class existencias_limon_model extends CI_Model {
       + (($devFruta_importe+$devFrutaIndus_importe)*-1) // devoluciones
       + (($compra_fruta_importe+$frutaCompra_importe)*-1) // compras fruta
       + (($existenciaPisoAnt_importe+$existencia_ant_importe)*-1); // existencia anterior
-    $resultado_dia_percent = 30361 + ($cert_importe+$descuentoVentasFletes_importe+$comisionTerceros_importe+$totalGastos) // costo de ventas
+    $resultado_dia_percent = ($cert_importe+$descuentoVentasFletes_importe+$comisionTerceros_importe+$totalGastos) // costo de ventas
       + $produccion_importe // Mano de obre e insumos,  costo de produccion
       + $compra_fruta_importe; // compras fruta materia prima
     $pdf->Row(array(
@@ -3738,13 +3738,13 @@ class existencias_limon_model extends CI_Model {
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetXY(130, $pdf->GetY());
       $pdf->Row(array(
-        MyString::formatoNumero(($value['importe']/($value['kilos']!=0? $value['kilos']: 1)), 2, '', false),
-        MyString::formatoNumero(($value['importe']), 2, '', false),
-        MyString::formatoNumero(($value['importe']/($value['cantidad']!=0? $value['cantidad']: 1)), 2, '', false),
+        MyString::formatoNumero((floatval($value['importe'])/floatval($value['kilos']!=0? $value['kilos']: 1)), 2, '', false),
+        MyString::formatoNumero((floatval($value['importe'])), 2, '', false),
+        MyString::formatoNumero((floatval($value['importe'])/floatval($value['cantidad']!=0? $value['cantidad']: 1)), 2, '', false),
       ), false, true);
-      $totalEstimacionImporte += $value['importe'];
-      $totalEstimacionBultos += $value['cantidad'];
-      $totalEstimacionKilos += $value['kilos'];
+      $totalEstimacionImporte += floatval($value['importe']);
+      $totalEstimacionBultos += floatval($value['cantidad']);
+      $totalEstimacionKilos += floatval($value['kilos']);
     }
     $pdf->SetXY(130, $pdf->GetY());
     $pdf->Row(array(
