@@ -1187,7 +1187,7 @@ class existencias_limon_model extends CI_Model {
   public function getCajaGastos($fecha, $noCaja, $otrDatos=[])
   {
     $sql = '';
-    $sql .= " AND cg.fecha = '{$fecha}'";
+    $sql .= " AND cg.fecha = '{$fecha}' AND cg.status = 't'";
     $sql .= isset($otrDatos['rremisionId'])? " AND cg.id_remision = {$otrDatos['rremisionId']}": '';
 
     $response = [];
