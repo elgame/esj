@@ -1043,7 +1043,7 @@ class existencias_limon_model extends CI_Model {
       {
         if (isset($data['gasto_del'][$key]) && $data['gasto_del'][$key] == 'true' &&
           isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
-          $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
+          // $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
 
           // $this->db->delete('otros.existencias_limon_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
           $this->db->update('otros.existencias_limon_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['gasto_id_gasto'][$key]);
