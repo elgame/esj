@@ -1143,6 +1143,7 @@ class existencias_limon_model extends CI_Model {
 
     $comisiones_terceros = [];
     foreach ($productosFactura as $key => $prod) {
+      $prod['id_clasificacion'] = intval($prod['id_clasificacion']);
       if (isset($listClasif[$prod['id_clasificacion']])) { // comisiones terceros
         $comisiones_terceros[] = array(
           'id_area'     => $exisLimonData['farea'],
