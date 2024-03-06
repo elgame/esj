@@ -9,20 +9,20 @@ class GastosProductos {
    * @var [type]
    */
   public static $gastosProductos = [
-    49 => 'c',
-    50 => 'g',
-    51 => 'c',
-    52 => 'c',
-    53 => 'c',
-    236 => 'g',
-    237 => 'g',
-    238 => 'ct',
-    239 => 'c',
-    1299 => 'g',
-    1601 => 'ct',
-    1602 => 'g',
-    1603 => 'c',
-    1610 => 'g',
+    49 => ['tipo' => 'c', 'nombre' => 'SEGURO'],
+    50 => ['tipo' => 'g', 'nombre' => 'SER TRANSPORTE'],
+    51 => ['tipo' => 'c', 'nombre' => 'C FITOSANITARIO'],
+    52 => ['tipo' => 'c', 'nombre' => 'C ORIGEN'],
+    53 => ['tipo' => 'c', 'nombre' => 'SUP CARGAS'],
+    236 => ['tipo' => 'g', 'nombre' => 'FLETES Y ACARREOS'],
+    237 => ['tipo' => 'g', 'nombre' => 'GASTOS ADUANALES'],
+    238 => ['tipo' => 'ct', 'nombre' => 'COMISION S/VTA'],
+    239 => ['tipo' => 'c', 'nombre' => 'C ADICIONALES'],
+    1299 => ['tipo' => 'g', 'nombre' => 'C FIN FLETE'],
+    1601 => ['tipo' => 'ct', 'nombre' => 'COMISIONES 3RO'],
+    1602 => ['tipo' => 'g', 'nombre' => 'DES DISTRIBUCION'],
+    1603 => ['tipo' => 'c', 'nombre' => 'EXPE FITOSANITARIO'],
+    1610 => ['tipo' => 'g', 'nombre' => 'MANIOBRA'],
   ];
   public static $gastosProductosKeys = [];
 
@@ -47,7 +47,7 @@ class GastosProductos {
     self::conf();
 
     $keys = array_filter(self::$gastosProductos, function ($itm) {
-      return ($itm === 'c');
+      return ($itm['tipo'] === 'c');
     });
 
     return ($rkeys? array_keys($keys) : $keys);
@@ -57,7 +57,7 @@ class GastosProductos {
     self::conf();
 
     $keys = array_filter(self::$gastosProductos, function ($itm) {
-      return ($itm === 'g');
+      return ($itm['tipo'] === 'g');
     });
 
     return ($rkeys? array_keys($keys) : $keys);
@@ -67,7 +67,7 @@ class GastosProductos {
     self::conf();
 
     $keys = array_filter(self::$gastosProductos, function ($itm) {
-      return ($itm === 'ct');
+      return ($itm['tipo'] === 'ct');
     });
 
     return ($rkeys? array_keys($keys) : $keys);
