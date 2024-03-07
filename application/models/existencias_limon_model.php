@@ -1219,6 +1219,21 @@ class existencias_limon_model extends CI_Model {
     return true;
   }
 
+  public function delCaja($fecha, $noCajas, $id_area)
+  {
+    $this->db->delete('otros.existencias_limon', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_compra_fruta', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_descuentos_ventas', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_devolucion_fruta', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_existencia', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_existencia_piso', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_existencia_reproceso', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_gastos', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_industrial', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_manoobra_insumo', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+    $this->db->delete('otros.existencias_limon_produccion', "fecha = '{$fecha}' AND no_caja = {$noCajas} AND id_area = {$id_area}");
+  }
+
 
   public function printCajaOld($fecha, $noCajas, $id_area)
   {
@@ -4044,12 +4059,18 @@ class existencias_limon_model extends CI_Model {
         );
       }
 
+      $num_pos = (count($remisionesCert) > 0? $remisionesCert[array_keys($remisionesCert)[0]] : []);
       if (isset($remisionesCert[$venta->id_factura])) {
         foreach ($remisionesCert[$venta->id_factura] as $keycc => $rcert) {
           $noarchivos = ($caja['ventas_tblcert'][$venta->id_factura]['cantidad'] > 0? $caja['ventas_tblcert'][$venta->id_factura]['cantidad']: 1);
           $remisionesCert[$venta->id_factura][$keycc] = MyString::formatoNumero($remisionesCert[$venta->id_factura][$keycc] / $noarchivos, 4, '', false);
         }
         $datarow = array_merge($datarow, array_values($remisionesCert[$venta->id_factura]));
+      } else {
+        foreach ($num_pos as $keyvf => $valuevfvf) {
+          $num_pos[$keyvf] = 0;
+        }
+        $datarow = array_merge($datarow, array_values($num_pos));
       }
       $pdf->Row($datarow, false, 'B');
 

@@ -105,6 +105,15 @@
                   <?php if ($caja['guardado']) { ?>
                     <div class="span3"><a href="<?php echo base_url('panel/existencias_limon/print_caja?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                     <!-- <div class="span3"><a href="<?php echo base_url('panel/existencias_limon/print_caja2?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir 2</a></div> -->
+                    <div class="span3">
+                      <?php
+                      echo $this->usuarios_model->getLinkPrivSm('existencias_limon/del_caja/', array(
+                          'params'   => 'farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea')),
+                          'btn_type' => 'btn-danger',
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar la caja?', 'Caja', this); return false;"))
+                      );
+                      ?>
+                    </div>
                   <?php }  ?>
                 </div>
               </div>
