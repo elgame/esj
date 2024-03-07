@@ -7,6 +7,8 @@
    -- lap|san
    ALTER TABLE IF EXISTS public.banco_movimientos ADD COLUMN tipo_mov character varying(30) COLLATE pg_catalog."default";
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Total Movimientos x Empresa',104,true,'banco/rpt_mov_totales_empresa/','print',true);
+   ALTER TABLE IF EXISTS public.banco_cuentas ADD COLUMN cuenta_uso boolean DEFAULT false;
+   COMMENT ON COLUMN public.banco_cuentas.cuenta_uso IS 'si es true son cuentas que se usan para reporte';
 
    Egresos facturas
    Egresos facturas USD
@@ -38,6 +40,8 @@
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon ADD COLUMN extras json;
+    -- lap
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',505,true,'existencias_limon/del_caja/','ban-circle',true);
 
  ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
  ✔ recetas seleccionar multi centros se agregan @done (24-01-17 10:49)

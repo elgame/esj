@@ -162,10 +162,11 @@ class proyectos_model extends CI_Model {
       ORDER BY fecha ASC")->result();
 
     $response['ordenes'] = $this->db->query("SELECT cs.id_orden, cs.folio, Date(cs.fecha_creacion) AS fecha,
-        csp.descripcion AS concepto,
+        csp.descripcion AS concepto, (c.serie || c.folio::text) AS compra,
         csp.importe AS costo, csp.cantidad, csp.piezas
       FROM compras_ordenes cs
         INNER JOIN compras_productos csp ON cs.id_orden = csp.id_orden
+        LEFT JOIN compras c ON c.id_compra = csp.id_compra
       WHERE cs.status in('a','f','n') AND cs.id_proyecto = {$id_proyecto}
       ORDER BY fecha ASC")->result();
 
@@ -410,7 +411,7 @@ class proyectos_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $datos = array(
             $prod->fecha,
-            $prod->folio,
+            "{$prod->folio} / {$prod->compra}",
             $prod->concepto,
             MyString::formatoNumero($prod->costo, 2, '$', false),
             MyString::formatoNumero($prod->cantidad, 2, '', false),

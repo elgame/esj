@@ -185,6 +185,14 @@ class existencias_limon extends MY_Controller {
     }
   }
 
+  public function del_caja()
+  {
+    $this->load->model('existencias_limon_model');
+    $this->existencias_limon_model->delCaja($_GET['ffecha'], $_GET['fno_caja'], $_GET['farea']);
+
+    redirect(base_url('panel/existencias_limon/cargar/?'.MyString::getVarsLink(array('id', 'msg')).'&msg=71'));
+  }
+
   public function print_caja()
   {
     $this->load->model('existencias_limon_model');
@@ -249,6 +257,10 @@ class existencias_limon extends MY_Controller {
         break;
       case 7:
         $txt = 'La caja chica se cerro correctamente!';
+        $icono = 'success';
+        break;
+      case 71:
+        $txt = 'La caja chica se borro correctamente!';
         $icono = 'success';
         break;
 
