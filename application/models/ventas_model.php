@@ -980,6 +980,13 @@ class ventas_model extends privilegios_model{
     // // Registra la salida de productos si tiene pallets
     // $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
 
+    // Agregar datos a la caja de existencia de limon EMPAQUE, PACHITA BRAND, GUBALU PRODUCE
+    if ($datosFactura['id_empresa'] == 2 || $datosFactura['id_empresa'] == 46 || $datosFactura['id_empresa'] == 15) {
+      $this->load->model('existencias_limon_model');
+      $datosFactura['id_venta'] = $id_venta;
+      $this->existencias_limon_model->guardarRemisionesGastos($datosFactura, $productosFactura);
+    }
+
     return array('passes' => true, 'id_venta' => $id_venta);
   }
 

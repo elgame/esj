@@ -1139,7 +1139,8 @@ class existencias_limon_model extends CI_Model {
       ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
     $this->db->delete('otros.existencias_limon_descuentos_ventas', "id_remision = {$exisLimonData['id_remision_rm']}");
-    $this->db->update('otros.existencias_limon_gastos', ['status' => 'f', 'fecha_cancelado' => $exisLimonData['fecha_caja_chica']], "id_remision = {$exisLimonData['id_remision_rm']}");
+    $this->db->delete('otros.existencias_limon_gastos', "id_remision = {$exisLimonData['id_remision_rm']}");
+    // $this->db->update('otros.existencias_limon_gastos', ['status' => 'f', 'fecha_cancelado' => $exisLimonData['fecha_caja_chica']], "id_remision = {$exisLimonData['id_remision_rm']}");
 
     $comisiones_terceros = [];
     foreach ($productosFactura as $key => $prod) {
