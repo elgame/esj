@@ -40,8 +40,10 @@
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon ADD COLUMN extras json;
-    -- lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',505,true,'existencias_limon/del_caja/','ban-circle',true);
+    -- pcc
+    ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_clasificacion bigint;
+    ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_clasificacion bigint;
 
  ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
  ✔ recetas seleccionar multi centros se agregan @done (24-01-17 10:49)

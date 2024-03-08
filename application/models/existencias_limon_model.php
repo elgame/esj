@@ -446,7 +446,8 @@ class existencias_limon_model extends CI_Model {
     $sqlgg = isset($otrDatos['rremisionId'])? " AND ele.id_remision = {$otrDatos['rremisionId']}": '';
     $comision_terceros = $this->db->query(
       "SELECT ele.id, ele.fecha, ele.no_caja, ele.nombre, ele.descripcion, ele.costo,
-        ele.cantidad, ele.importe, Concat(re.serie, re.folio::text) AS remision
+        ele.cantidad, ele.importe, Concat(re.serie, re.folio::text) AS remision,
+        ele.id_remision, ele.id_clasificacion
       FROM otros.existencias_limon_descuentos_ventas ele
         LEFT JOIN facturacion re ON re.id_factura = ele.id_remision
       WHERE ele.tipo = 'ct' AND Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
@@ -1134,44 +1135,47 @@ class existencias_limon_model extends CI_Model {
 
     $listClasif = GastosProductos::getComTer(false); // ['1601' => 'ct', '238' => 'ct']; // comisiones terceros
     $listOtrGastos = GastosProductos::getGastos(false); // ['50' => 'g', '236' => 'g', '237' => 'g', '1610' => 'g', '1602' => 'g', '1299' => 'g']; // Otros gastos
-    $gastos_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM otros.existencias_limon_gastos
-      WHERE folio_sig IS NOT NULL AND no_caja = {$exisLimonData['fno_caja']} AND date_part('year', fecha) = {$exisLimonData['anio']}
-      ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
     $this->db->delete('otros.existencias_limon_descuentos_ventas', "id_remision = {$exisLimonData['id_remision_rm']}");
     $this->db->delete('otros.existencias_limon_gastos', "id_remision = {$exisLimonData['id_remision_rm']}");
     // $this->db->update('otros.existencias_limon_gastos', ['status' => 'f', 'fecha_cancelado' => $exisLimonData['fecha_caja_chica']], "id_remision = {$exisLimonData['id_remision_rm']}");
+
+    $gastos_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM otros.existencias_limon_gastos
+      WHERE folio_sig IS NOT NULL AND no_caja = {$exisLimonData['fno_caja']} AND date_part('year', fecha) = {$exisLimonData['anio']}
+      ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
     $comisiones_terceros = [];
     foreach ($productosFactura as $key => $prod) {
       $prod['id_clasificacion'] = intval($prod['id_clasificacion']);
       if (isset($listClasif[$prod['id_clasificacion']])) { // comisiones terceros
         $comisiones_terceros[] = array(
-          'id_area'     => $exisLimonData['farea'],
-          'nombre'      => $prod['descripcion2'],
-          'descripcion' => $prod['descripcion'],
-          'cantidad'    => $prod['cantidad'],
-          'costo'       => $prod['precio_unitario'],
-          'importe'     => $prod['importe'],
-          'tipo'        => $listClasif[$prod['id_clasificacion']]['tipo'],
-          'fecha'       => $exisLimonData['fecha_caja_chica'],
-          'no_caja'     => $exisLimonData['fno_caja'],
-          'id_remision' => $exisLimonData['id_remision_rm'],
+          'id_area'          => $exisLimonData['farea'],
+          'nombre'           => $prod['descripcion2'],
+          'descripcion'      => $prod['descripcion'],
+          'cantidad'         => $prod['cantidad'],
+          'costo'            => $prod['precio_unitario'],
+          'importe'          => $prod['importe'],
+          'tipo'             => $listClasif[$prod['id_clasificacion']]['tipo'],
+          'fecha'            => $exisLimonData['fecha_caja_chica'],
+          'no_caja'          => $exisLimonData['fno_caja'],
+          'id_remision'      => $exisLimonData['id_remision_rm'],
+          'id_clasificacion' => $prod['id_clasificacion'],
         );
       } elseif (isset($listOtrGastos[$prod['id_clasificacion']])) { // Otros gastos
         $gastos_folio->folio += 1;
         $gastos = array(
-          'folio_sig'      => $gastos_folio->folio,
-          'folio'          => $gastos_folio->folio, //$data['gasto_folio'][$key],
-          'concepto'       => $prod['descripcion'],
-          'nombre'         => $prod['descripcion2'],
-          'monto'          => $prod['importe'],
-          'fecha'          => $exisLimonData['fecha_caja_chica'],
-          'no_caja'        => $exisLimonData['fno_caja'],
-          'id_area'        => $exisLimonData['farea'],
-          'id_cat_codigos' => NULL,
-          'id_remision'    => $exisLimonData['id_remision_rm'],
-          'id_usuario'     => $this->session->userdata('id_usuario'),
+          'folio_sig'        => $gastos_folio->folio,
+          'folio'            => $gastos_folio->folio, //$data['gasto_folio'][$key],
+          'concepto'         => $prod['descripcion'],
+          'nombre'           => $prod['descripcion2'],
+          'monto'            => $prod['importe'],
+          'fecha'            => $exisLimonData['fecha_caja_chica'],
+          'no_caja'          => $exisLimonData['fno_caja'],
+          'id_area'          => $exisLimonData['farea'],
+          'id_cat_codigos'   => NULL,
+          'id_remision'      => $exisLimonData['id_remision_rm'],
+          'id_clasificacion' => $prod['id_clasificacion'],
+          'id_usuario'       => $this->session->userdata('id_usuario'),
         );
         $this->db->insert('otros.existencias_limon_gastos', $gastos);
       }
@@ -1196,7 +1200,8 @@ class existencias_limon_model extends CI_Model {
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cg.nombre,
           cg.folio, ca.id_cat_codigos, ca.nombre AS cat_codigos, ca.codigo AS codigo_fin,
-          ar.id_area, ar.nombre AS area, Concat(re.serie, re.folio::text) AS remision
+          ar.id_area, ar.nombre AS area, Concat(re.serie, re.folio::text) AS remision,
+          cg.id_remision, cg.id_clasificacion
        FROM otros.existencias_limon_gastos cg
          LEFT JOIN otros.cat_codigos AS ca ON ca.id_cat_codigos = cg.id_cat_codigos
          LEFT JOIN areas AS ar ON ar.id_area = cg.id_area
@@ -3230,6 +3235,8 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
     $pdf->SetWidths(array(18, 34, 34, 13, 15, 20));
 
+    $caja['certificados_tblcerts'] = [];
+    $certGastos = GastosProductos::getAll(false);
     $comisionTerceros_cantidad = $comisionTerceros_importe = 0;
     foreach ($caja['comision_terceros'] as $existencia) {
       if($pdf->GetY() >= $pdf->limiteY){
@@ -3242,6 +3249,19 @@ class existencias_limon_model extends CI_Model {
 
       $comisionTerceros_cantidad  += floatval($existencia->cantidad);
       $comisionTerceros_importe  += floatval($existencia->importe);
+      if (isset($caja['certificados_tblcerts'][$existencia->id_remision])) {
+        if (isset($caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'])) {
+          $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'] += (float)$existencia->cantidad;
+          $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['importe'] += (float)$existencia->importe;
+        } else {
+          $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'] = (float)$existencia->cantidad;
+          $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['importe'] = (float)$existencia->importe;
+        }
+      } else {
+        $caja['certificados_tblcerts'][$existencia->id_remision] = $certGastos;
+        $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'] = (float)$existencia->cantidad;
+        $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['importe'] = (float)$existencia->importe;
+      }
 
       $pdf->SetX(54);
       $pdf->Row(array(
@@ -3301,6 +3321,19 @@ class existencias_limon_model extends CI_Model {
       }
 
       $totalGastos  += floatval($gasto->monto);
+      if (isset($caja['certificados_tblcerts'][$gasto->id_remision])) {
+        if (isset($caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'])) {
+          // $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'] += (float)$gasto->certificado;
+          $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['importe'] += (float)$gasto->monto;
+        } else {
+          // $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'] = (float)$gasto->certificado;
+          $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['importe'] = (float)$gasto->monto;
+        }
+      } else {
+        $caja['certificados_tblcerts'][$gasto->id_remision] = $certGastos;
+        // $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'] = (float)$gasto->certificado;
+        $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['importe'] = (float)$gasto->monto;
+      }
 
       $pdf->SetX(54);
       $pdf->Row(array(
@@ -3407,8 +3440,6 @@ class existencias_limon_model extends CI_Model {
 //           fp.importe, fc.proveedores, fc.certificado, fc.no_certificado
     $cert_importe = $cert_kilos = $cert_cantidad = 0;
     $auxcertt = 0;
-    $caja['certificados_tblcerts'] = [];
-    $certGastos = GastosProductos::getCerts(false);
     foreach ($caja['certificados'] as $venta) {
       if($pdf->GetY() >= $pdf->limiteY){
         if (count($pdf->pages) > $pdf->page) {
@@ -3869,57 +3900,57 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array(MyString::formatoNumero($venta_importe_ind, 2, '', false)), false, 'B');
 
 
-    // COSTO DE VENTAS
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
-    // $pdf->Row(array('COSTO DE VENTAS'), true, 'B');
+    // // COSTO DE VENTAS
+    // $pdf->SetFont('Arial','B', 7);
+    // $pdf->SetXY(6, $pdf->GetY()+5);
+    // $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(204));
+    // // $pdf->Row(array('COSTO DE VENTAS'), true, 'B');
 
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-    $pdf->SetWidths(array(54, 52, 50, 25));
-    $pdf->Row(array('COSTO DE VENTAS', 'NOMBRE', 'DESCRIPCION', 'IMPORTE'), true, 'B');
+    // $pdf->SetFont('Arial','B', 6);
+    // $pdf->SetX(6);
+    // $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+    // $pdf->SetWidths(array(54, 52, 50, 25));
+    // $pdf->Row(array('COSTO DE VENTAS', 'NOMBRE', 'DESCRIPCION', 'IMPORTE'), true, 'B');
 
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(60, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R'));
-    $pdf->SetWidths(array(52, 50, 25));
+    // $pdf->SetFont('Arial','', 7);
+    // $pdf->SetXY(60, $pdf->GetY());
+    // $pdf->SetAligns(array('L', 'L', 'R'));
+    // $pdf->SetWidths(array(52, 50, 25));
 
-    $costoVentas_importe = 0;
-    foreach ($caja['costo_ventas'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(60, 10);
-        } else
-          $pdf->AddPage();
-      }
+    // $costoVentas_importe = 0;
+    // foreach ($caja['costo_ventas'] as $existencia) {
+    //   if($pdf->GetY() >= $pdf->limiteY){
+    //     if (count($pdf->pages) > $pdf->page) {
+    //       $pdf->page++;
+    //       $pdf->SetXY(60, 10);
+    //     } else
+    //       $pdf->AddPage();
+    //   }
 
-      $costoVentas_importe += floatval($existencia->importe);
+    //   $costoVentas_importe += floatval($existencia->importe);
 
-      $pdf->SetX(60);
-      $pdf->Row(array(
-        $existencia->nombre,
-        $existencia->descripcion,
-        MyString::formatoNumero($existencia->importe, 2, '', false),
-      ), false, 'B');
-    }
+    //   $pdf->SetX(60);
+    //   $pdf->Row(array(
+    //     $existencia->nombre,
+    //     $existencia->descripcion,
+    //     MyString::formatoNumero($existencia->importe, 2, '', false),
+    //   ), false, 'B');
+    // }
 
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($costoVentas_importe, 2, '', false),
-    ), false, 'B');
-    $pdf->SetAligns(array('R'));
-    $pdf->SetWidths(array(22));
-    $pdf->SetXY(188, $pdf->GetY()-11);
-    $pdf->Row(array('COSTO VENTAS'), false, 'B');
-    $pdf->SetXY(188, $pdf->GetY());
-    $pdf->Row(array(MyString::formatoNumero($costoVentas_importe, 2, '', false)), false, 'B');
+    // $pdf->SetFont('Arial','B', 7);
+    // $pdf->SetX(60);
+    // $pdf->Row(array(
+    //   '',
+    //   '',
+    //   MyString::formatoNumero($costoVentas_importe, 2, '', false),
+    // ), false, 'B');
+    // $pdf->SetAligns(array('R'));
+    // $pdf->SetWidths(array(22));
+    // $pdf->SetXY(188, $pdf->GetY()-11);
+    // $pdf->Row(array('COSTO VENTAS'), false, 'B');
+    // $pdf->SetXY(188, $pdf->GetY());
+    // $pdf->Row(array(MyString::formatoNumero($costoVentas_importe, 2, '', false)), false, 'B');
 
     // ----------------------------------
 
@@ -3940,7 +3971,7 @@ class existencias_limon_model extends CI_Model {
     $key = array_search($id_calibre, array_column($tabla_rendimientos, 'id_calibre'));
     return (isset($tabla_rendimientos[$key])? $tabla_rendimientos[$key]: false);
   }
-  private function addHeadsCertificadosTblcerts($certificados_tblcerts, &$headerss, &$align1, &$width1, &$align2, &$width2)
+  private function addHeadsCertificadosTblcerts($certificados_tblcerts, &$headerss, &$align1, &$width1, &$align2, &$width2, $remisiones=null)
   {
     $newhead = $newalign = $newwidth = [];
     foreach ($certificados_tblcerts as $idfac => $fac) {
@@ -3959,10 +3990,14 @@ class existencias_limon_model extends CI_Model {
     $align2 = array_merge($align2, array_values($newalign));
     $width2 = array_merge($width2, array_values($newwidth));
 
-    $remisiones = [];
+    $remisiones = ($remisiones? $remisiones: []);
     foreach ($newhead as $idClas => $value) {
       foreach ($certificados_tblcerts as $idfac => $fac) {
-        $remisiones[$idfac][$idClas] = (isset($fac[$idClas]['importe'])? (float)$fac[$idClas]['importe']: 0);
+        if (isset($remisiones[$idfac][$idClas])) {
+          $remisiones[$idfac][$idClas] += (isset($fac[$idClas]['importe'])? (float)$fac[$idClas]['importe']: 0);
+        } else {
+          $remisiones[$idfac][$idClas] = (isset($fac[$idClas]['importe'])? (float)$fac[$idClas]['importe']: 0);
+        }
       }
     }
     return $remisiones;
@@ -3994,6 +4029,7 @@ class existencias_limon_model extends CI_Model {
     $width2 = array(18, 16, 16, 16, 16);
     $headerss = array('FOLIO', 'CLIENTE', 'CALIBRE', 'UNIDAD', 'BULTOS', 'PRECIO', 'X BULTO');
     $remisionesCert = $this->addHeadsCertificadosTblcerts($caja['certificados_tblcerts'], $headerss, $align1, $width1, $align2, $width2);
+
     // echo "<pre>";
     //   var_dump($remisionesCert);
     // echo "</pre>";exit;
