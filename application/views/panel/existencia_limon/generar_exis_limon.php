@@ -1115,7 +1115,7 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-comision-terceros">
                           <thead>
                             <tr>
-                              <th colspan="5">COMISIONES A TERCEROS</th>
+                              <th colspan="6">COMISIONES A TERCEROS</th>
                               <th style="width: 35px;">
                                 <button type="button" class="btn btn-success" id="btnAddComisionTerceros"><i class="icon-plus"></i></button>
                               </th>
@@ -1126,6 +1126,7 @@
                               <th>CANTIDAD</th>
                               <th>COSTO</th>
                               <th>IMPORTE</th>
+                              <th>CLASIF</th>
                               <th>OPC</th>
                             </tr>
                           </thead>
@@ -1149,6 +1150,10 @@
                                 <td><input type="text" name="comisionTerceros_cantidad[]" value="<?php echo $_POST['comisionTerceros_cantidad'][$keyp] ?>" class="span12 vpositive comisionTerceros_cantidad" required></td>
                                 <td><input type="text" name="comisionTerceros_costo[]" value="<?php echo $_POST['comisionTerceros_costo'][$keyp] ?>" class="span12 vpositive comisionTerceros_costo" required></td>
                                 <td><input type="text" name="comisionTerceros_importe[]" value="<?php echo $_POST['comisionTerceros_importe'][$keyp] ?>" class="span12 vpositive comisionTerceros_importe" readonly></td>
+                                <td>
+                                  <input type="text" name="comisionTerceros_clasificacion[]" value="<?php echo $_POST['comisionTerceros_clasificacion'][$keyp] ?>" class="span12 comisionTerceros_clasificacion" required>
+                                  <input type="hidden" name="comisionTerceros_id_clasificacion[]" value="<?php echo $_POST['comisionTerceros_id_clasificacion'][$keyp] ?>" class="span12 comisionTerceros_id_clasificacion" required>
+                                </td>
                                 <td style="width: 30px;">
                                   <button type="button" class="btn btn-danger comisionTerceros_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                 </td>
@@ -1172,6 +1177,10 @@
                                 <td><input type="text" name="comisionTerceros_cantidad[]" value="<?php echo $desc->cantidad ?>" class="span12 vpositive comisionTerceros_cantidad" required></td>
                                 <td><input type="text" name="comisionTerceros_costo[]" value="<?php echo $desc->costo ?>" class="span12 vpositive comisionTerceros_costo" required></td>
                                 <td><input type="text" name="comisionTerceros_importe[]" value="<?php echo $desc->importe ?>" class="span12 vpositive comisionTerceros_importe" readonly></td>
+                                <td>
+                                  <input type="text" name="comisionTerceros_clasificacion[]" value="<?php echo $desc->clasificacion ?>" class="span12 comisionTerceros_clasificacion" required>
+                                  <input type="hidden" name="comisionTerceros_id_clasificacion[]" value="<?php echo $desc->id_clasificacion ?>" class="span12 comisionTerceros_id_clasificacion" required>
+                                </td>
                                 <td style="width: 30px;">
                                   <button type="button" class="btn btn-danger comisionTerceros_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                 </td>
@@ -1266,12 +1275,14 @@
                                           <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
                                         </th>
                                         <th colspan="2">IMPORTE</th>
+                                        <th></th>
                                       </tr>
                                       <tr>
                                         <!-- <th>COD AREA</th> -->
                                         <th>NOMBRE</th>
                                         <th>CONCEPTO</th>
                                         <th>CARGO</th>
+                                        <th>CLASIF</th>
                                         <th></th>
                                       </tr>
                                     </thead>
@@ -1299,6 +1310,10 @@
                                                   <input type="text" name="gasto_concepto[]" value="<?php echo $_POST['gasto_concepto'][$key] ?>" class="span12 gasto-concepto" >
                                                 </td>
                                                 <td style=""><input type="text" name="gasto_importe[]" value="<?php echo $_POST['gasto_importe'][$key] ?>" class="span12 vpositive gasto-importe"></td>
+                                                <td>
+                                                  <input type="text" name="gasto_clasificacion[]" value="<?php echo $_POST['gasto_clasificacion'][$key] ?>" class="span12 gasto_clasificacion" required>
+                                                  <input type="hidden" name="gasto_id_clasificacion[]" value="<?php echo $_POST['gasto_id_clasificacion'][$key] ?>" class="span12 gasto_id_clasificacion" required>
+                                                </td>
                                                 <td style="">
                                                   <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                                 </td>
@@ -1325,6 +1340,10 @@
                                             <input type="text" name="gasto_concepto[]" value="<?php echo $gasto->concepto ?>" class="span12 gasto-concepto">
                                           </td>
                                           <td style=""><input type="text" name="gasto_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe"></td>
+                                          <td>
+                                            <input type="text" name="gasto_clasificacion[]" value="<?php echo $gasto->clasificacion ?>" class="span12 gasto_clasificacion" required>
+                                            <input type="hidden" name="gasto_id_clasificacion[]" value="<?php echo $gasto->id_clasificacion ?>" class="span12 gasto_id_clasificacion" required>
+                                          </td>
                                           <td style="">
                                             <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                           </td>
