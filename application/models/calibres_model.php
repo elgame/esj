@@ -26,7 +26,7 @@ class calibres_model extends CI_Model {
   {
     $sql = '';
     $res = $this->db->query("
-        SELECT id_calibre, nombre, tipo, \"order\", grupo
+        SELECT id_calibre, nombre, tipo, \"order\", grupo, grupo2
         FROM calibres
         WHERE id_calibre = {$id}
         ORDER BY nombre ASC");

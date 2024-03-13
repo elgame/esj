@@ -43,6 +43,14 @@ class GastosProductos {
     return ($res !== false);
   }
 
+  public static function getAll($rkeys = true) {
+    self::conf();
+
+    $keys = self::$gastosProductos;
+
+    return ($rkeys? array_keys($keys) : $keys);
+  }
+
   public static function getCerts($rkeys = true) {
     self::conf();
 

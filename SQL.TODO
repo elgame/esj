@@ -1,4 +1,5 @@
 
+ ☐ Contra recibos de ordenes de compra, seleccionarlas modificar e imprimir
  ✔ Proyectos @done (24-02-28 11:11)
    -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Finalizar',539,FALSE,'proyectos/finalizar/','check',FALSE);
@@ -40,8 +41,32 @@
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon ADD COLUMN extras json;
-    -- lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',505,true,'existencias_limon/del_caja/','ban-circle',true);
+    ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_clasificacion bigint;
+    ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_clasificacion bigint;
+    -- lap|san
+    ALTER TABLE IF EXISTS public.calibres ADD COLUMN grupo2 integer;
+    COMMENT ON COLUMN public.calibres.grupo2 IS 'agrupa los calibres para sumar el %';
+    UPDATE public.calibres SET grupo2=4 WHERE id_calibre=105;
+    UPDATE public.calibres SET grupo2=4 WHERE id_calibre=106;
+    UPDATE public.calibres SET grupo2=4 WHERE id_calibre=107;
+    UPDATE public.calibres SET grupo2=4 WHERE id_calibre=108;
+    UPDATE public.calibres SET grupo2=4 WHERE id_calibre=109;
+    UPDATE public.calibres SET grupo2=4 WHERE id_calibre=110;
+    UPDATE public.calibres SET grupo2=3 WHERE id_calibre=122;
+    UPDATE public.calibres SET grupo2=3 WHERE id_calibre=123;
+    UPDATE public.calibres SET grupo2=2 WHERE id_calibre=118;
+    UPDATE public.calibres SET grupo2=2 WHERE id_calibre=142;
+    UPDATE public.calibres SET grupo2=2 WHERE id_calibre=143;
+    UPDATE public.calibres SET grupo2=2 WHERE id_calibre=112;
+    UPDATE public.calibres SET grupo2=1 WHERE id_calibre=125;
+    UPDATE public.calibres SET grupo2=1 WHERE id_calibre=127;
+    UPDATE public.calibres SET grupo2=1 WHERE id_calibre=128;
+    UPDATE public.calibres SET grupo2=1 WHERE id_calibre=126;
+    UPDATE public.calibres SET grupo2=1 WHERE id_calibre=113;
+    UPDATE public.calibres SET grupo2=1 WHERE id_calibre=132;
+    UPDATE public.calibres SET grupo2=0 WHERE id_calibre=133;
+
 
  ✔ En ordenes de fletes poder seleccionar varias remisiones y en la orden de flete poner el total de kg de fruta y importe de fruta de las remisiones @done (24-01-16 18:57)
  ✔ recetas seleccionar multi centros se agregan @done (24-01-17 10:49)

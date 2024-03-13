@@ -1870,7 +1870,7 @@ class banco_cuentas_model extends banco_model {
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa((isset($_GET['did_empresa'])? $_GET['did_empresa']: 2));
+    $empresa = $this->empresas_model->getInfoEmpresa((!empty($_GET['did_empresa'])? $_GET['did_empresa']: 2));
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "REPORTE TOTAL MOVIMIENTOS POR EMPRESA";

@@ -636,6 +636,33 @@
   };
 
   const comisionTerceros = () => {
+    $('#table-comision-terceros').on('focus', 'input.comisionTerceros_clasificacion:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/facturacion/ajax_get_clasificaciones/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+          $tr.find('.comisionTerceros_id_clasificacion').val(ui.item.id);
+
+          setTimeout(function(){
+            let parts = $this.val().split(' - ');
+            $this.val((parts.length > 1? parts[0]: $this.val()));
+          }, 300);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('.comisionTerceros_id_clasificacion').val('');
+        }
+      });
+    });
+
     $('#btnAddComisionTerceros').click(function(event) {
       html =
       '<tr>'+
@@ -717,6 +744,33 @@
   var btnAddGasto = function () {
     $('#btn-add-gasto').on('click', function(event) {
       agregarGasto();
+    });
+
+    $('#table-gastos').on('focus', 'input.gasto_clasificacion:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/facturacion/ajax_get_clasificaciones/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+          $tr.find('.gasto_id_clasificacion').val(ui.item.id);
+
+          setTimeout(function(){
+            let parts = $this.val().split(' - ');
+            $this.val((parts.length > 1? parts[0]: $this.val()));
+          }, 300);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('.gasto_id_clasificacion').val('');
+        }
+      });
     });
   };
 
