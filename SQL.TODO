@@ -41,7 +41,7 @@
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_remision bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon ADD COLUMN extras json;
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',505,true,'existencias_limon/del_caja/','ban-circle',true);
-    -- pcc
+    -- pcc|lap
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_clasificacion bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_clasificacion bigint;
 
