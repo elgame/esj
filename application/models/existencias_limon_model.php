@@ -1191,8 +1191,7 @@ class existencias_limon_model extends CI_Model {
       $this->db->insert_batch('otros.existencias_limon_descuentos_ventas', $comisiones_terceros);
     }
 
-
-    $res_mdl = $this->existencias_limon_model->guardar($exisLimonData);
+    // $res_mdl = $this->existencias_limon_model->guardar($exisLimonData);
   }
 
   public function getCajaGastos($fecha, $noCaja, $otrDatos=[])
@@ -3400,6 +3399,29 @@ class existencias_limon_model extends CI_Model {
       $descuentoVentasFletes_cantidad += floatval($existencia->cantidad);
       $descuentoVentasFletes_importe += floatval($existencia->importe);
 
+      $existencia->ids_facrem = trim(str_replace('f:', '', $existencia->ids_facrem));
+      if (!empty($existencia->ids_facrem)) {
+        $existencia->ids_facrem = explode('|', $existencia->ids_facrem);
+        foreach ($existencia->ids_facrem as $keyifac => $facturr) {
+          $facturr = intval($facturr);
+          if ($facturr > 0) {
+            if (isset($caja['certificados_tblcerts'][$facturr])) {
+              if (isset($caja['certificados_tblcerts'][$facturr]['flete']['cantidad'])) {
+                $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] += (float)$existencia->cantidad/count($existencia->ids_facrem);
+                $caja['certificados_tblcerts'][$facturr]['flete']['importe'] += (float)$existencia->importe/count($existencia->ids_facrem);
+              } else {
+                $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad/count($existencia->ids_facrem);
+                $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe/count($existencia->ids_facrem);
+              }
+            } else {
+              $caja['certificados_tblcerts'][$facturr] = $certGastos;
+              $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad/count($existencia->ids_facrem);
+              $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe/count($existencia->ids_facrem);
+            }
+          }
+        }
+      }
+
       $pdf->SetX(54);
       $pdf->Row(array(
         $existencia->folio,
@@ -4046,7 +4068,7 @@ class existencias_limon_model extends CI_Model {
         if (isset($gg['importe']) && $gg['importe'] > 0 && !isset($newhead[$idClas])) {
           $newhead[$idClas] = $gg['nombre'];
           $newalign[$idClas] = 'R';
-          $newwidth[$idClas] = 16;
+          $newwidth[$idClas] = 14;
         }
       }
     }
@@ -4073,7 +4095,7 @@ class existencias_limon_model extends CI_Model {
   {
     $pdf->AddPage('L');
     // echo "<pre>";
-    //   var_dump($caja['certificados_tblcerts'], $caja_data, $grupByUnidad);
+    //   var_dump($caja['ventas_tblcert'], $caja_data, $grupByUnidad);
     // echo "</pre>";exit;
     // $caja['ventas_tblcert']
     // $caja['certificados_tblcerts']
@@ -4085,22 +4107,22 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(182));
-    $pdf->Row(array('VENTAS'), true, false);
+    $pdf->Row(array('COSTOS VENTAS'), true, false);
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
 
     $align1 = array('L', 'L', 'L', 'L', 'R', 'R', 'R');
-    $width1 = array(18, 30, 18, 16, 16, 16, 16);
+    $width1 = array(16, 30, 14, 14, 12, 12, 12);
     $align2 = array('L', 'L', 'R', 'R', 'R');
-    $width2 = array(18, 16, 16, 16, 16);
+    $width2 = array(14, 14, 12, 12, 12);
     $headerss = array('FOLIO', 'CLIENTE', 'CALIBRE', 'UNIDAD', 'BULTOS', 'PRECIO', 'X BULTO');
     $remisionesCert = $this->addHeadsCertificadosTblcerts($caja['certificados_tblcerts'], $headerss, $align1, $width1, $align2, $width2);
     $headerss = array_merge($headerss, ['Costo T', 'Utilidad', '%']);
     $align1 = array_merge($align1, ['R', 'R', 'R']);
-    $width1 = array_merge($width1, [16, 16, 16]);
+    $width1 = array_merge($width1, [12, 12, 10]);
     $align2 = array_merge($align2, ['R', 'R', 'R']);
-    $width2 = array_merge($width2, [16, 16, 16]);
+    $width2 = array_merge($width2, [12, 12, 10]);
 
     // echo "<pre>";
     //   var_dump($remisionesCert);
@@ -4113,7 +4135,7 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetAligns($align1);
     $pdf->SetWidths($width1);
-    $pdf->Row($headerss, true, 'B');
+    $pdf->Row($headerss, true, true);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
@@ -4121,6 +4143,7 @@ class existencias_limon_model extends CI_Model {
     //   var_dump($caja['ventas']);
     // echo "</pre>";exit;
 
+    $ventasDivididasXbulto = [];
     $auxvent = 0;
     foreach ($caja['ventas'] as $venta) {
       if($pdf->GetY() >= $pdf->limiteY){
@@ -4155,7 +4178,7 @@ class existencias_limon_model extends CI_Model {
           MyString::formatoNumero($porBulto, 2, '', false),
         );
       } else {
-        $pdf->SetX(54);
+        $pdf->SetX(52);
         $pdf->SetAligns($align2);
         $pdf->SetWidths($width2);
         $datarow = array(
@@ -4172,11 +4195,14 @@ class existencias_limon_model extends CI_Model {
       $costosex = 0;
       if (isset($remisionesCert[$venta->id_factura])) {
         foreach ($remisionesCert[$venta->id_factura] as $keycc => $rcert) {
-          $noarchivos = ($caja['ventas_tblcert'][$venta->id_factura]['cantidad'] > 0? $caja['ventas_tblcert'][$venta->id_factura]['cantidad']: 1);
-          $remisionesCert[$venta->id_factura][$keycc] = MyString::formatoNumero($remisionesCert[$venta->id_factura][$keycc] / $noarchivos, 4, '', false);
+          if (!isset($ventasDivididasXbulto[$venta->id_factura])) {
+            $noarchivos = ($caja['ventas_tblcert'][$venta->id_factura]['cantidad'] > 0? $caja['ventas_tblcert'][$venta->id_factura]['cantidad']: 1);
+            $remisionesCert[$venta->id_factura][$keycc] = MyString::formatoNumero($remisionesCert[$venta->id_factura][$keycc] / $noarchivos, 2, '', false);
+          }
           $costosex += $remisionesCert[$venta->id_factura][$keycc];
         }
         $datarow = array_merge($datarow, array_values($remisionesCert[$venta->id_factura]));
+        $ventasDivididasXbulto[$venta->id_factura] = true;
       } else {
         foreach ($num_pos as $keyvf => $valuevfvf) {
           $num_pos[$keyvf] = 0;
@@ -4186,9 +4212,9 @@ class existencias_limon_model extends CI_Model {
 
       $costoTotal = $costosex + $porBulto;
       $datarow = array_merge($datarow, array_values([
-        MyString::formatoNumero($costoTotal, 4, '', false),
-        MyString::formatoNumero(($venta->precio - $costoTotal), 4, '', false),
-        MyString::formatoNumero((($venta->precio - $costoTotal) * 100 / ($venta->precio != 0? $venta->precio: 1)), 4, '', false),
+        MyString::formatoNumero($costoTotal, 2, '', false),
+        MyString::formatoNumero(($venta->precio - $costoTotal), 2, '', false),
+        MyString::formatoNumero((($venta->precio - $costoTotal) * 100 / ($venta->precio != 0? $venta->precio: 1)), 2, '', false),
       ]));
 
       $pdf->Row($datarow, false, 'B');

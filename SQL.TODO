@@ -1,11 +1,11 @@
 
  ☐ Contra recibos de ordenes de compra, seleccionarlas modificar e imprimir
  ✔ Proyectos @done (24-02-28 11:11)
-   -- lap|san
+   -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Finalizar',539,FALSE,'proyectos/finalizar/','check',FALSE);
 
  ✔ Crear reporte de movimientos de bancos concentrado por empresa, como el de Reporte Acumulado Por Empresa @done (24-02-28 15:56)
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE IF EXISTS public.banco_movimientos ADD COLUMN tipo_mov character varying(30) COLLATE pg_catalog."default";
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Total Movimientos x Empresa',104,true,'banco/rpt_mov_totales_empresa/','print',true);
    ALTER TABLE IF EXISTS public.banco_cuentas ADD COLUMN cuenta_uso boolean DEFAULT false;
@@ -44,7 +44,6 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',505,true,'existencias_limon/del_caja/','ban-circle',true);
     ALTER TABLE IF EXISTS otros.existencias_limon_gastos ADD COLUMN id_clasificacion bigint;
     ALTER TABLE IF EXISTS otros.existencias_limon_descuentos_ventas ADD COLUMN id_clasificacion bigint;
-    -- lap|san
     ALTER TABLE IF EXISTS public.calibres ADD COLUMN grupo2 integer;
     COMMENT ON COLUMN public.calibres.grupo2 IS 'agrupa los calibres para sumar el %';
     UPDATE public.calibres SET grupo2=4 WHERE id_calibre=105;
