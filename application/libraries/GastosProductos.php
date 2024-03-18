@@ -23,6 +23,7 @@ class GastosProductos {
     1602 => ['tipo' => 'g', 'nombre' => 'DES DISTRIBUCION'],
     1603 => ['tipo' => 'c', 'nombre' => 'EXPE FITOSANITARIO'],
     1610 => ['tipo' => 'g', 'nombre' => 'MANIOBRA'],
+    'flete' => ['tipo' => 'g', 'nombre' => 'FLETES'],
   ];
   public static $gastosProductosKeys = [];
 

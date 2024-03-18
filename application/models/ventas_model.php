@@ -531,6 +531,8 @@ class ventas_model extends privilegios_model{
     }
     if(count($productosFactura) > 0)
       $this->db->insert_batch('facturacion_productos', $productosFactura);
+    log_message('error', var_export($productosFactura, true));
+
 
     if(count($produccionFactura) > 0)
       $this->db->insert_batch('otros.produccion_historial', $produccionFactura);
@@ -917,6 +919,8 @@ class ventas_model extends privilegios_model{
     $this->db->delete('facturacion_productos', "id_factura = {$id_venta}");
     if(count($productosFactura) > 0)
       $this->db->insert_batch('facturacion_productos', $productosFactura);
+    log_message('error', var_export($productosFactura, true));
+
 
     $this->db->delete('otros.produccion_historial', "id_factura = {$id_venta}");
     if(count($produccionFactura) > 0)
