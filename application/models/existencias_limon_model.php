@@ -414,7 +414,7 @@ class existencias_limon_model extends CI_Model {
       $fidss = 't:'.implode('\||t:', $faidss).'\|';
       $costo_ventas_fletes = $this->db->query(
         "SELECT co.id_orden, p.nombre_fiscal AS proveedor, co.folio, string_agg(distinct(cp.descripcion), ', ') AS descripcion,
-          Sum(cp.cantidad) AS cantidad, Sum(cp.importe) AS importe, Sum(cp.total) AS total, co.ids_facrem
+          Sum(cp.cantidad) AS cantidad, Sum(cp.importe) AS importe, Sum(cp.total) AS total, co.ids_facrem, Count(cp.id_orden) AS num_rows
         FROM compras_ordenes co
           INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
           INNER JOIN proveedores p ON p.id_proveedor = co.id_proveedor
@@ -494,6 +494,16 @@ class existencias_limon_model extends CI_Model {
     if ($existencia_anterior->num_rows() > 0)
     {
       $info['existencia_anterior'] = $existencia_anterior->result();
+    }
+    // Quitamos la existencia anterior de piso
+    foreach ($info['existencia_anterior'] as $key => $item) {
+      foreach ($info['existencia_piso_anterior'] as $key1 => $value) {
+        if (($item->id_calibre.$item->id_unidad) == ($value->id_calibre.$value->id_unidad)) {
+          $info['existencia_anterior'][$key]->cantidad -= round($value->cantidad, 2);
+          $info['existencia_anterior'][$key]->kilos    -= round($value->kilos, 2);
+          $info['existencia_anterior'][$key]->importe  -= round($value->importe, 2);
+        }
+      }
     }
 
 
@@ -2276,387 +2286,403 @@ class existencias_limon_model extends CI_Model {
 
 
     // Existencia Anterior
+    $existencia_ant_kilos = $existencia_ant_cantidad = $existencia_ant_importe = 0;
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetXY(6, 32);
     // $pdf->SetAligns(array('L'));
     // $pdf->SetWidths(array(204));
     // $pdf->Row(array('EXISTENCIA ANTERIOR'), true, 'B');
 
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(54, 30, 20, 20, 18, 18, 22));
-    $pdf->Row(array('EXISTENCIA ANTERIOR', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'PRECIO', 'IMPORTE'), true, 'B');
+    if (count($caja['existencia_anterior']) > 0) {
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(54, 30, 20, 20, 18, 18, 22));
+      $pdf->Row(array('EXISTENCIA ANTERIOR', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'PRECIO', 'IMPORTE'), true, 'B');
 
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 20, 20, 18, 18, 22));
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 20, 20, 18, 18, 22));
 
-    $existencia_ant_kilos = $existencia_ant_cantidad = $existencia_ant_importe = 0;
-    foreach ($caja['existencia_anterior'] as $existencia_ant) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(6, 10);
-        } else
-          $pdf->AddPage();
+      foreach ($caja['existencia_anterior'] as $existencia_ant) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $existencia_ant_kilos    += floatval($existencia_ant->kilos);
+        $existencia_ant_cantidad += floatval($existencia_ant->cantidad);
+        $existencia_ant_importe  += floatval($existencia_ant->importe);
+
+        $pdf->SetX(60);
+        $pdf->Row(array(
+          $existencia_ant->calibre,
+          // $existencia_ant->clasificacion,
+          $existencia_ant->unidad,
+          MyString::formatoNumero($existencia_ant->kilos, 2, '', false),
+          MyString::formatoNumero($existencia_ant->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia_ant->costo, 2, '', false),
+          MyString::formatoNumero($existencia_ant->importe, 2, '', false),
+        ), false, 'B');
       }
 
-      $existencia_ant_kilos    += floatval($existencia_ant->kilos);
-      $existencia_ant_cantidad += floatval($existencia_ant->cantidad);
-      $existencia_ant_importe  += floatval($existencia_ant->importe);
-
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(60);
       $pdf->Row(array(
-        $existencia_ant->calibre,
-        // $existencia_ant->clasificacion,
-        $existencia_ant->unidad,
-        MyString::formatoNumero($existencia_ant->kilos, 2, '', false),
-        MyString::formatoNumero($existencia_ant->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia_ant->costo, 2, '', false),
-        MyString::formatoNumero($existencia_ant->importe, 2, '', false),
+        '',
+        '',
+        MyString::formatoNumero($existencia_ant_kilos, 2, '', false),
+        MyString::formatoNumero($existencia_ant_cantidad, 2, '', false),
+        MyString::formatoNumero(($existencia_ant_importe/($existencia_ant_cantidad==0? 1: $existencia_ant_cantidad)), 2, '', false),
+        MyString::formatoNumero($existencia_ant_importe, 2, '', false),
       ), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($existencia_ant_kilos, 2, '', false),
-      MyString::formatoNumero($existencia_ant_cantidad, 2, '', false),
-      MyString::formatoNumero(($existencia_ant_importe/($existencia_ant_cantidad==0? 1: $existencia_ant_cantidad)), 2, '', false),
-      MyString::formatoNumero($existencia_ant_importe, 2, '', false),
-    ), false, 'B');
 
 
     // Existencia anterior de piso
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
-    // $pdf->Row(array('EXISTENCIA DE PISO'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(54, 30, 20, 18, 17, 17, 25, 22));
-    $pdf->Row(array('EXISTENCIA DE PISO ANTERIOR', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'COSTO', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(60, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 20, 18, 17, 17, 25));
-
     $existenciaPisoAnt_kilos = $existenciaPisoAnt_cantidad = $existenciaPisoAnt_importe = 0;
-    foreach ($caja['existencia_piso_anterior'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(60, 10);
-        } else
-          $pdf->AddPage();
+    if (count($caja['existencia_piso_anterior']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(204));
+      // $pdf->Row(array('EXISTENCIA DE PISO'), true, 'B');
+
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(54, 30, 20, 18, 17, 17, 25, 22));
+      $pdf->Row(array('EXISTENCIA DE PISO ANTERIOR', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'COSTO', 'IMPORTE'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(60, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 20, 18, 17, 17, 25));
+
+      foreach ($caja['existencia_piso_anterior'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(60, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $existenciaPisoAnt_kilos    += floatval($existencia->kilos);
+        $existenciaPisoAnt_cantidad += floatval($existencia->cantidad);
+        $existenciaPisoAnt_importe  += floatval($existencia->importe);
+
+        $pdf->SetX(60);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
       }
 
-      $existenciaPisoAnt_kilos    += floatval($existencia->kilos);
-      $existenciaPisoAnt_cantidad += floatval($existencia->cantidad);
-      $existenciaPisoAnt_importe  += floatval($existencia->importe);
-
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(60);
       $pdf->Row(array(
-        $existencia->calibre,
-        $existencia->unidad,
-        MyString::formatoNumero($existencia->kilos, 2, '', false),
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia->costo, 2, '', false),
-        MyString::formatoNumero($existencia->importe, 2, '', false),
+        '',
+        '',
+        MyString::formatoNumero($existenciaPisoAnt_kilos, 2, '', false),
+        MyString::formatoNumero($existenciaPisoAnt_cantidad, 2, '', false),
+        MyString::formatoNumero(($existenciaPisoAnt_importe/($existenciaPisoAnt_cantidad==0? 1: $existenciaPisoAnt_cantidad)), 2, '', false),
+        MyString::formatoNumero($existenciaPisoAnt_importe, 2, '', false),
+      ), false, 'B');
+      $pdf->SetX(60);
+      $pdf->Row(array(
+        '',
+        '',
+        MyString::formatoNumero(($existenciaPisoAnt_kilos+$existencia_ant_kilos), 2, '', false),
+        MyString::formatoNumero(($existenciaPisoAnt_cantidad+$existencia_ant_cantidad), 2, '', false),
+        MyString::formatoNumero((($existenciaPisoAnt_importe+$existencia_ant_importe)/(($existenciaPisoAnt_cantidad+$existencia_ant_cantidad)==0? 1: ($existenciaPisoAnt_cantidad+$existencia_ant_cantidad))), 2, '', false),
+        MyString::formatoNumero(($existenciaPisoAnt_importe+$existencia_ant_importe), 2, '', false),
       ), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($existenciaPisoAnt_kilos, 2, '', false),
-      MyString::formatoNumero($existenciaPisoAnt_cantidad, 2, '', false),
-      MyString::formatoNumero(($existenciaPisoAnt_importe/($existenciaPisoAnt_cantidad==0? 1: $existenciaPisoAnt_cantidad)), 2, '', false),
-      MyString::formatoNumero($existenciaPisoAnt_importe, 2, '', false),
-    ), false, 'B');
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero(($existenciaPisoAnt_kilos+$existencia_ant_kilos), 2, '', false),
-      MyString::formatoNumero(($existenciaPisoAnt_cantidad+$existencia_ant_cantidad), 2, '', false),
-      MyString::formatoNumero((($existenciaPisoAnt_importe+$existencia_ant_importe)/(($existenciaPisoAnt_cantidad+$existencia_ant_cantidad)==0? 1: ($existenciaPisoAnt_cantidad+$existencia_ant_cantidad))), 2, '', false),
-      MyString::formatoNumero(($existenciaPisoAnt_importe+$existencia_ant_importe), 2, '', false),
-    ), false, 'B');
-    $pdf->SetAligns(array('R'));
-    $pdf->SetWidths(array(22));
-    $pdf->SetXY(188, $pdf->GetY()-11);
-    $pdf->Row(array('EXIST ANT'), false, 'B');
-    $pdf->SetXY(188, $pdf->GetY());
-    $pdf->Row(array(MyString::formatoNumero((($existenciaPisoAnt_importe+$existencia_ant_importe)), 2, '', false)), false, 'B');
+    if ((($existenciaPisoAnt_importe+$existencia_ant_importe)) > 0) {
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(22));
+      $pdf->SetXY(188, $pdf->GetY()-11);
+      $pdf->Row(array('EXIST ANT'), false, 'B');
+      $pdf->SetXY(188, $pdf->GetY());
+      $pdf->Row(array(MyString::formatoNumero((($existenciaPisoAnt_importe+$existencia_ant_importe)), 2, '', false)), false, 'B');
+    }
 
 
     // Compra de fruta empacada
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    // $pdf->SetAligns(array('L'));
-    // $pdf->SetWidths(array(204));
-    // $pdf->Row(array('COMPRA DE FRUTA EMPACADA'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(54, 30, 20, 18, 18, 18, 24));
-    $pdf->Row(array('COMPRA DE FRUTA EMPACADA', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'COSTO', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 20, 18, 18, 18, 24));
-
     $frutaCompra_kilos = $frutaCompra_cantidad = $frutaCompra_importe = 0;
-    foreach ($caja['compra_fruta_empacada'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(6, 10);
-        } else
-          $pdf->AddPage();
+    if (count($caja['compra_fruta_empacada']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      // $pdf->SetAligns(array('L'));
+      // $pdf->SetWidths(array(204));
+      // $pdf->Row(array('COMPRA DE FRUTA EMPACADA'), true, 'B');
+
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(54, 30, 20, 18, 18, 18, 24));
+      $pdf->Row(array('COMPRA DE FRUTA EMPACADA', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'COSTO', 'IMPORTE'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 20, 18, 18, 18, 24));
+
+      foreach ($caja['compra_fruta_empacada'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $frutaCompra_kilos    += floatval($existencia->kilos);
+        $frutaCompra_cantidad += floatval($existencia->cantidad);
+        $frutaCompra_importe  += floatval($existencia->importe);
+
+        $pdf->SetX(60);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
       }
 
-      $frutaCompra_kilos    += floatval($existencia->kilos);
-      $frutaCompra_cantidad += floatval($existencia->cantidad);
-      $frutaCompra_importe  += floatval($existencia->importe);
-
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(60);
       $pdf->Row(array(
-        $existencia->calibre,
-        $existencia->unidad,
-        MyString::formatoNumero($existencia->kilos, 2, '', false),
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia->costo, 2, '', false),
-        MyString::formatoNumero($existencia->importe, 2, '', false),
+        '',
+        '',
+        MyString::formatoNumero($frutaCompra_kilos, 2, '', false),
+        MyString::formatoNumero($frutaCompra_cantidad, 2, '', false),
+        MyString::formatoNumero(($frutaCompra_importe/($frutaCompra_cantidad==0? 1: $frutaCompra_cantidad)), 2, '', false),
+        MyString::formatoNumero($frutaCompra_importe, 2, '', false),
       ), false, 'B');
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(22));
+      $pdf->SetXY(188, $pdf->GetY()-11);
+      $pdf->Row(array('COMPRA EMP'), false, 'B');
+      $pdf->SetXY(188, $pdf->GetY());
+      $pdf->Row(array(MyString::formatoNumero($frutaCompra_importe, 2, '', false)), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($frutaCompra_kilos, 2, '', false),
-      MyString::formatoNumero($frutaCompra_cantidad, 2, '', false),
-      MyString::formatoNumero(($frutaCompra_importe/($frutaCompra_cantidad==0? 1: $frutaCompra_cantidad)), 2, '', false),
-      MyString::formatoNumero($frutaCompra_importe, 2, '', false),
-    ), false, 'B');
-    $pdf->SetAligns(array('R'));
-    $pdf->SetWidths(array(22));
-    $pdf->SetXY(188, $pdf->GetY()-11);
-    $pdf->Row(array('COMPRA EMP'), false, 'B');
-    $pdf->SetXY(188, $pdf->GetY());
-    $pdf->Row(array(MyString::formatoNumero($frutaCompra_importe, 2, '', false)), false, 'B');
 
     $entrada_limon_fruta_importe = $entrada_limon_fruta = $entrada_limon_fruta_bults = 0;
-    // COMPARA DE LIMON
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    // $pdf->SetAligns(array('L'));
-    // $pdf->SetWidths(array(204));
-    // $pdf->Row(array('COMPRA DE FRUTA'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(54, 30, 20, 20, 18, 18, 22));
-    $pdf->Row(array('MATERIA PRIMA:', 'CALIBRE', 'PESO PROM', 'KILOS', 'CAJAS', 'PRECIO', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 20, 20, 18, 18, 22));
-
     $compra_fruta_kilos = $compra_fruta_cajas = $compra_fruta_importe = 0;
     $industrialSuelo_precio = 0;
-    foreach ($caja['compra_fruta'] as $com_fruta) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(6, 10);
-        } else
-          $pdf->AddPage();
+    // COMPARA DE LIMON
+    if (count($caja['compra_fruta']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      // $pdf->SetAligns(array('L'));
+      // $pdf->SetWidths(array(204));
+      // $pdf->Row(array('COMPRA DE FRUTA'), true, 'B');
+
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(54, 30, 20, 20, 18, 18, 22));
+      $pdf->Row(array('MATERIA PRIMA:', 'CALIBRE', 'PESO PROM', 'KILOS', 'CAJAS', 'PRECIO', 'IMPORTE'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 20, 20, 18, 18, 22));
+
+      foreach ($caja['compra_fruta'] as $com_fruta) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $compra_fruta_kilos += floatval($com_fruta->kilos);
+        $compra_fruta_cajas += floatval($com_fruta->cajas);
+        $compra_fruta_importe += floatval($com_fruta->importe);
+
+        if ($com_fruta->calidad == 'LIMON FRUTA') {
+          $entrada_limon_fruta += floatval($com_fruta->kilos);
+          $entrada_limon_fruta_bults += floatval($com_fruta->cajas);
+          $entrada_limon_fruta_importe += floatval($com_fruta->importe);
+        } elseif ($com_fruta->calidad == 'LIMON DEL SUELO') {
+          $industrialSuelo_precio = $com_fruta->precio;
+        }
+
+        $pdf->SetX(60);
+        $pdf->Row(array(
+          $com_fruta->calidad,
+          MyString::formatoNumero($com_fruta->peso_prom, 2, '', false),
+          MyString::formatoNumero($com_fruta->kilos, 2, '', false),
+          MyString::formatoNumero($com_fruta->cajas, 2, '', false),
+          MyString::formatoNumero($com_fruta->precio, 2, '', false),
+          MyString::formatoNumero($com_fruta->importe, 2, '', false),
+        ), false, 'B');
       }
 
-      $compra_fruta_kilos += floatval($com_fruta->kilos);
-      $compra_fruta_cajas += floatval($com_fruta->cajas);
-      $compra_fruta_importe += floatval($com_fruta->importe);
-
-      if ($com_fruta->calidad == 'LIMON FRUTA') {
-        $entrada_limon_fruta += floatval($com_fruta->kilos);
-        $entrada_limon_fruta_bults += floatval($com_fruta->cajas);
-        $entrada_limon_fruta_importe += floatval($com_fruta->importe);
-      } elseif ($com_fruta->calidad == 'LIMON DEL SUELO') {
-        $industrialSuelo_precio = $com_fruta->precio;
-      }
-
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(60);
       $pdf->Row(array(
-        $com_fruta->calidad,
-        MyString::formatoNumero($com_fruta->peso_prom, 2, '', false),
-        MyString::formatoNumero($com_fruta->kilos, 2, '', false),
-        MyString::formatoNumero($com_fruta->cajas, 2, '', false),
-        MyString::formatoNumero($com_fruta->precio, 2, '', false),
-        MyString::formatoNumero($com_fruta->importe, 2, '', false),
+        '',
+        '',
+        MyString::formatoNumero($compra_fruta_kilos, 2, '', false),
+        MyString::formatoNumero($compra_fruta_cajas, 2, '', false),
+        MyString::formatoNumero(($compra_fruta_importe/($compra_fruta_kilos==0? 1: $compra_fruta_kilos)), 2, '', false),
+        MyString::formatoNumero($compra_fruta_importe, 2, '', false),
       ), false, 'B');
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(22));
+      $pdf->SetXY(188, $pdf->GetY()-11);
+      $pdf->Row(array('COMPRA MP'), false, 'B');
+      $pdf->SetXY(188, $pdf->GetY());
+      $pdf->Row(array(MyString::formatoNumero(($compra_fruta_importe), 2, '', false)), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($compra_fruta_kilos, 2, '', false),
-      MyString::formatoNumero($compra_fruta_cajas, 2, '', false),
-      MyString::formatoNumero(($compra_fruta_importe/($compra_fruta_kilos==0? 1: $compra_fruta_kilos)), 2, '', false),
-      MyString::formatoNumero($compra_fruta_importe, 2, '', false),
-    ), false, 'B');
-    $pdf->SetAligns(array('R'));
-    $pdf->SetWidths(array(22));
-    $pdf->SetXY(188, $pdf->GetY()-11);
-    $pdf->Row(array('COMPRA MP'), false, 'B');
-    $pdf->SetXY(188, $pdf->GetY());
-    $pdf->Row(array(MyString::formatoNumero(($compra_fruta_importe), 2, '', false)), false, 'B');
 
 
     // Devolucion de fruta
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    // $pdf->SetAligns(array('L'));
-    // $pdf->SetWidths(array(204));
-    // $pdf->Row(array('DEVOLUCIÓN DE FRUTA'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(54, 30, 20, 18, 18, 18, 24));
-    $pdf->Row(array('DEVOLUCIÓN DE FRUTA AL INDUSTRIAL', 'CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 20, 18, 18, 18, 24));
-
     $devFrutaIndus_kilos = $devFrutaIndus_cantidad = $devFrutaIndus_importe = 0;
-    foreach ($caja['devolucion_fruta_indust'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(6, 10);
-        } else
-          $pdf->AddPage();
+    if (count($caja['devolucion_fruta_indust']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      // $pdf->SetAligns(array('L'));
+      // $pdf->SetWidths(array(204));
+      // $pdf->Row(array('DEVOLUCIÓN DE FRUTA'), true, 'B');
+
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(54, 30, 20, 18, 18, 18, 24));
+      $pdf->Row(array('DEVOLUCIÓN DE FRUTA AL INDUSTRIAL', 'CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 20, 18, 18, 18, 24));
+
+      foreach ($caja['devolucion_fruta_indust'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $devFrutaIndus_kilos    += floatval($existencia->kilos);
+        $devFrutaIndus_cantidad += floatval($existencia->cantidad);
+        $devFrutaIndus_importe  += floatval($existencia->importe);
+
+        $pdf->SetX(60);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
       }
 
-      $devFrutaIndus_kilos    += floatval($existencia->kilos);
-      $devFrutaIndus_cantidad += floatval($existencia->cantidad);
-      $devFrutaIndus_importe  += floatval($existencia->importe);
-
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(60);
       $pdf->Row(array(
-        $existencia->calibre,
-        $existencia->unidad,
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia->kilos, 2, '', false),
-        MyString::formatoNumero($existencia->costo, 2, '', false),
-        MyString::formatoNumero($existencia->importe, 2, '', false),
+        '',
+        '',
+        MyString::formatoNumero($devFrutaIndus_cantidad, 2, '', false),
+        MyString::formatoNumero($devFrutaIndus_kilos, 2, '', false),
+        MyString::formatoNumero(($devFrutaIndus_importe/($devFrutaIndus_cantidad==0? 1: $devFrutaIndus_cantidad)), 2, '', false),
+        MyString::formatoNumero($devFrutaIndus_importe, 2, '', false),
       ), false, 'B');
+      // $pdf->SetAligns(array('R'));
+      // $pdf->SetWidths(array(22));
+      // $pdf->SetXY(188, $pdf->GetY()-11);
+      // $pdf->Row(array('DEVOLUCIÓN'), false, 'B');
+      // $pdf->SetXY(188, $pdf->GetY());
+      // $pdf->Row(array(MyString::formatoNumero($devFruta_importe, 2, '', false)), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($devFrutaIndus_cantidad, 2, '', false),
-      MyString::formatoNumero($devFrutaIndus_kilos, 2, '', false),
-      MyString::formatoNumero(($devFrutaIndus_importe/($devFrutaIndus_cantidad==0? 1: $devFrutaIndus_cantidad)), 2, '', false),
-      MyString::formatoNumero($devFrutaIndus_importe, 2, '', false),
-    ), false, 'B');
-    // $pdf->SetAligns(array('R'));
-    // $pdf->SetWidths(array(22));
-    // $pdf->SetXY(188, $pdf->GetY()-11);
-    // $pdf->Row(array('DEVOLUCIÓN'), false, 'B');
-    // $pdf->SetXY(188, $pdf->GetY());
-    // $pdf->Row(array(MyString::formatoNumero($devFruta_importe, 2, '', false)), false, 'B');
-
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(54, 30, 20, 18, 18, 18, 24));
-    $pdf->Row(array('DEVOLUCIÓN DE FRUTA', 'CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 20, 18, 18, 18, 24));
 
     $devFruta_kilos = $devFruta_cantidad = $devFruta_importe = 0;
-    foreach ($caja['devolucion_fruta'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(6, 10);
-        } else
-          $pdf->AddPage();
+    if (count($caja['devolucion_fruta']) > 0) {
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(54, 30, 20, 18, 18, 18, 24));
+      $pdf->Row(array('DEVOLUCIÓN DE FRUTA', 'CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 20, 18, 18, 18, 24));
+
+      foreach ($caja['devolucion_fruta'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $devFruta_kilos    += floatval($existencia->kilos);
+        $devFruta_cantidad += floatval($existencia->cantidad);
+        $devFruta_importe  += floatval($existencia->importe);
+
+        $entrada_limon_fruta += floatval($existencia->kilos);
+        $entrada_limon_fruta_bults += floatval($existencia->cantidad);
+
+        $pdf->SetX(60);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
       }
 
-      $devFruta_kilos    += floatval($existencia->kilos);
-      $devFruta_cantidad += floatval($existencia->cantidad);
-      $devFruta_importe  += floatval($existencia->importe);
-
-      $entrada_limon_fruta += floatval($existencia->kilos);
-      $entrada_limon_fruta_bults += floatval($existencia->cantidad);
-
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(60);
       $pdf->Row(array(
-        $existencia->calibre,
-        $existencia->unidad,
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia->kilos, 2, '', false),
-        MyString::formatoNumero($existencia->costo, 2, '', false),
-        MyString::formatoNumero($existencia->importe, 2, '', false),
+        '',
+        '',
+        MyString::formatoNumero($devFruta_cantidad, 2, '', false),
+        MyString::formatoNumero($devFruta_kilos, 2, '', false),
+        MyString::formatoNumero(($devFruta_importe/($devFruta_cantidad==0? 1: $devFruta_cantidad)), 2, '', false),
+        MyString::formatoNumero($devFruta_importe, 2, '', false),
+      ), false, 'B');
+      $pdf->SetX(60);
+      $pdf->Row(array(
+        '',
+        '',
+        MyString::formatoNumero($devFruta_cantidad+$devFrutaIndus_cantidad, 2, '', false),
+        MyString::formatoNumero($devFruta_kilos+$devFrutaIndus_kilos, 2, '', false),
+        MyString::formatoNumero((($devFruta_importe+$devFrutaIndus_importe)/(($devFruta_cantidad+$devFrutaIndus_cantidad)==0? 1: ($devFruta_cantidad+$devFrutaIndus_cantidad))), 2, '', false),
+        MyString::formatoNumero(($devFruta_importe+$devFrutaIndus_importe), 2, '', false),
       ), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($devFruta_cantidad, 2, '', false),
-      MyString::formatoNumero($devFruta_kilos, 2, '', false),
-      MyString::formatoNumero(($devFruta_importe/($devFruta_cantidad==0? 1: $devFruta_cantidad)), 2, '', false),
-      MyString::formatoNumero($devFruta_importe, 2, '', false),
-    ), false, 'B');
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($devFruta_cantidad+$devFrutaIndus_cantidad, 2, '', false),
-      MyString::formatoNumero($devFruta_kilos+$devFrutaIndus_kilos, 2, '', false),
-      MyString::formatoNumero((($devFruta_importe+$devFrutaIndus_importe)/(($devFruta_cantidad+$devFrutaIndus_cantidad)==0? 1: ($devFruta_cantidad+$devFrutaIndus_cantidad))), 2, '', false),
-      MyString::formatoNumero(($devFruta_importe+$devFrutaIndus_importe), 2, '', false),
-    ), false, 'B');
-    $pdf->SetAligns(array('R'));
-    $pdf->SetWidths(array(22));
-    $pdf->SetXY(188, $pdf->GetY()-11);
-    $pdf->Row(array('DEVOLUCIÓN'), false, 'B');
-    $pdf->SetXY(188, $pdf->GetY());
-    $pdf->Row(array(MyString::formatoNumero((($devFruta_importe+$devFrutaIndus_importe)), 2, '', false)), false, 'B');
+    if (($devFruta_importe+$devFrutaIndus_importe) > 0) {
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(22));
+      $pdf->SetXY(188, $pdf->GetY()-11);
+      $pdf->Row(array('DEVOLUCIÓN'), false, 'B');
+      $pdf->SetXY(188, $pdf->GetY());
+      $pdf->Row(array(MyString::formatoNumero((($devFruta_importe+$devFrutaIndus_importe)), 2, '', false)), false, 'B');
+    }
 
 
     // Ventas
@@ -2822,67 +2848,69 @@ class existencias_limon_model extends CI_Model {
 
 
     // Existencia de piso
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
-    // $pdf->Row(array('EXISTENCIA DE PISO'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(54, 30, 20, 18, 17, 17, 25, 22));
-    $pdf->Row(array('EXISTENCIA DE PISO', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'COSTO', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(60, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 20, 18, 17, 17, 25));
-
     $existenciaPiso_kilos = $existenciaPiso_cantidad = $existenciaPiso_importe = 0;
-    foreach ($caja['existencia_piso'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(60, 10);
-        } else
-          $pdf->AddPage();
+    if (count($caja['existencia_piso']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(204));
+      // $pdf->Row(array('EXISTENCIA DE PISO'), true, 'B');
+
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(54, 30, 20, 18, 17, 17, 25, 22));
+      $pdf->Row(array('EXISTENCIA DE PISO', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'COSTO', 'IMPORTE'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(60, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 20, 18, 17, 17, 25));
+
+      foreach ($caja['existencia_piso'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(60, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $existenciaPiso_kilos    += floatval($existencia->kilos);
+        $existenciaPiso_cantidad += floatval($existencia->cantidad);
+        $existenciaPiso_importe  += floatval($existencia->importe);
+
+        $pdf->SetX(60);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
       }
 
-      $existenciaPiso_kilos    += floatval($existencia->kilos);
-      $existenciaPiso_cantidad += floatval($existencia->cantidad);
-      $existenciaPiso_importe  += floatval($existencia->importe);
-
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(60);
       $pdf->Row(array(
-        $existencia->calibre,
-        $existencia->unidad,
-        MyString::formatoNumero($existencia->kilos, 2, '', false),
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia->costo, 2, '', false),
-        MyString::formatoNumero($existencia->importe, 2, '', false),
+        '',
+        '',
+        MyString::formatoNumero($existenciaPiso_kilos, 2, '', false),
+        MyString::formatoNumero($existenciaPiso_cantidad, 2, '', false),
+        MyString::formatoNumero(($existenciaPiso_importe/($existenciaPiso_cantidad==0? 1: $existenciaPiso_cantidad)), 2, '', false),
+        MyString::formatoNumero($existenciaPiso_importe, 2, '', false),
+      ), false, 'B');
+      $pdf->SetX(60);
+      $pdf->Row(array(
+        '',
+        '',
+        MyString::formatoNumero(($existenciaPiso_kilos+$existencia_kilos), 2, '', false),
+        MyString::formatoNumero(($existenciaPiso_cantidad+$existencia_cantidad), 2, '', false),
+        MyString::formatoNumero((($existenciaPiso_importe+$existencia_importe)/(($existenciaPiso_cantidad+$existencia_cantidad)==0? 1: ($existenciaPiso_cantidad+$existencia_cantidad))), 2, '', false),
+        MyString::formatoNumero(($existenciaPiso_importe+$existencia_importe), 2, '', false),
       ), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($existenciaPiso_kilos, 2, '', false),
-      MyString::formatoNumero($existenciaPiso_cantidad, 2, '', false),
-      MyString::formatoNumero(($existenciaPiso_importe/($existenciaPiso_cantidad==0? 1: $existenciaPiso_cantidad)), 2, '', false),
-      MyString::formatoNumero($existenciaPiso_importe, 2, '', false),
-    ), false, 'B');
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero(($existenciaPiso_kilos+$existencia_kilos), 2, '', false),
-      MyString::formatoNumero(($existenciaPiso_cantidad+$existencia_cantidad), 2, '', false),
-      MyString::formatoNumero((($existenciaPiso_importe+$existencia_importe)/(($existenciaPiso_cantidad+$existencia_cantidad)==0? 1: ($existenciaPiso_cantidad+$existencia_cantidad))), 2, '', false),
-      MyString::formatoNumero(($existenciaPiso_importe+$existencia_importe), 2, '', false),
-    ), false, 'B');
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(22));
     $pdf->SetXY(188, $pdf->GetY()-11);
@@ -2892,100 +2920,100 @@ class existencias_limon_model extends CI_Model {
 
 
     // EXISTENCIA REPROCESO
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
-    // $pdf->Row(array('EXISTENCIA REPROCESO'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(54, 30, 20, 18, 17, 17, 25, 22));
-    // $pdf->Row(array('EXISTENCIA REPROCESO', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'COSTO', 'IMPORTE'), true, 'B');
-    $pdf->Row(array('EXISTENCIA REPROCESO', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(60, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 20, 18, 17, 17, 25));
-
     $produccionPercent = [];
     $grupByUnidad = [];
-
     $existenciaRePro_kilos = $existenciaRePro_cantidad = $existenciaRePro_importe = 0;
-    foreach ($caja['existencia_reproceso'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(60, 10);
-        } else
-          $pdf->AddPage();
+    if (count($caja['existencia_reproceso']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(204));
+      // $pdf->Row(array('EXISTENCIA REPROCESO'), true, 'B');
+
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(54, 30, 20, 18, 17, 17, 25, 22));
+      // $pdf->Row(array('EXISTENCIA REPROCESO', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS', 'COSTO', 'IMPORTE'), true, 'B');
+      $pdf->Row(array('EXISTENCIA REPROCESO', 'CALIBRE', 'UNIDAD', 'KILOS', 'BULTOS'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(60, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 20, 18, 17, 17, 25));
+      foreach ($caja['existencia_reproceso'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(60, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $existenciaRePro_kilos    += floatval($existencia->kilos);
+        $existenciaRePro_cantidad += floatval($existencia->cantidad);
+        $existenciaRePro_importe  += floatval($existencia->importe);
+
+        $pdf->SetX(60);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          // MyString::formatoNumero($existencia->costo, 2, '', false),
+          // MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
+
+        if (!isset($produccionPercent[$existencia->id_calibre])) {
+          $calibre = $this->calibres_model->getCalibre($existencia->id_calibre);
+          $produccionPercent[$existencia->id_calibre] = [
+            'id_calibre' => $existencia->id_calibre,
+            'cantidad' => $existencia->cantidad * -1,
+            'kilos'    => $existencia->kilos * -1,
+            'calibre'  => $existencia->calibre,
+            'clasificacion' => $existencia->clasificacion,
+            'order'  => $calibre->order,
+            'grupo'  => $calibre->grupo,
+            'grupo2'  => $calibre->grupo2,
+          ];
+        } else {
+          $produccionPercent[$existencia->id_calibre]['cantidad'] += ($existencia->cantidad * -1);
+          $produccionPercent[$existencia->id_calibre]['kilos'] += ($existencia->kilos * -1);
+        }
+
+        if (!isset($grupByUnidad[$existencia->unidad])) {
+          $grupByUnidad[$existencia->unidad] = [
+            'cantidad' => $existencia->cantidad * -1,
+            'kilos'    => $existencia->kilos * -1,
+            'unidad'   => $existencia->unidad,
+            'costo'    => $existencia->costo,
+            'importe'  => $existencia->importe * -1,
+          ];
+        } else {
+          $grupByUnidad[$existencia->unidad]['cantidad'] += $existencia->cantidad * -1;
+          $grupByUnidad[$existencia->unidad]['kilos']    += $existencia->kilos * -1;
+          $grupByUnidad[$existencia->unidad]['importe']  += $existencia->importe * -1;
+          $grupByUnidad[$existencia->unidad]['costo']  = $grupByUnidad[$existencia->unidad]['importe'] / ($grupByUnidad[$existencia->unidad]['cantidad'] > 0 ? $grupByUnidad[$existencia->unidad]['cantidad'] : 1);
+        }
       }
 
-      $existenciaRePro_kilos    += floatval($existencia->kilos);
-      $existenciaRePro_cantidad += floatval($existencia->cantidad);
-      $existenciaRePro_importe  += floatval($existencia->importe);
-
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(60);
       $pdf->Row(array(
-        $existencia->calibre,
-        $existencia->unidad,
-        MyString::formatoNumero($existencia->kilos, 2, '', false),
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        // MyString::formatoNumero($existencia->costo, 2, '', false),
-        // MyString::formatoNumero($existencia->importe, 2, '', false),
+        '',
+        '',
+        MyString::formatoNumero($existenciaRePro_kilos, 2, '', false),
+        MyString::formatoNumero($existenciaRePro_cantidad, 2, '', false),
+        // MyString::formatoNumero(($existenciaRePro_importe/($existenciaRePro_cantidad==0? 1: $existenciaRePro_cantidad)), 2, '', false),
+        // MyString::formatoNumero($existenciaRePro_importe, 2, '', false),
       ), false, 'B');
-
-      if (!isset($produccionPercent[$existencia->id_calibre])) {
-        $calibre = $this->calibres_model->getCalibre($existencia->id_calibre);
-        $produccionPercent[$existencia->id_calibre] = [
-          'id_calibre' => $existencia->id_calibre,
-          'cantidad' => $existencia->cantidad * -1,
-          'kilos'    => $existencia->kilos * -1,
-          'calibre'  => $existencia->calibre,
-          'clasificacion' => $existencia->clasificacion,
-          'order'  => $calibre->order,
-          'grupo'  => $calibre->grupo,
-          'grupo2'  => $calibre->grupo2,
-        ];
-      } else {
-        $produccionPercent[$existencia->id_calibre]['cantidad'] += ($existencia->cantidad * -1);
-        $produccionPercent[$existencia->id_calibre]['kilos'] += ($existencia->kilos * -1);
-      }
-
-      if (!isset($grupByUnidad[$existencia->unidad])) {
-        $grupByUnidad[$existencia->unidad] = [
-          'cantidad' => $existencia->cantidad * -1,
-          'kilos'    => $existencia->kilos * -1,
-          'unidad'   => $existencia->unidad,
-          'costo'    => $existencia->costo,
-          'importe'  => $existencia->importe * -1,
-        ];
-      } else {
-        $grupByUnidad[$existencia->unidad]['cantidad'] += $existencia->cantidad * -1;
-        $grupByUnidad[$existencia->unidad]['kilos']    += $existencia->kilos * -1;
-        $grupByUnidad[$existencia->unidad]['importe']  += $existencia->importe * -1;
-        $grupByUnidad[$existencia->unidad]['costo']  = $grupByUnidad[$existencia->unidad]['importe'] / ($grupByUnidad[$existencia->unidad]['cantidad'] > 0 ? $grupByUnidad[$existencia->unidad]['cantidad'] : 1);
-      }
+      // $pdf->SetAligns(array('R'));
+      // $pdf->SetWidths(array(22));
+      // $pdf->SetXY(188, $pdf->GetY()-11);
+      // $pdf->Row(array('EXISTENCIA RE.'), false, 'B');
+      // $pdf->SetXY(188, $pdf->GetY());
+      // $pdf->Row(array(MyString::formatoNumero($existenciaRePro_importe, 2, '', false)), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(60);
-    $pdf->Row(array(
-      '',
-      '',
-      MyString::formatoNumero($existenciaRePro_kilos, 2, '', false),
-      MyString::formatoNumero($existenciaRePro_cantidad, 2, '', false),
-      // MyString::formatoNumero(($existenciaRePro_importe/($existenciaRePro_cantidad==0? 1: $existenciaRePro_cantidad)), 2, '', false),
-      // MyString::formatoNumero($existenciaRePro_importe, 2, '', false),
-    ), false, 'B');
-    // $pdf->SetAligns(array('R'));
-    // $pdf->SetWidths(array(22));
-    // $pdf->SetXY(188, $pdf->GetY()-11);
-    // $pdf->Row(array('EXISTENCIA RE.'), false, 'B');
-    // $pdf->SetXY(188, $pdf->GetY());
-    // $pdf->Row(array(MyString::formatoNumero($existenciaRePro_importe, 2, '', false)), false, 'B');
 
 
     $pdf->SetFont('Arial','B', 8);
@@ -3226,328 +3254,342 @@ class existencias_limon_model extends CI_Model {
 
 
     // COMISIONES A TERCEROS
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
-    // $pdf->Row(array('COMISIONES A TERCEROS'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(48, 18, 34, 34, 13, 15, 20));
-    $pdf->Row(array('COMISIONES A TERCEROS', 'REMISION', 'NOMBRE', 'DESCRIPCION', 'CANT', 'COSTO', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(54, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(18, 34, 34, 13, 15, 20));
-
     $caja['certificados_tblcerts'] = [];
     $certGastos = GastosProductos::getAll(false);
     $comisionTerceros_cantidad = $comisionTerceros_importe = 0;
-    foreach ($caja['comision_terceros'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(54, 10);
-        } else
-          $pdf->AddPage();
-      }
+    if (count($caja['comision_terceros']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(204));
+      // $pdf->Row(array('COMISIONES A TERCEROS'), true, 'B');
 
-      $comisionTerceros_cantidad  += floatval($existencia->cantidad);
-      $comisionTerceros_importe  += floatval($existencia->importe);
-      if (isset($caja['certificados_tblcerts'][$existencia->id_remision])) {
-        if (isset($caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'])) {
-          $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'] += (float)$existencia->cantidad;
-          $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['importe'] += (float)$existencia->importe;
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(48, 18, 34, 34, 13, 15, 20));
+      $pdf->Row(array('COMISIONES A TERCEROS', 'REMISION', 'NOMBRE', 'DESCRIPCION', 'CANT', 'COSTO', 'IMPORTE'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(54, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(18, 34, 34, 13, 15, 20));
+
+      foreach ($caja['comision_terceros'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(54, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $comisionTerceros_cantidad  += floatval($existencia->cantidad);
+        $comisionTerceros_importe  += floatval($existencia->importe);
+        if (isset($caja['certificados_tblcerts'][$existencia->id_remision])) {
+          if (isset($caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'])) {
+            $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'] += (float)$existencia->cantidad;
+            $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['importe'] += (float)$existencia->importe;
+          } else {
+            $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'] = (float)$existencia->cantidad;
+            $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['importe'] = (float)$existencia->importe;
+          }
         } else {
+          $caja['certificados_tblcerts'][$existencia->id_remision] = $certGastos;
           $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'] = (float)$existencia->cantidad;
           $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['importe'] = (float)$existencia->importe;
         }
-      } else {
-        $caja['certificados_tblcerts'][$existencia->id_remision] = $certGastos;
-        $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['cantidad'] = (float)$existencia->cantidad;
-        $caja['certificados_tblcerts'][$existencia->id_remision][$existencia->id_clasificacion]['importe'] = (float)$existencia->importe;
+
+        $pdf->SetX(54);
+        $pdf->Row(array(
+          $existencia->remision,
+          $existencia->nombre,
+          $existencia->descripcion,
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
       }
 
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(54);
       $pdf->Row(array(
-        $existencia->remision,
-        $existencia->nombre,
-        $existencia->descripcion,
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia->costo, 2, '', false),
-        MyString::formatoNumero($existencia->importe, 2, '', false),
+        '',
+        '',
+        '',
+        MyString::formatoNumero($comisionTerceros_cantidad, 2, '', false),
+        MyString::formatoNumero(($comisionTerceros_importe/($comisionTerceros_cantidad>0? $comisionTerceros_cantidad: 1)), 2, '', false),
+        MyString::formatoNumero($comisionTerceros_importe, 2, '', false),
       ), false, 'B');
+      // $pdf->SetAligns(array('R'));
+      // $pdf->SetWidths(array(22));
+      // $pdf->SetXY(188, $pdf->GetY()-11);
+      // $pdf->Row(array('COMISIONES'), false, 'B');
+      // $pdf->SetXY(188, $pdf->GetY());
+      // $pdf->Row(array(MyString::formatoNumero($comisionTerceros_importe, 2, '', false)), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(54);
-    $pdf->Row(array(
-      '',
-      '',
-      '',
-      MyString::formatoNumero($comisionTerceros_cantidad, 2, '', false),
-      MyString::formatoNumero(($comisionTerceros_importe/($comisionTerceros_cantidad>0? $comisionTerceros_cantidad: 1)), 2, '', false),
-      MyString::formatoNumero($comisionTerceros_importe, 2, '', false),
-    ), false, 'B');
-    // $pdf->SetAligns(array('R'));
-    // $pdf->SetWidths(array(22));
-    // $pdf->SetXY(188, $pdf->GetY()-11);
-    // $pdf->Row(array('COMISIONES'), false, 'B');
-    // $pdf->SetXY(188, $pdf->GetY());
-    // $pdf->Row(array(MyString::formatoNumero($comisionTerceros_importe, 2, '', false)), false, 'B');
 
 
     // GASTOS GENERALES
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
-    // $pdf->Row(array('GASTOS GENERALES'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R'));
-    $pdf->SetWidths(array(48, 18, 46, 45, 25));
-    $pdf->Row(array('GASTOS GENERALES', 'REMISION', 'NOMBRE', 'CONCEPTO', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(54, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-    $pdf->SetWidths(array(18, 46, 45, 25));
-
     $totalGastos = 0;
-    foreach ($caja['gastos'] as $gasto) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(54, 10);
-        } else
-          $pdf->AddPage();
-      }
+    if (count($caja['gastos']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(204));
+      // $pdf->Row(array('GASTOS GENERALES'), true, 'B');
 
-      $totalGastos  += floatval($gasto->monto);
-      if (isset($caja['certificados_tblcerts'][$gasto->id_remision])) {
-        if (isset($caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'])) {
-          // $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'] += (float)$gasto->certificado;
-          $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['importe'] += (float)$gasto->monto;
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(48, 18, 46, 45, 25));
+      $pdf->Row(array('GASTOS GENERALES', 'REMISION', 'NOMBRE', 'CONCEPTO', 'IMPORTE'), true, 'B');
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(54, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(18, 46, 45, 25));
+
+      foreach ($caja['gastos'] as $gasto) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(54, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $totalGastos  += floatval($gasto->monto);
+        if (isset($caja['certificados_tblcerts'][$gasto->id_remision])) {
+          if (isset($caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'])) {
+            // $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'] += (float)$gasto->certificado;
+            $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['importe'] += (float)$gasto->monto;
+          } else {
+            // $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'] = (float)$gasto->certificado;
+            $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['importe'] = (float)$gasto->monto;
+          }
         } else {
+          $caja['certificados_tblcerts'][$gasto->id_remision] = $certGastos;
           // $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'] = (float)$gasto->certificado;
           $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['importe'] = (float)$gasto->monto;
         }
-      } else {
-        $caja['certificados_tblcerts'][$gasto->id_remision] = $certGastos;
-        // $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['cantidad'] = (float)$gasto->certificado;
-        $caja['certificados_tblcerts'][$gasto->id_remision][$gasto->id_clasificacion]['importe'] = (float)$gasto->monto;
+
+        $pdf->SetX(54);
+        $pdf->Row(array(
+          $gasto->remision,
+          $gasto->nombre,
+          $gasto->concepto,
+          MyString::formatoNumero($gasto->monto, 2, '', false),
+        ), false, 'B');
       }
 
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(54);
       $pdf->Row(array(
-        $gasto->remision,
-        $gasto->nombre,
-        $gasto->concepto,
-        MyString::formatoNumero($gasto->monto, 2, '', false),
+        '',
+        '',
+        '',
+        MyString::formatoNumero($totalGastos, 2, '', false),
       ), false, 'B');
+      // $pdf->SetAligns(array('R'));
+      // $pdf->SetWidths(array(22));
+      // $pdf->SetXY(188, $pdf->GetY()-11);
+      // $pdf->Row(array('GASTOS'), false, 'B');
+      // $pdf->SetXY(188, $pdf->GetY());
+      // $pdf->Row(array(MyString::formatoNumero($totalGastos, 2, '', false)), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(54);
-    $pdf->Row(array(
-      '',
-      '',
-      '',
-      MyString::formatoNumero($totalGastos, 2, '', false),
-    ), false, 'B');
-    // $pdf->SetAligns(array('R'));
-    // $pdf->SetWidths(array(22));
-    // $pdf->SetXY(188, $pdf->GetY()-11);
-    // $pdf->Row(array('GASTOS'), false, 'B');
-    // $pdf->SetXY(188, $pdf->GetY());
-    // $pdf->Row(array(MyString::formatoNumero($totalGastos, 2, '', false)), false, 'B');
 
 
     // FLETES
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
-    // $pdf->Row(array('FLETES'), true, 'B');
-
-    $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(48, 15, 15, 50, 17, 17, 20));
-    $pdf->Row(array('FLETE CONTRATADO', 'FOLIO', 'REM/FAC', 'PROVEEDOR', 'CANTIDAD', 'P PROM', 'IMPORTE'), true, 'B');
-
-    $pdf->SetFont('Arial','', 7);
-    $pdf->SetXY(54, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(15, 15, 50, 17, 17, 20));
-
     $descuentoVentasFletes_cantidad = $descuentoVentasFletes_importe = 0;
-    foreach ($caja['costo_ventas_fletes'] as $existencia) {
-      if($pdf->GetY() >= $pdf->limiteY) {
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(54, 10);
-        } else
-          $pdf->AddPage();
-      }
+    if (count($caja['costo_ventas_fletes']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(204));
+      // $pdf->Row(array('FLETES'), true, 'B');
 
-      $descuentoVentasFletes_cantidad += floatval($existencia->cantidad);
-      $descuentoVentasFletes_importe += floatval($existencia->importe);
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(48, 15, 15, 50, 17, 17, 20));
+      $pdf->Row(array('FLETE CONTRATADO', 'FOLIO', 'REM/FAC', 'PROVEEDOR', 'CANTIDAD', 'P PROM', 'IMPORTE'), true, 'B');
 
-      $existencia->ids_facrem = trim(str_replace('f:', '', $existencia->ids_facrem));
-      if (!empty($existencia->ids_facrem)) {
-        $existencia->ids_facrem = explode('|', $existencia->ids_facrem);
-        foreach ($existencia->ids_facrem as $keyifac => $facturr) {
-          $facturr = intval($facturr);
-          if ($facturr > 0) {
-            if (isset($caja['certificados_tblcerts'][$facturr])) {
-              if (isset($caja['certificados_tblcerts'][$facturr]['flete']['cantidad'])) {
-                $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] += (float)$existencia->cantidad/count($existencia->ids_facrem);
-                $caja['certificados_tblcerts'][$facturr]['flete']['importe'] += (float)$existencia->importe/count($existencia->ids_facrem);
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(54, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(15, 15, 50, 17, 17, 20));
+
+      // echo "<pre>";
+      // var_dump($caja['costo_ventas_fletes']);
+      // echo "</pre>";exit;
+      foreach ($caja['costo_ventas_fletes'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY) {
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(54, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $existencia->cantidad = $existencia->cantidad / $existencia->num_rows;
+
+        $descuentoVentasFletes_cantidad += floatval($existencia->cantidad);
+        $descuentoVentasFletes_importe += floatval($existencia->importe);
+
+        $existencia->ids_facrem = trim(str_replace('f:', '', $existencia->ids_facrem));
+        if (!empty($existencia->ids_facrem)) {
+          $existencia->ids_facrem = explode('|', $existencia->ids_facrem);
+          foreach ($existencia->ids_facrem as $keyifac => $facturr) {
+            $facturr = intval($facturr);
+            if ($facturr > 0) {
+              if (isset($caja['certificados_tblcerts'][$facturr])) {
+                if (isset($caja['certificados_tblcerts'][$facturr]['flete']['cantidad'])) {
+                  $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] += (float)$existencia->cantidad/count($existencia->ids_facrem);
+                  $caja['certificados_tblcerts'][$facturr]['flete']['importe'] += (float)$existencia->importe/count($existencia->ids_facrem);
+                } else {
+                  $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad/count($existencia->ids_facrem);
+                  $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe/count($existencia->ids_facrem);
+                }
               } else {
+                $caja['certificados_tblcerts'][$facturr] = $certGastos;
                 $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad/count($existencia->ids_facrem);
                 $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe/count($existencia->ids_facrem);
               }
-            } else {
-              $caja['certificados_tblcerts'][$facturr] = $certGastos;
-              $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad/count($existencia->ids_facrem);
-              $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe/count($existencia->ids_facrem);
             }
           }
         }
+
+        $pdf->SetX(54);
+        $pdf->Row(array(
+          $existencia->folio,
+          $existencia->facturas,
+          $existencia->proveedor,
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->importe/($existencia->cantidad != 0? $existencia->cantidad: 1), 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
       }
 
+      $pdf->SetFont('Arial','B', 7);
       $pdf->SetX(54);
       $pdf->Row(array(
-        $existencia->folio,
-        $existencia->facturas,
-        $existencia->proveedor,
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia->importe/($existencia->cantidad != 0? $existencia->cantidad: 1), 2, '', false),
-        MyString::formatoNumero($existencia->importe, 2, '', false),
+        '',
+        '',
+        '',
+        MyString::formatoNumero($descuentoVentasFletes_cantidad, 2, '', false),
+        MyString::formatoNumero($descuentoVentasFletes_importe/($descuentoVentasFletes_cantidad != 0? $descuentoVentasFletes_cantidad: 1), 2, '', false),
+        MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false),
       ), false, 'B');
+      // $pdf->SetAligns(array('R'));
+      // $pdf->SetWidths(array(22));
+      // $pdf->SetXY(188, $pdf->GetY()-11);
+      // $pdf->Row(array('FLETES'), false, 'B');
+      // $pdf->SetXY(188, $pdf->GetY());
+      // $pdf->Row(array(MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false)), false, 'B');
     }
-
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(54);
-    $pdf->Row(array(
-      '',
-      '',
-      '',
-      MyString::formatoNumero($descuentoVentasFletes_cantidad, 2, '', false),
-      MyString::formatoNumero($descuentoVentasFletes_importe/($descuentoVentasFletes_cantidad != 0? $descuentoVentasFletes_cantidad: 1), 2, '', false),
-      MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false),
-    ), false, 'B');
-    // $pdf->SetAligns(array('R'));
-    // $pdf->SetWidths(array(22));
-    // $pdf->SetXY(188, $pdf->GetY()-11);
-    // $pdf->Row(array('FLETES'), false, 'B');
-    // $pdf->SetXY(188, $pdf->GetY());
-    // $pdf->Row(array(MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false)), false, 'B');
 
 
     // Certificados
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetFillColor(230, 230, 230);
-    $pdf->SetXY(6, $pdf->GetY()+5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(182));
-    $pdf->Row(array('CERTIFICADOS'), true, false);
-
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(15, 55, 35, 27, 15, 15, 20));
-    $pdf->Row(array('FOLIO', 'PROVEEDORES', 'TIPO', 'CERTIFICADOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), true, 'B');
-
-
-// f.id_factura, f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion,
-//           c.nombre AS clasificacion, fp.cantidad, (fp.importe / fp.cantidad) AS precio,
-//           fp.importe, fc.proveedores, fc.certificado, fc.no_certificado
     $cert_importe = $cert_kilos = $cert_cantidad = 0;
     $auxcertt = 0;
-    foreach ($caja['certificados'] as $venta) {
-      if($pdf->GetY() >= $pdf->limiteY){
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(6, 10);
-        } else
-          $pdf->AddPage();
-      }
+    if (count($caja['certificados']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(182));
+      $pdf->Row(array('CERTIFICADOS'), true, false);
 
-      $cert_importe += floatval($venta->importe);
-      $cert_cantidad += floatval($venta->cantidad);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(15, 55, 35, 27, 15, 15, 20));
+      $pdf->Row(array('FOLIO', 'PROVEEDORES', 'TIPO', 'CERTIFICADOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), true, 'B');
 
-      if (isset($caja['certificados_tblcerts'][$venta->id_factura])) {
-        if (isset($caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['cantidad'])) {
-          $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['cantidad'] += (float)$venta->certificado;
-          $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['importe'] += (float)$venta->importe;
+      // f.id_factura, f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion,
+      //  c.nombre AS clasificacion, fp.cantidad, (fp.importe / fp.cantidad) AS precio,
+      //  fp.importe, fc.proveedores, fc.certificado, fc.no_certificado
+      foreach ($caja['certificados'] as $venta) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $cert_importe += floatval($venta->importe);
+        $cert_cantidad += floatval($venta->cantidad);
+
+        if (isset($caja['certificados_tblcerts'][$venta->id_factura])) {
+          if (isset($caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['cantidad'])) {
+            $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['cantidad'] += (float)$venta->certificado;
+            $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['importe'] += (float)$venta->importe;
+          } else {
+            $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['cantidad'] = (float)$venta->certificado;
+            $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['importe'] = (float)$venta->importe;
+          }
         } else {
+          $caja['certificados_tblcerts'][$venta->id_factura] = $certGastos;
           $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['cantidad'] = (float)$venta->certificado;
           $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['importe'] = (float)$venta->importe;
         }
-      } else {
-        $caja['certificados_tblcerts'][$venta->id_factura] = $certGastos;
-        $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['cantidad'] = (float)$venta->certificado;
-        $caja['certificados_tblcerts'][$venta->id_factura][$venta->id_clasificacion]['importe'] = (float)$venta->importe;
+
+        $pdf->SetFont('Arial','', 6);
+        if ($auxcertt != $venta->id_factura) {
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(15, 55, 35, 27, 15, 15, 20));
+          $pdf->Row(array(
+            $venta->serie.$venta->folio,
+            $venta->proveedores,
+            $venta->clasificacion,
+            $venta->no_certificado,
+            $venta->certificado,
+            MyString::formatoNumero($venta->precio, 2, '', false),
+            MyString::formatoNumero($venta->importe, 2, '', false),
+          ), false, 'B');
+
+        } else {
+          $pdf->SetXY(21, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(55, 35, 27, 15, 15, 20));
+          $pdf->Row(array(
+            $venta->proveedores,
+            $venta->clasificacion,
+            $venta->no_certificado,
+            $venta->certificado,
+            MyString::formatoNumero($venta->precio, 2, '', false),
+            MyString::formatoNumero($venta->importe, 2, '', false),
+          ), false, 'B');
+        }
+
+        $auxcertt = $venta->id_factura;
       }
 
-      $pdf->SetFont('Arial','', 6);
-      if ($auxcertt != $venta->id_factura) {
-        $pdf->SetXY(6, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
-        $pdf->SetWidths(array(15, 55, 35, 27, 15, 15, 20));
-        $pdf->Row(array(
-          $venta->serie.$venta->folio,
-          $venta->proveedores,
-          $venta->clasificacion,
-          $venta->no_certificado,
-          $venta->certificado,
-          MyString::formatoNumero($venta->precio, 2, '', false),
-          MyString::formatoNumero($venta->importe, 2, '', false),
-        ), false, 'B');
-
-      } else {
-        $pdf->SetXY(21, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
-        $pdf->SetWidths(array(55, 35, 27, 15, 15, 20));
-        $pdf->Row(array(
-          $venta->proveedores,
-          $venta->clasificacion,
-          $venta->no_certificado,
-          $venta->certificado,
-          MyString::formatoNumero($venta->precio, 2, '', false),
-          MyString::formatoNumero($venta->importe, 2, '', false),
-        ), false, 'B');
-      }
-
-      $auxcertt = $venta->id_factura;
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(15, 55, 35, 27, 15, 15, 20));
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        '',
+        '',
+        '',
+        '',
+        MyString::formatoNumero($cert_cantidad, 2, '', false),
+        MyString::formatoNumero(($cert_importe/($cert_cantidad==0? 1: $cert_cantidad)), 2, '', false),
+        MyString::formatoNumero($cert_importe, 2, '', false),
+      ), false, 'B');
     }
-
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(15, 55, 35, 27, 15, 15, 20));
-    $pdf->SetFont('Arial','B', 7);
-    $pdf->SetX(6);
-    $pdf->Row(array(
-      '',
-      '',
-      '',
-      '',
-      MyString::formatoNumero($cert_cantidad, 2, '', false),
-      MyString::formatoNumero(($cert_importe/($cert_cantidad==0? 1: $cert_cantidad)), 2, '', false),
-      MyString::formatoNumero($cert_importe, 2, '', false),
-    ), false, 'B');
-    $pdf->SetAligns(array('R'));
-    $pdf->SetWidths(array(22));
-    $pdf->SetXY(188, $pdf->GetY()-13.5);
-    $pdf->Row(array('COSTO DE VENTA'), false, 'B');
-    $pdf->SetXY(188, $pdf->GetY());
-    $pdf->Row(array(MyString::formatoNumero( (($cert_importe+$descuentoVentasFletes_importe+$comisionTerceros_importe+$totalGastos)), 2, '$', false)), false, 'B');
+    if ((($cert_importe+$descuentoVentasFletes_importe+$comisionTerceros_importe+$totalGastos)) > 0) {
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(22));
+      $pdf->SetXY(188, $pdf->GetY()-13.5);
+      $pdf->Row(array('COSTO DE VENTA'), false, 'B');
+      $pdf->SetXY(188, $pdf->GetY());
+      $pdf->Row(array(MyString::formatoNumero( (($cert_importe+$descuentoVentasFletes_importe+$comisionTerceros_importe+$totalGastos)), 2, '$', false)), false, 'B');
+    }
 
     // para el resultado del dia
     $pagaux_resum = $pdf->page;
