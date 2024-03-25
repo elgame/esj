@@ -495,16 +495,16 @@ class existencias_limon_model extends CI_Model {
     {
       $info['existencia_anterior'] = $existencia_anterior->result();
     }
-    // Quitamos la existencia anterior de piso
-    foreach ($info['existencia_anterior'] as $key => $item) {
-      foreach ($info['existencia_piso_anterior'] as $key1 => $value) {
-        if (($item->id_calibre.$item->id_unidad) == ($value->id_calibre.$value->id_unidad)) {
-          $info['existencia_anterior'][$key]->cantidad -= round($value->cantidad, 2);
-          $info['existencia_anterior'][$key]->kilos    -= round($value->kilos, 2);
-          $info['existencia_anterior'][$key]->importe  -= round($value->importe, 2);
-        }
-      }
-    }
+    // // Quitamos la existencia anterior de piso
+    // foreach ($info['existencia_anterior'] as $key => $item) {
+    //   foreach ($info['existencia_piso_anterior'] as $key1 => $value) {
+    //     if (($item->id_calibre.$item->id_unidad) == ($value->id_calibre.$value->id_unidad)) {
+    //       $info['existencia_anterior'][$key]->cantidad -= round($value->cantidad, 2);
+    //       $info['existencia_anterior'][$key]->kilos    -= round($value->kilos, 2);
+    //       $info['existencia_anterior'][$key]->importe  -= round($value->importe, 2);
+    //     }
+    //   }
+    // }
 
 
     $existencia = [];
