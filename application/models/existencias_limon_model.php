@@ -596,7 +596,7 @@ class existencias_limon_model extends CI_Model {
         $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
-    foreach ($info['existencia_piso'] as $key => $item) {
+    /*foreach ($info['existencia_piso'] as $key => $item) {
       if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
         $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad);
         $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos);
@@ -616,7 +616,7 @@ class existencias_limon_model extends CI_Model {
         $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
         $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
-    }
+    }*/
     foreach ($info['compra_fruta_empacada'] as $key => $item) {
       if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
         $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad);
