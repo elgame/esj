@@ -3260,7 +3260,7 @@ class nomina_fiscal_model extends CI_Model {
     $empleados = $this->nomina($configuraciones, $filtros);
     $nombre = "PAGO-{$semana['anio']}-{$tipoNomina}-{$semana[$tipoNomina]}.txt";
 
-    $cuentasSantander = [2 => '92001449876', 12 => '65506721517'];
+    $cuentasSantander = [2 => '92001449876', 12 => '65506721517', 14 => '65509438974'];
 
     $content           = array(); //BBVA Bancomer
     $contentSantr      = array();
