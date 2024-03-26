@@ -499,10 +499,10 @@ class existencias_limon_model extends CI_Model {
     // Quitamos la existencia anterior de piso agregándola a reproceso
     foreach ($info['existencia_piso_anterior'] as $key1 => $value) {
       $objval = clone $value;
-      $clone->cantidad *= -1;
-      $clone->kilos *= -1;
-      $clone->importe *= -1;
-      $info['existencia_reproceso'][] = $clone;
+      $objval->cantidad *= -1;
+      $objval->kilos *= -1;
+      $objval->importe *= -1;
+      $info['existencia_reproceso'][] = $objval;
     }
 
     $existencia = [];
