@@ -496,15 +496,6 @@ class existencias_limon_model extends CI_Model {
       $info['existencia_anterior'] = $existencia_anterior->result();
     }
 
-    // Quitamos la existencia anterior de piso agregándola a reproceso
-    foreach ($info['existencia_piso_anterior'] as $key1 => $value) {
-      $objval = clone $value;
-      $objval->cantidad *= -1;
-      $objval->kilos *= -1;
-      $objval->importe *= -1;
-      $info['existencia_reproceso'][] = $objval;
-    }
-
     $existencia = [];
     foreach ($info['existencia_anterior'] as $key => $item) {
       if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
@@ -2237,6 +2228,15 @@ class existencias_limon_model extends CI_Model {
     $this->load->model('calibres_model');
 
     $caja = ($dataCaja? $dataCaja: $this->get($fecha, $noCajas, $id_area));
+
+    // Quitamos la existencia anterior de piso agregándola a reproceso
+    foreach ($caja['existencia_piso_anterior'] as $key1 => $value) {
+      $objval = clone $value;
+      $objval->cantidad *= -1;
+      $objval->kilos *= -1;
+      $objval->importe *= -1;
+      $caja['existencia_reproceso'][] = $objval;
+    }
 
     // echo "<pre>";
     //   var_dump($caja);
