@@ -156,7 +156,7 @@ class unidades_model extends CI_Model {
 			$sql = " AND ( lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
 
 		$res = $this->db->query("
-				SELECT id_unidad, nombre, status
+				SELECT id_unidad, nombre, status, cantidad
 				FROM unidades
 				WHERE status = 't' ".$sql."
 				ORDER BY nombre ASC
@@ -176,6 +176,22 @@ class unidades_model extends CI_Model {
 
 		return $response;
 	}
+
+  public function getUnidad($codigo){
+    $sql = '';
+    if ($codigo) {
+      $sql .= " AND codigo = '{$codigo}' ";
+    }
+
+    $res = $this->db->query("
+        SELECT id_unidad, nombre, status, cantidad
+        FROM unidades
+        WHERE status = 't' ".$sql."
+        ORDER BY nombre ASC
+        LIMIT 1")->row();
+
+    return $res;
+  }
 
 }
 /* End of file usuarios_model.php */

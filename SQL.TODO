@@ -1,5 +1,10 @@
 
  ☐ Contra recibos de ordenes de compra, seleccionarlas modificar e imprimir
+ ☐ Filtrar por empresa las cuentas en por pagar
+ ✔ Estado resul trans @done (24-03-27 18:00)
+   -- lap|san
+   ALTER TABLE IF EXISTS otros.estado_resultado_trans_gastos ADD COLUMN extras json;
+
  ✔ Proyectos @done (24-02-28 11:11)
    -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Finalizar',539,FALSE,'proyectos/finalizar/','check',FALSE);

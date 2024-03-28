@@ -427,6 +427,10 @@ class estado_resultado_trans extends MY_Controller {
         ['field' => 'gastos_importe[]'        , 'label' => 'gastos_importe'        , 'rules' => '']                 ,
         ['field' => 'gastos_comprobacion[]'   , 'label' => 'gastos_comprobacion'   , 'rules' => '']                 ,
         ['field' => 'gastos_del[]'            , 'label' => 'gastos_del'            , 'rules' => '']                 ,
+        ['field' => 'gastos_rend[]'           , 'label' => 'gastos_rend'           , 'rules' => '']                 ,
+        ['field' => 'gastos_te[]'             , 'label' => 'gastos_te'             , 'rules' => '']                 ,
+        ['field' => 'gastos_km[]'             , 'label' => 'gastos_km'             , 'rules' => '']                 ,
+        ['field' => 'gastos_litros[]'         , 'label' => 'gastos_litros'         , 'rules' => '']                 ,
     );
 
     $this->form_validation->set_rules($rules);

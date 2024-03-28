@@ -49,6 +49,14 @@
 									  </div>
 									</div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dempresaFil">Filtrar x Empresa</label>
+                    <div class="controls">
+                      <input type="text" name="dempresaFil" class="span12" id="dempresaFil" value="" size="">
+                      <input type="hidden" name="did_empresaFil" id="did_empresaFil" value="">
+                    </div>
+                  </div>
+
 									<div class="control-group">
 									  <label class="control-label" for="fcuenta">Cuenta </label>
 									  <div class="controls">

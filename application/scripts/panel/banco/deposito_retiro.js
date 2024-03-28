@@ -41,7 +41,7 @@ $(function(){
 
 	//Evento al cambiar un banco
 	$("#fbanco").change(function(){
-		changeBanco("#fcuenta", $(this));
+		// changeBanco("#fcuenta", $(this));
 	});
 	//Evento al cambiar un banco destino traspaso
 	$("#fbanco_destino").change(function(){
@@ -58,6 +58,23 @@ $(function(){
 	// $("#fmetodo_pago").change(function(){
 	// 	getRefCheque($(this));
 	// });
+
+  $("#dempresaFil").autocomplete({
+      source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_empresaFil").val(ui.item.id);
+        $("#dempresaFil").css("background-color", "#B0FFB0");
+        changeEmpresaFil("#fcuenta", ui.item.id);
+      }
+  }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#dempresaFil").val("").css("background-color", "#FFD9B3");
+        $("#did_empresaFil").val("");
+        changeEmpresaFil("#fcuenta", '');
+      }
+  });
 
   $("#dempresa").autocomplete({
       source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
@@ -313,6 +330,23 @@ var autocompleteActivos = function () {
     }
   });
 };
+
+function changeEmpresaFil(cuenta, idempresa){
+  $.getJSON(base_url+'panel/banco/get_cuentas_banco/', {'id_empresa': idempresa}, function(resp){
+    $(cuenta).html("");
+    if (resp.cuentas.length > 0) {
+      var selcuentas = '';
+      for (var i = 0; i < resp.cuentas.length; i++) {
+        selcuentas += '<option value="'+resp.cuentas[i].id_cuenta+'" data-saldo="'+resp.cuentas[i].saldo+'">'+resp.cuentas[i].alias+' - '+util.darFormatoNum(resp.cuentas[i].saldo)+'</option>';
+      };
+      $(cuenta).append(selcuentas);
+
+      chageValMonto();
+      // getRefCheque($("#fmetodo_pago")); //cambia el numer referencia cheque
+    }else
+      noty({"text":"No hay cuentas para el banco seleccionado", "layout":"topRight", "type":"error"});
+  });
+}
 
 function changeBanco(cuenta, vthis){
 	$.getJSON(base_url+'panel/banco/get_cuentas_banco/', {'id_banco': vthis.val() }, function(resp){
