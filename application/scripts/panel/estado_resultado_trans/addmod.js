@@ -4,6 +4,8 @@
   $(function () {
     $('.mtime').mask('000:00');
 
+    eventBtnListaActivos();
+
     obtenRemisionesAjax();
     cargaRemisiones();
     btnDelRemision();
@@ -44,6 +46,18 @@
       }
     });
   }
+
+  var eventBtnListaActivos = function () {
+    $('#table-gastos').on('click', "#btnListActivos", function(event) {
+      var $this = $(this), $parent = $this.parents("div:first");
+      if ($parent.find(".popover").is(":hidden")){
+        $parent.find(".popover").show(80);
+        $parent.find('.gastos_rend').focus();
+      }
+      else
+        $parent.find(".popover").hide(80);
+    });
+  };
 
   var ltsPrecios = function() {
     $("#lts_precios").on('click', '.rowltsp', function(){

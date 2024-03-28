@@ -2227,6 +2227,7 @@ class existencias_limon_model extends CI_Model {
     $this->load->model('compras_areas_model');
     $this->load->model('catalogos_sft_model');
     $this->load->model('calibres_model');
+    $this->load->model('unidades_model');
 
     $caja = ($dataCaja? $dataCaja: $this->get($fecha, $noCajas, $id_area));
 
@@ -2981,12 +2982,14 @@ class existencias_limon_model extends CI_Model {
         }
 
         if (!isset($grupByUnidad[$existencia->unidad])) {
+          $unidadd = $this->unidades_model->getUnidad($existencia->unidad);
           $grupByUnidad[$existencia->unidad] = [
             'cantidad' => $existencia->cantidad * -1,
             'kilos'    => $existencia->kilos * -1,
             'unidad'   => $existencia->unidad,
             'costo'    => $existencia->costo,
             'importe'  => $existencia->importe * -1,
+            'ukilos'   => (isset($unidadd->cantidad)? $unidadd->cantidad: 0),
           ];
         } else {
           $grupByUnidad[$existencia->unidad]['cantidad'] += $existencia->cantidad * -1;
@@ -3192,12 +3195,14 @@ class existencias_limon_model extends CI_Model {
       }
 
       if (!isset($grupByUnidad[$produccion->unidad])) {
+        $unidadd = $this->unidades_model->getUnidad($produccion->unidad);
         $grupByUnidad[$produccion->unidad] = [
           'cantidad' => $produccion->cantidad,
           'kilos'    => $produccion->kilos,
           'unidad'   => $produccion->unidad,
           'costo'    => $produccion->costo,
           'importe'  => $produccion->importe,
+          'ukilos'   => (isset($unidadd->cantidad)? $unidadd->cantidad: 0),
         ];
       } else {
         $grupByUnidad[$produccion->unidad]['cantidad'] += $produccion->cantidad;
@@ -3444,16 +3449,16 @@ class existencias_limon_model extends CI_Model {
             if ($facturr > 0) {
               if (isset($caja['certificados_tblcerts'][$facturr])) {
                 if (isset($caja['certificados_tblcerts'][$facturr]['flete']['cantidad'])) {
-                  $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] += (float)$existencia->cantidad/count($existencia->ids_facrem);
-                  $caja['certificados_tblcerts'][$facturr]['flete']['importe'] += (float)$existencia->importe/count($existencia->ids_facrem);
+                  $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] += (float)$existencia->cantidad;
+                  $caja['certificados_tblcerts'][$facturr]['flete']['importe'] += (float)$existencia->importe;
                 } else {
-                  $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad/count($existencia->ids_facrem);
-                  $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe/count($existencia->ids_facrem);
+                  $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad;
+                  $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe;
                 }
               } else {
                 $caja['certificados_tblcerts'][$facturr] = $certGastos;
-                $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad/count($existencia->ids_facrem);
-                $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe/count($existencia->ids_facrem);
+                $caja['certificados_tblcerts'][$facturr]['flete']['cantidad'] = (float)$existencia->cantidad;
+                $caja['certificados_tblcerts'][$facturr]['flete']['importe'] = (float)$existencia->importe;
               }
             }
           }
@@ -3915,6 +3920,7 @@ class existencias_limon_model extends CI_Model {
     foreach ($caja_data['tabla_rendimientos'] as $key => $value) {
       $caja_data['tabla_rendimientos'][$key]['costo_bulto'] = (floatval($value['importe'])/floatval($value['cantidad']!=0? $value['cantidad']: 1));
       $totalEstimacionPrecios[$value['calibre']] = (floatval($value['importe'])/floatval($value['kilos']!=0? $value['kilos']: 1));
+      $caja_data['tabla_rendimientos'][$key]['precio'] = $totalEstimacionPrecios[$value['calibre']];
       $pdf->chkSaltaPag([150, 10]);
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetXY(150, $pdf->GetY());
@@ -3940,7 +3946,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(10));
     // echo "<pre>";
-    // var_dump($totalesRendimientos, $totalEstimacionPrecios);
+    // var_dump($precioCompraMateriaPrima, $totalesRendimientos, $totalEstimacionPrecios);
     // echo "</pre>";exit;
     foreach ($totalesRendimientos as $key => $value) {
       $pdf->chkSaltaPag([135, 10]);
@@ -3949,7 +3955,7 @@ class existencias_limon_model extends CI_Model {
       $porcentajePrecior = '';
       if ($key != 'IND') {
         $totalEstimacionPrecios[$key] = isset($totalEstimacionPrecios[$key])? $totalEstimacionPrecios[$key]: 0;
-        $porcentajePrecior = (($totalEstimacionPrecios[$key] - $precioCompraMateriaPrima) / ($precioCompraMateriaPrima != 0? $precioCompraMateriaPrima: 1));
+        $porcentajePrecior = (($totalEstimacionPrecios[$key] - $precioCompraMateriaPrima) / ($precioCompraMateriaPrima != 0? $precioCompraMateriaPrima: 1) * 100);
       }
       $pdf->Row(array(
         MyString::formatoNumero($porcentajePrecior, 2, '', false),
@@ -4200,9 +4206,15 @@ class existencias_limon_model extends CI_Model {
       // $venta_cantidad += floatval($venta->cantidad);
 
       $rendtotal = $this->findTblRend($venta->id_calibre, $caja_data['tabla_rendimientos']);
+      // echo "<pre>";
+      // var_dump($rendtotal, $grupByUnidad);
+      // echo "</pre>";exit;
       $porBulto = (
         (isset($grupByUnidad[$venta->unidad])? $grupByUnidad[$venta->unidad]['costo']: 0) +
-        (!empty($rendtotal['costo_bulto'])? $rendtotal['costo_bulto']: 0)
+        (
+          (!empty($rendtotal['precio'])? $rendtotal['precio']: 0) *
+          (isset($grupByUnidad[$venta->unidad])? $grupByUnidad[$venta->unidad]['ukilos']: 0)
+        )
       );
       if ($venta->id_factura != $auxvent) {
         $pdf->SetX(6);

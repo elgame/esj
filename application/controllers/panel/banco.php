@@ -247,9 +247,10 @@ class banco extends MY_Controller {
 				redirect(base_url('panel/banco/retirar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
 		}
 
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
 		$params['bancos']       = $this->banco_cuentas_model->getBancos(false);
 		$_GET['id_banco']       = $params['bancos']['bancos'][0]->id_banco;
-		$params['cuentas']      = $this->banco_cuentas_model->getCuentas(false);
+		$params['cuentas']      = $this->banco_cuentas_model->getCuentas(false, null, ['id_empresa' => $params['empresa_default']->id_empresa]);
 		$params['cuenta_saldo'] = (isset($params['cuentas']['cuentas'][0])? $params['cuentas']['cuentas'][0]->saldo: 0);
 
 		$params['metods_pago']  = array(
@@ -280,10 +281,12 @@ class banco extends MY_Controller {
 
 	public function get_cuentas_banco(){
 		$response = array('cuentas' => array());
+		$this->load->model('banco_cuentas_model');
 		if (isset($_GET['id_banco']{0})) {
-			$this->load->model('banco_cuentas_model');
 			$response = $this->banco_cuentas_model->getCuentas(false);
-		}
+		} elseif (isset($_GET['id_empresa']{0})) {
+      $response = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $_GET['id_empresa']));
+    }
 		echo json_encode($response);
 	}
 

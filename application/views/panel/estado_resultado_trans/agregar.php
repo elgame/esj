@@ -699,6 +699,30 @@
                                     <input type="hidden" name="gastos_comprobacion[]" value="<?php echo $_POST['gastos_comprobacion'][$key] ?>" class="valcomprobacion">
                                   </td>
                                   <td style="">
+                                    <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
+                                      <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                        <div class="arrow" style="top: 26%;"></div><h3 class="popover-title">Rendimientos</h3>
+                                        <div class="popover-content">
+
+                                          <div class="control-group" style="width: 375px;">
+                                            <input type="text" name="gastos_rend[]" class="span11 vpositive gastos_rend" value="<?php echo $_POST['gastos_rend'][$key] ?>" placeholder="Rendimiento">
+                                          </div>
+
+                                          <div class="control-group" style="width: 375px;">
+                                            <input type="text" name="gastos_te[]" class="span11 mtime gastos_te" value="<?php echo $_POST['gastos_te'][$key] ?>" placeholder="Tiempo Encendido">
+                                          </div>
+
+                                          <div class="control-group" style="width: 375px;">
+                                            <input type="text" name="gastos_km[]" class="span11 vpositive gastos_km" value="<?php echo $_POST['gastos_km'][$key] ?>" placeholder="Kilometros">
+                                          </div>
+
+                                          <div class="control-group" style="width: 375px;">
+                                            <input type="text" name="gastos_litros[]" class="span11 vpositive gastos_litros" value="<?php echo $_POST['gastos_litros'][$key] ?>" placeholder="Litros">
+                                          </div>
+
+                                        </div>
+                                      </div>
+                                    </div> |
                                     <button type="button" class="btn btn-danger btn-del-gastos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                     <input type="hidden" name="gastos_del[]" value="<?php echo $_POST['gastos_del'][$key] ?>" id="gastos_del">
                                   </td>
@@ -706,6 +730,7 @@
                             <?php }} else {
                               if (isset($borrador['gastos']))
                               foreach ($borrador['gastos'] as $gasto) {
+                                $gasto->extras = json_decode($gasto->extras);
                                 $totalGastosSubt += floatval($gasto->subtotal);
                                 $totalGastosIva += floatval($gasto->importe_iva);
                                 $totalGastosTot += floatval($gasto->total);
@@ -739,6 +764,30 @@
                                   <input type="hidden" name="gastos_comprobacion[]" value="<?php echo (isset($gasto->comprobacion) && $gasto->comprobacion == 't'? 'true': '') ?>" class="valcomprobacion">
                                 </td>
                                 <td style="">
+                                  <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
+                                    <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                      <div class="arrow" style="top: 26%;"></div><h3 class="popover-title">Rendimientos</h3>
+                                      <div class="popover-content">
+
+                                        <div class="control-group" style="width: 375px;">
+                                          <input type="text" name="gastos_rend[]" class="span11 vpositive gastos_rend" value="<?php echo (isset($gasto->extras->rend)? $gasto->extras->rend: '') ?>" placeholder="Rendimiento">
+                                        </div>
+
+                                        <div class="control-group" style="width: 375px;">
+                                          <input type="text" name="gastos_te[]" class="span11 mtime gastos_te" value="<?php echo (isset($gasto->extras->te)? $gasto->extras->te: '') ?>" placeholder="Tiempo Encendido">
+                                        </div>
+
+                                        <div class="control-group" style="width: 375px;">
+                                          <input type="text" name="gastos_km[]" class="span11 vpositive gastos_km" value="<?php echo (isset($gasto->extras->km)? $gasto->extras->km: '') ?>" placeholder="Kilometros">
+                                        </div>
+
+                                        <div class="control-group" style="width: 375px;">
+                                          <input type="text" name="gastos_litros[]" class="span11 vpositive gastos_litros" value="<?php echo (isset($gasto->extras->litros)? $gasto->extras->litros: '') ?>" placeholder="Litros">
+                                        </div>
+
+                                      </div>
+                                    </div>
+                                  </div> |
                                   <button type="button" class="btn btn-danger btn-del-gastos" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                   <input type="hidden" name="gastos_del[]" value="" id="gastos_del">
                                 </td>

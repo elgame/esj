@@ -354,6 +354,12 @@ class estado_resultado_trans_model extends privilegios_model{
           $msg = '33';
           // $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
         } else {
+          $extras = [
+            'rend' => $_POST['gastos_rend'][$key],
+            'te' => $_POST['gastos_te'][$key],
+            'km' => $_POST['gastos_km'][$key],
+            'litros' => $_POST['gastos_litros'][$key],
+          ];
           $gastos[] = array(
             'id_estado'    => $id_estado,
             'id_proveedor' => $_POST['gastos_proveedor_id'][$key] !== '' ? $_POST['gastos_proveedor_id'][$key] : null,
@@ -367,6 +373,7 @@ class estado_resultado_trans_model extends privilegios_model{
             'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
             'id_compra'    => $_POST['gastos_id_compra'][$key] !== '' ? $_POST['gastos_id_compra'][$key] : null,
             'folio'        => $_POST['gastos_folio'][$key] !== '' ? $_POST['gastos_folio'][$key] : '',
+            'extras'       => json_encode($extras),
           );
         }
 
@@ -550,6 +557,13 @@ class estado_resultado_trans_model extends privilegios_model{
           $msg = '33';
           // $id_cod = $this->addCods($_POST['gastos_codg'][$key]);
         } else {
+          $extras = [
+            'rend' => $_POST['gastos_rend'][$key],
+            'te' => $_POST['gastos_te'][$key],
+            'km' => $_POST['gastos_km'][$key],
+            'litros' => $_POST['gastos_litros'][$key],
+          ];
+
           if ($_POST['gastos_del'][$key] == 'true' && $_POST['gastos_id_gasto'][$key] > 0) {
             $this->db->delete('otros.estado_resultado_trans_gastos', "id = {$_POST['gastos_id_gasto'][$key]}");
           } elseif ($_POST['gastos_id_gasto'][$key] > 0) {
@@ -565,6 +579,7 @@ class estado_resultado_trans_model extends privilegios_model{
               'precio'       => 0,
               'comprobacion' => $_POST['gastos_comprobacion'][$key] == 'true' ? 't' : 'f',
               'id_tipo'      => $_POST['gastos_tipo'][$key] !== '' ? $_POST['gastos_tipo'][$key] : null,
+              'extras'       => json_encode($extras),
             ), "id = {$_POST['gastos_id_gasto'][$key]}");
           } else {
             $gastos[] = array(
@@ -581,6 +596,7 @@ class estado_resultado_trans_model extends privilegios_model{
               'id_compra'    => $_POST['gastos_id_compra'][$key] !== '' ? $_POST['gastos_id_compra'][$key] : null,
               'folio'        => $_POST['gastos_folio'][$key] !== '' ? $_POST['gastos_folio'][$key] : '',
               'id_tipo'      => $_POST['gastos_tipo'][$key] !== '' ? $_POST['gastos_tipo'][$key] : null,
+              'extras'       => json_encode($extras),
             );
           }
         }
@@ -743,7 +759,7 @@ class estado_resultado_trans_model extends privilegios_model{
           Coalesce(f.subtotal, v.subtotal ) AS subtotal, Coalesce(f.total, v.importe ) AS total,
           Coalesce(f.importe_iva, v.iva ) AS importe_iva, v.id_tipo,
           c.nombre AS codg, c.id AS id_codg, v.comprobacion,
-          et.nombre AS tiposg
+          et.nombre AS tiposg, v.extras
         FROM otros.estado_resultado_trans_gastos v
           INNER JOIN proveedores p ON p.id_proveedor = v.id_proveedor
           INNER JOIN otros.estado_resultado_trans_cods c ON c.id = v.id_cod
@@ -1166,27 +1182,57 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
-      $pdf->Row(array('C', 'FECHA', 'FOLIO', 'PROVEEDOR', 'DESCRIPCION', 'SUBTOTAL', 'IVA', 'IMPORTE'), true, true);
 
+      $align = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+      $align1 = array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R');
+      $width = array(5, 15, 15, 52, 55, 15, 15, 15);
+      $width1 = array(5, 15, 15, 52, 55, 15, 15, 15);
+      $head = array('C', 'FECHA', 'FOLIO', 'PROVEEDOR', 'DESCRIPCION', 'SUBTOTAL', 'IVA', 'IMPORTE');
+      $align2 = $align22 = $width2 = $head2 = [];
+      if ($caja['info']->tipo_flete == 'fl' || $caja['info']->tipo_flete == 'bg') {
+        $align22 = array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
+        $align = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+        $width = array(5, 15, 15, 32, 35, 10, 10, 10, 10, 15, 15, 15);
+        $head = array('C', 'FECHA', 'FOLIO', 'PROVEEDOR', 'DESCRIPCION', 'REND', 'TE', 'KM', 'LITROS', 'SUBTOTAL', 'IVA', 'IMPORTE');
+      }
+      $pdf->SetAligns($align);
+      $pdf->SetWidths($width);
+      $pdf->Row($head, true, true);
 
       $auxTipo = 0;
       $totalesTipo = [0, 0, 0];
+      $totalesTipo2 = [0, 0, 0, 0, 0, 0, 0];
       foreach ($caja['gastos'] as $key => $gasto)
       {
+        $gasto->extras = json_decode($gasto->extras);
+
         if ($gasto->id_tipo != 6) { // si no es comisiones
           if ($auxTipo != $gasto->id_tipo) {
             if ($key != 0) {
               $pdf->SetFont('Arial', 'B', 6);
               $pdf->SetXY(6, $pdf->GetY());
-              $pdf->SetAligns(array('L', 'R', 'R', 'R'));
-              $pdf->SetWidths(array(142, 15, 15, 15));
-              $pdf->Row(array('',
-                MyString::formatoNumero($totalesTipo[0], 2, '', false),
-                MyString::formatoNumero($totalesTipo[1], 2, '', false),
-                MyString::formatoNumero($totalesTipo[2], 2, '', false)
-              ), false, false);
+
+              if (count($align22) > 0 && $auxTipo == 1) {
+                $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
+                $pdf->SetWidths(array(102, 10, 10, 10, 10, 15, 15, 15));
+                $pdf->Row(array('',
+                  MyString::formatoNumero($totalesTipo2[0], 2, '', false),
+                  $totalesTipo2[1],
+                  MyString::formatoNumero($totalesTipo2[2], 2, '', false),
+                  MyString::formatoNumero($totalesTipo2[3], 2, '', false),
+                  MyString::formatoNumero($totalesTipo2[4], 2, '', false),
+                  MyString::formatoNumero($totalesTipo2[5], 2, '', false),
+                  MyString::formatoNumero($totalesTipo2[6], 2, '', false),
+                ), false, false);
+              } else {
+                $pdf->SetAligns(array('L', 'R', 'R', 'R'));
+                $pdf->SetWidths(array(142, 15, 15, 15));
+                $pdf->Row(array('',
+                  MyString::formatoNumero($totalesTipo[0], 2, '', false),
+                  MyString::formatoNumero($totalesTipo[1], 2, '', false),
+                  MyString::formatoNumero($totalesTipo[2], 2, '', false)
+                ), false, false);
+              }
             }
 
             $pdf->SetFont('Arial', 'B', 6);
@@ -1196,27 +1242,56 @@ class estado_resultado_trans_model extends privilegios_model{
             $pdf->Row(array($gasto->tiposg), false, 'B');
 
             $totalesTipo = [0, 0, 0];
+            $totalesTipo2 = [0, 0, 0, 0, 0, 0, 0];
             $auxTipo = $gasto->id_tipo;
           }
 
           $pdf->SetFont('Arial','', 6);
           $pdf->SetXY(6, $pdf->GetY());
-          $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R'));
-          $pdf->SetWidths(array(5, 15, 15, 52, 55, 15, 15, 15));
-          $pdf->Row(array(
-            $comprobacion[$gasto->comprobacion],
-            $gasto->fecha,
-            $gasto->folio,
-            $gasto->proveedor,
-            $gasto->codg,
-            MyString::formatoNumero($gasto->subtotal, 2, '', false),
-            MyString::formatoNumero($gasto->importe_iva, 2, '', false),
-            MyString::formatoNumero($gasto->total, 2, '', false)
-          ), false, 'B');
+          if (count($align22) > 0 && $gasto->id_tipo == 1) { // combustible
+            $pdf->SetAligns($align22);
+            $pdf->SetWidths($width);
+            $pdf->Row(array(
+              $comprobacion[$gasto->comprobacion],
+              $gasto->fecha,
+              $gasto->folio,
+              $gasto->proveedor,
+              $gasto->codg,
+              (isset($gasto->extras->rend)? $gasto->extras->rend: 0),
+              (isset($gasto->extras->te)? $gasto->extras->te: '0:0'),
+              (isset($gasto->extras->km)? $gasto->extras->km: 0),
+              (isset($gasto->extras->litros)? $gasto->extras->litros: 0),
+              MyString::formatoNumero($gasto->subtotal, 2, '', false),
+              MyString::formatoNumero($gasto->importe_iva, 2, '', false),
+              MyString::formatoNumero($gasto->total, 2, '', false)
+            ), false, 'B');
 
-          $totalesTipo[0] += floatval($gasto->subtotal);
-          $totalesTipo[1] += floatval($gasto->importe_iva);
-          $totalesTipo[2] += floatval($gasto->total);
+            $totalesTipo2[0] += floatval((isset($gasto->extras->rend)? $gasto->extras->rend: 0));
+            $totalesTipo2[1] = $this->sumTiempo($totalesTipo2[1], (isset($gasto->extras->te)? $gasto->extras->te: '0:0'));
+            $totalesTipo2[2] += floatval((isset($gasto->extras->km)? $gasto->extras->km: 0));
+            $totalesTipo2[3] += floatval((isset($gasto->extras->litros)? $gasto->extras->litros: 0));
+            $totalesTipo2[4] += floatval($gasto->subtotal);
+            $totalesTipo2[5] += floatval($gasto->importe_iva);
+            $totalesTipo2[6] += floatval($gasto->total);
+          } else {
+            $pdf->SetAligns($align1);
+            $pdf->SetWidths($width1);
+            $pdf->Row(array(
+              $comprobacion[$gasto->comprobacion],
+              $gasto->fecha,
+              $gasto->folio,
+              $gasto->proveedor,
+              $gasto->codg,
+              MyString::formatoNumero($gasto->subtotal, 2, '', false),
+              MyString::formatoNumero($gasto->importe_iva, 2, '', false),
+              MyString::formatoNumero($gasto->total, 2, '', false)
+            ), false, 'B');
+
+            $totalesTipo[0] += floatval($gasto->subtotal);
+            $totalesTipo[1] += floatval($gasto->importe_iva);
+            $totalesTipo[2] += floatval($gasto->total);
+          }
+
           $ttotalGastos += floatval($gasto->subtotal);
           if ($gasto->comprobacion == 't') {
             $ttotalGastosEf += floatval($gasto->total);
@@ -1227,13 +1302,27 @@ class estado_resultado_trans_model extends privilegios_model{
 
       $pdf->SetFont('Arial', 'B', 6);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('L', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(142, 15, 15, 15));
-      $pdf->Row(array('',
-        MyString::formatoNumero($totalesTipo[0], 2, '', false),
-        MyString::formatoNumero($totalesTipo[1], 2, '', false),
-        MyString::formatoNumero($totalesTipo[2], 2, '', false)
-      ), false, false);
+      if (count($align22) > 0 && $auxTipo == 1) {
+        $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
+        $pdf->SetWidths(array(102, 10, 10, 10, 10, 15, 15, 15));
+        $pdf->Row(array('',
+          MyString::formatoNumero($totalesTipo2[0], 2, '', false),
+          $totalesTipo2[1],
+          MyString::formatoNumero($totalesTipo2[2], 2, '', false),
+          MyString::formatoNumero($totalesTipo2[3], 2, '', false),
+          MyString::formatoNumero($totalesTipo2[4], 2, '', false),
+          MyString::formatoNumero($totalesTipo2[5], 2, '', false),
+          MyString::formatoNumero($totalesTipo2[6], 2, '', false),
+        ), false, false);
+      } else {
+        $pdf->SetAligns(array('L', 'R', 'R', 'R'));
+        $pdf->SetWidths(array(142, 15, 15, 15));
+        $pdf->Row(array('',
+          MyString::formatoNumero($totalesTipo[0], 2, '', false),
+          MyString::formatoNumero($totalesTipo[1], 2, '', false),
+          MyString::formatoNumero($totalesTipo[2], 2, '', false)
+        ), false, false);
+      }
     }
 
     // ------ estimaciones
@@ -2156,7 +2245,7 @@ class estado_resultado_trans_model extends privilegios_model{
       $html .= '<tr style="font-weight:bold">';
         $html .= '<td style=""></td>';
         $html .= '<td style=""></td>';
-        $html .= '<td style=""></td>';
+        $html .= '<td style="">SUMA</td>';
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalRend), 2, '').'</td>';
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKg), 2, '').'</td>';
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.($totalTiempo).'</td>';
@@ -2172,7 +2261,7 @@ class estado_resultado_trans_model extends privilegios_model{
       $html .= '<tr style="font-weight:bold">';
         $html .= '<td style=""></td>';
         $html .= '<td style=""></td>';
-        $html .= '<td style=""></td>';
+        $html .= '<td style="">PROMEDIO</td>';
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalRend/count($activo)), 2, '').'</td>';
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKg/count($activo)), 2, '').'</td>';
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$this->sumTiempo($totalTiempo, '0:0', count($activo)).'</td>';
@@ -2204,9 +2293,14 @@ class estado_resultado_trans_model extends privilegios_model{
     $tiempo1[0] = (isset($tiempo1[0])? $tiempo1[0]: 0) + $hrs;
     $tiempo1[1] = (isset($tiempo1[1])? $tiempo1[1]: 0) + $min;
 
+    $hhhrss = intval($tiempo1[1]/60);
+    $tiempo1[0] += $hhhrss;
+    $tiempo1[1] -= ($hhhrss * 60);
+
     if ($promedio) {
-      $tiempo1[0] /= $promedio;
-      $tiempo1[1] /= $promedio;
+      $hhhrss = intval((($tiempo1[0] * 60) + $tiempo1[1]) / $promedio);
+      $tiempo1[0] = intval($hhhrss/60);
+      $tiempo1[1] = $hhhrss - ($tiempo1[0] * 60);
     }
 
     return "{$tiempo1[0]}:{$tiempo1[1]}";
@@ -2336,7 +2430,7 @@ class estado_resultado_trans_model extends privilegios_model{
       $headers = $this->getHeadersGastosTp($activo);
 
       $html .= '<tr style="font-weight:bold">';
-        $html .= '<td colspan="'.(8+count($headers)).'" style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$activo[0]->activo.'</td>';
+        $html .= '<td colspan="'.(8+count($headers)-1).'" style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$activo[0]->activo.'</td>';
       $html .= '</tr>';
       $html .= '<tr style="font-weight:bold">';
         $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Folio</td>';
@@ -2344,19 +2438,22 @@ class estado_resultado_trans_model extends privilegios_model{
         $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Chofer</td>';
         $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Destino</td>';
         $html .= '<td colspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;text-align:center;">Gastos de Ventas</td>';
-        $html .= '<td colspan="'.(count($headers)).'" style="width:300px;border:1px solid #000;background-color: #cccccc;text-align:center;">Gastos Generales</td>';
+        $html .= '<td colspan="'.(count($headers)-1).'" style="width:300px;border:1px solid #000;background-color: #cccccc;text-align:center;">Gastos Generales</td>';
         $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Estimación Costo</td>';
         $html .= '<td rowspan="2" style="width:300px;border:1px solid #000;background-color: #cccccc;">Utilidad Estimada</td>';
       $html .= '</tr>';
       $html .= '<tr style="font-weight:bold">';
-        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Comisiones</td>';
         $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Sueldos</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">Comisiones</td>';
         foreach ($headers as $head => $headTotal) {
-          $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$head.'</td>';
+          if ($head != 'Comisiones') {
+            $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$head.'</td>';
+          }
         }
       $html .= '</tr>';
 
-      $totalRend = $totalKg = $totalTiempo = $totalKmRec = $reposicionLts = $totalSueldo = $totalUtilEsti = 0;
+      $sueldosTotal = $comisionesTotal = $estimacionCostoTotal = $utilidadEstimadaTotal = 0;
+      $totalesGastos = [];
       foreach ($activo as $keyff => $flete) {
         $html .= '<tr style="font-weight:bold">';
           $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->folio.'</td>';
@@ -2366,31 +2463,38 @@ class estado_resultado_trans_model extends privilegios_model{
           $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->sueldosTotal.'</td>';
           $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->comisionesTotal.'</td>';
           foreach ($headers as $head => $headTotal) {
-            $html .= '<td style="width:300px;border:1px solid #000;">'.(isset($flete->gastosTotalesTp[$head])? $flete->gastosTotalesTp[$head]: 0).'</td>';
+            if ($head != 'Comisiones') {
+              $html .= '<td style="width:300px;border:1px solid #000;">'.(isset($flete->gastosTotalesTp[$head])? $flete->gastosTotalesTp[$head]: 0).'</td>';
+
+              if (isset($totalesGastos[$head])) {
+                $totalesGastos[$head] += (isset($flete->gastosTotalesTp[$head])? $flete->gastosTotalesTp[$head]: 0);
+              } else {
+                $totalesGastos[$head] = (isset($flete->gastosTotalesTp[$head])? $flete->gastosTotalesTp[$head]: 0);
+              }
+            }
           }
           $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->estimacionCostoTotal.'</td>';
           $html .= '<td style="width:300px;border:1px solid #000;">'.$flete->utilidadEstimadaTotal.'</td>';
         $html .= '</tr>';
 
-        // $totalRend += $flete->rend_actual;
-        // $totalKg += $flete->ventasTotalKg;
+        $sueldosTotal += $flete->sueldosTotal;
+        $comisionesTotal += $flete->comisionesTotal;
+        $estimacionCostoTotal += $flete->estimacionCostoTotal;
+        $utilidadEstimadaTotal += $flete->utilidadEstimadaTotal;
       }
 
-      // $html .= '<tr style="font-weight:bold">';
-      //   $html .= '<td style=""></td>';
-      //   $html .= '<td style=""></td>';
-      //   $html .= '<td style=""></td>';
-      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalRend), 2, '').'</td>';
-      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKg), 2, '').'</td>';
-      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.($totalTiempo).'</td>';
-      //   $html .= '<td style=""></td>';
-      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalKmRec), 2, '').'</td>';
-      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($reposicionLts), 2, '').'</td>';
-      //   $html .= '<td style=""></td>';
-      //   $html .= '<td style=""></td>';
-      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalSueldo), 2, '').'</td>';
-      //   $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalUtilEsti), 2, '').'</td>';
-      // $html .= '</tr>';
+      $html .= '<tr style="font-weight:bold">';
+        $html .= '<td style="" colspan="4"></td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($sueldosTotal), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($comisionesTotal), 2, '').'</td>';
+        foreach ($headers as $head => $headTotal) {
+          if ($head != 'Comisiones') {
+            $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalesGastos[$head]), 2, '').'</td>';
+          }
+        }
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($estimacionCostoTotal), 2, '').'</td>';
+        $html .= '<td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($utilidadEstimadaTotal), 2, '').'</td>';
+      $html .= '</tr>';
 
       $html .= '<tr>
         <td colspan="13"></td>
